@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { UserRole } from '@/types';
-import { mockStudent, mockTeacher, mockStaff, mockCompany } from '@/lib/mockData';
+import type { UserRole } from '@/types';
+import { getMockUserByRole } from '@/lib/mockData';
 
 interface AuthUser {
   id: string;
   email: string;
   name: string;
+  nameThai: string;
   role: UserRole;
   avatar?: string;
 }
@@ -27,56 +28,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Mock authentication - in production, this would call an API
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    let mockUser: AuthUser;
-    switch (role) {
-      case 'student':
-        mockUser = {
-          id: mockStudent.id,
-          email: mockStudent.email,
-          name: mockStudent.name,
-          role: 'student',
-        };
-        break;
-      case 'teacher':
-        mockUser = {
-          id: mockTeacher.id,
-          email: mockTeacher.email,
-          name: mockTeacher.name,
-          role: 'teacher',
-        };
-        break;
-      case 'staff':
-        mockUser = {
-          id: mockStaff.id,
-          email: mockStaff.email,
-          name: mockStaff.name,
-          role: 'staff',
-        };
-        break;
-      case 'company':
-        mockUser = {
-          id: mockCompany.id,
-          email: mockCompany.email,
-          name: mockCompany.companyName,
-          role: 'company',
-        };
-        break;
-    }
+    const mockUser = getMockUserByRole(role);
+    
+    const authUser: AuthUser = {
+      id: mockUser.id,
+      email: mockUser.email,
+      name: mockUser.name,
+      nameThai: mockUser.nameThai,
+      role: mockUser.role,
+      avatar: mockUser.avatar,
+    };
 
-    setUser(mockUser);
+    setUser(authUser);
+    localStorage.setItem('auth_user', JSON.stringify(authUser));
     return true;
   }, []);
 
   const logout = useCallback(() => {
     setUser(null);
+    localStorage.removeItem('auth_user');
   }, []);
 
   const switchRole = useCallback((role: UserRole) => {
-    if (user) {
-      // For demo purposes, allow role switching
-      login(user.email, '', role);
+    // For demo purposes, allow role switching
+    login('demo@cmu.ac.th', 'demo', role);
+  }, [login]);
+
+  // Restore user from localStorage on mount
+  React.useEffect(() => {
+    const storedUser = localStorage.getItem('auth_user');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error('Failed to restore user session:', error);
+        localStorage.removeItem('auth_user');
+      }
     }
-  }, [user, login]);
+  }, []);
 
   return (
     <AuthContext.Provider value={{

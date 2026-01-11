@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { StatsCard } from '@/components/common/StatsCard';
-import { mockTeacher, mockCourses, mockAppointments, dashboardStats } from '@/lib/mockData';
+import { mockLecturer, mockCourses, mockAppointments } from '@/lib/mockData';
 import { Link } from 'react-router-dom';
 
 const containerVariants = {
@@ -39,7 +39,12 @@ const atRiskStudents = [
 ];
 
 export default function TeacherDashboard() {
-  const { totalCourses, totalStudents, pendingGrades, advisees, pendingAppointments } = dashboardStats.teacher;
+  const teacher = mockLecturer;
+  const teacherCourses = mockCourses.filter(c => c.instructorId === teacher.id);
+  const totalCourses = teacherCourses.length;
+  const totalStudents = teacherCourses.reduce((sum, course) => sum + (course.enrolled || 0), 0);
+  const teacherAppointments = mockAppointments.filter(apt => apt.lecturerId === teacher.id);
+  const pendingAppointments = teacherAppointments.filter(apt => apt.status === 'pending').length;
 
   return (
     <motion.div
@@ -52,10 +57,10 @@ export default function TeacherDashboard() {
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-            สวัสดี, {mockTeacher.name}
+            สวัสดี, {teacher.nameThai}
           </h1>
           <p className="text-muted-foreground mt-1">
-            {mockTeacher.position} • สาขา {mockTeacher.department}
+            {teacher.position} • สาขา {teacher.department}
           </p>
         </div>
         <Button variant="teacher" asChild>
@@ -72,28 +77,28 @@ export default function TeacherDashboard() {
           title="รายวิชาที่สอน"
           value={totalCourses}
           subtitle="วิชาในเทอมนี้"
-          icon={BookOpen}
+          icon={<BookOpen className="w-5 h-5" />}
           variant="teacher"
         />
         <StatsCard
           title="นักศึกษาทั้งหมด"
           value={totalStudents}
           subtitle="คน"
-          icon={Users}
+          icon={<Users className="w-5 h-5" />}
           variant="default"
         />
         <StatsCard
           title="เกรดที่รอบันทึก"
-          value={pendingGrades}
+          value={12}
           subtitle="รายการ"
-          icon={ClipboardList}
+          icon={<ClipboardList className="w-5 h-5" />}
           variant="warning"
         />
         <StatsCard
           title="นัดหมายรอยืนยัน"
           value={pendingAppointments}
           subtitle="นัดหมาย"
-          icon={Calendar}
+          icon={<Calendar className="w-5 h-5" />}
           variant="default"
         />
       </motion.div>

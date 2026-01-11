@@ -1,3 +1,6 @@
+@import '@fontsource/ibm-plex-sans-thai/100.css';
+@import '@fontsource/ibm-plex-sans-thai/200.css';
+@import '@fontsource/ibm-plex-sans-thai/300.css';
 @import '@fontsource/ibm-plex-sans-thai/400.css';
 @import '@fontsource/ibm-plex-sans-thai/500.css';
 @import '@fontsource/ibm-plex-sans-thai/600.css';
@@ -12,80 +15,35 @@
     /* DII CAMT Design System */
     --font-thai: 'IBM Plex Sans Thai', sans-serif;
     
-    /* Core Colors - Navy & Gold Theme */
+    /* Default (Navy) Variables */
     --background: 210 20% 98%;
     --foreground: 222 47% 11%;
-
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
-
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-
-    /* Primary - Deep Navy */
     --primary: 222 47% 20%;
     --primary-foreground: 210 40% 98%;
-
-    /* Secondary - Light Blue Gray */
     --secondary: 210 20% 94%;
     --secondary-foreground: 222 47% 20%;
-
-    /* Muted */
     --muted: 210 20% 96%;
     --muted-foreground: 215 16% 47%;
-
-    /* Accent - Gold/Amber for CAMT */
     --accent: 38 92% 50%;
     --accent-foreground: 222 47% 11%;
-
-    /* Destructive */
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
-
-    /* Success */
     --success: 142 71% 45%;
     --success-foreground: 210 40% 98%;
-
-    /* Warning */
     --warning: 38 92% 50%;
     --warning-foreground: 222 47% 11%;
-
-    /* Info */
     --info: 199 89% 48%;
     --info-foreground: 210 40% 98%;
-
     --border: 214 32% 91%;
     --input: 214 32% 91%;
     --ring: 222 47% 20%;
-
     --radius: 0.75rem;
 
-    /* Role Colors */
-    --role-student: 199 89% 48%;
-    --role-teacher: 142 71% 45%;
-    --role-staff: 262 83% 58%;
-    --role-company: 38 92% 50%;
-
-    /* Sidebar */
-    --sidebar-background: 222 47% 11%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 38 92% 50%;
-    --sidebar-primary-foreground: 222 47% 11%;
-    --sidebar-accent: 222 47% 20%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 222 47% 25%;
-    --sidebar-ring: 38 92% 50%;
-
-    /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(222 47% 11%) 0%, hsl(222 47% 25%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 20% 98%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(45 93% 58%) 100%);
-    --gradient-student: linear-gradient(135deg, hsl(199 89% 48%) 0%, hsl(199 89% 58%) 100%);
-    --gradient-teacher: linear-gradient(135deg, hsl(142 71% 45%) 0%, hsl(142 71% 55%) 100%);
-    --gradient-staff: linear-gradient(135deg, hsl(262 83% 58%) 0%, hsl(262 83% 68%) 100%);
-    --gradient-company: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(45 93% 58%) 100%);
-
-    /* Shadows */
+    /* Shadows & Effects */
     --shadow-sm: 0 1px 2px 0 hsl(222 47% 11% / 0.05);
     --shadow-md: 0 4px 6px -1px hsl(222 47% 11% / 0.1), 0 2px 4px -2px hsl(222 47% 11% / 0.1);
     --shadow-lg: 0 10px 15px -3px hsl(222 47% 11% / 0.1), 0 4px 6px -4px hsl(222 47% 11% / 0.1);
@@ -93,35 +51,109 @@
     --shadow-card: 0 4px 20px -2px hsl(222 47% 11% / 0.08);
     --shadow-card-hover: 0 8px 30px -4px hsl(222 47% 11% / 0.12);
   }
-
+ 
   .dark {
     --background: 222 47% 8%;
     --foreground: 210 40% 98%;
-
     --card: 222 47% 11%;
     --card-foreground: 210 40% 98%;
-
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
-
     --primary: 38 92% 50%;
     --primary-foreground: 222 47% 11%;
-
     --secondary: 222 47% 18%;
     --secondary-foreground: 210 40% 98%;
-
     --muted: 222 47% 18%;
     --muted-foreground: 215 20% 65%;
-
     --accent: 38 92% 50%;
     --accent-foreground: 222 47% 11%;
-
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
-
     --border: 222 47% 18%;
     --input: 222 47% 18%;
     --ring: 38 92% 50%;
+  }
+
+  /* --- Color Themes --- */
+  
+  /* Navy (Default - redundant but good for explicit switching) */
+  .theme-navy {
+    /* Uses root defaults */
+  }
+
+  /* Blue */
+  .theme-blue {
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --ring: 221.2 83.2% 53.3%;
+    --accent: 221.2 83.2% 53.3%;
+    --accent-foreground: 210 40% 98%;
+  }
+  .dark .theme-blue {
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --ring: 217.2 91.2% 59.8%;
+    --accent: 217.2 91.2% 59.8%;
+  }
+
+  /* Green */
+  .theme-green {
+    --primary: 142.1 76.2% 36.3%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --ring: 142.1 76.2% 36.3%;
+    --accent: 142.1 76.2% 36.3%;
+    --accent-foreground: 355.7 100% 97.3%;
+  }
+  .dark .theme-green {
+    --primary: 142.1 70.6% 45.3%;
+    --primary-foreground: 144.9 80.4% 10%;
+    --ring: 142.1 70.6% 45.3%;
+    --accent: 142.1 70.6% 45.3%;
+  }
+
+  /* Purple */
+  .theme-purple {
+    --primary: 262.1 83.3% 57.8%;
+    --primary-foreground: 210 40% 98%;
+    --ring: 262.1 83.3% 57.8%;
+    --accent: 262.1 83.3% 57.8%;
+    --accent-foreground: 210 40% 98%;
+  }
+  .dark .theme-purple {
+    --primary: 263.4 70% 50.4%;
+    --primary-foreground: 210 40% 98%;
+    --ring: 263.4 70% 50.4%;
+    --accent: 263.4 70% 50.4%;
+  }
+
+  /* Rose */
+  .theme-rose {
+    --primary: 346.8 77.2% 49.8%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --ring: 346.8 77.2% 49.8%;
+    --accent: 346.8 77.2% 49.8%;
+    --accent-foreground: 355.7 100% 97.3%;
+  }
+  .dark .theme-rose {
+    --primary: 346.8 77.2% 49.8%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --ring: 346.8 77.2% 49.8%;
+    --accent: 346.8 77.2% 49.8%;
+  }
+
+  /* Orange */
+  .theme-orange {
+    --primary: 24.6 95% 53.1%;
+    --primary-foreground: 60 9.1% 97.8%;
+    --ring: 24.6 95% 53.1%;
+    --accent: 24.6 95% 53.1%;
+    --accent-foreground: 60 9.1% 97.8%;
+  }
+  .dark .theme-orange {
+    --primary: 20.5 90.2% 48.2%;
+    --primary-foreground: 60 9.1% 97.8%;
+    --ring: 20.5 90.2% 48.2%;
+    --accent: 20.5 90.2% 48.2%;
   }
 }
 
@@ -135,7 +167,7 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary transition-colors duration-300;
     font-family: var(--font-thai);
   }
 
@@ -146,110 +178,33 @@
 }
 
 @layer components {
-  /* Role Badge Styles */
-  .role-badge-student {
-    @apply bg-[hsl(var(--role-student))] text-white;
-  }
-  
-  .role-badge-teacher {
-    @apply bg-[hsl(var(--role-teacher))] text-white;
-  }
-  
-  .role-badge-staff {
-    @apply bg-[hsl(var(--role-staff))] text-white;
-  }
-  
-  .role-badge-company {
-    @apply bg-[hsl(var(--role-company))] text-white;
-  }
+  /* Role Badge Styles - using absolute HSL due to specific colors but could be cleaner */
+  .role-badge-student { @apply bg-[hsl(199,89%,48%)] text-white; }
+  .role-badge-teacher { @apply bg-[hsl(142,71%,45%)] text-white; }
+  .role-badge-staff { @apply bg-[hsl(262,83%,58%)] text-white; }
+  .role-badge-company { @apply bg-[hsl(38,92%,50%)] text-white; }
 
   /* Gradient Backgrounds */
-  .bg-gradient-hero {
-    background: var(--gradient-hero);
-  }
-
-  .bg-gradient-accent {
-    background: var(--gradient-accent);
-  }
-
-  .bg-gradient-student {
-    background: var(--gradient-student);
-  }
-
-  .bg-gradient-teacher {
-    background: var(--gradient-teacher);
-  }
-
-  .bg-gradient-staff {
-    background: var(--gradient-staff);
-  }
-
-  .bg-gradient-company {
-    background: var(--gradient-company);
-  }
-
-  /* Card Styles */
-  .card-elevated {
-    box-shadow: var(--shadow-card);
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
-  }
-
-  .card-elevated:hover {
-    box-shadow: var(--shadow-card-hover);
-    transform: translateY(-2px);
-  }
-
-  /* Focus States */
-  .focus-ring {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
-  }
+  .bg-gradient-hero { background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%); }
+  /* Simplified gradients to use theme colors */
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-
-  .animate-fade-in {
-    animation: fadeIn 0.5s ease-out;
-  }
-
-  .animate-slide-up {
-    animation: slideUp 0.5s ease-out;
-  }
-
-  .animate-slide-down {
-    animation: slideDown 0.3s ease-out;
-  }
+  .text-balance { text-wrap: balance; }
+  .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+  .animate-slide-up { animation: slideUp 0.5s ease-out; }
+  .animate-slide-down { animation: slideDown 0.3s ease-out; }
 
   @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
-
   @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
-
   @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 }

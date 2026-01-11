@@ -8,6 +8,15 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
+import Courses from "./pages/Courses";
+import Schedule from "./pages/Schedule";
+import Grades from "./pages/Grades";
+import Activities from "./pages/Activities";
+import Portfolio from "./pages/Portfolio";
+import Internships from "./pages/Internships";
+import Requests from "./pages/Requests";
+import Messages from "./pages/Messages";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,16 +33,15 @@ const App = () => (
             <Route path="/login" element={<LoginPage />} />
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
-              {/* Placeholder routes - can be expanded later */}
-              <Route path="/courses" element={<Dashboard />} />
-              <Route path="/schedule" element={<Dashboard />} />
-              <Route path="/grades" element={<Dashboard />} />
-              <Route path="/activities" element={<Dashboard />} />
-              <Route path="/portfolio" element={<Dashboard />} />
-              <Route path="/internships" element={<Dashboard />} />
-              <Route path="/requests" element={<Dashboard />} />
-              <Route path="/messages" element={<Dashboard />} />
-              <Route path="/settings" element={<Dashboard />} />
+              <Route path="/courses" element={<Courses />} />
+              <Route path="/schedule" element={<Schedule />} />
+              <Route path="/grades" element={<Grades />} />
+              <Route path="/activities" element={<Activities />} />
+              <Route path="/portfolio" element={<Portfolio />} />
+              <Route path="/internships" element={<Internships />} />
+              <Route path="/requests" element={<Requests />} />
+              <Route path="/messages" element={<Messages />} />
+              <Route path="/settings" element={<Settings />} />
               <Route path="/students" element={<Dashboard />} />
               <Route path="/assignments" element={<Dashboard />} />
               <Route path="/appointments" element={<Dashboard />} />

@@ -26,8 +26,8 @@ export default function Activities() {
 
   const upcomingActivities = mockActivities.filter(a => a.status === 'upcoming');
   const completedActivities = mockActivities.filter(a => a.status === 'completed');
-  const studentPoints = mockStudent.activityPoints;
-  const studentHours = mockStudent.activityHours;
+  const studentPoints = mockStudent.gamificationPoints;
+  const studentHours = mockStudent.totalActivityHours;
 
   return (
     <motion.div
@@ -116,7 +116,7 @@ export default function Activities() {
               <div className="text-white/80 text-sm mt-1">เหรียญที่สะสม</div>
               <div className="flex gap-2 mt-4">
                 {mockStudent.badges?.slice(0, 4).map((badge, idx) => (
-                  <motion.div 
+                  <motion.div
                     key={idx}
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
@@ -169,21 +169,21 @@ export default function Activities() {
                     <CardHeader>
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
-                          <CardTitle className="text-lg">{activity.activityName}</CardTitle>
+                          <CardTitle className="text-lg">{activity.titleThai}</CardTitle>
                           <div className="mt-2">
                             <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
-                              {activity.category}
+                              {activity.type}
                             </Badge>
                           </div>
                         </div>
                         <div className="flex flex-col items-end gap-1">
                           <Badge className="bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-lg shadow-orange-200/50">
                             <Sparkles className="w-3 h-3 mr-1" />
-                            {activity.points} แต้ม
+                            {activity.gamificationPoints} แต้ม
                           </Badge>
                           <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                             <Clock className="w-3 h-3 mr-1" />
-                            {activity.hours} ชม.
+                            {activity.activityHours} ชม.
                           </Badge>
                         </div>
                       </div>
@@ -192,10 +192,10 @@ export default function Activities() {
                       <div className="space-y-2">
                         <div className="flex items-center gap-3 text-sm p-2 rounded-lg bg-gray-50">
                           <Calendar className="w-4 h-4 text-primary" />
-                          <span className="text-gray-700">{new Date(activity.date).toLocaleDateString('th-TH', { 
-                            year: 'numeric', 
-                            month: 'long', 
-                            day: 'numeric' 
+                          <span className="text-gray-700">{new Date(activity.startDate).toLocaleDateString('th-TH', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
                           })}</span>
                         </div>
 
@@ -208,12 +208,12 @@ export default function Activities() {
 
                         <div className="flex items-center gap-3 text-sm p-2 rounded-lg bg-gray-50">
                           <Users className="w-4 h-4 text-emerald-500" />
-                          <span className="text-gray-700">{activity.participants?.length || 0}/{activity.maxParticipants} คน</span>
+                          <span className="text-gray-700">{activity.enrolledStudents?.length || 0}/{activity.maxParticipants} คน</span>
                           <div className="flex-1">
                             <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                              <div 
+                              <div
                                 className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"
-                                style={{ width: `${((activity.participants?.length || 0) / (activity.maxParticipants || 1)) * 100}%` }}
+                                style={{ width: `${((activity.enrolledStudents?.length || 0) / (activity.maxParticipants || 1)) * 100}%` }}
                               />
                             </div>
                           </div>
@@ -249,8 +249,8 @@ export default function Activities() {
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <CardTitle className="text-lg">{activity.activityName}</CardTitle>
-                          <CardDescription className="mt-1">{activity.category}</CardDescription>
+                          <CardTitle className="text-lg">{activity.titleThai}</CardTitle>
+                          <CardDescription className="mt-1">{activity.type}</CardDescription>
                         </div>
                         <Badge className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-0">
                           <CheckCircle className="w-3 h-3 mr-1" />
@@ -264,14 +264,14 @@ export default function Activities() {
                           <Trophy className="w-4 h-4 text-orange-500" />
                           ได้รับแต้ม
                         </span>
-                        <span className="font-bold text-orange-600">+{activity.points} แต้ม</span>
+                        <span className="font-bold text-orange-600">+{activity.gamificationPoints} แต้ม</span>
                       </div>
                       <div className="flex justify-between items-center p-3 bg-white rounded-xl border">
                         <span className="text-gray-600 flex items-center gap-2">
                           <Clock className="w-4 h-4 text-blue-500" />
                           ชั่วโมง
                         </span>
-                        <span className="font-bold text-blue-600">+{activity.hours} ชม.</span>
+                        <span className="font-bold text-blue-600">+{activity.activityHours} ชม.</span>
                       </div>
                       <Button variant="outline" className="w-full border-emerald-200 text-emerald-700 hover:bg-emerald-50">
                         <Award className="w-4 h-4 mr-2" />
@@ -294,12 +294,90 @@ export default function Activities() {
                 <CardDescription>รายการกิจกรรมทั้งหมดที่เคยเข้าร่วม</CardDescription>
               </CardHeader>
               <CardContent>
-              <div className="text-center py-12">
-                <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center mb-4">
-                  <Target className="w-8 h-8 text-purple-500" />
+                <div className="space-y-4">
+                  {[...completedActivities, ...upcomingActivities.filter(a => a.status === 'completed')].length > 0 ? (
+                    <div className="relative">
+                      {/* Timeline line */}
+                      <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-purple-500 via-pink-500 to-rose-500" />
+
+                      {mockActivities.map((activity, index) => (
+                        <motion.div
+                          key={activity.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="relative flex items-start gap-4 pb-6 last:pb-0"
+                        >
+                          {/* Timeline dot */}
+                          <div className={`relative z-10 w-12 h-12 rounded-full flex items-center justify-center shadow-lg ${activity.status === 'completed'
+                            ? 'bg-gradient-to-br from-emerald-500 to-teal-500'
+                            : activity.status === 'upcoming'
+                              ? 'bg-gradient-to-br from-orange-500 to-amber-500'
+                              : 'bg-gradient-to-br from-gray-400 to-gray-500'
+                            }`}>
+                            {activity.status === 'completed' ? (
+                              <CheckCircle className="w-5 h-5 text-white" />
+                            ) : (
+                              <Clock className="w-5 h-5 text-white" />
+                            )}
+                          </div>
+
+                          {/* Content */}
+                          <div className="flex-1 bg-white rounded-xl p-4 shadow-md border hover:shadow-lg transition-shadow">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-gray-900">{activity.titleThai}</h4>
+                                <p className="text-sm text-gray-500 mt-1">{activity.type}</p>
+                              </div>
+                              <Badge className={`${activity.status === 'completed'
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-orange-100 text-orange-700'
+                                }`}>
+                                {activity.status === 'completed' ? 'เสร็จสิ้น' : 'รอเข้าร่วม'}
+                              </Badge>
+                            </div>
+
+                            <div className="flex items-center gap-4 mt-3 text-sm">
+                              <div className="flex items-center gap-1 text-gray-600">
+                                <Calendar className="w-4 h-4" />
+                                <span>{new Date(activity.startDate).toLocaleDateString('th-TH', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric'
+                                })}</span>
+                              </div>
+                              <div className="flex items-center gap-1 text-orange-600 font-medium">
+                                <Trophy className="w-4 h-4" />
+                                <span>+{activity.gamificationPoints} แต้ม</span>
+                              </div>
+                              <div className="flex items-center gap-1 text-blue-600 font-medium">
+                                <Clock className="w-4 h-4" />
+                                <span>+{activity.activityHours} ชม.</span>
+                              </div>
+                            </div>
+
+                            {activity.status === 'completed' && (
+                              <div className="mt-3 pt-3 border-t flex items-center gap-2">
+                                <Award className="w-4 h-4 text-purple-500" />
+                                <span className="text-sm text-purple-600">ได้รับใบประกาศนียบัตร</span>
+                                <Button variant="link" size="sm" className="text-purple-600 p-0 h-auto ml-auto">
+                                  ดาวน์โหลด
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center mb-4">
+                        <Target className="w-8 h-8 text-purple-500" />
+                      </div>
+                      <p className="text-gray-500">ยังไม่มีประวัติกิจกรรม</p>
+                    </div>
+                  )}
                 </div>
-                <p className="text-gray-500">กำลังพัฒนา...</p>
-              </div>
               </CardContent>
             </Card>
           </TabsContent>

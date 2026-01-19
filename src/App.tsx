@@ -18,6 +18,17 @@ import Requests from "./pages/Requests";
 import Messages from "./pages/Messages";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+// New pages
+import Students from "./pages/Students";
+import Assignments from "./pages/Assignments";
+import Appointments from "./pages/Appointments";
+import UsersPage from "./pages/Users";
+import Reports from "./pages/Reports";
+import Notifications from "./pages/Notifications";
+import Audit from "./pages/Audit";
+import JobPostings from "./pages/JobPostings";
+import Applicants from "./pages/Applicants";
+import StudentProfiles from "./pages/StudentProfiles";
 
 const queryClient = new QueryClient();
 
@@ -42,16 +53,16 @@ const App = () => (
               <Route path="/requests" element={<Requests />} />
               <Route path="/messages" element={<Messages />} />
               <Route path="/settings" element={<Settings />} />
-              <Route path="/students" element={<Dashboard />} />
-              <Route path="/assignments" element={<Dashboard />} />
-              <Route path="/appointments" element={<Dashboard />} />
-              <Route path="/users" element={<Dashboard />} />
-              <Route path="/reports" element={<Dashboard />} />
-              <Route path="/notifications" element={<Dashboard />} />
-              <Route path="/audit" element={<Dashboard />} />
-              <Route path="/job-postings" element={<Dashboard />} />
-              <Route path="/applicants" element={<Dashboard />} />
-              <Route path="/student-profiles" element={<Dashboard />} />
+              <Route path="/students" element={<Students />} />
+              <Route path="/assignments" element={<Assignments />} />
+              <Route path="/appointments" element={<Appointments />} />
+              <Route path="/users" element={<UsersPage />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route path="/audit" element={<Audit />} />
+              <Route path="/job-postings" element={<JobPostings />} />
+              <Route path="/applicants" element={<Applicants />} />
+              <Route path="/student-profiles" element={<StudentProfiles />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

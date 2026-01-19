@@ -112,7 +112,7 @@ export default function LandingPage() {
         {/* Animated Background Elements */}
         <div className="absolute inset-0 bg-gradient-hero opacity-5" />
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-accent/5 to-transparent" />
-        
+
         {/* Floating Orbs */}
         <motion.div
           className="absolute top-20 left-10 w-72 h-72 bg-accent/10 rounded-full blur-3xl"
@@ -140,14 +140,14 @@ export default function LandingPage() {
             ease: "easeInOut"
           }}
         />
-        
+
         {/* Floating Particles */}
         {[...Array(12)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute w-1.5 h-1.5 bg-accent/30 rounded-full"
-            initial={{ 
-              x: Math.random() * window.innerWidth, 
+            initial={{
+              x: Math.random() * window.innerWidth,
               y: Math.random() * 600
             }}
             animate={{
@@ -161,7 +161,7 @@ export default function LandingPage() {
             }}
           />
         ))}
-        
+
         <div className="container mx-auto px-4 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -169,7 +169,7 @@ export default function LandingPage() {
             transition={{ duration: 0.6 }}
             className="text-center max-w-4xl mx-auto"
           >
-            <motion.div 
+            <motion.div
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent mb-6 border border-accent/20 shadow-lg"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -181,16 +181,16 @@ export default function LandingPage() {
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               />
-              <span className="text-sm font-medium">ระบบบริหารข้อมูลสาขา Digital Innovation and Intelligence</span>
+              <span className="text-sm font-medium">ระบบบริหารข้อมูลสาขา Digital Industry Integration</span>
             </motion.div>
-            <motion.h1 
+            <motion.h1
               className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
               ศูนย์กลางการเรียนรู้และพัฒนา
-              <motion.span 
+              <motion.span
                 className="text-accent block mt-2"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -200,7 +200,7 @@ export default function LandingPage() {
               </motion.span>
             </motion.h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              เชื่อมต่อนักศึกษา อาจารย์ เจ้าหน้าที่ และภาคอุตสาหกรรม 
+              เชื่อมต่อนักศึกษา อาจารย์ เจ้าหน้าที่ และภาคอุตสาหกรรม
               บนแพลตฟอร์มเดียวที่ครบครัน ใช้งานง่าย และปลอดภัย
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -244,8 +244,8 @@ export default function LandingPage() {
               <motion.div
                 key={index}
                 variants={itemVariants}
-                whileHover={{ 
-                  y: -8, 
+                whileHover={{
+                  y: -8,
                   scale: 1.02,
                   rotateX: 5,
                 }}
@@ -254,8 +254,8 @@ export default function LandingPage() {
               >
                 {/* Gradient Overlay on Hover */}
                 <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                
-                <motion.div 
+
+                <motion.div
                   className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent/20 to-accent/10 flex items-center justify-center mb-4 relative z-10"
                   whileHover={{ rotate: 360, scale: 1.1 }}
                   transition={{ duration: 0.5 }}
@@ -264,7 +264,7 @@ export default function LandingPage() {
                 </motion.div>
                 <h3 className="text-lg font-semibold text-foreground mb-2 relative z-10">{feature.title}</h3>
                 <p className="text-sm text-muted-foreground relative z-10">{feature.description}</p>
-                
+
                 {/* Shine Effect */}
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"
@@ -345,7 +345,7 @@ export default function LandingPage() {
             ease: 'linear',
           }}
         />
-        
+
         {/* Floating Elements */}
         {[...Array(6)].map((_, i) => (
           <motion.div
@@ -366,14 +366,14 @@ export default function LandingPage() {
             }}
           />
         ))}
-        
+
         <div className="container mx-auto px-4 text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <motion.h2 
+            <motion.h2
               className="text-3xl md:text-4xl font-bold text-primary-foreground mb-4"
               whileInView={{ scale: [1, 1.02, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
@@ -383,8 +383,8 @@ export default function LandingPage() {
             <p className="text-lg text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
               เข้าสู่ระบบเพื่อเริ่มใช้งานฟีเจอร์ทั้งหมดของระบบบริหารข้อมูลสาขา DII
             </p>
-            <Button 
-              variant="hero" 
+            <Button
+              variant="hero"
               size="xl"
               onClick={() => navigate('/login')}
               className="bg-accent text-accent-foreground hover:bg-accent/90"
@@ -410,7 +410,7 @@ export default function LandingPage() {
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2024 สาขา Digital Innovation and Intelligence, มหาวิทยาลัยเชียงใหม่
+              © 2024 สาขา Digital Industry Integration, มหาวิทยาลัยเชียงใหม่
             </p>
           </div>
         </div>

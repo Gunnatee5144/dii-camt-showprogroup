@@ -31,22 +31,22 @@ export const mockStudents: Student[] = [
     nameThai: 'สมชาย ใจดี',
     role: 'student',
     studentId: '650510001',
-    major: 'Digital Innovation and Intelligence',
+    major: 'Digital Industry Integration',
     program: 'bachelor',
     year: 3,
     semester: 1,
     academicYear: '2568',
-    
+
     gpa: 3.45,
     gpax: 3.52,
     totalCredits: 130,
     earnedCredits: 90,
     requiredCredits: 130,
     academicStatus: 'normal',
-    
+
     advisorId: 'LEC001',
     advisorName: 'ดร.สมศักดิ์ วิชาการ',
-    
+
     skills: [
       { name: 'Python', category: 'programming', level: 'advanced', verifiedBy: 'DII201' },
       { name: 'React', category: 'framework', level: 'intermediate', verifiedBy: 'DII202' },
@@ -54,7 +54,7 @@ export const mockStudents: Student[] = [
       { name: 'UI/UX Design', category: 'soft_skill', level: 'advanced' },
       { name: 'Data Analysis', category: 'programming', level: 'advanced', verifiedBy: 'DII302' },
     ],
-    
+
     activities: [],
     totalActivityHours: 48,
     gamificationPoints: 250,
@@ -78,7 +78,7 @@ export const mockStudents: Student[] = [
         criteria: 'ได้รับคะแนนการประเมินเพื่อนร่วมงาน 4.5+',
       },
     ],
-    
+
     dataConsent: {
       studentId: 'STU001',
       allowDataSharing: true,
@@ -93,9 +93,9 @@ export const mockStudents: Student[] = [
       lastModified: new Date('2024-01-01'),
       history: [],
     },
-    
+
     timeline: [],
-    
+
     phone: '081-234-5678',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=somchai',
     createdAt: new Date('2021-06-01'),
@@ -109,33 +109,33 @@ export const mockStudents: Student[] = [
     nameThai: 'สุดา มณี',
     role: 'student',
     studentId: '650510002',
-    major: 'Digital Innovation and Intelligence',
+    major: 'Digital Industry Integration',
     program: 'bachelor',
     year: 2,
     semester: 1,
     academicYear: '2568',
-    
+
     gpa: 3.78,
     gpax: 3.75,
     totalCredits: 130,
     earnedCredits: 60,
     requiredCredits: 130,
     academicStatus: 'normal',
-    
+
     advisorId: 'LEC001',
     advisorName: 'ดร.สมศักดิ์ วิชาการ',
-    
+
     skills: [
       { name: 'JavaScript', category: 'programming', level: 'advanced' },
       { name: 'Vue.js', category: 'framework', level: 'intermediate' },
       { name: 'Node.js', category: 'framework', level: 'intermediate' },
     ],
-    
+
     activities: [],
     totalActivityHours: 36,
     gamificationPoints: 180,
     badges: [],
-    
+
     dataConsent: {
       studentId: 'STU002',
       allowDataSharing: true,
@@ -150,9 +150,9 @@ export const mockStudents: Student[] = [
       lastModified: new Date('2022-06-01'),
       history: [],
     },
-    
+
     timeline: [],
-    
+
     phone: '082-345-6789',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=suda',
     createdAt: new Date('2022-06-01'),
@@ -166,32 +166,32 @@ export const mockStudents: Student[] = [
     nameThai: 'ชัย กุหลาบ',
     role: 'student',
     studentId: '650510003',
-    major: 'Digital Innovation and Intelligence',
+    major: 'Digital Industry Integration',
     program: 'bachelor',
     year: 4,
     semester: 1,
     academicYear: '2568',
-    
+
     gpa: 2.15,
     gpax: 2.45,
     totalCredits: 130,
     earnedCredits: 105,
     requiredCredits: 130,
     academicStatus: 'probation',
-    
+
     advisorId: 'LEC001',
     advisorName: 'ดร.สมศักดิ์ วิชาการ',
-    
+
     skills: [
       { name: 'HTML', category: 'programming', level: 'intermediate' },
       { name: 'CSS', category: 'programming', level: 'beginner' },
     ],
-    
+
     activities: [],
     totalActivityHours: 12,
     gamificationPoints: 50,
     badges: [],
-    
+
     dataConsent: {
       studentId: 'STU003',
       allowDataSharing: false,
@@ -206,9 +206,9 @@ export const mockStudents: Student[] = [
       lastModified: new Date('2023-08-15'),
       history: [],
     },
-    
+
     timeline: [],
-    
+
     phone: '083-456-7890',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=chai',
     createdAt: new Date('2020-06-01'),
@@ -230,16 +230,16 @@ export const mockLecturers: Lecturer[] = [
     nameThai: 'ดร.สมศักดิ์ วิชาการ',
     role: 'lecturer',
     lecturerId: 'L001',
-    department: 'Digital Innovation and Intelligence',
+    department: 'Digital Industry Integration',
     position: 'assistant_professor',
-    
+
     courses: [],
     teachingHours: 12,
     maxTeachingHours: 18,
-    
+
     advisees: ['STU001', 'STU002', 'STU003'],
     maxAdvisees: 15,
-    
+
     officeHours: [
       {
         id: 'OH001',
@@ -261,10 +261,10 @@ export const mockLecturers: Lecturer[] = [
       },
     ],
     appointments: [],
-    
+
     specialization: ['Machine Learning', 'Data Science', 'AI'],
     researchInterests: ['Deep Learning', 'Computer Vision', 'NLP'],
-    
+
     phone: '053-943-000',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=somsak',
     createdAt: new Date('2015-01-01'),
@@ -278,16 +278,16 @@ export const mockLecturers: Lecturer[] = [
     nameThai: 'ดร.มานะ เก่งกาจ',
     role: 'lecturer',
     lecturerId: 'L002',
-    department: 'Digital Innovation and Intelligence',
+    department: 'Digital Industry Integration',
     position: 'associate_professor',
-    
+
     courses: [],
     teachingHours: 15,
     maxTeachingHours: 18,
-    
+
     advisees: ['STU004', 'STU005'],
     maxAdvisees: 15,
-    
+
     officeHours: [
       {
         id: 'OH003',
@@ -300,10 +300,10 @@ export const mockLecturers: Lecturer[] = [
       },
     ],
     appointments: [],
-    
+
     specialization: ['Software Engineering', 'Web Development'],
     researchInterests: ['Cloud Computing', 'DevOps', 'Microservices'],
-    
+
     phone: '053-943-001',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=mana',
     createdAt: new Date('2010-01-01'),
@@ -328,7 +328,7 @@ export const mockStaffUsers: Staff[] = [
     staffId: 'S001',
     department: 'CAMT Administration',
     position: 'เจ้าหน้าที่บริหารทั่วไป',
-    
+
     permissions: [
       { resource: 'students', actions: ['read', 'update'] },
       { resource: 'courses', actions: ['create', 'read', 'update', 'delete'] },
@@ -340,9 +340,9 @@ export const mockStaffUsers: Staff[] = [
     canManageSchedules: true,
     canViewReports: true,
     canManageInternships: true,
-    
+
     activityLogs: [],
-    
+
     phone: '053-943-100',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=somying',
     createdAt: new Date('2018-01-01'),
@@ -370,16 +370,16 @@ export const mockCompanies: Company[] = [
     size: 'medium',
     website: 'https://techinnovation.co.th',
     address: '123 ถ.นิมมานเหมินทร์ เชียงใหม่ 50200',
-    
+
     jobPostings: [],
     internshipSlots: 10,
     currentInterns: 3,
-    
+
     studentViewConsent: ['STU001'],
-    
+
     canContactStudents: true,
     messages: [],
-    
+
     phone: '052-123-456',
     avatar: 'https://api.dicebear.com/7.x/shapes/svg?seed=techinnovation',
     createdAt: new Date('2023-01-01'),
@@ -399,16 +399,16 @@ export const mockCompanies: Company[] = [
     size: 'small',
     website: 'https://datainsights.co.th',
     address: '456 ถ.ห้วยแก้ว เชียงใหม่ 50300',
-    
+
     jobPostings: [],
     internshipSlots: 5,
     currentInterns: 2,
-    
+
     studentViewConsent: ['STU001', 'STU002'],
-    
+
     canContactStudents: true,
     messages: [],
-    
+
     phone: '052-234-567',
     avatar: 'https://api.dicebear.com/7.x/shapes/svg?seed=datainsights',
     createdAt: new Date('2023-06-01'),
@@ -430,12 +430,12 @@ export const mockAdmin: Admin = {
   role: 'admin',
   adminId: 'A001',
   isSuperAdmin: true,
-  
+
   permissions: ['*'],
-  
+
   systemLogs: [],
   automationRules: [],
-  
+
   phone: '053-943-999',
   avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
   createdAt: new Date('2020-01-01'),
@@ -502,7 +502,7 @@ export const mockCourses: Course[] = [
     semester: 1,
     academicYear: '2568',
     year: 2,
-    
+
     lecturerId: 'LEC001',
     lecturerName: 'ดร.สมศักดิ์ วิชาการ',
     sections: [
@@ -515,7 +515,7 @@ export const mockCourses: Course[] = [
         schedule: scheduleMonWed9to12,
       },
     ],
-    
+
     description: 'ศึกษาหลักการและกระบวนการออกแบบประสบการณ์ผู้ใช้งาน',
     prerequisites: ['DII101'],
     learningOutcomes: [
@@ -523,13 +523,13 @@ export const mockCourses: Course[] = [
       'สามารถทำ User Research',
       'สร้าง Prototype ได้',
     ],
-    
+
     schedule: scheduleMonWed9to12,
-    
+
     enrolledStudents: ['STU001', 'STU002'],
     maxStudents: 50,
     minStudents: 20,
-    
+
     materials: [],
     assignments: [],
     grades: [],
@@ -543,7 +543,7 @@ export const mockCourses: Course[] = [
     semester: 1,
     academicYear: '2568',
     year: 2,
-    
+
     lecturerId: 'LEC002',
     lecturerName: 'ดร.มานะ เก่งกาจ',
     sections: [
@@ -556,7 +556,7 @@ export const mockCourses: Course[] = [
         schedule: scheduleTueThu13to16,
       },
     ],
-    
+
     description: 'ศึกษาการพัฒนาเว็บแอปพลิเคชันด้วย Modern Framework',
     prerequisites: ['DII102'],
     learningOutcomes: [
@@ -564,13 +564,13 @@ export const mockCourses: Course[] = [
       'พัฒนา Full-Stack Application',
       'Deploy Application',
     ],
-    
+
     schedule: scheduleTueThu13to16,
-    
+
     enrolledStudents: ['STU001', 'STU002'],
     maxStudents: 45,
     minStudents: 20,
-    
+
     materials: [],
     assignments: [],
     grades: [],
@@ -584,7 +584,7 @@ export const mockCourses: Course[] = [
     semester: 1,
     academicYear: '2568',
     year: 3,
-    
+
     lecturerId: 'LEC001',
     lecturerName: 'ดร.สมศักดิ์ วิชาการ',
     sections: [
@@ -608,7 +608,7 @@ export const mockCourses: Course[] = [
         ],
       },
     ],
-    
+
     description: 'ศึกษาพื้นฐาน Machine Learning และการประยุกต์ใช้',
     prerequisites: ['DII201', 'MATH201'],
     learningOutcomes: [
@@ -616,7 +616,7 @@ export const mockCourses: Course[] = [
       'สร้าง ML Model',
       'Evaluate และ Deploy Model',
     ],
-    
+
     schedule: [
       {
         id: 'SCH005',
@@ -629,11 +629,11 @@ export const mockCourses: Course[] = [
         type: 'lecture',
       },
     ],
-    
+
     enrolledStudents: ['STU001'],
     maxStudents: 55,
     minStudents: 20,
-    
+
     materials: [],
     assignments: [],
     grades: [],
@@ -872,7 +872,7 @@ export const mockTimelineEvents: TimelineEvent[] = [
     type: 'enrollment',
     title: 'Enrolled in DII Program',
     titleThai: 'เข้าศึกษาหลักสูตร DII',
-    description: 'Started Bachelor of Digital Innovation and Intelligence',
+    description: 'Started Bachelor of Digital Industry Integration',
     date: new Date('2021-06-01'),
     semester: 1,
     academicYear: '2564',

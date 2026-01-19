@@ -1,0 +1,151 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Users, Search, Filter, Eye, Mail, CheckCircle, XCircle, Clock, Star, FileText } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
+import { mockJobPostings, mockStudents } from '@/lib/mockData';
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.05 } },
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+};
+
+const allApplicants = mockJobPostings.flatMap(job =>
+    job.applicants.map(app => ({
+        ...app,
+        jobTitle: job.title,
+        student: mockStudents.find(s => s.id === app.studentId),
+    }))
+);
+
+export default function Applicants() {
+    const [searchQuery, setSearchQuery] = React.useState('');
+    const [statusFilter, setStatusFilter] = React.useState('all');
+
+    const pendingCount = allApplicants.filter(a => a.status === 'pending').length;
+    const shortlistedCount = allApplicants.filter(a => a.status === 'shortlisted').length;
+
+    const getStatusBadge = (status: string) => {
+        switch (status) {
+            case 'pending': return <Badge className="bg-orange-100 text-orange-700">รอพิจารณา</Badge>;
+            case 'reviewed': return <Badge className="bg-blue-100 text-blue-700">ตรวจสอบแล้ว</Badge>;
+            case 'shortlisted': return <Badge className="bg-purple-100 text-purple-700">คัดเลือก</Badge>;
+            case 'interviewed': return <Badge className="bg-cyan-100 text-cyan-700">สัมภาษณ์แล้ว</Badge>;
+            case 'accepted': return <Badge className="bg-emerald-100 text-emerald-700">ตอบรับ</Badge>;
+            case 'rejected': return <Badge className="bg-red-100 text-red-700">ปฏิเสธ</Badge>;
+            default: return <Badge>{status}</Badge>;
+        }
+    };
+
+    const filteredApplicants = allApplicants.filter(app => {
+        const matchesSearch = app.student?.nameThai.includes(searchQuery) || app.jobTitle.includes(searchQuery);
+        const matchesStatus = statusFilter === 'all' || app.status === statusFilter;
+        return matchesSearch && matchesStatus;
+    });
+
+    return (
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
+            <ThemedPageHeader
+                title="ผู้สมัครงาน"
+                subtitle={`${allApplicants.length} คน • ${pendingCount} รอพิจารณา`}
+                icon={<Users className="w-7 h-7" />}
+            />
+
+            <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                    { label: 'ทั้งหมด', value: allApplicants.length, gradient: 'from-blue-500 to-indigo-500', icon: Users },
+                    { label: 'รอพิจารณา', value: pendingCount, gradient: 'from-orange-500 to-amber-500', icon: Clock },
+                    { label: 'คัดเลือกแล้ว', value: shortlistedCount, gradient: 'from-purple-500 to-pink-500', icon: Star },
+                    { label: 'ตอบรับ', value: allApplicants.filter(a => a.status === 'accepted').length, gradient: 'from-emerald-500 to-teal-500', icon: CheckCircle },
+                ].map((stat, i) => (
+                    <motion.div key={i} whileHover={{ scale: 1.02 }} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradient} p-6 text-white shadow-xl`}>
+                        <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+                        <div className="relative z-10">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="p-2 rounded-xl bg-white/20"><stat.icon className="w-5 h-5" /></div>
+                                <span className="font-medium text-white/90">{stat.label}</span>
+                            </div>
+                            <div className="text-4xl font-bold">{stat.value}</div>
+                        </div>
+                    </motion.div>
+                ))}
+            </motion.div>
+
+            <motion.div variants={itemVariants}>
+                <div className="flex gap-4 mb-4">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <Input placeholder="ค้นหาผู้สมัคร..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
+                    </div>
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                        <SelectTrigger className="w-40"><SelectValue placeholder="สถานะ" /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">ทุกสถานะ</SelectItem>
+                            <SelectItem value="pending">รอพิจารณา</SelectItem>
+                            <SelectItem value="shortlisted">คัดเลือก</SelectItem>
+                            <SelectItem value="accepted">ตอบรับ</SelectItem>
+                            <SelectItem value="rejected">ปฏิเสธ</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <Card>
+                    <CardContent className="pt-6">
+                        <div className="space-y-3">
+                            {filteredApplicants.map((applicant, index) => (
+                                <motion.div
+                                    key={applicant.id}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: index * 0.03 }}
+                                    className="flex items-center justify-between p-4 border rounded-xl hover:shadow-md transition-all"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
+                                            {applicant.student?.nameThai.charAt(0) || 'N'}
+                                        </div>
+                                        <div>
+                                            <div className="font-semibold">{applicant.student?.nameThai || 'Unknown'}</div>
+                                            <div className="text-sm text-gray-600">{applicant.jobTitle}</div>
+                                            <div className="text-xs text-gray-400 mt-1">
+                                                สมัครเมื่อ {new Date(applicant.appliedAt).toLocaleDateString('th-TH')}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="text-right hidden sm:block">
+                                            <div className="text-sm font-semibold">GPA {applicant.student?.gpa.toFixed(2)}</div>
+                                            <div className="text-xs text-gray-500">ปี {applicant.student?.year}</div>
+                                        </div>
+                                        {getStatusBadge(applicant.status)}
+                                        <div className="flex gap-1">
+                                            <Button size="sm" variant="ghost"><Eye className="w-4 h-4" /></Button>
+                                            <Button size="sm" variant="ghost"><FileText className="w-4 h-4" /></Button>
+                                            <Button size="sm" variant="ghost"><Mail className="w-4 h-4" /></Button>
+                                        </div>
+                                        {applicant.status === 'pending' && (
+                                            <div className="flex gap-1 ml-2">
+                                                <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600"><CheckCircle className="w-4 h-4" /></Button>
+                                                <Button size="sm" variant="outline" className="text-red-600"><XCircle className="w-4 h-4" /></Button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            </motion.div>
+        </motion.div>
+    );
+}

@@ -5,9 +5,10 @@ interface ThemedPageHeaderProps {
   title: string;
   subtitle?: string;
   icon?: React.ReactNode;
+  actions?: React.ReactNode;
 }
 
-export function ThemedPageHeader({ title, subtitle, icon }: ThemedPageHeaderProps) {
+export function ThemedPageHeader({ title, subtitle, icon, actions }: ThemedPageHeaderProps) {
   const { user } = useAuth();
 
   // Define role colors
@@ -37,9 +38,9 @@ export function ThemedPageHeader({ title, subtitle, icon }: ThemedPageHeaderProp
             <motion.div
               key={i}
               className="absolute w-2 h-2 bg-white/20 rounded-full"
-              initial={{ 
-                x: Math.random() * 100 + '%', 
-                y: Math.random() * 100 + '%' 
+              initial={{
+                x: Math.random() * 100 + '%',
+                y: Math.random() * 100 + '%'
               }}
               animate={{
                 x: [
@@ -98,6 +99,15 @@ export function ThemedPageHeader({ title, subtitle, icon }: ThemedPageHeaderProp
               </motion.p>
             )}
           </div>
+          {actions && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              {actions}
+            </motion.div>
+          )}
         </div>
 
         {/* Shine Effect */}

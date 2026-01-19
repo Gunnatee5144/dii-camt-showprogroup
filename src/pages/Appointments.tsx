@@ -1,0 +1,181 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+    Calendar, Clock, Plus, CheckCircle, XCircle, User, MapPin, MessageSquare
+} from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
+import { mockAppointments, mockLecturers } from '@/lib/mockData';
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+};
+
+export default function Appointments() {
+    const { user } = useAuth();
+    const pendingCount = mockAppointments.filter(a => a.status === 'pending').length;
+    const confirmedCount = mockAppointments.filter(a => a.status === 'confirmed').length;
+    const isTeacher = user?.role === 'teacher' || user?.role === 'lecturer';
+
+    const getStatusBadge = (status: string) => {
+        switch (status) {
+            case 'pending': return <Badge className="bg-orange-100 text-orange-700">รอยืนยัน</Badge>;
+            case 'confirmed': return <Badge className="bg-blue-100 text-blue-700">ยืนยันแล้ว</Badge>;
+            case 'completed': return <Badge className="bg-emerald-100 text-emerald-700">เสร็จสิ้น</Badge>;
+            default: return <Badge>{status}</Badge>;
+        }
+    };
+
+    return (
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
+            <ThemedPageHeader
+                title="นัดหมาย"
+                subtitle={`${mockAppointments.length} นัดหมาย • ${pendingCount} รอยืนยัน`}
+                icon={<Calendar className="w-7 h-7" />}
+                actions={!isTeacher && (
+                    <Button className="bg-gradient-to-r from-blue-500 to-cyan-500">
+                        <Plus className="w-4 h-4 mr-2" />จองนัดหมายใหม่
+                    </Button>
+                )}
+            />
+
+            <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                    { label: 'รอยืนยัน', value: pendingCount, gradient: 'from-orange-500 to-amber-500', icon: Clock },
+                    { label: 'ยืนยันแล้ว', value: confirmedCount, gradient: 'from-blue-500 to-indigo-500', icon: Calendar },
+                    { label: 'เสร็จสิ้น', value: mockAppointments.filter(a => a.status === 'completed').length, gradient: 'from-emerald-500 to-teal-500', icon: CheckCircle },
+                    { label: 'ทั้งหมด', value: mockAppointments.length, gradient: 'from-purple-500 to-pink-500', icon: Calendar },
+                ].map((stat, i) => (
+                    <motion.div key={i} whileHover={{ scale: 1.02 }} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradient} p-6 text-white shadow-xl`}>
+                        <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+                        <div className="relative z-10">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="p-2 rounded-xl bg-white/20"><stat.icon className="w-5 h-5" /></div>
+                                <span className="font-medium text-white/90">{stat.label}</span>
+                            </div>
+                            <div className="text-4xl font-bold">{stat.value}</div>
+                        </div>
+                    </motion.div>
+                ))}
+            </motion.div>
+
+            {!isTeacher && (
+                <motion.div variants={itemVariants}>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><User className="w-5 h-5" />อาจารย์ที่เปิดให้นัดพบ</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {mockLecturers.map((lecturer) => (
+                                    <div key={lecturer.id} className="p-4 border rounded-xl hover:shadow-md transition-all">
+                                        <div className="flex items-start gap-4">
+                                            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-bold text-lg">{lecturer.nameThai.charAt(0)}</div>
+                                            <div className="flex-1">
+                                                <h3 className="font-semibold">{lecturer.nameThai}</h3>
+                                                <p className="text-sm text-gray-600">{lecturer.department}</p>
+                                                <div className="flex flex-wrap gap-1 mt-2">
+                                                    {lecturer.officeHours.slice(0, 2).map((hour) => (
+                                                        <Badge key={hour.id} variant="outline" className="text-xs">{hour.day} {hour.startTime}-{hour.endTime}</Badge>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <Button size="sm">จองเวลา</Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            )}
+
+            <motion.div variants={itemVariants}>
+                <Tabs defaultValue="upcoming" className="space-y-4">
+                    <TabsList className="bg-white/80 backdrop-blur-sm border shadow-sm">
+                        <TabsTrigger value="upcoming">กำลังจะมาถึง</TabsTrigger>
+                        <TabsTrigger value="pending">รอยืนยัน</TabsTrigger>
+                        <TabsTrigger value="completed">ประวัติ</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="upcoming">
+                        <Card><CardContent className="pt-6">
+                            <div className="space-y-4">
+                                {mockAppointments.filter(a => a.status === 'confirmed').map((apt) => (
+                                    <div key={apt.id} className="flex items-start gap-4 p-4 border rounded-xl bg-gradient-to-r from-blue-50 to-white">
+                                        <div className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white rounded-xl px-4 py-3 text-center min-w-[80px]">
+                                            <div className="text-xl font-bold">{new Date(apt.date).getDate()}</div>
+                                            <div className="text-xs">{new Date(apt.date).toLocaleDateString('th-TH', { month: 'short' })}</div>
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="font-semibold">{isTeacher ? apt.studentName : apt.lecturerName}</h3>
+                                            <p className="text-sm text-gray-600">{apt.purpose}</p>
+                                            <div className="flex items-center gap-4 text-sm text-gray-500 mt-2">
+                                                <span><Clock className="w-4 h-4 inline mr-1" />{apt.startTime}-{apt.endTime}</span>
+                                                <span><MapPin className="w-4 h-4 inline mr-1" />{apt.location}</span>
+                                            </div>
+                                        </div>
+                                        {getStatusBadge(apt.status)}
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent></Card>
+                    </TabsContent>
+
+                    <TabsContent value="pending">
+                        <Card><CardContent className="pt-6">
+                            <div className="space-y-4">
+                                {mockAppointments.filter(a => a.status === 'pending').map((apt) => (
+                                    <div key={apt.id} className="flex items-start gap-4 p-4 border rounded-xl bg-orange-50">
+                                        <div className="bg-gradient-to-br from-orange-500 to-amber-500 text-white rounded-xl px-4 py-3 text-center min-w-[80px]">
+                                            <div className="text-xl font-bold">{new Date(apt.date).getDate()}</div>
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="font-semibold">{isTeacher ? apt.studentName : apt.lecturerName}</h3>
+                                            <p className="text-sm text-gray-600">{apt.purpose}</p>
+                                        </div>
+                                        {isTeacher ? (
+                                            <div className="flex gap-2">
+                                                <Button size="sm" className="bg-emerald-500"><CheckCircle className="w-4 h-4 mr-1" />ยืนยัน</Button>
+                                                <Button size="sm" variant="outline" className="text-red-600"><XCircle className="w-4 h-4" /></Button>
+                                            </div>
+                                        ) : getStatusBadge(apt.status)}
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent></Card>
+                    </TabsContent>
+
+                    <TabsContent value="completed">
+                        <Card><CardContent className="pt-6">
+                            <div className="space-y-3">
+                                {mockAppointments.filter(a => a.status === 'completed').map((apt) => (
+                                    <div key={apt.id} className="flex items-center justify-between p-4 border rounded-xl bg-gray-50">
+                                        <div className="flex items-center gap-4">
+                                            <CheckCircle className="w-6 h-6 text-emerald-600" />
+                                            <div>
+                                                <h3 className="font-semibold">{isTeacher ? apt.studentName : apt.lecturerName}</h3>
+                                                <p className="text-xs text-gray-400">{new Date(apt.date).toLocaleDateString('th-TH')}</p>
+                                            </div>
+                                        </div>
+                                        {getStatusBadge(apt.status)}
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent></Card>
+                    </TabsContent>
+                </Tabs>
+            </motion.div>
+        </motion.div>
+    );
+}

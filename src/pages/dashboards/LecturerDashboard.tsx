@@ -1,19 +1,21 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
-  BookOpen, Users, Calendar, TrendingUp, Clock, 
-  FileText, CheckCircle, AlertCircle, MessageSquare, Award
+import {
+  BookOpen, Users, Calendar, TrendingUp, Clock,
+  FileText, CheckCircle, AlertCircle, MessageSquare, Award,
+  ChevronRight
 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
-import { 
-  mockLecturer, 
-  mockCourses, 
-  mockStudents, 
+import {
+  mockLecturer,
+  mockCourses,
+  mockStudents,
   mockAppointments,
   mockGrades,
   getLecturerAppointments,
@@ -30,18 +32,19 @@ const itemVariants = {
 };
 
 export default function LecturerDashboard() {
+  const navigate = useNavigate();
   const lecturer = mockLecturer;
   const appointments = getLecturerAppointments(lecturer.id);
   const upcomingAppointments = appointments.filter(a => a.status === 'confirmed').slice(0, 3);
-  
+
   // Lecturer's courses
   const lecturerCourses = mockCourses.filter(c => c.lecturerId === lecturer.id);
   const totalStudents = lecturerCourses.reduce((sum, course) => sum + course.enrolledStudents.length, 0);
-  
+
   // Advisees
   const adviseesList = mockStudents.filter(s => lecturer.advisees.includes(s.id));
   const atRiskAdvisees = adviseesList.filter(s => s.academicStatus === 'probation' || s.academicStatus === 'risk');
-  
+
   const workloadPercentage = (lecturer.teachingHours / lecturer.maxTeachingHours) * 100;
 
   return (
@@ -54,30 +57,34 @@ export default function LecturerDashboard() {
       {/* Welcome Header */}
       <ThemedPageHeader
         title={`สวัสดี, ${lecturer.nameThai} 👨‍🏫`}
-        subtitle={`${lecturer.department} • ${
-          lecturer.position === 'assistant_professor' ? 'ผู้ช่วยศาสตราจารย์' :
+        subtitle={`${lecturer.department} • ${lecturer.position === 'assistant_professor' ? 'ผู้ช่วยศาสตราจารย์' :
           lecturer.position === 'associate_professor' ? 'รองศาสตราจารย์' :
-          lecturer.position === 'professor' ? 'ศาสตราจารย์' : 'อาจารย์'
-        }`}
+            lecturer.position === 'professor' ? 'ศาสตราจารย์' : 'อาจารย์'
+          }`}
         icon={<BookOpen className="w-7 h-7" />}
       />
 
       <motion.div variants={itemVariants} className="flex justify-end gap-2">
-        <Button variant="outline">
-          <Calendar className="w-4 h-4 mr-2" />
-          จัดการตารางสอน
-        </Button>
-        <Button className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg shadow-emerald-200/50">
-          <MessageSquare className="w-4 h-4 mr-2" />
-          ข้อความ
-        </Button>
+        <Link to="/schedule">
+          <Button variant="outline">
+            <Calendar className="w-4 h-4 mr-2" />
+            จัดการตารางสอน
+          </Button>
+        </Link>
+        <Link to="/messages">
+          <Button className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg shadow-emerald-200/50">
+            <MessageSquare className="w-4 h-4 mr-2" />
+            ข้อความ
+          </Button>
+        </Link>
       </motion.div>
 
       {/* Key Stats */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <motion.div
           whileHover={{ scale: 1.02 }}
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 p-6 text-white shadow-xl shadow-emerald-200"
+          onClick={() => navigate('/courses')}
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 p-6 text-white shadow-xl shadow-emerald-200 cursor-pointer"
         >
           <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
           <div className="relative z-10">
@@ -94,7 +101,8 @@ export default function LecturerDashboard() {
 
         <motion.div
           whileHover={{ scale: 1.02 }}
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 p-6 text-white shadow-xl shadow-blue-200"
+          onClick={() => navigate('/students')}
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 p-6 text-white shadow-xl shadow-blue-200 cursor-pointer"
         >
           <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
           <div className="relative z-10">
@@ -111,11 +119,11 @@ export default function LecturerDashboard() {
 
         <motion.div
           whileHover={{ scale: 1.02 }}
-          className={`relative overflow-hidden rounded-2xl p-6 text-white shadow-xl ${
-            atRiskAdvisees.length > 0 
-              ? 'bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 shadow-orange-200' 
-              : 'bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 shadow-purple-200'
-          }`}
+          onClick={() => navigate('/students')}
+          className={`relative overflow-hidden rounded-2xl p-6 text-white shadow-xl cursor-pointer ${atRiskAdvisees.length > 0
+            ? 'bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 shadow-orange-200'
+            : 'bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 shadow-purple-200'
+            }`}
         >
           <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
           <div className="relative z-10">
@@ -134,11 +142,11 @@ export default function LecturerDashboard() {
 
         <motion.div
           whileHover={{ scale: 1.02 }}
-          className={`relative overflow-hidden rounded-2xl p-6 text-white shadow-xl ${
-            workloadPercentage >= 80 
-              ? 'bg-gradient-to-br from-red-500 via-rose-500 to-pink-500 shadow-red-200' 
-              : 'bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 shadow-green-200'
-          }`}
+          onClick={() => navigate('/workload')}
+          className={`relative overflow-hidden rounded-2xl p-6 text-white shadow-xl cursor-pointer ${workloadPercentage >= 80
+            ? 'bg-gradient-to-br from-red-500 via-rose-500 to-pink-500 shadow-red-200'
+            : 'bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 shadow-green-200'
+            }`}
         >
           <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
           <div className="relative z-10">
@@ -187,7 +195,7 @@ export default function LecturerDashboard() {
                             <p className="text-gray-600">{course.nameThai}</p>
                           </div>
                         </div>
-                        
+
                         <div className="grid grid-cols-3 gap-4 pt-3 border-t">
                           <div className="text-center">
                             <div className="text-2xl font-bold text-blue-600">
@@ -210,11 +218,11 @@ export default function LecturerDashboard() {
                         </div>
 
                         <div className="flex gap-2 pt-2">
-                          <Button size="sm" variant="outline" className="flex-1">
+                          <Button size="sm" variant="outline" className="flex-1" onClick={() => navigate('/courses')}>
                             <FileText className="w-4 h-4 mr-2" />
                             จัดการวิชา
                           </Button>
-                          <Button size="sm" variant="outline" className="flex-1">
+                          <Button size="sm" variant="outline" className="flex-1" onClick={() => navigate('/students')}>
                             <Users className="w-4 h-4 mr-2" />
                             ดูนักศึกษา
                           </Button>
@@ -304,7 +312,7 @@ export default function LecturerDashboard() {
               <CardContent>
                 <div className="space-y-4">
                   {lecturerCourses.map(course => {
-                    const courseStudents = mockStudents.filter(s => 
+                    const courseStudents = mockStudents.filter(s =>
                       course.enrolledStudents.includes(s.id)
                     );
                     return (
@@ -373,10 +381,12 @@ export default function LecturerDashboard() {
                           <div className="font-semibold">{student.year}</div>
                         </div>
                       </div>
-                      <Button size="sm" className="w-full">
-                        <MessageSquare className="w-4 h-4 mr-2" />
-                        ติดต่อและให้คำปรึกษา
-                      </Button>
+                      <Link to={`/students`}>
+                        <Button size="sm" className="w-full">
+                          <MessageSquare className="w-4 h-4 mr-2" />
+                          ติดต่อและให้คำปรึกษา
+                        </Button>
+                      </Link>
                     </div>
                   ))}
                 </CardContent>

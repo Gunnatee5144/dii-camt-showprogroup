@@ -1410,3 +1410,20 @@ export function getAchievementsByStudentId(studentId: string) {
 export function getMaterialsByCourseId(courseId: string) {
   return mockCourseMaterials.filter(mat => mat.courseId === courseId);
 }
+export const findMockUserByEmail = (email: string) => {
+  const student = mockStudents.find(u => u.email === email);
+  if (student) return { ...student, role: 'student' as const };
+
+  const lecturer = mockLecturers.find(u => u.email === email);
+  if (lecturer) return { ...lecturer, role: 'lecturer' as const };
+
+  const staff = mockStaffUsers.find(u => u.email === email);
+  if (staff) return { ...staff, role: 'staff' as const };
+
+  const company = mockCompanies.find(u => u.email === email);
+  if (company) return { ...company, role: 'company' as const };
+
+  if (mockAdmin.email === email) return { ...mockAdmin, role: 'admin' as const };
+
+  return null;
+};

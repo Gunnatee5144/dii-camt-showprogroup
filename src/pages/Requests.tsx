@@ -13,6 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
 import { ThemedCard } from '@/components/common/ThemedCard';
 
+import { toast } from 'sonner';
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
@@ -23,7 +25,7 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const mockRequests = [
+const initialRequests = [
   {
     id: 1,
     type: 'ลงทะเบียนเรียนเกิน',
@@ -53,10 +55,37 @@ const mockRequests = [
 export default function Requests() {
   const { user } = useAuth();
   const [showNewRequestForm, setShowNewRequestForm] = React.useState(false);
+  const [requests, setRequests] = React.useState<any[]>(initialRequests);
+  const [formData, setFormData] = React.useState({
+    type: '',
+    title: '',
+    description: ''
+  });
 
-  const pendingCount = mockRequests.filter(r => r.status === 'pending').length;
-  const approvedCount = mockRequests.filter(r => r.status === 'approved').length;
-  const rejectedCount = mockRequests.filter(r => r.status === 'rejected').length;
+  const pendingCount = requests.filter(r => r.status === 'pending').length;
+  const approvedCount = requests.filter(r => r.status === 'approved').length;
+  const rejectedCount = requests.filter(r => r.status === 'rejected').length;
+
+  const handleSubmit = () => {
+    if (!formData.type || !formData.title || !formData.description) {
+      toast.error('กรุณากรอกข้อมูลให้ครบถ้วน');
+      return;
+    }
+
+    const newRequest = {
+      id: requests.length + 1,
+      type: formData.type,
+      title: formData.title,
+      description: formData.description,
+      status: 'pending',
+      createdAt: new Date().toISOString().split('T')[0],
+    };
+
+    setRequests([newRequest, ...requests]);
+    setShowNewRequestForm(false);
+    setFormData({ type: '', title: '', description: '' });
+    toast.success('ยื่นคำร้องเรียบร้อยแล้ว');
+  };
 
   return (
     <motion.div
@@ -72,7 +101,7 @@ export default function Requests() {
       />
 
       <motion.div variants={itemVariants} className="flex justify-end">
-        <Button 
+        <Button
           onClick={() => setShowNewRequestForm(true)}
           className="bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 shadow-lg shadow-rose-200/50"
         >
@@ -94,7 +123,7 @@ export default function Requests() {
               </div>
               <span className="font-medium text-white/90">คำร้องทั้งหมด</span>
             </div>
-            <div className="text-4xl font-bold">{mockRequests.length}</div>
+            <div className="text-4xl font-bold">{requests.length}</div>
           </div>
         </motion.div>
 
@@ -173,32 +202,42 @@ export default function Requests() {
             <CardContent className="space-y-5 pt-6">
               <div className="space-y-2">
                 <Label className="text-gray-700 font-medium">ประเภทคำร้อง</Label>
-                <Select>
+                <Select
+                  value={formData.type}
+                  onValueChange={(value) => setFormData({ ...formData, type: value })}
+                >
                   <SelectTrigger className="bg-white border-gray-200 focus:border-rose-400">
                     <SelectValue placeholder="เลือกประเภทคำร้อง" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="register">ลงทะเบียนเรียนเกิน/ขาด</SelectItem>
-                    <SelectItem value="certificate">ขอใบรับรอง</SelectItem>
-                    <SelectItem value="change-section">ขอเปลี่ยนกลุ่มเรียน</SelectItem>
-                    <SelectItem value="withdraw">ขอถอนรายวิชา</SelectItem>
-                    <SelectItem value="leave">ขอลาพักการศึกษา</SelectItem>
-                    <SelectItem value="other">อื่นๆ</SelectItem>
+                    <SelectItem value="ลงทะเบียนเรียนเกิน">ลงทะเบียนเรียนเกิน/ขาด</SelectItem>
+                    <SelectItem value="ขอใบรับรอง">ขอใบรับรอง</SelectItem>
+                    <SelectItem value="ขอเปลี่ยนกลุ่ม">ขอเปลี่ยนกลุ่มเรียน</SelectItem>
+                    <SelectItem value="ขอถอนรายวิชา">ขอถอนรายวิชา</SelectItem>
+                    <SelectItem value="ลาพักการศึกษา">ขอลาพักการศึกษา</SelectItem>
+                    <SelectItem value="อื่นๆ">อื่นๆ</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
                 <Label className="text-gray-700 font-medium">หัวข้อคำร้อง</Label>
-                <Input placeholder="กรอกหัวข้อคำร้อง" className="bg-white border-gray-200 focus:border-rose-400" />
+                <Input
+                  placeholder="กรอกหัวข้อคำร้อง"
+                  className="bg-white border-gray-200 focus:border-rose-400"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                />
               </div>
 
               <div className="space-y-2">
                 <Label className="text-gray-700 font-medium">รายละเอียด</Label>
-                <Textarea 
-                  placeholder="กรอกรายละเอียดคำร้อง" 
+                <Textarea
+                  placeholder="กรอกรายละเอียดคำร้อง"
                   rows={5}
                   className="bg-white border-gray-200 focus:border-rose-400"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 />
               </div>
 
@@ -212,7 +251,10 @@ export default function Requests() {
               </div>
 
               <div className="flex gap-3 pt-4">
-                <Button className="flex-1 h-11 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 shadow-lg shadow-rose-200/50">
+                <Button
+                  className="flex-1 h-11 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 shadow-lg shadow-rose-200/50"
+                  onClick={handleSubmit}
+                >
                   <Send className="w-4 h-4 mr-2" />
                   ยื่นคำร้อง
                 </Button>
@@ -247,7 +289,7 @@ export default function Requests() {
           </TabsList>
 
           <TabsContent value="all" className="space-y-4 mt-6">
-            {mockRequests.map((request, index) => (
+            {requests.map((request, index) => (
               <motion.div
                 key={request.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -256,22 +298,21 @@ export default function Requests() {
                 whileHover={{ y: -2 }}
               >
                 <Card className="border-0 shadow-lg hover:shadow-xl transition-all overflow-hidden">
-                  <div className={`h-1 ${
-                    request.status === 'approved' ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
+                  <div className={`h-1 ${request.status === 'approved' ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
                     request.status === 'pending' ? 'bg-gradient-to-r from-orange-500 to-amber-500' :
-                    'bg-gradient-to-r from-red-500 to-rose-500'
-                  }`} />
+                      'bg-gradient-to-r from-red-500 to-rose-500'
+                    }`} />
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <Badge variant="outline" className="bg-gray-50">{request.type}</Badge>
                           <Badge className={
-                            request.status === 'approved' 
+                            request.status === 'approved'
                               ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0' :
-                            request.status === 'pending' 
-                              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0' :
-                              'bg-gradient-to-r from-red-500 to-rose-500 text-white border-0'
+                              request.status === 'pending'
+                                ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0' :
+                                'bg-gradient-to-r from-red-500 to-rose-500 text-white border-0'
                           }>
                             {request.status === 'approved' ? (
                               <><CheckCircle className="w-3 h-3 mr-1" />อนุมัติ</>
@@ -315,7 +356,7 @@ export default function Requests() {
 
           <TabsContent value="pending" className="mt-6">
             <div className="space-y-4">
-              {mockRequests.filter(r => r.status === 'pending').map((request, index) => (
+              {requests.filter(r => r.status === 'pending').map((request, index) => (
                 <motion.div
                   key={request.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -336,7 +377,7 @@ export default function Requests() {
 
           <TabsContent value="approved" className="mt-6">
             <div className="space-y-4">
-              {mockRequests.filter(r => r.status === 'approved').map((request, index) => (
+              {requests.filter(r => r.status === 'approved').map((request, index) => (
                 <motion.div
                   key={request.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -357,7 +398,7 @@ export default function Requests() {
 
           <TabsContent value="rejected" className="mt-6">
             <div className="space-y-4">
-              {mockRequests.filter(r => r.status === 'rejected').map((request, index) => (
+              {requests.filter(r => r.status === 'rejected').map((request, index) => (
                 <motion.div
                   key={request.id}
                   initial={{ opacity: 0, y: 20 }}

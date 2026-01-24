@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
@@ -43,7 +44,7 @@ export default function Appointments() {
                 subtitle={`${mockAppointments.length} นัดหมาย • ${pendingCount} รอยืนยัน`}
                 icon={<Calendar className="w-7 h-7" />}
                 actions={!isTeacher && (
-                    <Button className="bg-gradient-to-r from-blue-500 to-cyan-500">
+                    <Button className="bg-gradient-to-r from-blue-500 to-cyan-500" onClick={() => toast.info('ระบบการจองกำลังปรับปรุง โปรดติดต่อเจ้าหน้าที่')}>
                         <Plus className="w-4 h-4 mr-2" />จองนัดหมายใหม่
                     </Button>
                 )}
@@ -90,7 +91,7 @@ export default function Appointments() {
                                                     ))}
                                                 </div>
                                             </div>
-                                            <Button size="sm">จองเวลา</Button>
+                                            <Button size="sm" onClick={() => toast.success(`ส่งคำขอจองเวลากับ ${lecturer.nameThai} แล้ว`)}>จองเวลา</Button>
                                         </div>
                                     </div>
                                 ))}

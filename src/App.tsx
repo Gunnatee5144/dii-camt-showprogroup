@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 import Dashboard from "./pages/Dashboard";
 import Courses from "./pages/Courses";
 import Schedule from "./pages/Schedule";
@@ -22,13 +23,25 @@ import NotFound from "./pages/NotFound";
 import Students from "./pages/Students";
 import Assignments from "./pages/Assignments";
 import Appointments from "./pages/Appointments";
+import Attendance from "./pages/Attendance";
+import Workload from "./pages/Workload";
 import UsersPage from "./pages/Users";
 import Reports from "./pages/Reports";
 import Notifications from "./pages/Notifications";
 import Audit from "./pages/Audit";
+import Budget from "./pages/Budget";
+import Network from "./pages/Network";
+import Documents from "./pages/Documents";
+import Personnel from "./pages/Personnel";
+import WorkloadTracking from "./pages/WorkloadTracking";
+import ScheduleManagement from "./pages/ScheduleManagement";
+import ActivitiesManagement from "./pages/ActivitiesManagement";
 import JobPostings from "./pages/JobPostings";
 import Applicants from "./pages/Applicants";
 import StudentProfiles from "./pages/StudentProfiles";
+import Cooperation from "./pages/Cooperation";
+import Subscription from "./pages/Subscription";
+import InternTracking from "./pages/InternTracking";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +54,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/register" element={<RegisterPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
@@ -48,21 +62,42 @@ const App = () => (
               <Route path="/schedule" element={<Schedule />} />
               <Route path="/grades" element={<Grades />} />
               <Route path="/activities" element={<Activities />} />
+              <Route path="/messages" element={<Messages />} />
+              <Route path="/settings" element={<Settings />} />
+
+              {/* Student Routes */}
               <Route path="/portfolio" element={<Portfolio />} />
               <Route path="/internships" element={<Internships />} />
               <Route path="/requests" element={<Requests />} />
-              <Route path="/messages" element={<Messages />} />
-              <Route path="/settings" element={<Settings />} />
+
+              {/* Lecturer Routes */}
               <Route path="/students" element={<Students />} />
               <Route path="/assignments" element={<Assignments />} />
               <Route path="/appointments" element={<Appointments />} />
+              <Route path="/attendance" element={<Attendance />} />
+              <Route path="/workload" element={<Workload />} />
+
+              {/* Staff Routes */}
               <Route path="/users" element={<UsersPage />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/audit" element={<Audit />} />
+              <Route path="/budget" element={<Budget />} />
+              <Route path="/network" element={<Network />} />
+              <Route path="/documents" element={<Documents />} />
+              <Route path="/personnel" element={<Personnel />} />
+              <Route path="/workload-tracking" element={<WorkloadTracking />} />
+              <Route path="/schedule-management" element={<ScheduleManagement />} />
+              <Route path="/activities-management" element={<ActivitiesManagement />} />
+
+              {/* Company Routes */}
               <Route path="/job-postings" element={<JobPostings />} />
               <Route path="/applicants" element={<Applicants />} />
               <Route path="/student-profiles" element={<StudentProfiles />} />
+              <Route path="/subscription" element={<Subscription />} />
+              <Route path="/intern-tracking" element={<InternTracking />} />
+              <Route path="/cooperation" element={<Cooperation />} />
+              <Route path="/talent-search" element={<StudentProfiles />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -52,18 +52,17 @@ export default function LoginPage() {
   const location = useLocation();
   const { login } = useAuth();
   const { toast } = useToast();
-  
+
   const initialRole = (location.state as { role?: UserRole })?.role || 'student';
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<UserRole>(initialRole);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !password) {
       toast({
         title: 'กรุณากรอกข้อมูลให้ครบ',
@@ -75,18 +74,22 @@ export default function LoginPage() {
 
     setIsLoading(true);
     try {
-      const success = await login(email, password, selectedRole);
+      // Login without specifying role - let backend/mock determine it
+      const success = await login(email, password);
+
       if (success) {
         toast({
           title: 'เข้าสู่ระบบสำเร็จ',
-          description: `ยินดีต้อนรับ ${roleInfo[selectedRole].title}`,
+          description: `ยินดีต้อนรับกลับเข้าสู่ระบบ`,
         });
         navigate('/dashboard');
+      } else {
+        throw new Error('User not found');
       }
     } catch (error) {
       toast({
         title: 'เกิดข้อผิดพลาด',
-        description: 'ไม่สามารถเข้าสู่ระบบได้ กรุณาลองอีกครั้ง',
+        description: 'ไม่สามารถเข้าสู่ระบบได้ กรุณาตรวจสอบอีเมลและรหัสผ่าน',
         variant: 'destructive',
       });
     } finally {
@@ -94,13 +97,18 @@ export default function LoginPage() {
     }
   };
 
-  const RoleIcon = roleInfo[selectedRole].icon;
+  // Default theme properties since we don't have selectedRole anymore
+  const pageTheme = {
+    title: 'DII CAMT',
+    gradient: 'from-blue-600 via-indigo-600 to-purple-600',
+    icon: GraduationCap
+  };
 
   return (
     <div className="min-h-screen flex relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5" />
-      
+
       {/* Left Panel - Form */}
       <div className="flex-1 flex flex-col justify-center px-6 py-12 lg:px-8 bg-background relative z-10">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -122,12 +130,12 @@ export default function LoginPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <motion.div 
+            <motion.div
               className="flex items-center justify-center gap-3 mb-8"
               whileHover={{ scale: 1.02 }}
               transition={{ type: 'spring', stiffness: 300 }}
             >
-              <motion.div 
+              <motion.div
                 className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-hero shadow-lg"
                 whileHover={{ rotate: [0, -10, 10, -10, 0] }}
                 transition={{ duration: 0.5 }}
@@ -140,81 +148,7 @@ export default function LoginPage() {
               </div>
             </motion.div>
 
-            {/* Role Selector */}
-            <div className="mb-6">
-              <Label className="text-sm font-medium mb-3 flex items-center gap-2">
-                <motion.div
-                  className="w-2 h-2 rounded-full bg-accent"
-                  animate={{ scale: [1, 1.3, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                />
-                เลือกบทบาท
-              </Label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {(Object.keys(roleInfo).filter(r => r !== 'admin') as UserRole[]).map((role, index) => {
-                  const Icon = roleInfo[role].icon;
-                  const isSelected = selectedRole === role;
-                  return (
-                    <motion.button
-                      key={role}
-                      type="button"
-                      onClick={() => setSelectedRole(role)}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      whileHover={{ scale: 1.05, y: -2 }}
-                      whileTap={{ scale: 0.95 }}
-                      className={`relative flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all overflow-hidden ${
-                        isSelected
-                          ? 'border-transparent shadow-xl shadow-accent/20'
-                          : 'border-border bg-card hover:border-muted-foreground/30 hover:shadow-lg'
-                      }`}
-                    >
-                      {isSelected && (
-                        <>
-                          <motion.div 
-                            className={`absolute inset-0 bg-gradient-to-br ${roleInfo[role].gradient} opacity-100`}
-                            layoutId="roleBackground"
-                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                          />
-                          {/* Animated Particles for Selected Role */}
-                          {[...Array(3)].map((_, i) => (
-                            <motion.div
-                              key={i}
-                              className="absolute w-1 h-1 bg-white/40 rounded-full"
-                              initial={{ x: '50%', y: '50%' }}
-                              animate={{
-                                x: `${50 + (Math.random() - 0.5) * 100}%`,
-                                y: `${50 + (Math.random() - 0.5) * 100}%`,
-                                opacity: [1, 0],
-                              }}
-                              transition={{
-                                duration: 1.5,
-                                repeat: Infinity,
-                                delay: i * 0.3,
-                              }}
-                            />
-                          ))}
-                        </>
-                      )}
-                      <div className="relative z-10 flex flex-col items-center gap-2">
-                        <motion.div 
-                          className={`p-2 rounded-xl ${isSelected ? 'bg-white/20 backdrop-blur-sm' : 'bg-muted'}`}
-                          whileHover={{ rotate: isSelected ? [0, -10, 10, 0] : 0 }}
-                          transition={{ duration: 0.5 }}
-                        >
-                          <Icon className={`w-6 h-6 ${isSelected ? 'text-white' : 'text-foreground'}`} />
-                        </motion.div>
-                        <span className={`text-sm font-medium ${isSelected ? 'text-white' : 'text-foreground'}`}>
-                          {roleInfo[role].title}
-                        </span>
-                      </div>
-                    </motion.button>
 
-                  );
-                })}
-              </div>
-            </div>
 
             {/* Login Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -302,7 +236,7 @@ export default function LoginPage() {
                 >
                   <Button
                     type="submit"
-                    className={`w-full bg-gradient-to-r ${roleInfo[selectedRole].gradient} text-white relative overflow-hidden group`}
+                    className={`w-full bg-gradient-to-r ${pageTheme.gradient} text-white relative overflow-hidden group`}
                     size="lg"
                     disabled={isLoading}
                   >
@@ -340,7 +274,7 @@ export default function LoginPage() {
             </p>
 
             {/* Demo Hint */}
-            <motion.div 
+            <motion.div
               className="mt-8 p-4 rounded-xl bg-muted/50 border border-border backdrop-blur-sm relative overflow-hidden group"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -358,7 +292,7 @@ export default function LoginPage() {
       </div>
 
       {/* Right Panel - Hero */}
-      <div className={`hidden lg:flex lg:flex-1 bg-gradient-to-br ${roleInfo[selectedRole].gradient} relative overflow-hidden`}>
+      <div className={`hidden lg:flex lg:flex-1 bg-gradient-to-br ${pageTheme.gradient} relative overflow-hidden`}>
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden">
           {/* Floating Particles */}
@@ -366,9 +300,9 @@ export default function LoginPage() {
             <motion.div
               key={i}
               className="absolute w-2 h-2 bg-white/20 rounded-full"
-              initial={{ 
-                x: Math.random() * 100 + '%', 
-                y: Math.random() * 100 + '%' 
+              initial={{
+                x: Math.random() * 100 + '%',
+                y: Math.random() * 100 + '%'
               }}
               animate={{
                 x: [
@@ -389,45 +323,41 @@ export default function LoginPage() {
               }}
             />
           ))}
-          
+
           {/* Gradient Orbs */}
           <div className="absolute -top-24 -right-24 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
           <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-white/10 rounded-full blur-3xl" />
         </div>
-        
+
         <div className="relative z-10 flex flex-col justify-center px-12 max-w-lg mx-auto text-white">
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <motion.div 
+            <motion.div
               className="w-24 h-24 rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-8 shadow-2xl border border-white/30"
               whileHover={{ scale: 1.05, rotate: 5 }}
               transition={{ type: 'spring', stiffness: 300 }}
             >
-              <RoleIcon className="h-12 w-12 text-white" />
+              <pageTheme.icon className="h-12 w-12 text-white" />
             </motion.div>
-            <h2 className="text-5xl font-bold text-white mb-4 drop-shadow-lg">
-              ยินดีต้อนรับ
-              <br />
-              {roleInfo[selectedRole].title}
+            <h2 className="text-5xl font-bold text-white mb-4 drop-shadow-lg leading-tight">
+              ระบบบริหาร<br />การศึกษา
             </h2>
             <p className="text-lg text-white/90 mb-8 leading-relaxed">
-              {selectedRole === 'student' && 'เข้าถึงตารางเรียน ผลการเรียน กิจกรรม และสร้าง Portfolio ของคุณ'}
-              {selectedRole === 'lecturer' && 'จัดการรายวิชา ให้เกรด และดูแลนักศึกษาในที่ปรึกษา'}
-              {selectedRole === 'staff' && 'บริหารระบบ จัดการผู้ใช้งาน และดูรายงานภาพรวม'}
-              {selectedRole === 'company' && 'ค้นหานักศึกษาที่ตรงใจ ลงประกาศรับสมัครงานและฝึกงาน'}
-              {selectedRole === 'admin' && 'ควบคุมระบบทั้งหมด จัดการข้อมูล และกำหนดสิทธิ์ผู้ใช้'}
+              เชื่อมโยงการเรียนรู้สู่โลกอุตสาหกรรมดิจิทัล<br />
+              Digital Industry Integration (DII)
             </p>
-            <div className="flex gap-3">
-              {Object.keys(roleInfo).map((role, i) => (
-                <motion.div
-                  key={role}
-                  className={`h-1.5 rounded-full transition-all ${role === selectedRole ? 'w-8 bg-white' : 'w-1.5 bg-white/40'}`}
-                  whileHover={{ scale: 1.2 }}
-                />
-              ))}
+            <div className="flex gap-4">
+              <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
+                <span className="font-bold text-2xl">4</span>
+                <span className="text-sm ml-2 opacity-80">User Roles</span>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
+                <span className="font-bold text-2xl">30+</span>
+                <span className="text-sm ml-2 opacity-80">Features</span>
+              </div>
             </div>
           </motion.div>
         </div>

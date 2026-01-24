@@ -1,12 +1,14 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import { BookOpen, Users, Calendar, MapPin, Filter, Search } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PageHeader } from '@/components/common/PageHeader';
 import { GlassCard } from '@/components/common/GlassCard';
 import { mockCourses } from '@/lib/mockData';
@@ -31,73 +33,133 @@ export default function Courses() {
         className="space-y-6"
       >
         <PageHeader
-          title="รายวิชาของฉัน"
-          subtitle={`ภาคเรียนที่ 1/2568 • ลงทะเบียน ${mockCourses.length} รายวิชา`}
+          title="ลงทะเบียนและรายวิชา"
+          subtitle={`ภาคเรียนที่ 1/2568 • ลงทะเบียนแล้ว ${mockCourses.length} รายวิชา`}
           icon={<BookOpen className="w-7 h-7" />}
           gradient="blue"
         />
 
-        {/* Search */}
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              placeholder="ค้นหารายวิชา..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Button variant="outline">
-            <Filter className="w-4 h-4 mr-2" />
-            ตัวกรอง
-          </Button>
-        </div>
+        <Tabs defaultValue="my-courses" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="my-courses">รายวิชาของฉัน</TabsTrigger>
+            <TabsTrigger value="registration">ลงทะเบียนเรียน</TabsTrigger>
+          </TabsList>
 
-        {/* Courses Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCourses.slice(0, 6).map((course) => (
-            <motion.div
-              key={course.id}
-              whileHover={{ scale: 1.02 }}
-              className="cursor-pointer"
-            >
-              <Card className="h-full hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex justify-between items-start mb-2">
-                    <Badge variant="outline">{course.code}</Badge>
-                    <Badge className="bg-blue-600">A</Badge>
-                  </div>
-                  <CardTitle className="text-lg">{course.name}</CardTitle>
-                  <CardDescription>{course.nameThai}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 text-sm text-gray-600">
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4" />
-                      <span>อาจารย์ผู้สอน</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      <span>จ. 09:00-12:00</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4" />
-                      <span>ห้อง 301 อาคาร DII</span>
-                    </div>
-                  </div>
-                  <div className="mt-4">
-                    <div className="flex justify-between text-xs mb-1">
-                      <span>ความคืบหน้า</span>
-                      <span>85%</span>
-                    </div>
-                    <Progress value={85} />
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+          <TabsContent value="my-courses" className="space-y-6">
+            {/* Search */}
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="ค้นหารายวิชา..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Button variant="outline">
+                <Filter className="w-4 h-4 mr-2" />
+                ตัวกรอง
+              </Button>
+            </div>
+
+            {/* Courses Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredCourses.slice(0, 6).map((course) => (
+                <motion.div
+                  key={course.id}
+                  whileHover={{ scale: 1.02 }}
+                  className="cursor-pointer"
+                >
+                  <Card className="h-full hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <div className="flex justify-between items-start mb-2">
+                        <Badge variant="outline">{course.code}</Badge>
+                        <Badge className="bg-blue-600">A</Badge>
+                      </div>
+                      <CardTitle className="text-lg">{course.name}</CardTitle>
+                      <CardDescription>{course.nameThai}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2 text-sm text-gray-600">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          <span>อาจารย์ผู้สอน</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4" />
+                          <span>จ. 09:00-12:00</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4" />
+                          <span>ห้อง 301 อาคาร DII</span>
+                        </div>
+                      </div>
+                      <div className="mt-4">
+                        <div className="flex justify-between text-xs mb-1">
+                          <span>ความคืบหน้า</span>
+                          <span>85%</span>
+                        </div>
+                        <Progress value={85} />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="registration" className="space-y-6">
+            <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-100">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-blue-800">
+                  <BookOpen className="w-5 h-5" />
+                  รายวิชาแนะนำสำหรับเทอมถัดไป
+                </CardTitle>
+                <CardDescription className="text-blue-600">
+                  ตามแผนการเรียนหลักสูตร Digital Industry Integration ชั้นปีที่ {user.year || 3}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[
+                    { code: 'DII302', name: 'Advanced AI', credit: 3, reason: 'วิชาบังคับเลือก' },
+                    { code: 'DII305', name: 'Software Architecture', credit: 3, reason: 'วิชาแกน' },
+                    { code: 'DII391', name: 'Pre-Cooperative Education', credit: 1, reason: 'เตรียมสหกิจ' },
+                  ].map((rec, idx) => (
+                    <Card key={idx} className="bg-white border-blue-100 shadow-sm hover:shadow-md transition-all">
+                      <CardHeader className="pb-2">
+                        <div className="flex justify-between">
+                          <Badge variant="outline" className="text-blue-700 bg-blue-50 border-blue-200">{rec.code}</Badge>
+                          <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-0">{rec.reason}</Badge>
+                        </div>
+                        <CardTitle className="text-base mt-2">{rec.name}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-gray-500 mb-4">{rec.credit} หน่วยกิต</p>
+                        <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => toast.success(`ลงทะเบียนวิชา ${rec.code} เรียบร้อยแล้ว`)}>ลงทะเบียน</Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="flex items-center justify-between mt-8 mb-4">
+              <h3 className="text-lg font-semibold">รายวิชาอื่นๆ ที่เปิดสอน</h3>
+              <div className="flex gap-2">
+                <Input className="w-64" placeholder="ค้นหารหัสวิชา หรือชื่อวิชา..." />
+                <Button variant="outline">ค้นหา</Button>
+              </div>
+            </div>
+
+            {/* Placeholder for generic course list */}
+            <div className="border rounded-xl p-8 text-center text-gray-500 bg-gray-50 border-dashed">
+              <BookOpen className="w-10 h-10 mx-auto mb-3 text-gray-300" />
+              <p>พิมพ์คำค้นหาเพื่อดูรายวิชาที่เปิดสอนเพิ่มเติม</p>
+            </div>
+          </TabsContent>
+        </Tabs>
       </motion.div>
     );
   }

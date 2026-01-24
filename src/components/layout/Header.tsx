@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Bell, 
-  Menu, 
-  X, 
-  User, 
-  LogOut, 
+import {
+  Bell,
+  Menu,
+  X,
+  Users,
+  LogOut,
   Settings,
-  ChevronDown
+  ChevronDown,
+  User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,6 +19,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -30,11 +35,11 @@ interface HeaderProps {
 }
 
 export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
-  const { user, logout } = useAuth();
+  const { user, logout, switchRole } = useAuth();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
 
-  const unreadCount = mockNotifications.filter(n => !n.read).length;
+  const unreadCount = mockNotifications.filter(n => !n.isRead).length;
 
   const handleLogout = () => {
     logout();
@@ -106,7 +111,7 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
                 {mockNotifications.map((notification) => (
                   <DropdownMenuItem key={notification.id} className="flex flex-col items-start p-3 cursor-pointer">
                     <div className="flex items-center gap-2 w-full">
-                      <span className={`w-2 h-2 rounded-full ${notification.read ? 'bg-muted' : 'bg-accent'}`} />
+                      <span className={`w-2 h-2 rounded-full ${notification.isRead ? 'bg-muted' : 'bg-accent'}`} />
                       <span className="font-medium text-sm">{notification.title}</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1 ml-4">{notification.message}</p>
@@ -156,6 +161,22 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
                   <Settings className="mr-2 h-4 w-4" />
                   ตั้งค่า
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <Users className="mr-2 h-4 w-4" />
+                    <span>Switch Role (Demo)</span>
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuItem onClick={() => switchRole('student')}>Student</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => switchRole('lecturer')}>Lecturer</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => switchRole('staff')}>Staff</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => switchRole('company')}>Company</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => switchRole('admin')}>Admin</DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />

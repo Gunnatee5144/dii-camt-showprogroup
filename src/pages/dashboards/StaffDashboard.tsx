@@ -1,19 +1,21 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
+import {
   Users, BookOpen, Calendar, TrendingUp, AlertTriangle,
   FileText, Settings, BarChart3, Clock, CheckCircle, XCircle
 } from 'lucide-react';
+import { toast } from 'sonner';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
-import { 
-  mockStaff, 
-  mockStudents, 
-  mockCourses, 
+import {
+  mockStaff,
+  mockStudents,
+  mockCourses,
   mockLecturers,
   mockLecturerWorkloads,
   mockRequests,
@@ -30,6 +32,7 @@ const itemVariants = {
 };
 
 export default function StaffDashboard() {
+  const navigate = useNavigate();
   const staff = mockStaff;
   const totalStudents = mockStudents.length;
   const atRiskStudents = mockStudents.filter(
@@ -54,8 +57,13 @@ export default function StaffDashboard() {
       />
 
       <motion.div variants={itemVariants} className="flex justify-end gap-2">
-        <Button variant="outline"><Calendar className="w-4 h-4 mr-2" />จัดการตารางเรียน</Button>
-        <Button className="bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 shadow-lg shadow-purple-200/50">
+        <Button variant="outline" onClick={() => toast.info('ระบบจัดการตารางเรียนกำลังเปิดใช้งานเร็วๆนี้')}>
+          <Calendar className="w-4 h-4 mr-2" />จัดการตารางเรียน
+        </Button>
+        <Button
+          className="bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 shadow-lg shadow-purple-200/50"
+          onClick={() => toast.info('ระบบตั้งค่ากำลังเปิดใช้งานเร็วๆนี้')}
+        >
           <Settings className="w-4 h-4 mr-2" />ตั้งค่าระบบ
         </Button>
       </motion.div>
@@ -63,11 +71,11 @@ export default function StaffDashboard() {
       <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <motion.div
           whileHover={{ scale: 1.02 }}
-          className={`relative overflow-hidden rounded-2xl p-6 text-white shadow-xl ${
-            atRiskStudents > 0 
-              ? 'bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 shadow-orange-200' 
-              : 'bg-gradient-to-br from-purple-500 via-violet-500 to-indigo-500 shadow-purple-200'
-          }`}
+          onClick={() => navigate('/users')}
+          className={`relative overflow-hidden rounded-2xl p-6 text-white shadow-xl cursor-pointer ${atRiskStudents > 0
+            ? 'bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 shadow-orange-200'
+            : 'bg-gradient-to-br from-purple-500 via-violet-500 to-indigo-500 shadow-purple-200'
+            }`}
         >
           <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
           <div className="relative z-10">
@@ -84,7 +92,8 @@ export default function StaffDashboard() {
 
         <motion.div
           whileHover={{ scale: 1.02 }}
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 p-6 text-white shadow-xl shadow-blue-200"
+          onClick={() => navigate('/courses')}
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 p-6 text-white shadow-xl shadow-blue-200 cursor-pointer"
         >
           <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
           <div className="relative z-10">
@@ -101,11 +110,11 @@ export default function StaffDashboard() {
 
         <motion.div
           whileHover={{ scale: 1.02 }}
-          className={`relative overflow-hidden rounded-2xl p-6 text-white shadow-xl ${
-            overloadedLecturers.length > 0
-              ? 'bg-gradient-to-br from-red-500 via-rose-500 to-pink-500 shadow-red-200'
-              : 'bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 shadow-emerald-200'
-          }`}
+          onClick={() => navigate('/users')}
+          className={`relative overflow-hidden rounded-2xl p-6 text-white shadow-xl cursor-pointer ${overloadedLecturers.length > 0
+            ? 'bg-gradient-to-br from-red-500 via-rose-500 to-pink-500 shadow-red-200'
+            : 'bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 shadow-emerald-200'
+            }`}
         >
           <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
           <div className="relative z-10">
@@ -122,11 +131,11 @@ export default function StaffDashboard() {
 
         <motion.div
           whileHover={{ scale: 1.02 }}
-          className={`relative overflow-hidden rounded-2xl p-6 text-white shadow-xl ${
-            pendingRequests.length > 5
-              ? 'bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 shadow-orange-200'
-              : 'bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 shadow-purple-200'
-          }`}
+          onClick={() => navigate('/documents')}
+          className={`relative overflow-hidden rounded-2xl p-6 text-white shadow-xl cursor-pointer ${pendingRequests.length > 5
+            ? 'bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 shadow-orange-200'
+            : 'bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 shadow-purple-200'
+            }`}
         >
           <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
           <div className="relative z-10">

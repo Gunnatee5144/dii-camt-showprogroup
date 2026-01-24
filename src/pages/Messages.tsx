@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 import { Send, Inbox, Archive, Trash2, Search, Star, Paperclip, Filter, MoreVertical, Reply, Forward, Mail, CheckCheck } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,10 +24,10 @@ export default function Messages() {
 
   const filteredInbox = searchQuery
     ? inboxMessages.filter(m =>
-        m.from.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        m.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        m.preview.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      m.from.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      m.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      m.preview.toLowerCase().includes(searchQuery.toLowerCase())
+    )
     : inboxMessages;
 
   const selectedMsg = selectedMessage ? userMessages.find(m => m.id === selectedMessage) : null;
@@ -142,11 +143,14 @@ export default function Messages() {
               <Textarea placeholder="เนื้อหาข้อความ..." rows={6} className="mt-1" />
             </div>
             <div className="flex gap-2">
-              <Button>
+              <Button onClick={() => {
+                setComposing(false);
+                toast.success('ส่งข้อความเรียบร้อยแล้ว');
+              }}>
                 <Send className="w-4 h-4 mr-2" />
                 ส่งข้อความ
               </Button>
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => toast.info('เลือกไฟล์ที่ต้องการแนบ')}>
                 <Paperclip className="w-4 h-4 mr-2" />
                 แนบไฟล์
               </Button>
@@ -160,11 +164,11 @@ export default function Messages() {
               <CardHeader className="pb-3">
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input 
-                    placeholder="ค้นหาข้อความ..." 
+                  <Input
+                    placeholder="ค้นหาข้อความ..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9" 
+                    className="pl-9"
                   />
                 </div>
               </CardHeader>
@@ -191,9 +195,8 @@ export default function Messages() {
                         <div
                           key={message.id}
                           onClick={() => setSelectedMessage(message.id)}
-                          className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                            !message.read ? 'bg-blue-50 border-l-4 border-blue-500' : ''
-                          } ${selectedMessage === message.id ? 'bg-gray-100' : ''}`}
+                          className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${!message.read ? 'bg-blue-50 border-l-4 border-blue-500' : ''
+                            } ${selectedMessage === message.id ? 'bg-gray-100' : ''}`}
                         >
                           <div className="flex items-start gap-3">
                             <Avatar className="w-10 h-10">
@@ -216,8 +219,8 @@ export default function Messages() {
                               </p>
                               <div className="flex items-center gap-2 mt-2">
                                 <span className="text-xs text-gray-400">
-                                  {message.date.toLocaleDateString('th-TH', { 
-                                    day: 'numeric', 
+                                  {message.date.toLocaleDateString('th-TH', {
+                                    day: 'numeric',
                                     month: 'short',
                                     hour: '2-digit',
                                     minute: '2-digit'
@@ -245,9 +248,8 @@ export default function Messages() {
                         <div
                           key={message.id}
                           onClick={() => setSelectedMessage(message.id)}
-                          className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                            selectedMessage === message.id ? 'bg-gray-100' : ''
-                          }`}
+                          className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${selectedMessage === message.id ? 'bg-gray-100' : ''
+                            }`}
                         >
                           <div className="flex items-start gap-3">
                             <Avatar className="w-10 h-10">
@@ -263,8 +265,8 @@ export default function Messages() {
                               <p className="text-sm font-medium truncate">{message.subject}</p>
                               <p className="text-xs text-gray-500 truncate mt-1">{message.preview}</p>
                               <span className="text-xs text-gray-400 mt-2 block">
-                                {message.date.toLocaleDateString('th-TH', { 
-                                  day: 'numeric', 
+                                {message.date.toLocaleDateString('th-TH', {
+                                  day: 'numeric',
                                   month: 'short',
                                   hour: '2-digit',
                                   minute: '2-digit'
@@ -283,9 +285,8 @@ export default function Messages() {
                         <div
                           key={message.id}
                           onClick={() => setSelectedMessage(message.id)}
-                          className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                            selectedMessage === message.id ? 'bg-gray-100' : ''
-                          }`}
+                          className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${selectedMessage === message.id ? 'bg-gray-100' : ''
+                            }`}
                         >
                           <div className="flex items-start gap-3">
                             <Avatar className="w-10 h-10">
@@ -388,15 +389,15 @@ export default function Messages() {
                   <Separator />
 
                   <div className="flex gap-2">
-                    <Button>
+                    <Button onClick={() => toast.success('ตอบกลับข้อความแล้ว')}>
                       <Reply className="w-4 h-4 mr-2" />
                       ตอบกลับ
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => toast.success('ส่งต่อข้อความแล้ว')}>
                       <Forward className="w-4 h-4 mr-2" />
                       ส่งต่อ
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => toast.success('ย้ายไปยังคลังเก็บถาวรแล้ว')}>
                       <Archive className="w-4 h-4 mr-2" />
                       เก็บเข้าคลัง
                     </Button>

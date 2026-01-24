@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import { Trophy, Calendar, Users, CheckCircle, Clock, MapPin, Star, Award, Sparkles, Zap, Target, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -224,7 +225,10 @@ export default function Activities() {
                         <p className="text-sm text-gray-600 line-clamp-2 bg-gray-50 p-3 rounded-lg">{activity.description}</p>
                       )}
 
-                      <Button className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-lg shadow-orange-200/50 group">
+                      <Button
+                        className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-lg shadow-orange-200/50 group"
+                        onClick={() => toast.success(`ลงทะเบียนกิจกรรม ${activity.titleThai} เรียบร้อยแล้ว`)}
+                      >
                         ลงทะเบียนเข้าร่วม
                         <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                       </Button>

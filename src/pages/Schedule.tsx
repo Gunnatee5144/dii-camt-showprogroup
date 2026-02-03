@@ -1,12 +1,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
-import { Calendar, Clock, MapPin, ChevronLeft, ChevronRight, BookOpen, GraduationCap } from 'lucide-react';
+import {
+  Calendar, Clock, MapPin, ChevronLeft, ChevronRight,
+  BookOpen, GraduationCap, GripVertical, Info
+} from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
-import { ThemedCard } from '@/components/common/ThemedCard';
 import { Timetable } from '@/components/common/Timetable';
 import { DraggableSchedule } from '@/components/schedule/DraggableSchedule';
 import { mockStudent, mockCourses } from '@/lib/mockData';
@@ -25,17 +26,15 @@ const itemVariants = {
 export default function Schedule() {
   const { user } = useAuth();
   const [currentWeek, setCurrentWeek] = React.useState(0);
-
-  // Hooks for Lecturer role - MUST be called unconditionally
   const [isEditMode, setIsEditMode] = React.useState(false);
 
-  // Transform courses to schedule items - MUST be called unconditionally
+  // Transform courses to schedule items
   const scheduleItems: any[] = React.useMemo(() => {
     return mockCourses.flatMap(course =>
       (course.schedule || []).map((slot, idx) => ({
         id: `${course.id}-${idx}`,
-        courseCode: course.courseCode,
-        courseName: course.courseName,
+        courseCode: course.code,
+        courseName: course.name,
         day: ['mon', 'tue', 'wed', 'thu', 'fri'].indexOf(slot.day.toLowerCase()) + 1,
         startTime: slot.startTime,
         endTime: slot.endTime,
@@ -51,246 +50,249 @@ export default function Schedule() {
     setIsEditMode(false);
   };
 
+  const currentDate = new Date();
+  currentDate.setDate(currentDate.getDate() + (currentWeek * 7));
+
+  // Format week range
+  const startOfWeek = new Date(currentDate);
+  const day = startOfWeek.getDay();
+  const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+  startOfWeek.setDate(diff);
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 4);
+
   if (user?.role === 'student') {
+    // Correctly filter courses for the student
     const studentCourses = mockCourses.filter(c =>
-      mockStudent.courses?.some(sc => sc.courseId === c.id)
+      c.enrolledStudents.includes(mockStudent.id)
     );
 
     const totalCredits = studentCourses.reduce((sum, c) => sum + c.credits, 0);
-    const totalHours = studentCourses.length * 3; // Approximate
+    const totalHours = studentCourses.length * 3;
 
     return (
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="space-y-6"
+        className="space-y-8 pb-10"
       >
-        <ThemedPageHeader
-          title="ตารางเรียน"
-          subtitle="ภาคเรียนที่ 1/2567"
-          icon={<Calendar className="w-7 h-7" />}
-          actions={
-            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg p-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-white hover:bg-white/20"
-                onClick={() => setCurrentWeek(currentWeek - 1)}
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <span className="text-sm font-medium text-white px-3">สัปดาห์นี้</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-white hover:bg-white/20"
-                onClick={() => setCurrentWeek(currentWeek + 1)}
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-end gap-6">
+          <div>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center gap-2 text-slate-500 font-medium mb-2"
+            >
+              <Calendar className="w-4 h-4 text-purple-500" />
+              <span>ภาคเรียนที่ 1/2568</span>
+            </motion.div>
+            <motion.h1
+              className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              ตารางเรียน<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">สัปดาห์นี้</span>
+            </motion.h1>
+          </div>
+
+          <motion.div
+            className="flex items-center gap-2 bg-white rounded-2xl p-1.5 shadow-sm border border-slate-200"
+            whileHover={{ scale: 1.02 }}
+          >
+            <Button variant="ghost" size="icon" onClick={() => setCurrentWeek(currentWeek - 1)} className="rounded-xl hover:bg-slate-100">
+              <ChevronLeft className="w-5 h-5 text-slate-600" />
+            </Button>
+            <div className="px-4 text-sm font-bold text-slate-700">
+              {startOfWeek.getDate()} {startOfWeek.toLocaleDateString('th-TH', { month: 'short' })} - {endOfWeek.getDate()} {endOfWeek.toLocaleDateString('th-TH', { month: 'short' })}
             </div>
-          }
-        />
+            <Button variant="ghost" size="icon" onClick={() => setCurrentWeek(currentWeek + 1)} className="rounded-xl hover:bg-slate-100">
+              <ChevronRight className="w-5 h-5 text-slate-600" />
+            </Button>
+          </motion.div>
+        </div>
 
         {/* Stats Row */}
-        <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 p-6 text-white shadow-xl shadow-blue-200"
+            variants={itemVariants}
+            whileHover={{ y: -5 }}
+            className="p-5 rounded-3xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/20"
           >
-            <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
-            <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
-                  <BookOpen className="w-5 h-5" />
-                </div>
-                <span className="font-medium text-white/90">วิชาทั้งหมด</span>
-              </div>
-              <div className="text-4xl font-bold">{studentCourses.length} วิชา</div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 p-6 text-white shadow-xl shadow-purple-200"
-          >
-            <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
-            <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
-                  <GraduationCap className="w-5 h-5" />
-                </div>
-                <span className="font-medium text-white/90">หน่วยกิตรวม</span>
-              </div>
-              <div className="text-4xl font-bold">{totalCredits} หน่วยกิต</div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 p-6 text-white shadow-xl shadow-emerald-200"
-          >
-            <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
-            <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
-                  <Clock className="w-5 h-5" />
-                </div>
-                <span className="font-medium text-white/90">ชั่วโมงต่อสัปดาห์</span>
-              </div>
-              <div className="text-4xl font-bold">{totalHours} ชั่วโมง</div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 p-6 text-white shadow-xl shadow-orange-200"
-          >
-            <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
-            <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
-                  <Calendar className="w-5 h-5" />
-                </div>
-                <span className="font-medium text-white/90">วันเรียน</span>
-              </div>
-              <div className="text-4xl font-bold">จ-ศ</div>
-            </div>
-          </motion.div>
-        </motion.div>
-
-        {/* Timetable */}
-        <motion.div variants={itemVariants}>
-          <Card>
-            <CardContent className="pt-6">
-              <Timetable courses={studentCourses} />
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Today's Classes & Summary */}
-        <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
-                คลาสวันนี้
-              </CardTitle>
-              <CardDescription>
-                {new Date().toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {studentCourses.slice(0, 3).map((course, index) => (
-                  <motion.div
-                    key={course.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="flex items-start gap-4 p-4 bg-gradient-to-r from-blue-50 to-white rounded-xl border border-blue-100 hover:shadow-md transition-all"
-                  >
-                    <div className="flex flex-col items-center justify-center bg-gradient-to-br from-blue-500 to-cyan-500 text-white rounded-xl px-3 py-2 min-w-[70px] shadow-lg shadow-blue-200">
-                      <div className="text-sm font-bold">08:00</div>
-                      <div className="text-xs opacity-75">ถึง</div>
-                      <div className="text-sm font-bold">11:00</div>
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">{course.courseCode}</div>
-                      <div className="text-sm text-gray-600">{course.courseName}</div>
-                      <div className="flex items-center gap-2 text-xs text-gray-500 mt-2">
-                        <MapPin className="w-3 h-3" />
-                        <span>ห้อง {course.schedule?.[0]?.room || '301'}</span>
-                        <span className="text-gray-300">•</span>
-                        <span>{course.schedule?.[0]?.building || 'อาคาร DII'}</span>
-                      </div>
-                    </div>
-                    <Badge className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white">
-                      กำลังเรียน
-                    </Badge>
-                  </motion.div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                 <BookOpen className="w-5 h-5" />
-                สรุปตารางเรียน
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center p-3 bg-gradient-to-r from-gray-50 to-white rounded-xl border">
-                  <span className="text-gray-600">วิชาทั้งหมด</span>
-                  <span className="font-bold text-lg text-primary">{studentCourses.length} วิชา</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-gradient-to-r from-gray-50 to-white rounded-xl border">
-                  <span className="text-gray-600">หน่วยกิตรวม</span>
-                  <span className="font-bold text-lg text-purple-600">{totalCredits} หน่วยกิต</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-gradient-to-r from-gray-50 to-white rounded-xl border">
-                  <span className="text-gray-600">ชั่วโมงต่อสัปดาห์</span>
-                  <span className="font-bold text-lg text-emerald-600">{totalHours} ชั่วโมง</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-gradient-to-r from-gray-50 to-white rounded-xl border">
-                  <span className="text-gray-600">วันเรียน</span>
-                  <span className="font-bold text-lg text-orange-600">จันทร์ - ศุกร์</span>
-                </div>
               </div>
-            </CardContent>
-          </Card>
+              <span className="font-medium text-white/90 text-sm">วิชาทั้งหมด</span>
+            </div>
+            <div className="text-3xl font-bold">{studentCourses.length}</div>
+          </motion.div>
+
+          <motion.div
+            variants={itemVariants}
+            whileHover={{ y: -5 }}
+            className="p-5 rounded-3xl bg-gradient-to-br from-purple-500 to-pink-600 text-white shadow-lg shadow-purple-500/20"
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
+                <GraduationCap className="w-5 h-5" />
+              </div>
+              <span className="font-medium text-white/90 text-sm">หน่วยกิต</span>
+            </div>
+            <div className="text-3xl font-bold">{totalCredits}</div>
+          </motion.div>
+
+          <motion.div
+            variants={itemVariants}
+            whileHover={{ y: -5 }}
+            className="p-5 rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/20"
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
+                <Clock className="w-5 h-5" />
+              </div>
+              <span className="font-medium text-white/90 text-sm">ชม./สัปดาห์</span>
+            </div>
+            <div className="text-3xl font-bold">{totalHours}</div>
+          </motion.div>
+
+          <motion.div
+            variants={itemVariants}
+            whileHover={{ y: -5 }}
+            className="p-5 rounded-3xl bg-white border border-slate-200 shadow-sm text-slate-700"
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 rounded-xl bg-slate-100">
+                <Calendar className="w-5 h-5 text-slate-500" />
+              </div>
+              <span className="font-medium text-slate-500 text-sm">วันเรียน</span>
+            </div>
+            <div className="text-3xl font-bold">จ-ศ</div>
+          </motion.div>
+        </div>
+
+        {/* Timetable Card */}
+        <motion.div variants={itemVariants} className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">
+          <Timetable
+            courses={studentCourses}
+            semester={mockStudent.semester}
+            academicYear={mockStudent.academicYear}
+          />
+        </motion.div>
+
+        {/* Today's Classes */}
+        <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-4">
+            <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-purple-500" /> คลาสวันนี้
+            </h3>
+            <div className="space-y-3">
+              {studentCourses.slice(0, 3).map((course, index) => (
+                <motion.div
+                  key={course.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all cursor-pointer group"
+                >
+                  <div className="flex flex-col items-center justify-center bg-purple-50 text-purple-700 rounded-xl px-4 py-2 min-w-[80px] group-hover:bg-purple-500 group-hover:text-white transition-colors">
+                    <div className="text-sm font-bold">09:00</div>
+                    <div className="text-xs opacity-75">12:00</div>
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-bold text-slate-800 group-hover:text-purple-600 transition-colors">{course.name}</div>
+                    <div className="text-xs text-slate-500 flex items-center gap-2 mt-1">
+                      <MapPin className="w-3 h-3" />
+                      ห้อง 301 อาคาร DII
+                    </div>
+                  </div>
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-600 group-hover:bg-white group-hover:text-purple-600">
+                    กำลังเรียน
+                  </Badge>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 text-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/20 rounded-full blur-[80px]" />
+            <div className="relative z-10">
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <Info className="w-5 h-5 text-purple-400" /> ข้อควรระวัง
+              </h3>
+              <ul className="space-y-4 text-slate-300 text-sm">
+                <li className="flex gap-3">
+                  <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold shrink-0">1</div>
+                  กรุณาเข้าเรียนตรงเวลา หากสายเกิน 15 นาทีถือว่าขาดเรียน
+                </li>
+                <li className="flex gap-3">
+                  <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold shrink-0">2</div>
+                  การลากิจต้องยื่นใบลาล่วงหน้าอย่างน้อย 3 วัน
+                </li>
+                <li className="flex gap-3">
+                  <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold shrink-0">3</div>
+                  แต่งกายชุดนักศึกษาให้เรียบร้อยทุกครั้ง
+                </li>
+              </ul>
+              <Button className="w-full mt-8 bg-purple-600 hover:bg-purple-500 text-white border-0">
+                ดูระเบียบการเข้าเรียน
+              </Button>
+            </div>
+          </div>
         </motion.div>
       </motion.div>
     );
   }
 
-  // For other roles (Lecturer)
+  // Lecturer View
   return (
     <motion.div
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="space-y-6"
+      className="space-y-8"
     >
-      <ThemedPageHeader
-        title="ตารางสอน"
-        subtitle="ภาคเรียนที่ 1/2567"
-        icon={<Calendar className="w-7 h-7" />}
-        actions={
-          <Button
-            variant={isEditMode ? "secondary" : "default"}
-            onClick={() => setIsEditMode(!isEditMode)}
-            className="bg-white/20 hover:bg-white/30 text-white border-0"
-          >
-            {isEditMode ? 'ปิดโหมดแก้ไข' : 'ขอแก้ไขตาราง'}
-          </Button>
-        }
-      />
+      <div className="flex items-end justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">ตารางสอน</h1>
+          <p className="text-slate-500 mt-1">จัดการเวลาและตารางสอนของคุณ</p>
+        </div>
+        <Button
+          variant={isEditMode ? "secondary" : "default"}
+          onClick={() => setIsEditMode(!isEditMode)}
+          className="rounded-xl px-6"
+        >
+          {isEditMode ? 'บันทึกการแก้ไข' : 'ขอแก้ไขตาราง'}
+        </Button>
+      </div>
 
-      <motion.div variants={itemVariants}>
-        <Card>
-          {isEditMode && (
-            <div className="p-4 bg-orange-50 border-b border-orange-100 text-orange-700 text-sm flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              โหมดขอแก้ไขตารางสอน: ลากวิชาไปยังเวลาที่ต้องการ เมื่อยืนยันระบบจะส่งคำขอไปยังเจ้าหน้าที่
-            </div>
-          )}
-          <CardContent className="pt-6">
-            {isEditMode ? (
-              <DraggableSchedule
-                initialSchedule={scheduleItems}
-                editable={true}
-                onRequestMove={handleRequestMove}
-              />
-            ) : (
-              <Timetable courses={mockCourses.slice(0, 3)} />
-            )}
-          </CardContent>
-        </Card>
+      {isEditMode && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-orange-50 border border-orange-200 text-orange-800 p-4 rounded-xl flex items-center gap-3"
+        >
+          <Clock className="w-5 h-5" />
+          <span className="font-medium">Complete editing mode enabled. Drag and drop slots to reschedule.</span>
+        </motion.div>
+      )}
+
+      <motion.div variants={itemVariants} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+        {isEditMode ? (
+          <DraggableSchedule
+            initialSchedule={scheduleItems}
+            editable={true}
+            onRequestMove={handleRequestMove}
+          />
+        ) : (
+          <Timetable
+            courses={mockCourses.slice(0, 3)}
+            semester={1}
+            academicYear="2568"
+          />
+        )}
       </motion.div>
     </motion.div>
   );

@@ -1,420 +1,439 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { GraduationCap, Users, Building2, ShieldCheck, ArrowRight, ChevronRight, BookOpen, Trophy, Briefcase, BarChart3 } from 'lucide-react';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { ArrowRight, BookOpen, Users, Building2, Briefcase, GraduationCap, Trophy, Globe, CheckCircle2, Star, ChevronRight, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { RoleCard } from '@/components/common/RoleCard';
-import { UserRole } from '@/types';
+import { Badge } from '@/components/ui/badge';
 
-const features = [
-  {
-    icon: BookOpen,
-    title: 'จัดการหลักสูตร',
-    description: 'ระบบบริหารรายวิชา ตารางเรียน และการลงทะเบียน',
-  },
-  {
-    icon: Trophy,
-    title: 'กิจกรรมและ Gamification',
-    description: 'สะสมแต้ม เก็บชั่วโมง รับ Badge จากกิจกรรมต่างๆ',
-  },
-  {
-    icon: Briefcase,
-    title: 'ฝึกงานและ Portfolio',
-    description: 'สร้าง CV อัตโนมัติ จับคู่กับบริษัท และสมัครฝึกงาน',
-  },
-  {
-    icon: BarChart3,
-    title: 'Dashboard & รายงาน',
-    description: 'วิเคราะห์ข้อมูลและติดตามความก้าวหน้า',
-  },
-];
-
-const roles = [
-  {
-    role: 'student' as UserRole,
-    title: 'นักศึกษา',
-    description: 'เข้าถึงตารางเรียน เกรด กิจกรรม และ Portfolio',
-    icon: GraduationCap,
-  },
-  {
-    role: 'teacher' as UserRole,
-    title: 'อาจารย์',
-    description: 'จัดการรายวิชา ให้เกรด และดูแลนักศึกษาในที่ปรึกษา',
-    icon: Users,
-  },
-  {
-    role: 'staff' as UserRole,
-    title: 'เจ้าหน้าที่',
-    description: 'บริหารระบบ จัดการผู้ใช้ และดูรายงานภาพรวม',
-    icon: ShieldCheck,
-  },
-  {
-    role: 'company' as UserRole,
-    title: 'บริษัท',
-    description: 'ดูโปรไฟล์นักศึกษา ลงประกาศรับสมัครงาน',
-    icon: Building2,
-  },
-];
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-};
+const FadeIn = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.5, delay }}
+    className={className}
+  >
+    {children}
+  </motion.div>
+);
 
 export default function LandingPage() {
-  const navigate = useNavigate();
-  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
-
-  const handleGetStarted = () => {
-    navigate('/login', { state: { role: selectedRole } });
-  };
+  const { scrollYProgress } = useScroll();
+  const y = useTransform(scrollYProgress, [0, 1], [0, -50]);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-hero">
-              <span className="text-lg font-bold text-accent">DII</span>
+    <div className="min-h-screen bg-white overflow-hidden font-sans text-slate-900">
+      {/* Navbar */}
+      <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+        <div className="container mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-blue-200">
+              DII
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-foreground">DII CAMT</h1>
-              <p className="text-xs text-muted-foreground hidden sm:block">มหาวิทยาลัยเชียงใหม่</p>
+              <div className="font-bold text-xl tracking-tight text-slate-900">DII CAMT</div>
+              <div className="text-xs text-slate-500 font-medium tracking-wide">Digital Intelligence & Innovation</div>
             </div>
-          </Link>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" asChild>
-              <Link to="/login">เข้าสู่ระบบ</Link>
-            </Button>
-            <Button variant="hero" asChild className="hidden sm:flex">
-              <Link to="/login">
-                เริ่มต้นใช้งาน
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </Link>
-            </Button>
+          </div>
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
+            <a href="#features" className="hover:text-blue-600 transition-colors">คุณสมบัติระบบ</a>
+            <a href="#stats" className="hover:text-blue-600 transition-colors">สถิติ</a>
+            <a href="#partners" className="hover:text-blue-600 transition-colors">พันธมิตร</a>
+            <a href="#contact" className="hover:text-blue-600 transition-colors">ติดต่อเรา</a>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link to="/login">
+              <Button variant="ghost" className="font-medium hover:text-blue-600 hover:bg-blue-50">เข้าสู่ระบบ</Button>
+            </Link>
+            <Link to="/register">
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 rounded-full px-6">
+                สมัครสมาชิก
+              </Button>
+            </Link>
           </div>
         </div>
-      </header>
+      </nav>
 
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 overflow-hidden">
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0 bg-gradient-hero opacity-5" />
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-accent/5 to-transparent" />
-
-        {/* Floating Orbs */}
-        <motion.div
-          className="absolute top-20 left-10 w-72 h-72 bg-accent/10 rounded-full blur-3xl"
-          animate={{
-            x: [0, 50, 0],
-            y: [0, 30, 0],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        <motion.div
-          className="absolute bottom-20 right-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl"
-          animate={{
-            x: [0, -30, 0],
-            y: [0, -50, 0],
-            scale: [1, 1.2, 1],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-
-        {/* Floating Particles */}
-        {[...Array(12)].map((_, i) => (
+      {/* Hero Section - Premium Dark Mode */}
+      <section className="relative pt-32 pb-40 overflow-hidden bg-slate-950">
+        {/* Abstract Background Effects */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
           <motion.div
-            key={i}
-            className="absolute w-1.5 h-1.5 bg-accent/30 rounded-full"
-            initial={{
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * 600
-            }}
             animate={{
-              y: [null, -100, null],
-              opacity: [0, 1, 0],
+              scale: [1, 1.1, 1],
+              opacity: [0.3, 0.5, 0.3],
             }}
-            transition={{
-              duration: 3 + Math.random() * 2,
-              repeat: Infinity,
-              delay: Math.random() * 2,
-            }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -top-1/2 left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] bg-blue-600/20 rounded-full blur-[120px]"
           />
-        ))}
-
-        <div className="container mx-auto px-4 relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center max-w-4xl mx-auto"
-          >
-            <motion.div
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent mb-6 border border-accent/20 shadow-lg"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-              whileHover={{ scale: 1.05 }}
-            >
-              <motion.div
-                className="w-2 h-2 bg-accent rounded-full"
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
-              <span className="text-sm font-medium">ระบบบริหารข้อมูลสาขา Digital Industry Integration</span>
-            </motion.div>
-            <motion.h1
-              className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              ศูนย์กลางการเรียนรู้และพัฒนา
-              <motion.span
-                className="text-accent block mt-2"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 }}
-              >
-                สำหรับทุกคน
-              </motion.span>
-            </motion.h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              เชื่อมต่อนักศึกษา อาจารย์ เจ้าหน้าที่ และภาคอุตสาหกรรม
-              บนแพลตฟอร์มเดียวที่ครบครัน ใช้งานง่าย และปลอดภัย
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button variant="hero" size="xl" onClick={() => navigate('/login')}>
-                เริ่มต้นใช้งาน
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <Button variant="outline" size="xl">
-                เรียนรู้เพิ่มเติม
-              </Button>
-            </div>
-          </motion.div>
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.2, 0.4, 0.2],
+            }}
+            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+            className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-500/10 rounded-full blur-[120px]"
+          />
+        </div>
+
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="max-w-5xl mx-auto text-center">
+            <FadeIn>
+              <div className="inline-flex items-center gap-2 mb-8 px-4 py-2 bg-slate-900/80 backdrop-blur-md rounded-full border border-slate-700/50 animate-fade-in hover:border-blue-500/50 transition-colors cursor-default group shadow-lg shadow-blue-900/10">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </span>
+                <span className="text-sm font-medium text-slate-300 group-hover:text-blue-200 transition-colors font-sans tracking-wide">DII Ecosystem 2026</span>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.1} className="relative">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[200px] bg-blue-500/20 blur-[100px] rounded-full -z-10 pointer-events-none"></div>
+              <h1 className="text-5xl lg:text-8xl font-bold tracking-tight text-white mb-8 leading-[1.1] text-balance font-sans drop-shadow-lg">
+                ระบบบริหารการศึกษา<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 font-sans animate-gradient-x bg-[length:200%_auto]">
+                  ที่เหนือกว่าทุกจินตนาการ
+                </span>
+              </h1>
+            </FadeIn>
+
+            <FadeIn delay={0.2}>
+              <p className="text-lg lg:text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed text-balance font-light font-sans">
+                เชื่อมต่อทุกความเป็นไปได้ในรั้วมหาวิทยาลัย ด้วยเทคโนโลยีที่ทันสมัยที่สุด ออกแบบเพื่อประสบการณ์การใช้งานระดับ world-class
+              </p>
+            </FadeIn>
+
+            <FadeIn delay={0.3}>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link to="/register">
+                  <Button size="lg" className="h-16 px-10 bg-blue-600 hover:bg-blue-500 text-white rounded-full text-lg font-semibold shadow-lg shadow-blue-900/20 hover:shadow-blue-600/30 hover:-translate-y-1 transition-all duration-300 font-sans">
+                    เริ่มต้นใช้งานฟรี <ArrowRight className="ml-2 w-5 h-5" />
+                  </Button>
+                </Link>
+                <Link to="/features">
+                  <Button size="lg" variant="outline" className="h-16 px-10 bg-transparent border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800 rounded-full text-lg font-medium transition-all duration-300 font-sans">
+                    <Play className="mr-2 w-5 h-5" /> ดูตัวอย่างระบบ
+                  </Button>
+                </Link>
+              </div>
+            </FadeIn>
+
+            {/* Ultra-Premium Glass UI Mockup */}
+            <FadeIn delay={0.5} className="mt-32 relative z-10 max-w-6xl mx-auto">
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                <div className="relative rounded-2xl border border-slate-800 bg-slate-950/80 backdrop-blur-xl shadow-2xl overflow-hidden ring-1 ring-white/10">
+
+                  {/* Window Controls */}
+                  <div className="h-12 border-b border-slate-800 flex items-center px-6 gap-2 bg-slate-900/50">
+                    <div className="w-3 h-3 rounded-full bg-slate-700" />
+                    <div className="w-3 h-3 rounded-full bg-slate-700" />
+                    <div className="w-3 h-3 rounded-full bg-slate-700" />
+                    <div className="ml-4 h-6 px-3 rounded-full bg-slate-800 text-xs text-slate-500 flex items-center font-mono">dii-platform.cmu.ac.th</div>
+                  </div>
+
+                  {/* Dashboard Content */}
+                  <div className="p-8 grid grid-cols-12 gap-8">
+                    {/* Sidebar Mock */}
+                    <div className="col-span-12 md:col-span-3 space-y-4">
+                      {[1, 2, 3, 4, 5].map(i => (
+                        <div key={i} className="h-10 w-full rounded-lg bg-slate-900/50 border border-slate-800/50 hover:bg-white/5 transition-colors flex items-center px-3 gap-3">
+                          <div className={`w-5 h-5 rounded ${i === 1 ? 'bg-blue-500/20' : 'bg-slate-800'}`}></div>
+                          <div className="h-2 w-20 bg-slate-800 rounded-full"></div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Main Content Mock */}
+                    <div className="col-span-12 md:col-span-9 grid grid-cols-3 gap-6">
+                      {/* Top Cards */}
+                      {[1, 2, 3].map(i => (
+                        <div key={i} className="h-32 rounded-xl bg-gradient-to-br from-slate-900 to-slate-900/50 border border-slate-800 p-5 relative overflow-hidden group/card hover:border-slate-700 transition-colors">
+                          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover/card:opacity-20 transition-opacity">
+                            <div className="w-16 h-16 rounded-full bg-blue-500 blur-2xl"></div>
+                          </div>
+                          <div className="h-8 w-8 rounded-lg bg-slate-800 mb-4"></div>
+                          <div className="h-3 w-16 bg-slate-800 rounded-full mb-2"></div>
+                          <div className="h-6 w-24 bg-slate-700/50 rounded-full"></div>
+                        </div>
+                      ))}
+
+                      {/* Large Chart Area */}
+                      <div className="col-span-3 h-64 rounded-xl bg-slate-900/50 border border-slate-800 p-6 flex items-end justify-between gap-4 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:16px_16px]"></div>
+                        {[40, 65, 45, 80, 55, 90, 70, 85, 60, 95].map((h, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ height: 0 }}
+                            whileInView={{ height: `${h}%` }}
+                            transition={{ duration: 1, delay: i * 0.1, ease: "backOut" }}
+                            className="w-full bg-gradient-to-t from-blue-600/20 to-blue-500 rounded-t-sm relative group/bar"
+                          >
+                            <div className="absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover/bar:opacity-100 transition-opacity bg-slate-800 text-white text-xs py-1 px-2 rounded">
+                              {h}%
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </FadeIn>
+          </div>
+        </div>
+
+        {/* Bottom Fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+      </section>
+
+      {/* Features Grid - Bento Style */}
+      <section id="features" className="py-32 bg-slate-50 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)]"></div>
+
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="text-center mb-24 max-w-3xl mx-auto">
+            <FadeIn>
+              <Badge variant="outline" className="mb-6 py-2 px-6 border-blue-200 bg-blue-50 text-blue-700 text-sm font-medium rounded-full">
+                Professional Features
+              </Badge>
+              <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-slate-900 tracking-tight font-sans">
+                ฟีเจอร์ที่ออกแบบมาเพื่อ<br />
+                <span className="text-blue-600">ความเป็นเลิศทางวิชาการ</span>
+              </h2>
+              <p className="text-slate-600 text-xl font-light leading-relaxed font-sans">
+                ครบครันด้วยเครื่องมือที่ทันสมัย ตอบโจทย์ทุกบทบาทในสถาบันการศึกษา
+              </p>
+            </FadeIn>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Student Card - Large */}
+            <FadeIn delay={0.1} className="md:col-span-2">
+              <div className="group relative overflow-hidden rounded-[2rem] bg-white border border-slate-200 p-12 h-full shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 flex flex-col md:flex-row items-center gap-10">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="flex-1 space-y-6 relative z-10">
+                  <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 mb-4 group-hover:scale-110 transition-transform duration-500">
+                    <GraduationCap className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-900 font-sans">สำหรับนักศึกษา</h3>
+                  <p className="text-slate-500 text-lg leading-relaxed font-sans">
+                    จัดการชีวิตการเรียนได้ง่ายเพียงปลายนิ้ว ตั้งแต่ลงทะเบียน ตรวจสอบเกรด จนถึงการสร้างพอร์ตโฟลิโอเพื่อเข้าสู่ตลาดงาน
+                  </p>
+                  <ul className="grid grid-cols-2 gap-3 pt-4">
+                    {['Dashboard ส่วนตัว', 'แจ้งเตือนเรียลไทม์', 'Transcript ออนไลน์', 'ระบบแนะนำอาชีพ'].map((item, i) => (
+                      <li key={i} className="flex items-center text-slate-600 text-sm font-medium">
+                        <CheckCircle2 className="w-4 h-4 mr-2 text-blue-500" /> {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="w-full md:w-1/2 relative z-10">
+                  {/* Abstract Visual */}
+                  <div className="relative aspect-square bg-slate-100 rounded-2xl overflow-hidden border border-slate-200/50 group-hover:scale-[1.02] transition-transform duration-500">
+                    <div className="absolute inset-2 bg-white rounded-xl shadow-sm p-4 space-y-3">
+                      <div className="h-2 w-1/3 bg-slate-100 rounded-full" />
+                      <div className="h-8 w-full bg-blue-50/50 rounded-lg" />
+                      <div className="h-8 w-full bg-slate-50 rounded-lg" />
+                      <div className="h-32 w-full bg-slate-50 rounded-lg mt-4 border border-dashed border-slate-200" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </FadeIn>
+
+            {/* Teacher Card */}
+            <FadeIn delay={0.2} className="md:col-span-1">
+              <div className="group relative overflow-hidden rounded-[2rem] bg-slate-900 text-white p-10 h-full shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                <div className="relative z-10 h-full flex flex-col">
+                  <div className="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-8 border border-white/10">
+                    <BookOpen className="w-7 h-7 text-emerald-400" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4 font-sans">สำหรับอาจารย์</h3>
+                  <p className="text-slate-400 mb-8 leading-relaxed font-sans flex-grow">
+                    ลดภาระงานเอกสาร โฟกัสกับการสอนได้เต็มที่ ด้วยเครื่องมือตัดเกรดและเช็คชื่ออัตโนมัติ
+                  </p>
+                  <div className="space-y-4">
+                    <div className="p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-pointer flex items-center justify-between">
+                      <span className="text-sm font-medium">จัดการรายวิชา</span>
+                      <ChevronRight className="w-4 h-4 text-slate-500" />
+                    </div>
+                    <div className="p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-pointer flex items-center justify-between">
+                      <span className="text-sm font-medium">ตัดเกรดออนไลน์</span>
+                      <ChevronRight className="w-4 h-4 text-slate-500" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </FadeIn>
+
+            {/* Staff Card */}
+            <FadeIn delay={0.3} className="md:col-span-1">
+              <div className="group relative overflow-hidden rounded-[2rem] bg-white border border-slate-200 p-10 h-full shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-500">
+                <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center mb-8 text-purple-600 group-hover:rotate-12 transition-transform duration-500">
+                  <Building2 className="w-7 h-7" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-4 font-sans">สำหรับเจ้าหน้าที่</h3>
+                <p className="text-slate-500 text-sm leading-relaxed mb-6 font-sans">
+                  บริหารจัดการข้อมูลบุคลากรและงบประมาณได้อย่างแม่นยำ รวดเร็ว และตรวจสอบได้
+                </p>
+                <div className="w-full h-1 bg-slate-100 rounded-full mb-6 relative overflow-hidden">
+                  <div className="absolute inset-y-0 left-0 w-2/3 bg-purple-500 rounded-full" />
+                </div>
+                <div className="flex -space-x-3">
+                  {[1, 2, 3, 4].map(i => (
+                    <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-slate-200" />
+                  ))}
+                  <div className="w-10 h-10 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500">+12</div>
+                </div>
+              </div>
+            </FadeIn>
+
+            {/* Company Card - Large */}
+            <FadeIn delay={0.4} className="md:col-span-2">
+              <div className="group relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-slate-900 to-slate-800 text-white p-12 h-full shadow-xl transition-all duration-500">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
+                <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
+                  <div className="flex-1">
+                    <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-orange-500/30">
+                      <Briefcase className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold mb-4 font-sans">สำหรับภาคอุตสาหกรรม</h3>
+                    <p className="text-slate-300 text-lg leading-relaxed mb-8 font-sans">
+                      เข้าถึงฐานข้อมูล Talent Pool คุณภาพ ค้นหานักศึกษาฝึกงานและพนักงานที่ตรงโจทย์ธุรกิจของคุณที่สุด
+                    </p>
+                    <Button variant="outline" className="border-white/20 text-white hover:bg-white hover:text-slate-900 rounded-full px-8">
+                      ดูรายละเอียดความร่วมมือ
+                    </Button>
+                  </div>
+                  <div className="w-full md:w-1/3">
+                    <div className="grid grid-cols-2 gap-4">
+                      {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="bg-white/5 backdrop-blur-sm border border-white/10 p-4 rounded-xl text-center hover:bg-white/10 transition-colors">
+                          <div className="text-2xl font-bold text-orange-400 mb-1">{95 + i}%</div>
+                          <div className="text-xs text-slate-400">Satisfaction</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </FadeIn>
+          </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 bg-secondary/30">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              ฟีเจอร์หลักของระบบ
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              ออกแบบมาเพื่อตอบโจทย์ทุกความต้องการของสาขา DII
-            </p>
-          </motion.div>
-
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-          >
-            {features.map((feature, index) => (
-              <motion.div
-                key={index}
-                variants={itemVariants}
-                whileHover={{
-                  y: -8,
-                  scale: 1.02,
-                  rotateX: 5,
-                }}
-                className="bg-card rounded-2xl p-6 shadow-card hover:shadow-card-hover transition-all duration-300 border border-border relative overflow-hidden group"
-                style={{ transformStyle: 'preserve-3d' }}
-              >
-                {/* Gradient Overlay on Hover */}
-                <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                <motion.div
-                  className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent/20 to-accent/10 flex items-center justify-center mb-4 relative z-10"
-                  whileHover={{ rotate: 360, scale: 1.1 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <feature.icon className="h-6 w-6 text-accent" />
-                </motion.div>
-                <h3 className="text-lg font-semibold text-foreground mb-2 relative z-10">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground relative z-10">{feature.description}</p>
-
-                {/* Shine Effect */}
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"
-                  initial={{ x: '-100%' }}
-                  whileHover={{ x: '100%' }}
-                  transition={{ duration: 0.6 }}
-                />
-              </motion.div>
+      {/* Stats Section - Clean & Minimal */}
+      <section id="stats" className="py-24 bg-white relative">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 divide-x divide-slate-100">
+            {[
+              { label: 'Active Users', value: '5K+', icon: Users, color: 'text-blue-600' },
+              { label: 'Partners', value: '200+', icon: Globe, color: 'text-indigo-600' },
+              { label: 'Employment Rate', value: '98%', icon: Trophy, color: 'text-purple-600' },
+              { label: 'Satisfaction', value: '4.9', icon: Star, color: 'text-orange-500' },
+            ].map((stat, i) => (
+              <FadeIn key={i} delay={i * 0.1} className="text-center px-4 group cursor-default">
+                <div className={`text-5xl lg:text-6xl font-bold tracking-tighter mb-2 ${stat.color} drop-shadow-sm font-sans`}>
+                  {stat.value}
+                </div>
+                <div className="text-slate-500 font-medium tracking-wide uppercase text-sm font-sans group-hover:text-slate-900 transition-colors">
+                  {stat.label}
+                </div>
+              </FadeIn>
             ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Role Selection Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              เลือกบทบาทของคุณ
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              ระบบรองรับผู้ใช้งาน 4 บทบาท พร้อมฟีเจอร์และสิทธิ์ที่แตกต่างกัน
-            </p>
-          </motion.div>
-
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto mb-8"
-          >
-            {roles.map((role) => (
-              <motion.div key={role.role} variants={itemVariants}>
-                <RoleCard
-                  role={role.role}
-                  title={role.title}
-                  description={role.description}
-                  icon={role.icon}
-                  onClick={() => setSelectedRole(role.role)}
-                  isSelected={selectedRole === role.role}
-                />
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {selectedRole && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center"
-            >
-              <Button variant="hero" size="lg" onClick={handleGetStarted}>
-                เข้าสู่ระบบในฐานะ{roles.find(r => r.role === selectedRole)?.title}
-                <ChevronRight className="ml-1 h-5 w-5" />
-              </Button>
-            </motion.div>
-          )}
+          </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="relative py-20 bg-gradient-hero overflow-hidden">
-        {/* Animated Background */}
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-accent/20 via-primary/20 to-accent/20"
-          animate={{
-            backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: 'linear',
-          }}
-        />
+      <section className="py-24">
+        <div className="container mx-auto px-6">
+          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[3rem] p-12 lg:p-24 text-center relative overflow-hidden shadow-2xl shadow-blue-200">
+            {/* Animated background elements */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 animate-pulse" />
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-black/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
-        {/* Floating Elements */}
-        {[...Array(6)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-32 h-32 border border-white/10 rounded-full"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.1, 0.3, 0.1],
-            }}
-            transition={{
-              duration: 4 + i,
-              repeat: Infinity,
-              delay: i * 0.5,
-            }}
-          />
-        ))}
-
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <motion.h2
-              className="text-3xl md:text-4xl font-bold text-primary-foreground mb-4"
-              whileInView={{ scale: [1, 1.02, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              พร้อมเริ่มต้นใช้งานแล้วหรือยัง?
-            </motion.h2>
-            <p className="text-lg text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
-              เข้าสู่ระบบเพื่อเริ่มใช้งานฟีเจอร์ทั้งหมดของระบบบริหารข้อมูลสาขา DII
-            </p>
-            <Button
-              variant="hero"
-              size="xl"
-              onClick={() => navigate('/login')}
-              className="bg-accent text-accent-foreground hover:bg-accent/90"
-            >
-              เริ่มต้นใช้งานเลย
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </motion.div>
+            <div className="relative z-10 max-w-3xl mx-auto space-y-8">
+              <h2 className="text-3xl lg:text-5xl font-bold text-white tracking-tight font-sans">พร้อมก้าวสู่โลกการศึกษายุคใหม่?</h2>
+              <p className="text-blue-100 text-lg lg:text-xl font-light font-sans">
+                เข้าร่วมกับเราวันนี้เพื่อสัมผัสประสบการณ์การบริหารจัดการการศึกษาที่ทันสมัย ครบวงจร และตอบโจทย์ทุกความต้องการ
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+                <Link to="/register">
+                  <Button size="lg" className="h-14 px-8 bg-white text-blue-600 hover:bg-blue-50 border-0 rounded-full text-lg font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 font-sans">
+                    สมัครสมาชิกเลย
+                  </Button>
+                </Link>
+                <Link to="/contact">
+                  <Button size="lg" variant="outline" className="h-14 px-8 bg-white/10 border-2 border-white/30 text-white hover:bg-white hover:text-blue-600 rounded-full text-lg font-semibold backdrop-blur-sm transition-all font-sans">
+                    ติดต่อสอบถาม
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 border-t border-border">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-hero">
-                <span className="text-sm font-bold text-accent">DII</span>
+      <footer className="bg-slate-50 pt-20 pb-10 border-t border-slate-200">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">D</div>
+                <span className="font-bold text-xl text-slate-900">DII CAMT</span>
               </div>
-              <div>
-                <p className="text-sm font-medium text-foreground">DII CAMT</p>
-                <p className="text-xs text-muted-foreground">College of Arts, Media and Technology</p>
-              </div>
+              <p className="text-slate-500 leading-relaxed">
+                หลักสูตรบูรณาการอุตสาหกรรมดิจิทัล<br />
+                วิทยาลัยศิลปะ สื่อ และเทคโนโลยี<br />
+                มหาวิทยาลัยเชียงใหม่
+              </p>
             </div>
-            <p className="text-sm text-muted-foreground">
-              © 2024 สาขา Digital Industry Integration, มหาวิทยาลัยเชียงใหม่
-            </p>
+
+            <div>
+              <h4 className="font-bold text-slate-900 mb-6">เมนูหลัก</h4>
+              <ul className="space-y-3 text-slate-500">
+                <li><a href="#" className="hover:text-blue-600 transition-colors">หน้าหลัก</a></li>
+                <li><a href="#" className="hover:text-blue-600 transition-colors">เกี่ยวกับเรา</a></li>
+                <li><a href="#" className="hover:text-blue-600 transition-colors">หลักสูตร</a></li>
+                <li><a href="#" className="hover:text-blue-600 transition-colors">ข่าวสาร</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-bold text-slate-900 mb-6">สำหรับผู้ใช้งาน</h4>
+              <ul className="space-y-3 text-slate-500">
+                <li><Link to="/login" className="hover:text-blue-600 transition-colors">เข้าสู่ระบบ</Link></li>
+                <li><Link to="/register" className="hover:text-blue-600 transition-colors">สมัครสมาชิก</Link></li>
+                <li><a href="#" className="hover:text-blue-600 transition-colors">คู่มือการใช้งาน</a></li>
+                <li><a href="#" className="hover:text-blue-600 transition-colors">แจ้งปัญหา</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-bold text-slate-900 mb-6">ติดต่อเรา</h4>
+              <ul className="space-y-3 text-slate-500">
+                <li className="flex items-center gap-2"><Globe className="w-4 h-4" /> www.camt.cmu.ac.th</li>
+                <li className="flex items-center gap-2"><Trophy className="w-4 h-4" /> 053-942110</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-slate-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-400">
+            <div>© 2024 DII CAMT. All rights reserved.</div>
+            <div className="flex gap-6">
+              <a href="#" className="hover:text-slate-600">Privacy Policy</a>
+              <a href="#" className="hover:text-slate-600">Terms of Service</a>
+            </div>
           </div>
         </div>
       </footer>
     </div>
   );
 }
+

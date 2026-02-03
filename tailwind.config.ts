@@ -14,6 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
+        titan: ["Titan One", "cursive"],
+        sans: ["IBM Plex Sans Thai", "sans-serif"],
         thai: ["IBM Plex Sans Thai", "sans-serif"],
       },
       colors: {

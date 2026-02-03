@@ -140,12 +140,57 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   const getRoleGradient = (role: UserRole) => {
     switch (role) {
-      case 'student': return 'from-role-student to-blue-600';
-      case 'lecturer': return 'from-role-teacher to-green-600';
-      case 'staff': return 'from-role-staff to-purple-600';
-      case 'company': return 'from-role-company to-yellow-600';
+      case 'student': return 'from-blue-500 to-indigo-600';
+      case 'lecturer': return 'from-emerald-500 to-teal-600';
+      case 'staff': return 'from-purple-500 to-fuchsia-600';
+      case 'company': return 'from-orange-500 to-amber-600';
+      case 'admin': return 'from-red-500 to-rose-600';
+      default: return 'from-blue-500 to-indigo-600';
     }
   };
+
+  const getRoleActiveScheme = (role: UserRole) => {
+    switch (role) {
+      case 'student': return {
+        bg: 'bg-blue-600',
+        shadow: 'shadow-blue-500/25',
+        gradient: 'from-blue-600 to-indigo-600',
+        textHover: 'group-hover:text-blue-400'
+      };
+      case 'lecturer': return {
+        bg: 'bg-emerald-600',
+        shadow: 'shadow-emerald-500/25',
+        gradient: 'from-emerald-600 to-teal-600',
+        textHover: 'group-hover:text-emerald-400'
+      };
+      case 'staff': return {
+        bg: 'bg-purple-600',
+        shadow: 'shadow-purple-500/25',
+        gradient: 'from-purple-600 to-fuchsia-600',
+        textHover: 'group-hover:text-purple-400'
+      };
+      case 'company': return {
+        bg: 'bg-orange-600',
+        shadow: 'shadow-orange-500/25',
+        gradient: 'from-orange-600 to-amber-600',
+        textHover: 'group-hover:text-orange-400'
+      };
+      case 'admin': return {
+        bg: 'bg-red-600',
+        shadow: 'shadow-red-500/25',
+        gradient: 'from-red-600 to-rose-600',
+        textHover: 'group-hover:text-red-400'
+      };
+      default: return {
+        bg: 'bg-blue-600',
+        shadow: 'shadow-blue-500/25',
+        gradient: 'from-blue-600 to-indigo-600',
+        textHover: 'group-hover:text-blue-400'
+      };
+    }
+  };
+
+  const activeScheme = getRoleActiveScheme(user.role);
 
   return (
     <>
@@ -156,38 +201,44 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-foreground/50 md:hidden"
+            className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm md:hidden"
             onClick={onClose}
           />
         )}
       </AnimatePresence>
 
-      {/* Sidebar */}
+      {/* Sidebar - Premium Dark Glass */}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-50 h-full w-64 bg-sidebar text-sidebar-foreground shadow-xl transition-transform duration-300 md:sticky md:top-0 md:h-screen md:translate-x-0",
+          "fixed top-0 left-0 z-50 h-full w-72 bg-slate-900 text-white shadow-2xl transition-transform duration-300 md:sticky md:top-0 md:h-screen md:translate-x-0 border-r border-white/5 flex flex-col",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
+        {/* Background Effects */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2 opacity-20" />
+          <div className="absolute bottom-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-[100px] translate-x-1/2 translate-y-1/2 opacity-20" />
+        </div>
+
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
-          <div className="flex items-center gap-3">
-            <div className={cn("w-10 h-10 rounded-xl bg-gradient-to-br flex items-center justify-center", getRoleGradient(user.role))}>
-              <span className="text-lg font-bold text-white">DII</span>
+        <div className="relative z-10 flex items-center justify-between p-6 border-b border-white/5 shrink-0">
+          <Link to="/dashboard" className="flex items-center gap-4 group">
+            <div className={cn("w-12 h-12 rounded-2xl bg-gradient-to-br flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300", getRoleGradient(user.role))}>
+              <span className="text-xl font-bold text-white">D</span>
             </div>
             <div>
-              <h2 className="font-semibold text-sidebar-foreground">DII CAMT</h2>
-              <p className="text-xs text-sidebar-foreground/60">ระบบบริหารข้อมูล</p>
+              <h2 className={`font-bold text-lg tracking-tight transition-colors ${activeScheme.textHover}`}>DII CAMT</h2>
+              <p className="text-xs text-slate-400 font-medium">System v2.0</p>
             </div>
-          </div>
-          <Button variant="ghost" size="icon" className="md:hidden text-sidebar-foreground" onClick={onClose}>
+          </Link>
+          <Button variant="ghost" size="icon" className="md:hidden text-slate-400 hover:text-white" onClick={onClose}>
             <X className="h-5 w-5" />
           </Button>
         </div>
 
         {/* Navigation */}
-        <ScrollArea className="h-[calc(100vh-80px)] py-4">
-          <nav className="px-3 space-y-1">
+        <ScrollArea className="relative z-10 flex-1 py-6 px-4">
+          <nav className="space-y-1.5 pb-20">
             {navItems.map((item) => {
               const isActive = location.pathname === item.href;
               return (
@@ -196,20 +247,32 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                   to={item.href}
                   onClick={onClose}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                    "relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group overflow-hidden",
                     isActive
-                      ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-md"
-                      : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                      ? `${activeScheme.bg} text-white shadow-lg ${activeScheme.shadow}`
+                      : "text-slate-400 hover:text-white hover:bg-white/5"
                   )}
                 >
-                  <item.icon className="h-5 w-5" />
-                  <span className="flex-1 font-medium">{item.label}</span>
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeNav"
+                      className={`absolute inset-0 bg-gradient-to-r ${activeScheme.gradient} opacity-100`}
+                      initial={false}
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                  )}
+
+                  <span className="relative z-10 flex items-center gap-3">
+                    <item.icon className={cn("h-5 w-5 transition-transform duration-300", isActive ? "scale-110" : "group-hover:scale-110")} />
+                    <span className="font-medium tracking-wide">{item.label}</span>
+                  </span>
+
                   {item.badge && (
                     <span className={cn(
-                      "px-2 py-0.5 text-xs rounded-full",
+                      "relative z-10 ml-auto px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full",
                       isActive
-                        ? "bg-sidebar-primary-foreground/20 text-sidebar-primary-foreground"
-                        : "bg-sidebar-primary text-sidebar-primary-foreground"
+                        ? "bg-white/20 text-white"
+                        : "bg-slate-800 text-slate-300 group-hover:bg-slate-700"
                     )}>
                       {item.badge}
                     </span>
@@ -219,6 +282,22 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             })}
           </nav>
         </ScrollArea>
+
+        {/* User Profile Mini - Fixed at Bottom */}
+        <div className="relative z-10 p-4 border-t border-white/5 bg-slate-900/50 backdrop-blur-md shrink-0 mt-auto">
+          <div className="p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-pointer group">
+            <div className="flex items-center gap-3">
+              <div className={cn("w-10 h-10 rounded-full bg-gradient-to-tr border-2 border-slate-700 shadow-md", getRoleGradient(user.role))} />
+              <div className="flex-1 min-w-0">
+                <div className={`text-sm font-bold text-white truncate group-hover:text-blue-400 transition-colors`}>{user.name}</div>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <div className={cn("w-2 h-2 rounded-full animate-pulse", activeScheme.bg)} />
+                  <div className="text-xs text-slate-400 truncate capitalize">{user.role} Account</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </aside>
     </>
   );

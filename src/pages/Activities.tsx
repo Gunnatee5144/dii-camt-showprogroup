@@ -1,15 +1,17 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { motion } from 'framer-motion';
-import { toast } from 'sonner';
-import { Trophy, Calendar, Users, CheckCircle, Clock, MapPin, Star, Award, Sparkles, Zap, Target, ArrowRight } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Trophy, Calendar, Users, CheckCircle, Clock, MapPin,
+  Star, Award, Sparkles, Zap, Target, ArrowRight, Hourglass,
+  ArrowUpRight, Flame
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
-import { ThemedCard } from '@/components/common/ThemedCard';
 import { mockActivities, mockStudent } from '@/lib/mockData';
 
 const containerVariants = {
@@ -24,369 +26,288 @@ const itemVariants = {
 
 export default function Activities() {
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = React.useState('upcoming');
 
   const upcomingActivities = mockActivities.filter(a => a.status === 'upcoming');
-  const completedActivities = mockActivities.filter(a => a.status === 'completed');
   const studentPoints = mockStudent.gamificationPoints;
   const studentHours = mockStudent.totalActivityHours;
+
+  // Fake leaderboard data
+  const leaderboard = [
+    { rank: 1, name: 'Gunna T.', points: 1250, badge: '🏆' },
+    { rank: 2, name: 'Sarah W.', points: 1180, badge: '🥈' },
+    { rank: 3, name: 'Mike R.', points: 1050, badge: '🥉' },
+    { rank: 4, name: 'Jenny K.', points: 980, badge: '' },
+    { rank: 5, name: 'Tom H.', points: 920, badge: '' },
+  ];
+
+  if (user?.role !== 'student') {
+    return (
+      <div className="p-8 text-center text-slate-500">
+        Student view only
+      </div>
+    );
+  }
+
+  const StatCard = ({ icon: Icon, label, value, subtext, gradient, delay, onClick }: any) => (
+    <motion.div
+      variants={itemVariants}
+      whileHover={{ y: -5, scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={onClick}
+      className={`relative overflow-hidden rounded-3xl p-6 cursor-pointer group shadow-lg hover:shadow-2xl transition-all duration-300 border border-white/20 ${gradient}`}
+    >
+      <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-white/20 transition-colors" />
+      <div className="relative z-10">
+        <div className="flex justify-between items-start mb-4">
+          <div className="p-3 rounded-2xl bg-white/20 backdrop-blur-md shadow-sm border border-white/10">
+            <Icon className="w-6 h-6 text-white" />
+          </div>
+          <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <ArrowUpRight className="w-4 h-4 text-white" />
+          </div>
+        </div>
+        <div>
+          <p className="text-white/80 text-sm font-medium mb-1">{label}</p>
+          <h3 className="text-3xl font-bold text-white tracking-tight">{value}</h3>
+          {subtext && <div className="mt-2">{subtext}</div>}
+        </div>
+      </div>
+    </motion.div>
+  );
 
   return (
     <motion.div
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="space-y-6"
+      className="space-y-8 pb-10"
     >
       <ThemedPageHeader
         title="กิจกรรมและแต้มสะสม"
-        subtitle="เก็บแต้ม สะสมชั่วโมง รับ Badge"
+        subtitle="เข้าร่วมกิจกรรม สะสมแต้ม และแลกรับของรางวัลพิเศษ"
         icon={<Trophy className="w-7 h-7" />}
       />
 
-      {user?.role === 'student' && (
-        <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Points Card */}
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 p-6 text-white shadow-xl shadow-orange-200"
-          >
-            <div className="absolute -top-12 -right-12 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-            <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-white/10 rounded-full blur-xl" />
-            <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
-                  <Trophy className="w-5 h-5" />
-                </div>
-                <span className="font-semibold">แต้มสะสม</span>
-              </div>
-              <div className="text-5xl font-bold">{studentPoints}</div>
-              <div className="text-white/80 text-sm mt-1">คะแนนทั้งหมด</div>
-              <div className="mt-4 h-2 bg-white/20 rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${(studentPoints / 1000) * 100}%` }}
-                  transition={{ duration: 1, ease: 'easeOut' }}
-                  className="h-full bg-white rounded-full"
-                />
-              </div>
-              <div className="text-xs text-white/70 mt-1">เป้าหมาย 1,000 คะแนน</div>
+      {/* Bento Grid Stats - Matching Dashboard Theme */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard
+          icon={Trophy}
+          label="แต้มสะสมทั้งหมด"
+          value={studentPoints}
+          gradient="bg-gradient-to-br from-amber-400 via-orange-500 to-red-500"
+          subtext={
+            <div className="flex items-center gap-1.5 text-xs text-orange-100 bg-orange-500/30 w-fit px-2 py-1 rounded-lg backdrop-blur-sm">
+              <Flame className="w-3 h-3 fill-orange-100" />
+              <span>Level 12 Explorer</span>
             </div>
-          </motion.div>
-
-          {/* Hours Card */}
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 p-6 text-white shadow-xl shadow-blue-200"
-          >
-            <div className="absolute -top-12 -right-12 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-            <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
-                  <Clock className="w-5 h-5" />
-                </div>
-                <span className="font-semibold">ชั่วโมงกิจกรรม</span>
-              </div>
-              <div className="text-5xl font-bold">{studentHours}</div>
-              <div className="text-white/80 text-sm mt-1">ชั่วโมง</div>
-              <div className="mt-4 h-2 bg-white/20 rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${(studentHours / 100) * 100}%` }}
-                  transition={{ duration: 1, ease: 'easeOut' }}
-                  className="h-full bg-white rounded-full"
-                />
-              </div>
-              <div className="text-xs text-white/70 mt-1">เป้าหมาย 100 ชั่วโมง</div>
+          }
+        />
+        <StatCard
+          icon={Clock}
+          label="ชั่วโมงกิจกรรม"
+          value={`${studentHours} ชม.`}
+          gradient="bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-600"
+          subtext={
+            <div className="h-1.5 w-full bg-black/20 rounded-full mt-2 overflow-hidden">
+              <div
+                className="h-full bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+                style={{ width: `${Math.min((studentHours / 100) * 100, 100)}%` }}
+              />
             </div>
-          </motion.div>
+          }
+        />
+        <StatCard
+          icon={Star}
+          label="Badges ที่ได้รับ"
+          value="8"
+          gradient="bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600"
+          subtext={<span className="text-blue-100 text-xs">เหลืออีก 2 เพื่อปลดล็อคเลเวลถัดไป</span>}
+        />
+        <StatCard
+          icon={Target}
+          label="เป้าหมายเทอมนี้"
+          value="4/5"
+          gradient="bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500"
+          subtext={<span className="text-purple-100 text-xs text-right block">80% สำเร็จ</span>}
+        />
+      </div>
 
-          {/* Badges Card */}
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 p-6 text-white shadow-xl shadow-purple-200"
-          >
-            <div className="absolute -top-12 -right-12 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-            <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
-                  <Award className="w-5 h-5" />
-                </div>
-                <span className="font-semibold">Badge ที่ได้รับ</span>
-              </div>
-              <div className="text-5xl font-bold">{mockStudent.badges?.length || 0}</div>
-              <div className="text-white/80 text-sm mt-1">เหรียญที่สะสม</div>
-              <div className="flex gap-2 mt-4">
-                {mockStudent.badges?.slice(0, 4).map((badge, idx) => (
-                  <motion.div
-                    key={idx}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: idx * 0.1, type: 'spring' }}
-                    className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-lg"
-                  >
-                    {badge.icon || '⭐'}
-                  </motion.div>
-                ))}
-                {(mockStudent.badges?.length || 0) > 4 && (
-                  <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-sm font-bold">
-                    +{(mockStudent.badges?.length || 0) - 4}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column: Activity Feed */}
+        <motion.div variants={itemVariants} className="lg:col-span-2 space-y-6">
+          <Tabs defaultValue="upcoming" onValueChange={setActiveTab} className="w-full space-y-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <h2 className="text-2xl font-bold text-slate-900 tracking-tight">รายการกิจกรรม</h2>
+              <TabsList className="bg-white/40 backdrop-blur-xl border border-white/40 p-1.5 h-auto rounded-2xl shadow-sm">
+                <TabsTrigger
+                  value="upcoming"
+                  className="rounded-xl px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-lg shadow-blue-500/10 transition-all duration-300 font-medium text-slate-600"
+                >
+                  กำลังจะมาถึง
+                </TabsTrigger>
+                <TabsTrigger
+                  value="history"
+                  className="rounded-xl px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-lg shadow-blue-500/10 transition-all duration-300 font-medium text-slate-600"
+                >
+                  ประวัติกิจกรรม
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <AnimatePresence mode="wait">
+              {activeTab === 'upcoming' && (
+                <TabsContent value="upcoming" className="space-y-4 mt-0" key="upcoming" forceMount>
+                  {upcomingActivities.map((activity, index) => (
+                    <motion.div
+                      key={activity.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="group bg-white/60 backdrop-blur-xl border border-white/60 rounded-[2rem] p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden"
+                    >
+                      <div className="flex flex-col md:flex-row gap-6">
+                        <div className="relative shrink-0 w-full md:w-52 h-36 md:h-auto rounded-2xl overflow-hidden shadow-md">
+                          <img
+                            src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&q=80&w=400&h=300"
+                            alt="Activity cover"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          />
+                          <div className="absolute top-3 right-3 bg-white/90 backdrop-blur px-2.5 py-1 rounded-xl text-xs font-bold text-indigo-600 shadow-sm border border-white/50">
+                            {activity.gamificationPoints} XP
+                          </div>
+                        </div>
+                        <div className="flex-1 flex flex-col justify-between py-1">
+                          <div>
+                            <div className="flex gap-2 mb-3">
+                              <Badge variant="secondary" className="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border-0 rounded-lg px-2.5">{activity.type}</Badge>
+                              {index === 0 && <Badge className="bg-orange-500 hover:bg-orange-600 border-0 rounded-lg px-2.5 shadow-lg shadow-orange-500/20">HOT กิจกรรมแนะนำ</Badge>}
+                            </div>
+                            <h3 className="text-2xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors mb-2 tracking-tight">{activity.title}</h3>
+                            <div className="flex flex-wrap gap-4 text-sm text-slate-500 font-medium">
+                              <div className="flex items-center gap-1.5">
+                                <Calendar className="w-4 h-4 text-slate-400" />
+                                {new Date(activity.startDate).toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' })}
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <MapPin className="w-4 h-4 text-slate-400" />
+                                {activity.location}
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <Users className="w-4 h-4 text-slate-400" />
+                                {activity.enrolledStudents.length}/{activity.maxParticipants || '-'} คน
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mt-6 flex gap-3">
+                            <Button className="rounded-xl h-11 bg-slate-900 hover:bg-slate-800 text-white shadow-xl shadow-slate-900/20 px-8 font-bold border border-slate-700">
+                              ลงทะเบียนเข้าร่วม
+                            </Button>
+                            <Button variant="ghost" className="rounded-xl h-11 border border-slate-200 hover:bg-slate-100 font-medium px-6">
+                              รายละเอียด
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </TabsContent>
+              )}
+
+              {activeTab === 'history' && (
+                <TabsContent value="history" className="mt-0" key="history" forceMount>
+                  <div className="bg-white/40 backdrop-blur-xl rounded-[2rem] p-12 text-center text-slate-400 border border-dashed border-slate-300">
+                    <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-200">
+                      <Hourglass className="w-10 h-10 opacity-30" />
+                    </div>
+                    <p className="text-lg font-medium">ยังไม่มีประวัติกิจกรรมสะสม</p>
+                    <p className="text-sm">เข้าร่วมกิจกรรมวันนี้เพื่อเริ่มสะสมแต้ม!</p>
                   </div>
-                )}
+                </TabsContent>
+              )}
+            </AnimatePresence>
+          </Tabs>
+        </motion.div>
+
+        {/* Right Column: Gamification & Leaderboard */}
+        <motion.div variants={itemVariants} className="space-y-6">
+          <div className="bg-white/60 backdrop-blur-xl rounded-[2rem] border border-white/60 shadow-sm p-6">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-amber-500" />
+                อันดับผู้นำ (Leaderboard)
+              </h3>
+              <Badge variant="outline" className="rounded-full border-slate-200 text-slate-400 text-[10px] uppercase tracking-wider">เทอมนี้</Badge>
+            </div>
+            <div className="space-y-4">
+              {leaderboard.map((user, idx) => (
+                <div key={idx} className={`flex items-center gap-4 p-3.5 rounded-2xl transition-all duration-300 ${user.rank === 1 ? 'bg-amber-400/10 border border-amber-200/50 shadow-inner' : 'hover:bg-white/50'}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${user.rank === 1 ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30 ring-2 ring-white/50' :
+                    user.rank === 2 ? 'bg-slate-300 text-slate-600' :
+                      user.rank === 3 ? 'bg-orange-200 text-orange-700' :
+                        'bg-slate-100 text-slate-400'
+                    }`}>
+                    {user.rank}
+                  </div>
+                  <Avatar className="w-11 h-11 border-2 border-white shadow-md">
+                    <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} />
+                    <AvatarFallback>{user.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="font-bold text-slate-800 flex items-center gap-1.5">
+                      {user.name} <span className="text-lg">{user.badge}</span>
+                    </div>
+                    <div className="text-xs text-slate-500 font-medium">{user.points} XP</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Button variant="outline" className="w-full mt-8 rounded-xl border-dashed border-slate-300 text-slate-500 hover:text-indigo-600 hover:border-indigo-300 h-11 font-medium">ดูอันดับทั้งหมด</Button>
+          </div>
+
+          <div className="relative overflow-hidden bg-gradient-to-br from-indigo-900 via-slate-900 to-black rounded-[2rem] shadow-2xl p-7 text-white">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-purple-500/20 rounded-full blur-[60px]" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/10 rounded-full blur-[50px]" />
+
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-bold flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-purple-300" />
+                  Badges สะสม
+                </h3>
+                <div className="text-[10px] text-slate-400 font-bold tracking-widest uppercase">8 Unlocked</div>
+              </div>
+
+              <div className="grid grid-cols-4 gap-3">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                  <div key={i} className="aspect-square rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white/15 transition-all cursor-pointer group shadow-sm">
+                    {i <= 3 ? (
+                      <div className="text-2xl group-hover:scale-125 group-hover:rotate-12 transition-all duration-500">
+                        {i === 1 ? '🚀' : i === 2 ? '🎯' : '💎'}
+                      </div>
+                    ) : (
+                      <div className="w-2.5 h-2.5 rounded-full bg-white/20 group-hover:bg-white/40 transition-colors" />
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-white/10">
+                <div className="flex justify-between items-end mb-2">
+                  <div>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Badge ถัดไป</p>
+                    <p className="text-sm font-bold text-purple-200">Activity Master</p>
+                  </div>
+                  <div className="text-xs font-bold text-white">60%</div>
+                </div>
+                <Progress value={60} className="h-2 bg-white/10" indicatorClassName="bg-gradient-to-r from-purple-400 to-indigo-400" />
+                <p className="text-[10px] text-slate-500 mt-2 text-center font-medium">เข้าร่วมกิจกรรมให้ครบ 10 ครั้งเพื่อปลดล็อค</p>
               </div>
             </div>
-          </motion.div>
+          </div>
         </motion.div>
-      )}
-
-      <motion.div variants={itemVariants}>
-        <Tabs defaultValue="upcoming" className="space-y-6">
-          <TabsList className="bg-white/80 backdrop-blur-sm border shadow-sm p-1 h-auto">
-            <TabsTrigger value="upcoming" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-6 py-2.5">
-              <Zap className="w-4 h-4 mr-2" />
-              กิจกรรมที่กำลังเปิดรับ
-            </TabsTrigger>
-            <TabsTrigger value="completed" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-6 py-2.5">
-              <CheckCircle className="w-4 h-4 mr-2" />
-              กิจกรรมที่เข้าร่วมแล้ว
-            </TabsTrigger>
-            <TabsTrigger value="history" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-6 py-2.5">
-              <Target className="w-4 h-4 mr-2" />
-              ประวัติการเข้าร่วม
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="upcoming" className="space-y-4 mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {upcomingActivities.map((activity, index) => (
-                <motion.div
-                  key={activity.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ y: -4 }}
-                >
-                  <Card className="h-full overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all bg-gradient-to-br from-white to-gray-50">
-                    <div className="h-2 bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500" />
-                    <CardHeader>
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <CardTitle className="text-lg">{activity.titleThai}</CardTitle>
-                          <div className="mt-2">
-                            <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
-                              {activity.type}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end gap-1">
-                          <Badge className="bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-lg shadow-orange-200/50">
-                            <Sparkles className="w-3 h-3 mr-1" />
-                            {activity.gamificationPoints} แต้ม
-                          </Badge>
-                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                            <Clock className="w-3 h-3 mr-1" />
-                            {activity.activityHours} ชม.
-                          </Badge>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-3 text-sm p-2 rounded-lg bg-gray-50">
-                          <Calendar className="w-4 h-4 text-primary" />
-                          <span className="text-gray-700">{new Date(activity.startDate).toLocaleDateString('th-TH', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}</span>
-                        </div>
-
-                        {activity.location && (
-                          <div className="flex items-center gap-3 text-sm p-2 rounded-lg bg-gray-50">
-                            <MapPin className="w-4 h-4 text-rose-500" />
-                            <span className="text-gray-700">{activity.location}</span>
-                          </div>
-                        )}
-
-                        <div className="flex items-center gap-3 text-sm p-2 rounded-lg bg-gray-50">
-                          <Users className="w-4 h-4 text-emerald-500" />
-                          <span className="text-gray-700">{activity.enrolledStudents?.length || 0}/{activity.maxParticipants} คน</span>
-                          <div className="flex-1">
-                            <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                              <div
-                                className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"
-                                style={{ width: `${((activity.enrolledStudents?.length || 0) / (activity.maxParticipants || 1)) * 100}%` }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {activity.description && (
-                        <p className="text-sm text-gray-600 line-clamp-2 bg-gray-50 p-3 rounded-lg">{activity.description}</p>
-                      )}
-
-                      <Button
-                        className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-lg shadow-orange-200/50 group"
-                        onClick={() => toast.success(`ลงทะเบียนกิจกรรม ${activity.titleThai} เรียบร้อยแล้ว`)}
-                      >
-                        ลงทะเบียนเข้าร่วม
-                        <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="completed" className="space-y-4 mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {completedActivities.map((activity, index) => (
-                <motion.div
-                  key={activity.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-emerald-50 to-white">
-                    <div className="h-2 bg-gradient-to-r from-emerald-500 to-teal-500" />
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <CardTitle className="text-lg">{activity.titleThai}</CardTitle>
-                          <CardDescription className="mt-1">{activity.type}</CardDescription>
-                        </div>
-                        <Badge className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-0">
-                          <CheckCircle className="w-3 h-3 mr-1" />
-                          เสร็จสิ้น
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex justify-between items-center p-3 bg-white rounded-xl border">
-                        <span className="text-gray-600 flex items-center gap-2">
-                          <Trophy className="w-4 h-4 text-orange-500" />
-                          ได้รับแต้ม
-                        </span>
-                        <span className="font-bold text-orange-600">+{activity.gamificationPoints} แต้ม</span>
-                      </div>
-                      <div className="flex justify-between items-center p-3 bg-white rounded-xl border">
-                        <span className="text-gray-600 flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-blue-500" />
-                          ชั่วโมง
-                        </span>
-                        <span className="font-bold text-blue-600">+{activity.activityHours} ชม.</span>
-                      </div>
-                      <Button variant="outline" className="w-full border-emerald-200 text-emerald-700 hover:bg-emerald-50">
-                        <Award className="w-4 h-4 mr-2" />
-                        ดูใบประกาศนียบัตร
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="history" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="w-5 h-5" />
-                  ประวัติการเข้าร่วมกิจกรรม
-                </CardTitle>
-                <CardDescription>รายการกิจกรรมทั้งหมดที่เคยเข้าร่วม</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[...completedActivities, ...upcomingActivities.filter(a => a.status === 'completed')].length > 0 ? (
-                    <div className="relative">
-                      {/* Timeline line */}
-                      <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-purple-500 via-pink-500 to-rose-500" />
-
-                      {mockActivities.map((activity, index) => (
-                        <motion.div
-                          key={activity.id}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          className="relative flex items-start gap-4 pb-6 last:pb-0"
-                        >
-                          {/* Timeline dot */}
-                          <div className={`relative z-10 w-12 h-12 rounded-full flex items-center justify-center shadow-lg ${activity.status === 'completed'
-                            ? 'bg-gradient-to-br from-emerald-500 to-teal-500'
-                            : activity.status === 'upcoming'
-                              ? 'bg-gradient-to-br from-orange-500 to-amber-500'
-                              : 'bg-gradient-to-br from-gray-400 to-gray-500'
-                            }`}>
-                            {activity.status === 'completed' ? (
-                              <CheckCircle className="w-5 h-5 text-white" />
-                            ) : (
-                              <Clock className="w-5 h-5 text-white" />
-                            )}
-                          </div>
-
-                          {/* Content */}
-                          <div className="flex-1 bg-white rounded-xl p-4 shadow-md border hover:shadow-lg transition-shadow">
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="flex-1">
-                                <h4 className="font-semibold text-gray-900">{activity.titleThai}</h4>
-                                <p className="text-sm text-gray-500 mt-1">{activity.type}</p>
-                              </div>
-                              <Badge className={`${activity.status === 'completed'
-                                ? 'bg-emerald-100 text-emerald-700'
-                                : 'bg-orange-100 text-orange-700'
-                                }`}>
-                                {activity.status === 'completed' ? 'เสร็จสิ้น' : 'รอเข้าร่วม'}
-                              </Badge>
-                            </div>
-
-                            <div className="flex items-center gap-4 mt-3 text-sm">
-                              <div className="flex items-center gap-1 text-gray-600">
-                                <Calendar className="w-4 h-4" />
-                                <span>{new Date(activity.startDate).toLocaleDateString('th-TH', {
-                                  year: 'numeric',
-                                  month: 'short',
-                                  day: 'numeric'
-                                })}</span>
-                              </div>
-                              <div className="flex items-center gap-1 text-orange-600 font-medium">
-                                <Trophy className="w-4 h-4" />
-                                <span>+{activity.gamificationPoints} แต้ม</span>
-                              </div>
-                              <div className="flex items-center gap-1 text-blue-600 font-medium">
-                                <Clock className="w-4 h-4" />
-                                <span>+{activity.activityHours} ชม.</span>
-                              </div>
-                            </div>
-
-                            {activity.status === 'completed' && (
-                              <div className="mt-3 pt-3 border-t flex items-center gap-2">
-                                <Award className="w-4 h-4 text-purple-500" />
-                                <span className="text-sm text-purple-600">ได้รับใบประกาศนียบัตร</span>
-                                <Button variant="link" size="sm" className="text-purple-600 p-0 h-auto ml-auto">
-                                  ดาวน์โหลด
-                                </Button>
-                              </div>
-                            )}
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12">
-                      <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center mb-4">
-                        <Target className="w-8 h-8 text-purple-500" />
-                      </div>
-                      <p className="text-gray-500">ยังไม่มีประวัติกิจกรรม</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }

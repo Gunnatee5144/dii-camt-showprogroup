@@ -14,7 +14,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
 import { toast } from 'sonner';
 
 const containerVariants = {
@@ -159,12 +158,26 @@ export default function Requests() {
       animate="visible"
       className="space-y-8 pb-10"
     >
+      {/* Header Section - Matching Dashboard/Courses/Schedule Style */}
       <div className="flex flex-col md:flex-row justify-between items-end gap-6">
-        <ThemedPageHeader
-          title="คำร้องและฟอร์ม"
-          subtitle="ยื่นและติดตามสถานะคำร้องทางการศึกษาได้ทันที"
-          icon={<FileBox className="w-7 h-7" />}
-        />
+        <div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-2 text-slate-500 font-medium mb-2"
+          >
+            <FileBox className="w-4 h-4 text-indigo-500" />
+            <span>ยื่นคำร้องออนไลน์</span>
+          </motion.div>
+          <motion.h1
+            className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            คำร้อง<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">และฟอร์ม</span>
+          </motion.h1>
+        </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button size="lg" className="rounded-2xl px-8 bg-slate-900 text-white hover:bg-slate-800 shadow-xl shadow-slate-900/20 h-12 font-bold transform active:scale-95 transition-all">

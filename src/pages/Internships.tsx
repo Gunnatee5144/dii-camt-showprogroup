@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
 import { mockJobPostings } from '@/lib/mockData';
 
 const containerVariants = {
@@ -78,11 +77,27 @@ export default function Internships() {
       className="space-y-6 flex flex-col h-[calc(100vh-6rem)]"
     >
       <div className="flex-shrink-0">
-        <ThemedPageHeader
-          title="ฝึกงานและสหกิจ"
-          subtitle="ค้นหาโอกาสฝึกงานจากบริษัทชั้นนำและพันธมิตรของคณะฯ"
-          icon={<Briefcase className="w-7 h-7" />}
-        />
+        {/* Header Section - Matching Dashboard/Courses/Schedule Style */}
+        <div className="flex flex-col md:flex-row justify-between items-end gap-6">
+          <div>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center gap-2 text-slate-500 font-medium mb-2"
+            >
+              <Briefcase className="w-4 h-4 text-blue-500" />
+              <span>โอกาสฝึกงานและสหกิจ</span>
+            </motion.div>
+            <motion.h1
+              className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              ฝึกงาน<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">และสหกิจ</span>
+            </motion.h1>
+          </div>
+        </div>
 
         {/* Bento Stats for Internships */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">

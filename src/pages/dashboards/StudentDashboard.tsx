@@ -5,7 +5,7 @@ import {
   BookOpen, Calendar, Trophy, TrendingUp, Clock, Award,
   AlertCircle, CheckCircle2, GraduationCap, Target, Activity as ActivityIcon,
   Sparkles, Flame, Star, Zap, ChevronRight, Bell, ArrowUpRight,
-  MoreHorizontal
+  MoreHorizontal, User
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,12 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Timetable } from '@/components/common/Timetable';
 import { StudentTimeline } from '@/components/common/StudentTimeline';
+import { DegreeProgressCard } from '@/components/dashboard/DegreeProgressCard';
+import { GPAHistoryCard } from '@/components/dashboard/GPAHistoryCard';
+import { TechnicalSkillsRubricCard } from '@/components/dashboard/TechnicalSkillsRubricCard';
+import { SoftSkillsRubricCard } from '@/components/dashboard/SoftSkillsRubricCard';
+import { SkillsRadarCard } from '@/components/dashboard/SkillsRadarCard';
+import { CourseGradesCard } from '@/components/dashboard/CourseGradesCard';
 import {
   mockStudent,
   mockCourses,
@@ -30,7 +36,65 @@ const containerVariants = {
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100 } },
+  visible: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 100 } },
+};
+
+// Mock data for GPA History
+const semesterGPAHistory = [
+  { semester: '1/2565', gpa: 3.25, credits: 18 },
+  { semester: '2/2565', gpa: 3.35, credits: 21 },
+  { semester: '1/2566', gpa: 3.48, credits: 18 },
+  { semester: '2/2566', gpa: 3.52, credits: 21 },
+  { semester: '1/2567', gpa: 3.65, credits: 18 },
+  { semester: '2/2567', gpa: 3.45, credits: 21 },
+];
+
+// Mock data for Technical Skills (Rubric-based)
+const technicalSkillScores = {
+  functionality: 4.2, // โค้ดทำงานได้จริง
+  readability: 3.8, // โค้ดอ่านง่าย
+  bestPractice: 4.0, // โครงสร้างถูกต้อง
+  professorWeight: 60,
+  peerWeight: 40,
+  professorScore: 4.1,
+  peerScore: 3.9,
+  commentTags: {
+    bug: 2,
+    suggestion: 8,
+    goodJob: 15,
+  },
+};
+
+// Mock data for Soft Skills (AAC&U Value Rubrics)
+const softSkillScores = {
+  communication: 4.0, // การสื่อสาร (README/Document)
+  openness: 4.3, // ความเปิดกว้าง (การตอบกลับคอมเมนต์)
+  professorWeight: 60,
+  peerWeight: 40,
+  professorScore: 4.2,
+  peerScore: 4.0,
+  feedbackHistory: [
+    { projectName: 'Capstone Project', date: '15 ม.ค. 68', communicationScore: 4.5, opennessScore: 4.3, comments: 12 },
+    { projectName: 'UX Design Workshop', date: '20 พ.ย. 67', communicationScore: 3.8, opennessScore: 4.1, comments: 8 },
+    { projectName: 'Hackathon 2024', date: '10 มี.ค. 67', communicationScore: 4.2, opennessScore: 4.5, comments: 15 },
+  ],
+};
+
+// Transform grades for CourseGradesCard
+const transformGradesForCard = () => {
+  const studentGrades = getStudentGrades(mockStudent.id);
+  return studentGrades.map(grade => {
+    const course = mockCourses.find(c => c.id === grade.courseId);
+    return {
+      courseId: grade.courseId,
+      courseCode: course?.code || '',
+      courseName: course?.nameThai || course?.name || '',
+      credits: course?.credits || 0,
+      letterGrade: grade.letterGrade || 'I',
+      semester: `${course?.semester}/${course?.academicYear}` || '1/2568',
+      total: grade.total,
+    };
+  });
 };
 
 export default function StudentDashboard() {
@@ -45,6 +109,9 @@ export default function StudentDashboard() {
       course.academicYear === student.academicYear
   );
 
+  const studentCourses = mockCourses.filter(c => c.enrolledStudents.includes(student.id));
+  const courseGrades = transformGradesForCard();
+
   const creditProgress = (student.earnedCredits / student.totalCredits) * 100;
   const upcomingActivities = mockActivities.filter(a => a.status === 'upcoming').slice(0, 3);
 
@@ -52,32 +119,7 @@ export default function StudentDashboard() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'สวัสดีตอนเช้า' : hour < 18 ? 'สวัสดีตอนบ่าย' : 'สวัสดีตอนเย็น';
 
-  const StatCard = ({ icon: Icon, label, value, subtext, gradient, delay, onClick }: any) => (
-    <motion.div
-      variants={itemVariants}
-      whileHover={{ y: -5, scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      onClick={onClick}
-      className={`relative overflow-hidden rounded-3xl p-6 cursor-pointer group shadow-lg hover:shadow-2xl transition-all duration-300 border border-white/20 ${gradient}`}
-    >
-      <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-white/20 transition-colors" />
-      <div className="relative z-10">
-        <div className="flex justify-between items-start mb-4">
-          <div className="p-3 rounded-2xl bg-white/20 backdrop-blur-md shadow-sm border border-white/10">
-            <Icon className="w-6 h-6 text-white" />
-          </div>
-          <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <ArrowUpRight className="w-4 h-4 text-white" />
-          </div>
-        </div>
-        <div>
-          <p className="text-white/80 text-sm font-medium mb-1">{label}</p>
-          <h3 className="text-3xl font-bold text-white tracking-tight">{value}</h3>
-          {subtext && <div className="mt-2">{subtext}</div>}
-        </div>
-      </div>
-    </motion.div>
-  );
+  const yearLabel = ['', 'ปี 1', 'ปี 2', 'ปี 3', 'ปี 4'][student.year] || `ปี ${student.year}`;
 
   return (
     <motion.div
@@ -86,102 +128,108 @@ export default function StudentDashboard() {
       animate="visible"
       className="space-y-8 pb-10"
     >
-      {/* Hero Section */}
-      <div className="flex flex-col md:flex-row justify-between items-end gap-6">
-        <div>
+      {/* Profile Header with Year */}
+      <motion.div
+        variants={itemVariants}
+        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8 text-white shadow-2xl"
+      >
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-emerald-500/10 to-teal-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+
+        <div className="relative z-10 flex flex-col lg:flex-row items-center gap-8">
+          {/* Avatar */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2 text-slate-500 font-medium mb-2"
+            whileHover={{ scale: 1.05 }}
+            className="relative"
           >
-            <Sparkles className="w-4 h-4 text-yellow-500" />
-            <span>{greeting}, {student.nameThai}</span>
+            <div className="w-28 h-28 lg:w-32 lg:h-32 rounded-3xl bg-gradient-to-br from-blue-500 to-indigo-600 p-1 shadow-xl shadow-blue-500/30">
+              <div className="w-full h-full rounded-[22px] bg-slate-800 flex items-center justify-center overflow-hidden">
+                {student.avatar ? (
+                  <img src={student.avatar} alt={student.name} className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-16 h-16 text-slate-400" />
+                )}
+              </div>
+            </div>
+            <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+              {yearLabel}
+            </div>
           </motion.div>
-          <motion.h1
-            className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            พร้อมลุยกับ<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">การเรียนวันนี้</span>หรือยัง? 🚀
-          </motion.h1>
+
+          {/* Info */}
+          <div className="flex-1 text-center lg:text-left">
+            <div className="flex items-center justify-center lg:justify-start gap-2 text-slate-400 text-sm mb-2">
+              <Sparkles className="w-4 h-4 text-yellow-500" />
+              <span>{greeting}</span>
+            </div>
+            <h1 className="text-3xl lg:text-4xl font-bold mb-2">{student.nameThai}</h1>
+            <p className="text-slate-400 mb-4">{student.name}</p>
+
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-sm text-slate-300">
+              <div className="flex items-center gap-2">
+                <GraduationCap className="w-4 h-4 text-blue-400" />
+                <span>{student.major}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-emerald-400" />
+                <span>ภาคเรียน {student.semester}/{student.academicYear}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Award className="w-4 h-4 text-yellow-400" />
+                <span>{student.gamificationPoints} XP</span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mt-4">
+              <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30">
+                รหัส: {student.studentId}
+              </Badge>
+              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30">
+                GPAX: {student.gpax.toFixed(2)}
+              </Badge>
+              {student.academicStatus === 'normal' && (
+                <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
+                  สถานะ: ปกติ
+                </Badge>
+              )}
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="flex flex-col gap-3">
+            <Button
+              onClick={() => navigate('/portfolio')}
+              className="bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl"
+            >
+              <Trophy className="w-4 h-4 mr-2 text-yellow-500" />
+              ดู Portfolio
+            </Button>
+            <Button
+              onClick={() => navigate('/settings')}
+              variant="ghost"
+              className="text-slate-300 hover:text-white hover:bg-white/10 rounded-xl"
+            >
+              แก้ไขโปรไฟล์
+            </Button>
+          </div>
         </div>
-        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-          <Button
-            className="h-12 px-6 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white shadow-xl shadow-slate-900/20 border border-slate-700"
-            onClick={() => navigate('/portfolio')}
-          >
-            <Trophy className="w-4 h-4 mr-2 text-yellow-500" />
-            ดู Portfolio ของฉัน
-          </Button>
-        </motion.div>
-      </div>
+      </motion.div>
 
-      {/* Bento Grid Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          icon={TrendingUp}
-          label="เกรดเฉลี่ย (GPA)"
-          value={student.gpa.toFixed(2)}
-          gradient="bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600"
-          subtext={
-            <div className="flex items-center gap-1.5 text-xs text-blue-100 bg-blue-500/30 w-fit px-2 py-1 rounded-lg backdrop-blur-sm">
-              <span className="font-semibold">GPAX: {student.gpax.toFixed(2)}</span>
-            </div>
-          }
-          onClick={() => navigate('/grades')}
-        />
-        <StatCard
-          icon={BookOpen}
-          label="หน่วยกิตสะสม"
-          value={`${student.earnedCredits}/${student.totalCredits}`}
-          gradient="bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500"
-          subtext={
-            <div className="h-1.5 w-full bg-black/20 rounded-full mt-2 overflow-hidden">
-              <div
-                className="h-full bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.5)]"
-                style={{ width: `${creditProgress}%` }}
-              />
-            </div>
-          }
-          onClick={() => navigate('/courses')}
-        />
-        <StatCard
-          icon={Zap}
-          label="คะแนนกิจกรรม"
-          value={student.gamificationPoints}
-          gradient="bg-gradient-to-br from-amber-400 via-orange-500 to-red-500"
-          subtext={
-            <div className="flex items-center gap-1 text-xs text-orange-100">
-              <Flame className="w-3 h-3 fill-orange-100" /> Level 5 Explorer
-            </div>
-          }
-          onClick={() => navigate('/activities')}
-        />
-        <StatCard
-          icon={Clock}
-          label="ชั่วโมงกิจกรรม"
-          value={`${student.totalActivityHours} ชม.`}
-          gradient="bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-600"
-          subtext={<span className="text-emerald-100 text-xs">ครบตามเกณฑ์ขั้นต่ำแล้ว</span>}
-          onClick={() => navigate('/activities')}
-        />
-      </div>
-
-      {/* Main Content Area */}
+      {/* Main Content Tabs */}
       <Tabs defaultValue="overview" className="space-y-8" onValueChange={setActiveTab}>
         <div className="flex justify-center md:justify-start">
-          <TabsList className="bg-white/40 backdrop-blur-xl border border-white/40 p-1.5 h-auto rounded-2xl shadow-sm">
+          <TabsList className="bg-white/40 backdrop-blur-xl border border-white/40 p-1.5 h-auto rounded-2xl shadow-sm flex-wrap">
             {[
               { id: 'overview', icon: Target, label: 'ภาพรวม' },
               { id: 'schedule', icon: Calendar, label: 'ตารางเรียน' },
               { id: 'grades', icon: TrendingUp, label: 'ผลการเรียน' },
+              { id: 'skills', icon: Zap, label: 'ทักษะ' },
               { id: 'timeline', icon: ActivityIcon, label: 'Timeline' },
             ].map((tab) => (
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
-                className="rounded-xl px-6 py-3 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-lg shadow-blue-500/10 transition-all duration-300 font-medium text-slate-600"
+                className="rounded-xl px-4 lg:px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-lg shadow-blue-500/10 transition-all duration-300 font-medium text-slate-600"
               >
                 <tab.icon className="w-4 h-4 mr-2" />
                 {tab.label}
@@ -191,12 +239,37 @@ export default function StudentDashboard() {
         </div>
 
         <AnimatePresence mode="wait">
+          {/* Overview Tab */}
           {activeTab === 'overview' && (
             <TabsContent value="overview" className="mt-0" key="overview" forceMount>
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Left Column (2/3) */}
+                {/* Left Column - 2/3 */}
                 <div className="lg:col-span-2 space-y-8">
-                  {/* Current Courses - Glassmorphism */}
+                  {/* Class Schedule */}
+                  <motion.div variants={itemVariants}>
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <Calendar className="w-5 h-5 text-purple-500" />
+                        ตารางเรียนสัปดาห์นี้
+                      </h2>
+                      <Button
+                        variant="ghost"
+                        onClick={() => navigate('/schedule')}
+                        className="text-slate-500 hover:text-purple-600"
+                      >
+                        ดูเต็มจอ <ChevronRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    </div>
+                    <div className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">
+                      <Timetable
+                        courses={studentCourses}
+                        semester={student.semester}
+                        academicYear={student.academicYear}
+                      />
+                    </div>
+                  </motion.div>
+
+                  {/* Current Courses */}
                   <motion.div variants={itemVariants} className="space-y-4">
                     <div className="flex items-center justify-between">
                       <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
@@ -206,7 +279,7 @@ export default function StudentDashboard() {
                     </div>
 
                     <div className="grid gap-4">
-                      {currentCourses.map((course, index) => (
+                      {currentCourses.slice(0, 3).map((course, index) => (
                         <motion.div
                           key={course.id}
                           initial={{ opacity: 0, x: -20 }}
@@ -239,40 +312,20 @@ export default function StudentDashboard() {
                       ))}
                     </div>
                   </motion.div>
-
-                  {/* Progress Card */}
-                  <motion.div variants={itemVariants} className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl">
-                    <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-blue-500/20 rounded-full blur-[80px]" />
-                    <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
-                      <div className="relative w-40 h-40 flex-shrink-0">
-                        {/* Circular Progress Placeholder - In real app use SVG circle */}
-                        <div className="absolute inset-0 rounded-full border-[12px] border-slate-700" />
-                        <div className="absolute inset-0 rounded-full border-[12px] border-blue-500 border-l-transparent border-b-transparent rotate-45" />
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <span className="text-3xl font-bold">{creditProgress.toFixed(0)}%</span>
-                          <span className="text-xs text-slate-400">Complete</span>
-                        </div>
-                      </div>
-                      <div className="flex-1 text-center md:text-left">
-                        <h3 className="text-2xl font-bold mb-2">เส้นทางสู่ความสำเร็จ 🎓</h3>
-                        <p className="text-slate-300 mb-6">คุณมาไกลมากแล้ว! เหลืออีกเพียง {student.totalCredits - student.earnedCredits} หน่วยกิตก็จะจบการศึกษา รักษามาตรฐานนี้ไว้ คุณทำได้!</p>
-                        <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-                          <div className="bg-slate-800/50 backdrop-blur-md px-4 py-3 rounded-xl border border-slate-700">
-                            <div className="text-xs text-slate-400">เกรดเฉลี่ยสูงสุด</div>
-                            <div className="text-xl font-bold text-emerald-400">3.95</div>
-                          </div>
-                          <div className="bg-slate-800/50 backdrop-blur-md px-4 py-3 rounded-xl border border-slate-700">
-                            <div className="text-xs text-slate-400">วิชาที่ผ่านแล้ว</div>
-                            <div className="text-xl font-bold text-blue-400">42 วิชา</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
                 </div>
 
-                {/* Right Column (1/3) */}
+                {/* Right Column - 1/3 */}
                 <div className="space-y-8">
+                  {/* Degree Progress */}
+                  <motion.div variants={itemVariants}>
+                    <DegreeProgressCard
+                      totalCredits={student.totalCredits}
+                      earnedCredits={student.earnedCredits}
+                      registeredCredits={studentCourses.reduce((sum, c) => sum + c.credits, 0)}
+                      requiredCredits={student.requiredCredits || student.totalCredits}
+                    />
+                  </motion.div>
+
                   {/* Upcoming Events */}
                   <motion.div variants={itemVariants} className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">
                     <h3 className="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
@@ -300,40 +353,17 @@ export default function StudentDashboard() {
                       </Button>
                     </div>
                   </motion.div>
-
-                  {/* Quick Actions */}
-                  <motion.div variants={itemVariants}>
-                    <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 px-2">ทางลัด</h3>
-                    <div className="grid grid-cols-2 gap-3">
-                      {[
-                        { icon: Calendar, label: 'นัดหมาย', color: 'bg-blue-100 text-blue-600', path: '/appointments' },
-                        { icon: BookOpen, label: 'คำร้อง', color: 'bg-indigo-100 text-indigo-600', path: '/requests' },
-                        { icon: Zap, label: 'สะสมแต้ม', color: 'bg-yellow-100 text-yellow-600', path: '/activities' },
-                        { icon: MoreHorizontal, label: 'อื่นๆ', color: 'bg-slate-100 text-slate-600', path: '/settings' },
-                      ].map((action, i) => (
-                        <div
-                          key={i}
-                          onClick={() => navigate(action.path)}
-                          className="flex flex-col items-center justify-center p-4 bg-white/60 backdrop-blur-md border border-white/60 rounded-2xl hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-sm hover:shadow-md"
-                        >
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${action.color}`}>
-                            <action.icon className="w-5 h-5" />
-                          </div>
-                          <span className="text-xs font-bold text-slate-600">{action.label}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
                 </div>
               </div>
             </TabsContent>
           )}
 
+          {/* Schedule Tab */}
           {activeTab === 'schedule' && (
             <TabsContent value="schedule" className="mt-0" key="schedule" forceMount>
               <motion.div variants={itemVariants} className="bg-white/80 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">
                 <Timetable
-                  courses={currentCourses}
+                  courses={studentCourses}
                   semester={student.semester}
                   academicYear={student.academicYear}
                 />
@@ -341,42 +371,80 @@ export default function StudentDashboard() {
             </TabsContent>
           )}
 
+          {/* Grades Tab */}
           {activeTab === 'grades' && (
             <TabsContent value="grades" className="mt-0" key="grades" forceMount>
-              {/* Same logic as before but wrapped in new Card style */}
-              <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {grades.map((grade, index) => {
-                  const course = mockCourses.find(c => c.id === grade.courseId);
-                  const isA = grade.letterGrade === 'A';
-                  return (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.05 }}
-                      className={`relative overflow-hidden p-6 rounded-3xl border ${isA ? 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-100' : 'bg-white border-slate-100'} shadow-sm hover:shadow-lg transition-all`}
-                    >
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center font-bold text-slate-700 text-sm border border-slate-100">
-                          {course?.code?.substring(0, 3)}
-                        </div>
-                        <div className={`text-3xl font-black ${isA ? 'text-emerald-500' : 'text-slate-300'}`}>
-                          {grade.letterGrade}
-                        </div>
-                      </div>
-                      <h4 className="font-bold text-slate-800 text-lg mb-1">{course?.code}</h4>
-                      <p className="text-slate-500 text-sm line-clamp-1">{course?.nameThai}</p>
-                      <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center text-sm">
-                        <span className="text-slate-400">หน่วยกิต: {course?.credits}</span>
-                        <span className="font-bold text-slate-700">{grade.total} คะแนน</span>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </motion.div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* GPA History */}
+                <motion.div variants={itemVariants}>
+                  <GPAHistoryCard
+                    semesterHistory={semesterGPAHistory}
+                    currentGPA={student.gpa}
+                    gpax={student.gpax}
+                  />
+                </motion.div>
+
+                {/* Course Grades */}
+                <motion.div variants={itemVariants}>
+                  <CourseGradesCard
+                    grades={courseGrades}
+                    currentSemester={`${student.semester}/${student.academicYear}`}
+                  />
+                </motion.div>
+              </div>
             </TabsContent>
           )}
 
+          {/* Skills Tab */}
+          {activeTab === 'skills' && (
+            <TabsContent value="skills" className="mt-0" key="skills" forceMount>
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                {/* Technical Skills - Rubric Based */}
+                <motion.div variants={itemVariants}>
+                  <TechnicalSkillsRubricCard
+                    functionality={technicalSkillScores.functionality}
+                    readability={technicalSkillScores.readability}
+                    bestPractice={technicalSkillScores.bestPractice}
+                    professorWeight={technicalSkillScores.professorWeight}
+                    peerWeight={technicalSkillScores.peerWeight}
+                    professorScore={technicalSkillScores.professorScore}
+                    peerScore={technicalSkillScores.peerScore}
+                    commentTags={technicalSkillScores.commentTags}
+                  />
+                </motion.div>
+
+                {/* Soft Skills - AAC&U Value Rubrics Based */}
+                <motion.div variants={itemVariants}>
+                  <SoftSkillsRubricCard
+                    communication={softSkillScores.communication}
+                    openness={softSkillScores.openness}
+                    professorWeight={softSkillScores.professorWeight}
+                    peerWeight={softSkillScores.peerWeight}
+                    professorScore={softSkillScores.professorScore}
+                    peerScore={softSkillScores.peerScore}
+                    feedbackHistory={softSkillScores.feedbackHistory}
+                  />
+                </motion.div>
+
+                {/* Skills Radar Chart */}
+                <motion.div variants={itemVariants}>
+                  <SkillsRadarCard
+                    technicalSkills={{
+                      functionality: technicalSkillScores.functionality,
+                      readability: technicalSkillScores.readability,
+                      bestPractice: technicalSkillScores.bestPractice,
+                    }}
+                    softSkills={{
+                      communication: softSkillScores.communication,
+                      openness: softSkillScores.openness,
+                    }}
+                  />
+                </motion.div>
+              </div>
+            </TabsContent>
+          )}
+
+          {/* Timeline Tab */}
           {activeTab === 'timeline' && (
             <TabsContent value="timeline" className="mt-0" key="timeline" forceMount>
               <motion.div variants={itemVariants} className="bg-white/80 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">
@@ -386,6 +454,6 @@ export default function StudentDashboard() {
           )}
         </AnimatePresence>
       </Tabs>
-    </motion.div >
+    </motion.div>
   );
 }

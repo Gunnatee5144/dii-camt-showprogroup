@@ -1,0 +1,168 @@
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { BookOpen, ChevronDown, ChevronUp, Award } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+
+interface CourseGrade {
+    courseId: string;
+    courseCode: string;
+    courseName: string;
+    credits: number;
+    letterGrade: string;
+    semester: string;
+    total?: number;
+}
+
+interface CourseGradesProps {
+    grades: CourseGrade[];
+    currentSemester: string;
+}
+
+const getGradeColor = (grade: string) => {
+    if (grade === 'A') return 'bg-emerald-500 text-white';
+    if (grade === 'B+') return 'bg-blue-500 text-white';
+    if (grade === 'B') return 'bg-blue-400 text-white';
+    if (grade === 'C+') return 'bg-orange-400 text-white';
+    if (grade === 'C') return 'bg-orange-300 text-white';
+    if (grade === 'D+' || grade === 'D') return 'bg-red-400 text-white';
+    if (grade === 'F') return 'bg-red-600 text-white';
+    return 'bg-slate-300 text-slate-700';
+};
+
+const getGradeBgColor = (grade: string) => {
+    if (grade === 'A') return 'bg-emerald-50 border-emerald-100';
+    if (grade.startsWith('B')) return 'bg-blue-50 border-blue-100';
+    if (grade.startsWith('C')) return 'bg-orange-50 border-orange-100';
+    return 'bg-slate-50 border-slate-100';
+};
+
+export function CourseGradesCard({ grades, currentSemester }: CourseGradesProps) {
+    const [showAll, setShowAll] = useState(false);
+
+    const currentSemesterGrades = grades.filter(g => g.semester === currentSemester);
+    const previousSemesterGrades = grades.filter(g => g.semester !== currentSemester);
+
+    const displayedPreviousGrades = showAll ? previousSemesterGrades : previousSemesterGrades.slice(0, 3);
+
+    const totalAGrades = grades.filter(g => g.letterGrade === 'A').length;
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm"
+        >
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 text-white shadow-lg shadow-indigo-500/20">
+                        <BookOpen className="w-5 h-5" />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-bold text-slate-800">เกรดรายวิชา</h3>
+                        <p className="text-sm text-slate-500">Course Grades</p>
+                    </div>
+                </div>
+                <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">
+                    <Award className="w-3 h-3 mr-1" />
+                    {totalAGrades} เกรด A
+                </Badge>
+            </div>
+
+            {/* Current Semester */}
+            <div className="mb-6">
+                <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    ภาคเรียนปัจจุบัน ({currentSemester})
+                </h4>
+                <div className="space-y-2">
+                    {currentSemesterGrades.map((grade, index) => (
+                        <motion.div
+                            key={grade.courseId}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            className={`flex items-center justify-between p-4 rounded-2xl border ${getGradeBgColor(grade.letterGrade)}`}
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center font-bold text-slate-600 text-xs border border-slate-100">
+                                    {grade.courseCode.slice(-3)}
+                                </div>
+                                <div>
+                                    <h5 className="font-semibold text-slate-800">{grade.courseCode}</h5>
+                                    <p className="text-sm text-slate-500 line-clamp-1">{grade.courseName}</p>
+                                    <span className="text-xs text-slate-400">{grade.credits} หน่วยกิต</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                {grade.total && (
+                                    <span className="text-sm text-slate-500">{grade.total} คะแนน</span>
+                                )}
+                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold shadow-sm ${getGradeColor(grade.letterGrade)}`}>
+                                    {grade.letterGrade}
+                                </div>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Previous Semesters */}
+            {previousSemesterGrades.length > 0 && (
+                <div>
+                    <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-slate-400" />
+                        ภาคเรียนก่อนหน้า
+                    </h4>
+
+                    <AnimatePresence>
+                        <div className="space-y-2">
+                            {displayedPreviousGrades.map((grade, index) => (
+                                <motion.div
+                                    key={grade.courseId}
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center font-bold text-slate-500 text-xs">
+                                            {grade.courseCode.slice(-3)}
+                                        </div>
+                                        <div>
+                                            <h5 className="font-medium text-slate-700 text-sm">{grade.courseCode}</h5>
+                                            <p className="text-xs text-slate-500">{grade.semester} • {grade.credits} หน่วยกิต</p>
+                                        </div>
+                                    </div>
+                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold shadow-sm ${getGradeColor(grade.letterGrade)}`}>
+                                        {grade.letterGrade}
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </AnimatePresence>
+
+                    {previousSemesterGrades.length > 3 && (
+                        <Button
+                            variant="ghost"
+                            onClick={() => setShowAll(!showAll)}
+                            className="w-full mt-3 text-slate-500 hover:text-slate-700"
+                        >
+                            {showAll ? (
+                                <>
+                                    <ChevronUp className="w-4 h-4 mr-2" />
+                                    แสดงน้อยลง
+                                </>
+                            ) : (
+                                <>
+                                    <ChevronDown className="w-4 h-4 mr-2" />
+                                    ดูทั้งหมด ({previousSemesterGrades.length} วิชา)
+                                </>
+                            )}
+                        </Button>
+                    )}
+                </div>
+            )}
+        </motion.div>
+    );
+}

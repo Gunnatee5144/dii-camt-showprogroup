@@ -11,7 +11,6 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
 import { mockActivities, mockStudent } from '@/lib/mockData';
 
 const containerVariants = {
@@ -83,11 +82,27 @@ export default function Activities() {
       animate="visible"
       className="space-y-8 pb-10"
     >
-      <ThemedPageHeader
-        title="กิจกรรมและแต้มสะสม"
-        subtitle="เข้าร่วมกิจกรรม สะสมแต้ม และแลกรับของรางวัลพิเศษ"
-        icon={<Trophy className="w-7 h-7" />}
-      />
+      {/* Header Section - Matching Dashboard/Courses/Schedule Style */}
+      <div className="flex flex-col md:flex-row justify-between items-end gap-6">
+        <div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-2 text-slate-500 font-medium mb-2"
+          >
+            <Trophy className="w-4 h-4 text-amber-500" />
+            <span>สะสมแต้มและกิจกรรม</span>
+          </motion.div>
+          <motion.h1
+            className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            กิจกรรม<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600">และแต้มสะสม</span>
+          </motion.h1>
+        </div>
+      </div>
 
       {/* Bento Grid Stats - Matching Dashboard Theme */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

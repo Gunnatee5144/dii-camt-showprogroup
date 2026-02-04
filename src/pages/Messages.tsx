@@ -11,7 +11,6 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
 import { mockMessages, getMessagesByUserId, mockStudent } from '@/lib/mockData';
 
 const containerVariants = {
@@ -47,12 +46,28 @@ export default function Messages() {
       animate="visible"
       className="h-[calc(100vh-6rem)] flex flex-col gap-6"
     >
+      {/* Header Section - Matching Dashboard/Courses/Schedule Style */}
       <div className="flex-shrink-0">
-        <ThemedPageHeader
-          title="ข้อความและประกาศ"
-          subtitle="จัดการการสื่อสารและรับข่าวสารสำคัญจากทางคณะฯ"
-          icon={<Mail className="w-7 h-7" />}
-        />
+        <div className="flex flex-col md:flex-row justify-between items-end gap-6">
+          <div>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center gap-2 text-slate-500 font-medium mb-2"
+            >
+              <Mail className="w-4 h-4 text-blue-500" />
+              <span>การสื่อสารและประกาศ</span>
+            </motion.div>
+            <motion.h1
+              className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              ข้อความ<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">และประกาศ</span>
+            </motion.h1>
+          </div>
+        </div>
       </div>
 
       <div className="flex-1 min-h-0 grid grid-cols-12 gap-6 pb-4 h-full">

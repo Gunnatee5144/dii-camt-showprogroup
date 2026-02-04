@@ -42,6 +42,7 @@ import StudentProfiles from "./pages/StudentProfiles";
 import Cooperation from "./pages/Cooperation";
 import Subscription from "./pages/Subscription";
 import InternTracking from "./pages/InternTracking";
+import PersonalDashboard from "./pages/PersonalDashboard";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const App = () => (
             <Route path="/login" element={<LoginPage />} />
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/personal-dashboard" element={<PersonalDashboard />} />
               <Route path="/courses" element={<Courses />} />
               <Route path="/schedule" element={<Schedule />} />
               <Route path="/grades" element={<Grades />} />

@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
 import {
   mockStudent,
   getProjectsByStudentId,
@@ -83,12 +82,26 @@ export default function Portfolio() {
       animate="visible"
       className="space-y-8 pb-10"
     >
+      {/* Header Section - Matching Dashboard/Courses/Schedule Style */}
       <div className="flex flex-col md:flex-row justify-between items-end gap-6">
-        <ThemedPageHeader
-          title="Portfolio & CV"
-          subtitle="สร้างและจัดการโปรไฟล์ของคุณเพื่อยื่นฝึกงานและสมัครงาน"
-          icon={<Briefcase className="w-7 h-7" />}
-        />
+        <div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-2 text-slate-500 font-medium mb-2"
+          >
+            <Briefcase className="w-4 h-4 text-indigo-500" />
+            <span>โปรไฟล์และผลงาน</span>
+          </motion.div>
+          <motion.h1
+            className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            Portfolio<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600"> & CV</span>
+          </motion.h1>
+        </div>
         <div className="flex gap-3">
           <Button variant="outline" className="rounded-xl border-slate-200">
             <Share2 className="w-4 h-4 mr-2" /> แชร์โปรไฟล์
@@ -160,7 +173,7 @@ export default function Portfolio() {
                     <div className="h-48 overflow-hidden relative">
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
                       <img
-                        src={project.image || `https://placehold.co/600x400/indigo/white?text=${project.title}`}
+                        src={(project as any).images?.[0] || `https://placehold.co/600x400/indigo/white?text=${project.title}`}
                         alt={project.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />

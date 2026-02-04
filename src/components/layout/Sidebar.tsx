@@ -23,6 +23,7 @@ import {
   Search,
   Clock,
   Building,
+  Command,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -223,12 +224,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         {/* Header */}
         <div className="relative z-10 flex items-center justify-between p-6 border-b border-white/5 shrink-0">
           <Link to="/dashboard" className="flex items-center gap-4 group">
-            <div className={cn("w-12 h-12 rounded-2xl bg-gradient-to-br flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300", getRoleGradient(user.role))}>
-              <span className="text-xl font-bold text-white">D</span>
+            <div className={cn("w-12 h-12 rounded-2xl bg-gradient-to-br flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300 relative overflow-hidden", getRoleGradient(user.role))}>
+              <div className="absolute inset-0 bg-white/10 blur-xl"></div>
+              <Command className="w-6 h-6 text-white relative z-10" />
             </div>
             <div>
               <h2 className={`font-bold text-lg tracking-tight transition-colors ${activeScheme.textHover}`}>DII CAMT</h2>
-              <p className="text-xs text-slate-400 font-medium">System v2.0</p>
+              <p className="text-xs text-slate-400 font-medium tracking-wide">ShowPro v2.0</p>
             </div>
           </Link>
           <Button variant="ghost" size="icon" className="md:hidden text-slate-400 hover:text-white" onClick={onClose}>

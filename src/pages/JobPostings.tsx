@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
 import { mockJobPostings, mockCompany } from '@/lib/mockData';
 import { toast } from 'sonner';
 
@@ -105,18 +104,27 @@ export default function JobPostings() {
 
     return (
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-            <ThemedPageHeader
-                title="ประกาศรับสมัครงาน"
-                subtitle={`${companyJobPostings.length} ตำแหน่ง • ${openJobs} เปิดรับ`}
-                icon={<Briefcase className="w-7 h-7" />}
-                actions={
-                    canManage && (
+            <motion.div variants={itemVariants} className="relative">
+                <div className="flex items-center gap-2 mb-2">
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-lg">
+                        <Briefcase className="w-5 h-5" />
+                    </div>
+                    <span className="text-sm font-medium text-orange-600">ประกาศงาน</span>
+                </div>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <motion.h1 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="text-3xl font-bold text-gray-900">
+                            <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">ประกาศรับสมัครงาน</span>
+                        </motion.h1>
+                        <p className="text-gray-500 mt-1">{`${companyJobPostings.length} ตำแหน่ง • ${openJobs} เปิดรับ`}</p>
+                    </div>
+                    {canManage && (
                         <Button onClick={handleAdd} className="bg-gradient-to-r from-orange-500 to-amber-500 shadow-lg">
                             <Plus className="w-4 h-4 mr-2" />ลงประกาศใหม่
                         </Button>
-                    )
-                }
-            />
+                    )}
+                </div>
+            </motion.div>
 
             <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
@@ -139,7 +147,7 @@ export default function JobPostings() {
             </motion.div>
 
             <motion.div variants={itemVariants}>
-                <Card>
+                <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                     <CardHeader><CardTitle>รายการประกาศงาน</CardTitle></CardHeader>
                     <CardContent>
                         <div className="space-y-4">

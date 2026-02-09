@@ -11,7 +11,6 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
 import { mockCourses } from '@/lib/mockData';
 
 const containerVariants = {
@@ -30,7 +29,7 @@ const mockAssignments = [
         title: 'Project UX Design',
         courseName: 'การออกแบบประสบการณ์ผู้ใช้',
         courseCode: 'DII201',
-        dueDate: new Date('2024-02-15'),
+        dueDate: new Date('2026-02-15'),
         type: 'group',
         maxScore: 100,
         submissionCount: 35,
@@ -42,7 +41,7 @@ const mockAssignments = [
         title: 'React Portfolio',
         courseName: 'การพัฒนาเว็บแอปพลิเคชัน',
         courseCode: 'DII202',
-        dueDate: new Date('2024-02-20'),
+        dueDate: new Date('2026-02-20'),
         type: 'individual',
         maxScore: 50,
         submissionCount: 28,
@@ -54,7 +53,7 @@ const mockAssignments = [
         title: 'ML Model Training',
         courseName: 'Machine Learning พื้นฐาน',
         courseCode: 'DII301',
-        dueDate: new Date('2024-01-10'),
+        dueDate: new Date('2026-01-10'),
         type: 'individual',
         maxScore: 80,
         submissionCount: 38,
@@ -66,7 +65,7 @@ const mockAssignments = [
         title: 'Wireframe Design',
         courseName: 'การออกแบบประสบการณ์ผู้ใช้',
         courseCode: 'DII201',
-        dueDate: new Date('2024-02-28'),
+        dueDate: new Date('2026-02-28'),
         type: 'individual',
         maxScore: 30,
         submissionCount: 0,
@@ -100,17 +99,22 @@ export default function Assignments() {
             animate="visible"
             className="space-y-6"
         >
-            <ThemedPageHeader
-                title="งานมอบหมาย"
-                subtitle={`${mockAssignments.length} งาน • ${activeAssignments} กำลังดำเนินการ`}
-                icon={<ClipboardList className="w-7 h-7" />}
-                actions={
-                    <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg">
-                        <Plus className="w-4 h-4 mr-2" />
-                        สร้างงานใหม่
-                    </Button>
-                }
-            />
+            {/* Header */}
+            <div className="flex items-end justify-between">
+                <div>
+                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
+                        <ClipboardList className="w-4 h-4 text-blue-500" />
+                        <span>{`${mockAssignments.length} งาน • ${activeAssignments} กำลังดำเนินการ`}</span>
+                    </motion.div>
+                    <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                        งาน<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">มอบหมาย</span>
+                    </motion.h1>
+                </div>
+                <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg">
+                    <Plus className="w-4 h-4 mr-2" />
+                    สร้างงานใหม่
+                </Button>
+            </div>
 
             {/* Stats Cards */}
             <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -202,7 +206,7 @@ export default function Assignments() {
                             </div>
                         </div>
 
-                        <Card>
+                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                             <CardContent className="pt-6">
                                 <div className="space-y-4">
                                     {mockAssignments.map((assignment, index) => (
@@ -265,7 +269,7 @@ export default function Assignments() {
                     </TabsContent>
 
                     <TabsContent value="active">
-                        <Card>
+                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                             <CardContent className="pt-6">
                                 <div className="space-y-4">
                                     {mockAssignments.filter(a => a.status === 'active').map((assignment, index) => (
@@ -298,7 +302,7 @@ export default function Assignments() {
                     </TabsContent>
 
                     <TabsContent value="completed">
-                        <Card>
+                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                             <CardContent className="pt-6">
                                 <div className="space-y-4">
                                     {mockAssignments.filter(a => a.status === 'completed').map((assignment) => (
@@ -321,7 +325,7 @@ export default function Assignments() {
                     </TabsContent>
 
                     <TabsContent value="draft">
-                        <Card>
+                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                             <CardContent className="pt-6">
                                 <div className="space-y-4">
                                     {mockAssignments.filter(a => a.status === 'draft').map((assignment) => (

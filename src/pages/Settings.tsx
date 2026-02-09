@@ -14,7 +14,6 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -41,11 +40,19 @@ export default function Settings() {
       animate="visible"
       className="space-y-8 pb-10"
     >
-      <ThemedPageHeader
-        title="การตั้งค่าระบบ"
-        subtitle="จัดการข้อมูลส่วนตัว ความปลอดภัย และความชอบส่วนบุคคล"
-        icon={<SettingsIcon className="w-7 h-7" />}
-      />
+      {/* Header */}
+      <div>
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
+          <SettingsIcon className="w-4 h-4 text-indigo-500" />
+          <span>ระบบตั้งค่า</span>
+        </motion.div>
+        <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          การตั้งค่า<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">ระบบ</span>
+        </motion.h1>
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-slate-500 mt-2">
+          จัดการข้อมูลส่วนตัว ความปลอดภัย และความชอบส่วนบุคคล
+        </motion.p>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Sidebar - Bento Style */}

@@ -1,112 +1,122 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Printer, File, Download, CheckCircle, Search, Clock } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { FileText, Printer, File, Download, CheckCircle, Search, Clock, Plus, FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
+import { Badge } from '@/components/ui/badge';
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.06 } },
+};
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+};
 
 export default function Documents() {
     const docTemplates = [
-        { title: 'หนังสือรับรองสถานภาพ', desc: 'ใบรับรองการเป็นนักศึกษา (ภาษาไทย/อังกฤษ)', icon: FileText },
-        { title: 'Transcript', desc: 'ใบแสดงผลการเรียน (อย่างไม่เป็นทางการ)', icon: FileText },
-        { title: 'หนังสือขอความอนุเคราะห์', desc: 'หนังสือขอความอนุเคราะห์ฝึกงาน/สหกิจ', icon: File },
-        { title: 'หนังสือลากิจ/ลาป่วย', desc: 'แบบฟอร์มการลาสำหรับนักศึกษา', icon: FileText },
+        { title: 'หนังสือรับรองสถานภาพ', desc: 'ใบรับรองการเป็นนักศึกษา', icon: FileText, color: 'from-blue-500 to-indigo-500' },
+        { title: 'Transcript', desc: 'ใบแสดงผลการเรียน', icon: FileText, color: 'from-emerald-500 to-teal-500' },
+        { title: 'หนังสือขอความอนุเคราะห์', desc: 'หนังสือขอฝึกงาน/สหกิจ', icon: File, color: 'from-amber-500 to-orange-500' },
+        { title: 'หนังสือลากิจ/ลาป่วย', desc: 'แบบฟอร์มการลา', icon: FileText, color: 'from-purple-500 to-violet-500' },
     ];
 
     return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="space-y-6"
-        >
-            <ThemedPageHeader
-                title="ออกเอกสารสำคัญ"
-                subtitle="ระบบสร้างเอกสารราชการและหนังสือรับรองอัตโนมัติ"
-                icon={<Printer className="w-7 h-7" />}
-                gradient="blue"
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {docTemplates.map((doc, idx) => (
-                    <Card key={idx} className="hover:shadow-lg transition-all cursor-pointer border-l-4 border-l-blue-500">
-                        <CardHeader>
-                            <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center mb-2">
-                                <doc.icon className="w-6 h-6 text-blue-600" />
-                            </div>
-                            <CardTitle className="text-lg">{doc.title}</CardTitle>
-                            <CardDescription>{doc.desc}</CardDescription>
-                        </CardHeader>
-                    </Card>
-                ))}
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8 pb-10">
+            {/* Header */}
+            <div>
+                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
+                    <Printer className="w-4 h-4 text-blue-500" />
+                    <span>ระบบออกเอกสาร</span>
+                </motion.div>
+                <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                    ออกเอกสาร<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">สำคัญ</span>
+                </motion.h1>
             </div>
 
-            <div className="space-y-4">
-                <h3 className="text-lg font-semibold">รายการขอเอกสารล่าสุด</h3>
-
-                <Card>
-                    <CardHeader>
-                        <div className="flex justify-between items-center">
-                            <CardTitle className="text-base">คำร้องที่รอดำเนินการ</CardTitle>
-                            <div className="relative w-64">
-                                <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
-                                <Input placeholder="ค้นหาคำร้อง..." className="pl-8" />
+            {/* Document Templates Grid */}
+            <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {docTemplates.map((doc, idx) => (
+                    <motion.div key={idx} whileHover={{ scale: 1.03, y: -4 }} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${doc.color} p-6 text-white shadow-xl cursor-pointer group`}>
+                        <div className="absolute -top-8 -right-8 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500" />
+                        <div className="relative z-10">
+                            <div className="p-2.5 rounded-xl bg-white/20 backdrop-blur-sm w-fit mb-4">
+                                <doc.icon className="w-6 h-6" />
                             </div>
+                            <h3 className="font-bold text-lg mb-1">{doc.title}</h3>
+                            <p className="text-sm text-white/80">{doc.desc}</p>
                         </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-2">
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="flex justify-between items-center p-4 border rounded-lg hover:bg-gray-50">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
-                                            <Clock className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold">นายทดสอบ นักศึกษา ({642110000 + i})</p>
-                                            <p className="text-sm text-gray-500">ขอใบรับรองสถานภาพ • ยื่นเมื่อ 2 ชั่วโมงที่แล้ว</p>
-                                        </div>
+                    </motion.div>
+                ))}
+            </motion.div>
+
+            {/* Bento Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                {/* Pending Requests - 3 cols */}
+                <motion.div variants={itemVariants} className="lg:col-span-3 bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">
+                    <div className="flex justify-between items-center mb-5">
+                        <div>
+                            <h3 className="text-lg font-bold text-slate-800">คำร้องที่รอดำเนินการ</h3>
+                            <p className="text-sm text-slate-500">เอกสารที่รอตรวจสอบและออก</p>
+                        </div>
+                        <div className="relative w-56">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            <Input placeholder="ค้นหาคำร้อง..." className="pl-9 rounded-xl bg-white/80" />
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        {[1, 2, 3].map((i) => (
+                            <motion.div key={i} whileHover={{ x: 4 }} className="flex items-center justify-between p-4 rounded-2xl hover:bg-white border border-transparent hover:border-slate-100 hover:shadow-sm transition-all">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-11 h-11 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500">
+                                        <Clock className="w-5 h-5" />
                                     </div>
-                                    <div className="flex gap-2">
-                                        <Button size="sm" variant="outline">ดูรายละเอียด</Button>
-                                        <Button size="sm" className="bg-blud-600">
-                                            <Printer className="w-4 h-4 mr-2" />
-                                            ออกเอกสาร
-                                        </Button>
+                                    <div>
+                                        <p className="font-semibold text-slate-800">นายทดสอบ นักศึกษา ({642110000 + i})</p>
+                                        <p className="text-sm text-slate-400">ขอใบรับรองสถานภาพ • 2 ชั่วโมงที่แล้ว</p>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-base">ประวัติการออกเอกสาร</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-2">
-                            {[1, 2].map((i) => (
-                                <div key={i} className="flex justify-between items-center p-4 border rounded-lg hover:bg-gray-50 bg-gray-50/50">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                                            <CheckCircle className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-gray-700">นายตัวอย่าง สุขใจ ({642110010 + i})</p>
-                                            <p className="text-sm text-gray-500">Transcript • ออกเมื่อ 15 มี.ค. 2567</p>
-                                        </div>
-                                    </div>
-                                    <Button size="sm" variant="outline" className="text-gray-500">
-                                        <Download className="w-4 h-4 mr-2" />
-                                        ดาวน์โหลดซ้ำ
+                                <div className="flex gap-2">
+                                    <Button size="sm" variant="outline" className="rounded-xl text-xs">ดูรายละเอียด</Button>
+                                    <Button size="sm" className="rounded-xl bg-blue-600 hover:bg-blue-700 text-xs shadow-lg shadow-blue-200">
+                                        <Printer className="w-3.5 h-3.5 mr-1.5" /> ออกเอกสาร
                                     </Button>
                                 </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
+                            </motion.div>
+                        ))}
+                    </div>
+                </motion.div>
+
+                {/* History - 2 cols */}
+                <motion.div variants={itemVariants} className="lg:col-span-2 bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">
+                    <h3 className="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
+                        <FolderOpen className="w-5 h-5 text-emerald-500" /> ประวัติการออกเอกสาร
+                    </h3>
+                    <div className="space-y-3">
+                        {[
+                            { name: 'นายตัวอย่าง สุขใจ', doc: 'Transcript', date: '15 มี.ค. 2567' },
+                            { name: 'นางสาวทดสอบ ระบบ', doc: 'ใบรับรองสถานภาพ', date: '12 มี.ค. 2567' },
+                            { name: 'นายพัฒนา ซอฟต์แวร์', doc: 'หนังสือขอฝึกงาน', date: '10 มี.ค. 2567' },
+                        ].map((item, i) => (
+                            <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 + i * 0.1 }}
+                                className="flex items-center justify-between p-3 rounded-2xl hover:bg-white transition-all">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-500">
+                                        <CheckCircle className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <p className="font-medium text-slate-800 text-sm">{item.name}</p>
+                                        <p className="text-xs text-slate-400">{item.doc} • {item.date}</p>
+                                    </div>
+                                </div>
+                                <Button size="sm" variant="ghost" className="text-slate-400 hover:text-blue-500 rounded-xl">
+                                    <Download className="w-4 h-4" />
+                                </Button>
+                            </motion.div>
+                        ))}
+                    </div>
+                </motion.div>
             </div>
         </motion.div>
     );

@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Search, MapPin, Plus, Clock, Edit3, Save, AlertCircle, CheckCircle, XCircle, Bell } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
 import { DraggableSchedule, ScheduleItem } from '@/components/schedule/DraggableSchedule';
 import { toast } from 'sonner';
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.06 } },
+};
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+};
 
 const initialScheduleData: ScheduleItem[] = [
     { id: '1', day: 1, startTime: '09:00', endTime: '12:00', courseCode: 'DII302', courseName: 'Advanced AI', room: 'DII-301' },
@@ -37,13 +45,10 @@ export default function ScheduleManagement() {
     ];
 
     const handleApprove = (req: any) => {
-        // Simulate updating the schedule
         toast.success(`อนุมัติคำขอของ ${req.lecturer} เรียบร้อยแล้ว`, {
             description: 'ระบบได้ทำการอัปเดตตารางและแจ้งเตือนนักศึกษาเรียบร้อยแล้ว'
         });
         setRequests(prev => prev.filter(r => r.id !== req.id));
-
-        // In a real app, we would merge the change into 'schedule' state here
     };
 
     const handleReject = (id: number) => {
@@ -52,139 +57,107 @@ export default function ScheduleManagement() {
     };
 
     return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="space-y-6"
-        >
-            <ThemedPageHeader
-                title="จัดการตารางเรียนและห้อง"
-                subtitle="บริหารจัดการการใช้ห้องเรียนและตารางสอน"
-                icon={<Calendar className="w-7 h-7" />}
-                gradient="purple"
-                actions={
-                    <Button className="bg-purple-600 hover:bg-purple-700">
-                        <Plus className="w-4 h-4 mr-2" />
-                        จองห้องเรียน
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8 pb-10">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                <div>
+                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
+                        <Calendar className="w-4 h-4 text-purple-500" />
+                        <span>ระบบจัดการตารางเรียน</span>
+                    </motion.div>
+                    <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                        จัดการ<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-violet-600">ตารางเรียนและห้อง</span>
+                    </motion.h1>
+                </div>
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                    <Button className="rounded-xl bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-200 h-11">
+                        <Plus className="w-4 h-4 mr-2" /> จองห้องเรียน
                     </Button>
-                }
-            />
+                </motion.div>
+            </div>
 
-            {/* Pending Requests Section */}
+            {/* Pending Requests */}
             <AnimatePresence>
                 {requests.length > 0 && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                    >
-                        <Card className="border-orange-200 bg-orange-50/50">
-                            <CardHeader className="pb-3">
-                                <CardTitle className="text-lg flex items-center gap-2 text-orange-800">
-                                    <Bell className="w-5 h-5 animate-pulse" />
-                                    คำขอแก้ไขตารางสอน ({requests.length})
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-3">
-                                    {requests.map(req => (
-                                        <div key={req.id} className="bg-white p-4 rounded-xl border shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <span className="font-bold text-gray-800">{req.lecturer}</span>
-                                                    <Badge variant="outline">{req.courseCode}</Badge>
-                                                    <Badge className={req.type === 'permanent' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}>
-                                                        {req.type === 'permanent' ? 'เปลี่ยนถาวร' : 'เฉพาะครั้งนี้'}
-                                                    </Badge>
-                                                </div>
-                                                <p className="text-sm text-gray-600">
-                                                    ขอเปลี่ยนจาก <span className="text-red-500 font-medium">{req.oldTime}</span> เป็น <span className="text-green-600 font-medium">{req.newTime}</span>
-                                                </p>
-                                                <p className="text-sm text-gray-500 mt-1">เหตุผล: {req.reason}</p>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <Button size="sm" variant="outline" className="text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => handleReject(req.id)}>
-                                                    <XCircle className="w-4 h-4 mr-1" />
-                                                    ปฏิเสธ
-                                                </Button>
-                                                <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleApprove(req)}>
-                                                    <CheckCircle className="w-4 h-4 mr-1" />
-                                                    อนุมัติ & แจ้งนักศึกษา
-                                                </Button>
-                                            </div>
+                    <motion.div variants={itemVariants} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                        className="bg-amber-50/80 backdrop-blur-xl border border-amber-200 rounded-3xl p-6 shadow-sm">
+                        <h3 className="text-lg font-bold text-amber-800 mb-4 flex items-center gap-2">
+                            <Bell className="w-5 h-5 animate-pulse" /> คำขอแก้ไขตารางสอน ({requests.length})
+                        </h3>
+                        <div className="space-y-3">
+                            {requests.map(req => (
+                                <motion.div key={req.id} whileHover={{ x: 4 }} className="bg-white p-5 rounded-2xl border border-amber-100 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                            <span className="font-bold text-slate-800">{req.lecturer}</span>
+                                            <Badge variant="outline" className="rounded-lg text-xs">{req.courseCode}</Badge>
+                                            <Badge className={`rounded-lg text-xs ${req.type === 'permanent' ? 'bg-purple-100 text-purple-700 border-purple-200' : 'bg-blue-100 text-blue-700 border-blue-200'}`}>
+                                                {req.type === 'permanent' ? 'เปลี่ยนถาวร' : 'เฉพาะครั้งนี้'}
+                                            </Badge>
                                         </div>
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
+                                        <p className="text-sm text-slate-600">
+                                            จาก <span className="text-red-500 font-medium">{req.oldTime}</span> เป็น <span className="text-emerald-600 font-medium">{req.newTime}</span>
+                                        </p>
+                                        <p className="text-sm text-slate-400 mt-1">เหตุผล: {req.reason}</p>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <Button size="sm" variant="outline" className="text-red-500 hover:bg-red-50 border-red-200 rounded-xl" onClick={() => handleReject(req.id)}>
+                                            <XCircle className="w-4 h-4 mr-1" /> ปฏิเสธ
+                                        </Button>
+                                        <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600 rounded-xl shadow-lg shadow-emerald-200" onClick={() => handleApprove(req)}>
+                                            <CheckCircle className="w-4 h-4 mr-1" /> อนุมัติ
+                                        </Button>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            <div className="flex gap-4 mb-4">
-                <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input placeholder="ค้นหาห้องเรียน..." className="pl-10" />
-                </div>
-                <Button variant="outline">ตรวจสอบตารางว่าง</Button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Room Cards */}
+            <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {rooms.map((room, idx) => (
-                    <Card key={idx} className="hover:shadow-md transition-shadow">
-                        <CardHeader className="pb-2">
-                            <div className="flex justify-between items-start">
-                                <CardTitle className="text-base">{room.name}</CardTitle>
-                                <div className={`w-3 h-3 rounded-full ${room.status === 'available' ? 'bg-green-500' :
-                                    room.status === 'occupied' ? 'bg-red-500' : 'bg-yellow-500'
-                                    }`} />
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-gray-500 flex items-center gap-2 mb-4">
-                                <MapPin className="w-4 h-4" />
-                                ความจุ {room.capacity} ที่นั่ง
-                            </p>
-                            <div className="flex gap-2">
-                                <Button size="sm" variant="outline" className="flex-1 w-full">ตาราง</Button>
-                                <Button size="sm" className="flex-1 w-full">จอง</Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-
-            <Card className="min-h-[600px]">
-                <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <CardTitle>ตารางสอนรวม</CardTitle>
-                            <p className="text-sm text-gray-500">จัดการตารางสอนอาจารย์และห้องเรียน</p>
+                    <motion.div key={idx} whileHover={{ scale: 1.02 }}
+                        className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
+                        <div className="flex justify-between items-start mb-3">
+                            <h4 className="font-bold text-slate-800 text-sm">{room.name}</h4>
+                            <div className={`w-3 h-3 rounded-full ${room.status === 'available' ? 'bg-emerald-500' : room.status === 'occupied' ? 'bg-red-500' : 'bg-amber-500'}`} />
                         </div>
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center space-x-2 bg-gray-50 p-2 rounded-lg border">
-                                <Switch id="edit-mode" checked={isEditMode} onCheckedChange={setIsEditMode} />
-                                <Label htmlFor="edit-mode" className="cursor-pointer flex items-center gap-2">
-                                    <Edit3 className="w-4 h-4" />
-                                    แก้ไขตาราง
-                                </Label>
-                            </div>
+                        <p className="text-sm text-slate-400 flex items-center gap-2 mb-4">
+                            <MapPin className="w-3.5 h-3.5" /> ความจุ {room.capacity} ที่นั่ง
+                        </p>
+                        <div className="flex gap-2">
+                            <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs">ตาราง</Button>
+                            <Button size="sm" className="flex-1 rounded-xl text-xs bg-purple-600 hover:bg-purple-700">จอง</Button>
+                        </div>
+                    </motion.div>
+                ))}
+            </motion.div>
+
+            {/* Schedule */}
+            <motion.div variants={itemVariants} className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm min-h-[600px]">
+                <div className="flex items-center justify-between mb-5">
+                    <div>
+                        <h3 className="text-lg font-bold text-slate-800">ตารางสอนรวม</h3>
+                        <p className="text-sm text-slate-500">จัดการตารางสอนอาจารย์และห้องเรียน</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200">
+                            <Switch id="edit-mode" checked={isEditMode} onCheckedChange={setIsEditMode} />
+                            <Label htmlFor="edit-mode" className="cursor-pointer flex items-center gap-2 text-sm">
+                                <Edit3 className="w-4 h-4" /> แก้ไขตาราง
+                            </Label>
                         </div>
                     </div>
-                </CardHeader>
-                <CardContent>
-                    {isEditMode && (
-                        <div className="mb-4 p-3 bg-blue-50 border border-blue-100 rounded-lg text-sm text-blue-700 flex items-center gap-2">
-                            <Edit3 className="w-4 h-4" />
-                            คุณอยู่ในโหมดแก้ไข สามารถลากวิชาเพื่อเปลี่ยนเวลาได้
-                        </div>
-                    )}
-                    <DraggableSchedule
-                        initialSchedule={schedule}
-                        editable={isEditMode}
-                    />
-                </CardContent>
-            </Card>
+                </div>
+                {isEditMode && (
+                    <div className="mb-4 p-3.5 bg-blue-50 border border-blue-100 rounded-2xl text-sm text-blue-700 flex items-center gap-2">
+                        <Edit3 className="w-4 h-4" /> คุณอยู่ในโหมดแก้ไข สามารถลากวิชาเพื่อเปลี่ยนเวลาได้
+                    </div>
+                )}
+                <DraggableSchedule initialSchedule={schedule} editable={isEditMode} />
+            </motion.div>
         </motion.div>
     );
 }

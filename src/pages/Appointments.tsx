@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
 import { mockAppointments, mockLecturers } from '@/lib/mockData';
 
 const containerVariants = {
@@ -39,16 +38,23 @@ export default function Appointments() {
 
     return (
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-            <ThemedPageHeader
-                title="นัดหมาย"
-                subtitle={`${mockAppointments.length} นัดหมาย • ${pendingCount} รอยืนยัน`}
-                icon={<Calendar className="w-7 h-7" />}
-                actions={!isTeacher && (
+            {/* Header */}
+            <div className="flex items-end justify-between">
+                <div>
+                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
+                        <Calendar className="w-4 h-4 text-blue-500" />
+                        <span>{`${mockAppointments.length} นัดหมาย • ${pendingCount} รอยืนยัน`}</span>
+                    </motion.div>
+                    <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                        ระบบ<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">นัดหมาย</span>
+                    </motion.h1>
+                </div>
+                {!isTeacher && (
                     <Button className="bg-gradient-to-r from-blue-500 to-cyan-500" onClick={() => toast.info('ระบบการจองกำลังปรับปรุง โปรดติดต่อเจ้าหน้าที่')}>
                         <Plus className="w-4 h-4 mr-2" />จองนัดหมายใหม่
                     </Button>
                 )}
-            />
+            </div>
 
             <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
@@ -72,7 +78,7 @@ export default function Appointments() {
 
             {!isTeacher && (
                 <motion.div variants={itemVariants}>
-                    <Card>
+                    <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2"><User className="w-5 h-5" />อาจารย์ที่เปิดให้นัดพบ</CardTitle>
                         </CardHeader>
@@ -110,7 +116,7 @@ export default function Appointments() {
                     </TabsList>
 
                     <TabsContent value="upcoming">
-                        <Card><CardContent className="pt-6">
+                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm"><CardContent className="pt-6">
                             <div className="space-y-4">
                                 {mockAppointments.filter(a => a.status === 'confirmed').map((apt) => (
                                     <div key={apt.id} className="flex items-start gap-4 p-4 border rounded-xl bg-gradient-to-r from-blue-50 to-white">
@@ -134,7 +140,7 @@ export default function Appointments() {
                     </TabsContent>
 
                     <TabsContent value="pending">
-                        <Card><CardContent className="pt-6">
+                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm"><CardContent className="pt-6">
                             <div className="space-y-4">
                                 {mockAppointments.filter(a => a.status === 'pending').map((apt) => (
                                     <div key={apt.id} className="flex items-start gap-4 p-4 border rounded-xl bg-orange-50">
@@ -158,7 +164,7 @@ export default function Appointments() {
                     </TabsContent>
 
                     <TabsContent value="completed">
-                        <Card><CardContent className="pt-6">
+                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm"><CardContent className="pt-6">
                             <div className="space-y-3">
                                 {mockAppointments.filter(a => a.status === 'completed').map((apt) => (
                                     <div key={apt.id} className="flex items-center justify-between p-4 border rounded-xl bg-gray-50">

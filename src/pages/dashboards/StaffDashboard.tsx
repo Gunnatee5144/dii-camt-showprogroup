@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
 import {
   mockStaff,
   mockStudents,
@@ -50,11 +49,18 @@ export default function StaffDashboard() {
       animate="visible"
       className="space-y-6"
     >
-      <ThemedPageHeader
-        title={`สวัสดี, ${staff.nameThai} 👔`}
-        subtitle={`${staff.department} • ${staff.position}`}
-        icon={<Settings className="w-7 h-7" />}
-      />
+      <motion.div variants={itemVariants} className="relative">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-violet-500 text-white shadow-lg">
+            <Settings className="w-5 h-5" />
+          </div>
+          <span className="text-sm font-medium text-purple-600">แดชบอร์ดเจ้าหน้าที่</span>
+        </div>
+        <motion.h1 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="text-3xl font-bold text-gray-900">
+          <span className="bg-gradient-to-r from-purple-500 to-violet-500 bg-clip-text text-transparent">{`สวัสดี, ${staff.nameThai} 👔`}</span>
+        </motion.h1>
+        <p className="text-gray-500 mt-1">{`${staff.department} • ${staff.position}`}</p>
+      </motion.div>
 
       <motion.div variants={itemVariants} className="flex justify-end gap-2">
         <Button variant="outline" onClick={() => toast.info('ระบบจัดการตารางเรียนกำลังเปิดใช้งานเร็วๆนี้')}>
@@ -152,7 +158,7 @@ export default function StaffDashboard() {
       </motion.div>
 
       <motion.div variants={itemVariants}>
-        <Card>
+        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
           <CardHeader>
             <CardTitle>ภาพรวมระบบ DII CAMT</CardTitle>
             <CardDescription>ข้อมูลสรุปของระบบบริหารจัดการ</CardDescription>

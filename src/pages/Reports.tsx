@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
 import { mockStudents, mockCourses, mockActivities } from '@/lib/mockData';
 
 const containerVariants = {
@@ -31,16 +30,25 @@ export default function Reports() {
 
     return (
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-            <ThemedPageHeader
-                title="รายงานและสถิติ"
-                subtitle="วิเคราะห์ข้อมูลภาพรวมของระบบ"
-                icon={<BarChart3 className="w-7 h-7" />}
-                actions={
+            <motion.div variants={itemVariants} className="relative">
+                <div className="flex items-center gap-2 mb-2">
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-lg">
+                        <BarChart3 className="w-5 h-5" />
+                    </div>
+                    <span className="text-sm font-medium text-emerald-600">รายงานและสถิติ</span>
+                </div>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <motion.h1 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="text-3xl font-bold text-gray-900">
+                            <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">รายงานและสถิติ</span>
+                        </motion.h1>
+                        <p className="text-gray-500 mt-1">วิเคราะห์ข้อมูลภาพรวมของระบบ</p>
+                    </div>
                     <Button variant="outline">
                         <Download className="w-4 h-4 mr-2" />ดาวน์โหลดรายงาน
                     </Button>
-                }
-            />
+                </div>
+            </motion.div>
 
             <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
@@ -72,7 +80,7 @@ export default function Reports() {
 
                     <TabsContent value="academic" className="space-y-4">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            <Card>
+                            <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                                 <CardHeader><CardTitle>การกระจายตัวของ GPA</CardTitle></CardHeader>
                                 <CardContent>
                                     <div className="space-y-4">
@@ -97,7 +105,7 @@ export default function Reports() {
                                 </CardContent>
                             </Card>
 
-                            <Card>
+                            <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                                 <CardHeader><CardTitle>สถานะนักศึกษา</CardTitle></CardHeader>
                                 <CardContent>
                                     <div className="space-y-4">
@@ -121,7 +129,7 @@ export default function Reports() {
                     </TabsContent>
 
                     <TabsContent value="students">
-                        <Card>
+                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                             <CardHeader><CardTitle>จำนวนนักศึกษาแยกตามชั้นปี</CardTitle></CardHeader>
                             <CardContent>
                                 <div className="grid grid-cols-4 gap-4">
@@ -138,7 +146,7 @@ export default function Reports() {
                     </TabsContent>
 
                     <TabsContent value="activities">
-                        <Card>
+                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                             <CardHeader><CardTitle>สรุปกิจกรรม</CardTitle></CardHeader>
                             <CardContent>
                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

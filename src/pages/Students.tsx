@@ -11,7 +11,6 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
 import { mockStudents } from '@/lib/mockData';
 
 const containerVariants = {
@@ -60,11 +59,15 @@ export default function Students() {
       animate="visible"
       className="space-y-6"
     >
-      <ThemedPageHeader
-        title="จัดการนักศึกษา"
-        subtitle={`ทั้งหมด ${mockStudents.length} คน • เสี่ยง ${atRiskCount} คน`}
-        icon={<Users className="w-7 h-7" />}
-      />
+      <div>
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
+              <Users className="w-4 h-4 text-blue-500" />
+              <span>{`ทั้งหมด ${mockStudents.length} คน • เสี่ยง ${atRiskCount} คน`}</span>
+          </motion.div>
+          <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              จัดการ<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">นักศึกษา</span>
+          </motion.h1>
+      </div>
 
       {/* Stats Cards */}
       <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -171,7 +174,7 @@ export default function Students() {
 
       {/* Student List */}
       <motion.div variants={itemVariants}>
-        <Card>
+        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <GraduationCap className="w-5 h-5" />

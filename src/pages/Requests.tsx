@@ -34,8 +34,8 @@ const initialRequests = [
     status: 'pending',
     step: 2,
     totalSteps: 4,
-    createdAt: '2024-01-08',
-    updatedAt: '2024-01-09',
+    createdAt: '2026-01-08',
+    updatedAt: '2026-01-09',
     description: 'ขอลงทะเบียนเรียนเกินเนื่องจากต้องการจบการศึกษาตามกำหนด วิชาที่ต้องการเพิ่มคือ 261499',
     documents: ['transcript.pdf', 'reg_form.pdf']
   },
@@ -46,8 +46,8 @@ const initialRequests = [
     status: 'approved',
     step: 3,
     totalSteps: 3,
-    createdAt: '2024-01-05',
-    updatedAt: '2024-01-06',
+    createdAt: '2026-01-05',
+    updatedAt: '2026-01-06',
     description: 'สำหรับใช้ในการทำวีซ่าท่องเที่ยวต่างประเทศ',
     documents: []
   },
@@ -58,8 +58,8 @@ const initialRequests = [
     status: 'rejected',
     step: 1,
     totalSteps: 3,
-    createdAt: '2024-03-03',
-    updatedAt: '2024-03-04',
+    createdAt: '2026-03-03',
+    updatedAt: '2026-03-04',
     description: 'ขอเปลี่ยนจากกลุ่ม 01 เป็นกลุ่ม 02 เนื่องจากตารางเรียนชนกับวิชาเลือกเสรี',
     documents: ['schedule.png']
   },

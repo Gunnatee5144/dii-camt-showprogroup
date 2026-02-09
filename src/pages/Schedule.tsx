@@ -256,8 +256,13 @@ export default function Schedule() {
     >
       <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">ตารางสอน</h1>
-          <p className="text-slate-500 mt-1">จัดการเวลาและตารางสอนของคุณ</p>
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
+            <Calendar className="w-4 h-4 text-purple-500" />
+            <span>จัดการเวลาและตารางสอนของคุณ</span>
+          </motion.div>
+          <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+            ตาราง<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">สอน</span>
+          </motion.h1>
         </div>
         <Button
           variant={isEditMode ? "secondary" : "default"}

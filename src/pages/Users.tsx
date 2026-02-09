@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
 import { mockStudents, mockLecturers, mockStaffUsers, mockCompanies } from '@/lib/mockData';
 import { toast } from 'sonner';
 
@@ -92,16 +91,25 @@ export default function UsersPage() {
 
     return (
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-            <ThemedPageHeader
-                title="จัดการผู้ใช้งาน"
-                subtitle={`ผู้ใช้ทั้งหมด ${totalUsers} คน`}
-                icon={<Users className="w-7 h-7" />}
-                actions={
+            <motion.div variants={itemVariants} className="relative">
+                <div className="flex items-center gap-2 mb-2">
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-violet-500 text-white shadow-lg">
+                        <Users className="w-5 h-5" />
+                    </div>
+                    <span className="text-sm font-medium text-purple-600">จัดการผู้ใช้งาน</span>
+                </div>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <motion.h1 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="text-3xl font-bold text-gray-900">
+                            <span className="bg-gradient-to-r from-purple-500 to-violet-500 bg-clip-text text-transparent">จัดการผู้ใช้งาน</span>
+                        </motion.h1>
+                        <p className="text-gray-500 mt-1">{`ผู้ใช้ทั้งหมด ${totalUsers} คน`}</p>
+                    </div>
                     <Button onClick={handleAdd} className="bg-gradient-to-r from-purple-500 to-violet-500 shadow-lg">
                         <Plus className="w-4 h-4 mr-2" />เพิ่มผู้ใช้ใหม่
                     </Button>
-                }
-            />
+                </div>
+            </motion.div>
 
             <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
@@ -142,7 +150,7 @@ export default function UsersPage() {
 
                     {['all', 'student', 'lecturer', 'staff', 'company'].map(tab => (
                         <TabsContent key={tab} value={tab}>
-                            <Card><CardContent className="pt-6">
+                            <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm"><CardContent className="pt-6">
                                 <div className="space-y-3">
                                     <AnimatePresence>
                                         {filteredUsers.filter(u => tab === 'all' || u.type === tab).map((user) => (

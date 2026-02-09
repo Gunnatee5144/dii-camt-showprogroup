@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -19,12 +18,12 @@ const itemVariants = {
 };
 
 const mockAuditLogs = [
-    { id: 'LOG001', userId: 'STU001', userName: 'สมชาย ใจดี', userRole: 'student', action: 'login', resource: 'auth', timestamp: new Date('2024-01-09T08:30:00'), status: 'success' },
-    { id: 'LOG002', userId: 'LEC001', userName: 'ดร.สมศักดิ์ วิชาการ', userRole: 'lecturer', action: 'update_grade', resource: 'grades', timestamp: new Date('2024-01-09T09:15:00'), status: 'success' },
-    { id: 'LOG003', userId: 'STA001', userName: 'สมหญิง รักงาน', userRole: 'staff', action: 'approve_request', resource: 'requests', timestamp: new Date('2024-01-09T10:00:00'), status: 'success' },
-    { id: 'LOG004', userId: 'COM001', userName: 'Tech Innovation', userRole: 'company', action: 'view_student', resource: 'students', timestamp: new Date('2024-01-09T11:30:00'), status: 'success' },
-    { id: 'LOG005', userId: 'ADM001', userName: 'ผู้ดูแลระบบ', userRole: 'admin', action: 'create_user', resource: 'users', timestamp: new Date('2024-01-09T14:00:00'), status: 'success' },
-    { id: 'LOG006', userId: 'STU002', userName: 'สุดา มณี', userRole: 'student', action: 'login', resource: 'auth', timestamp: new Date('2024-01-09T14:30:00'), status: 'failed' },
+    { id: 'LOG001', userId: 'STU001', userName: 'สมชาย ใจดี', userRole: 'student', action: 'login', resource: 'auth', timestamp: new Date('2026-01-09T08:30:00'), status: 'success' },
+    { id: 'LOG002', userId: 'LEC001', userName: 'ดร.สมศักดิ์ วิชาการ', userRole: 'lecturer', action: 'update_grade', resource: 'grades', timestamp: new Date('2026-01-09T09:15:00'), status: 'success' },
+    { id: 'LOG003', userId: 'STA001', userName: 'สมหญิง รักงาน', userRole: 'staff', action: 'approve_request', resource: 'requests', timestamp: new Date('2026-01-09T10:00:00'), status: 'success' },
+    { id: 'LOG004', userId: 'COM001', userName: 'Tech Innovation', userRole: 'company', action: 'view_student', resource: 'students', timestamp: new Date('2026-01-09T11:30:00'), status: 'success' },
+    { id: 'LOG005', userId: 'ADM001', userName: 'ผู้ดูแลระบบ', userRole: 'admin', action: 'create_user', resource: 'users', timestamp: new Date('2026-01-09T14:00:00'), status: 'success' },
+    { id: 'LOG006', userId: 'STU002', userName: 'สุดา มณี', userRole: 'student', action: 'login', resource: 'auth', timestamp: new Date('2026-01-09T14:30:00'), status: 'failed' },
 ];
 
 export default function Audit() {
@@ -61,14 +60,23 @@ export default function Audit() {
 
     return (
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-            <ThemedPageHeader
-                title="Audit Log"
-                subtitle="ประวัติการใช้งานระบบ"
-                icon={<Shield className="w-7 h-7" />}
-                actions={
+            <motion.div variants={itemVariants} className="relative">
+                <div className="flex items-center gap-2 mb-2">
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-white shadow-lg">
+                        <Shield className="w-5 h-5" />
+                    </div>
+                    <span className="text-sm font-medium text-indigo-600">ระบบตรวจสอบ</span>
+                </div>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <motion.h1 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="text-3xl font-bold text-gray-900">
+                            <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">Audit Log</span>
+                        </motion.h1>
+                        <p className="text-gray-500 mt-1">ประวัติการใช้งานระบบ</p>
+                    </div>
                     <Button variant="outline"><Download className="w-4 h-4 mr-2" />ส่งออก</Button>
-                }
-            />
+                </div>
+            </motion.div>
 
             <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
@@ -109,7 +117,7 @@ export default function Audit() {
                     </Select>
                 </div>
 
-                <Card>
+                <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                     <CardContent className="pt-6">
                         <div className="space-y-3">
                             {filteredLogs.map((log, index) => (

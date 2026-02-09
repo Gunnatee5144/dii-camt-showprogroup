@@ -46,12 +46,12 @@ const softSkillScores = {
 const peerFeedbacks = [
     { projectName: 'Capstone Project', teamSize: 5, averageScore: 4.6, date: '15 ม.ค. 68' },
     { projectName: 'UX Design Workshop', teamSize: 4, averageScore: 4.3, date: '20 พ.ย. 67' },
-    { projectName: 'Hackathon 2024', teamSize: 4, averageScore: 4.8, date: '10 มี.ค. 67' },
+    { projectName: 'Hackathon 2026', teamSize: 4, averageScore: 4.8, date: '10 มี.ค. 67' },
 ];
 
 // Mock data for Technical Skills Activities
 const technicalActivities = [
-    { name: 'CAMT Hackathon 2024', type: 'แข่งขัน', date: 'มี.ค. 67' },
+    { name: 'CAMT Hackathon 2026', type: 'แข่งขัน', date: 'มี.ค. 67' },
     { name: 'React Workshop', type: 'อบรม', date: 'ก.พ. 67' },
     { name: 'UX Design Bootcamp', type: 'อบรม', date: 'ม.ค. 67' },
 ];

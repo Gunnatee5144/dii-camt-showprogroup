@@ -149,11 +149,11 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="rounded-xl cursor-pointer py-2.5">
+                <DropdownMenuItem className="rounded-xl cursor-pointer py-2.5" onClick={() => navigate('/personal-dashboard')}>
                   <User className="mr-2 h-4 w-4 text-slate-500" />
                   <span className="font-medium">โปรไฟล์ของฉัน</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="rounded-xl cursor-pointer py-2.5">
+                <DropdownMenuItem className="rounded-xl cursor-pointer py-2.5" onClick={() => navigate('/settings')}>
                   <Settings className="mr-2 h-4 w-4 text-slate-500" />
                   <span className="font-medium">ตั้งค่าระบบ</span>
                 </DropdownMenuItem>

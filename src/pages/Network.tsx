@@ -1,12 +1,19 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Globe, Building, Search, MapPin, Users, Handshake, ExternalLink } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
 import { mockCompanies } from '@/lib/mockData';
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.06 } },
+};
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+};
 
 export default function Network() {
     const [searchQuery, setSearchQuery] = React.useState('');
@@ -17,90 +24,74 @@ export default function Network() {
     );
 
     return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="space-y-6"
-        >
-            <ThemedPageHeader
-                title="ฐานข้อมูลเครือข่าย"
-                subtitle={`พันธมิตรและสถานประกอบการทั้งหมด ${mockCompanies.length} แห่ง`}
-                icon={<Globe className="w-7 h-7" />}
-                gradient="orange"
-                actions={
-                    <Button className="bg-orange-600 hover:bg-orange-700">
-                        <Building className="w-4 h-4 mr-2" />
-                        เพิ่มสถานประกอบการ
-                    </Button>
-                }
-            />
-
-            {/* Search */}
-            <div className="flex gap-4">
-                <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                        placeholder="ค้นหาชื่อบริษัท, อุตสาหกรรม..."
-                        value={searchQuery}
-                        onChange={e => setSearchQuery(e.target.value)}
-                        className="pl-10"
-                    />
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8 pb-10">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                <div>
+                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
+                        <Globe className="w-4 h-4 text-orange-500" />
+                        <span>ฐานข้อมูลพันธมิตร</span>
+                    </motion.div>
+                    <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                        เครือข่าย<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">สถานประกอบการ</span>
+                    </motion.h1>
+                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-slate-500 mt-2">
+                        พันธมิตรและสถานประกอบการทั้งหมด {mockCompanies.length} แห่ง
+                    </motion.p>
                 </div>
-                <Button variant="outline">ตัวกรองอุตสาหกรรม</Button>
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                    <Button className="rounded-xl bg-orange-500 hover:bg-orange-600 shadow-lg shadow-orange-200 h-11">
+                        <Building className="w-4 h-4 mr-2" /> เพิ่มสถานประกอบการ
+                    </Button>
+                </motion.div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {filteredCompanies.map((company, index) => (
-                    <motion.div
-                        key={company.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                    >
-                        <Card className="h-full hover:shadow-lg transition-shadow border-l-4 border-l-orange-500">
-                            <CardHeader>
-                                <div className="flex justify-between items-start">
-                                    <div className="flex gap-4">
-                                        <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center text-2xl font-bold text-gray-400">
-                                            {company.companyName.charAt(0)}
-                                        </div>
-                                        <div>
-                                            <CardTitle className="text-xl">{company.companyName}</CardTitle>
-                                            <CardDescription className="text-base mt-1">{company.companyNameThai}</CardDescription>
-                                            <Badge variant="outline" className="mt-2">{company.industry}</Badge>
-                                        </div>
-                                    </div>
-                                    <Button variant="ghost" size="icon">
-                                        <ExternalLink className="w-4 h-4 text-gray-400" />
-                                    </Button>
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-                                    <div className="flex items-center gap-2 text-gray-600">
-                                        <MapPin className="w-4 h-4" />
-                                        <span className="truncate">{company.location}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-gray-600">
-                                        <Users className="w-4 h-4" />
-                                        <span>50-200 คน (ขนาดกลาง)</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-gray-600">
-                                        <Handshake className="w-4 h-4" />
-                                        <span>MOU: Active</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-gray-600">
-                                        <Globe className="w-4 h-4" />
-                                        <span className="truncate">{company.website}</span>
-                                    </div>
-                                </div>
+            {/* Search Bar */}
+            <motion.div variants={itemVariants} className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row gap-3">
+                <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Input placeholder="ค้นหาชื่อบริษัท, อุตสาหกรรม..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 rounded-xl bg-white/80 border-slate-200" />
+                </div>
+                <Button variant="outline" className="rounded-xl">ตัวกรองอุตสาหกรรม</Button>
+            </motion.div>
 
-                                <div className="flex gap-2 mt-4 pt-4 border-t">
-                                    <Button size="sm" variant="outline" className="flex-1">ส่งนักศึกษาฝึกงาน</Button>
-                                    <Button size="sm" variant="outline" className="flex-1">แก้ไขข้อมูล</Button>
+            {/* Company Cards Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                {filteredCompanies.map((company, index) => (
+                    <motion.div key={company.id} variants={itemVariants} whileHover={{ y: -4 }}
+                        className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all group">
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="flex gap-4">
+                                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-orange-200">
+                                    {company.companyName.charAt(0)}
                                 </div>
-                            </CardContent>
-                        </Card>
+                                <div>
+                                    <h3 className="text-xl font-bold text-slate-800">{company.companyName}</h3>
+                                    <p className="text-sm text-slate-500 mt-0.5">{company.companyNameThai}</p>
+                                    <Badge variant="outline" className="mt-2 rounded-lg text-xs">{company.industry}</Badge>
+                                </div>
+                            </div>
+                            <Button variant="ghost" size="icon" className="text-slate-300 hover:text-orange-500 rounded-xl">
+                                <ExternalLink className="w-4 h-4" />
+                            </Button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3 text-sm mb-4">
+                            {[
+                                { icon: MapPin, text: company.address || 'ไม่ระบุที่อยู่' },
+                                { icon: Users, text: '50-200 คน (ขนาดกลาง)' },
+                                { icon: Handshake, text: 'MOU: Active' },
+                                { icon: Globe, text: company.website },
+                            ].map((item, i) => (
+                                <div key={i} className="flex items-center gap-2 text-slate-500">
+                                    <item.icon className="w-4 h-4 flex-shrink-0" />
+                                    <span className="truncate">{item.text}</span>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="flex gap-2 pt-4 border-t border-slate-100">
+                            <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs">ส่งนักศึกษาฝึกงาน</Button>
+                            <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs">แก้ไขข้อมูล</Button>
+                        </div>
                     </motion.div>
                 ))}
             </div>

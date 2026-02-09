@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
 import { mockStudents, mockCompany } from '@/lib/mockData';
 
 const containerVariants = {
@@ -42,11 +41,22 @@ export default function StudentProfiles() {
 
     return (
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-            <ThemedPageHeader
-                title="โปรไฟล์นักศึกษา"
-                subtitle={`${accessibleStudents.length} คนที่อนุญาตให้ดูโปรไฟล์`}
-                icon={<GraduationCap className="w-7 h-7" />}
-            />
+            <motion.div variants={itemVariants} className="relative">
+                <div className="flex items-center gap-2 mb-2">
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 text-white shadow-lg">
+                        <GraduationCap className="w-5 h-5" />
+                    </div>
+                    <span className="text-sm font-medium text-blue-600">โปรไฟล์นักศึกษา</span>
+                </div>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <motion.h1 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="text-3xl font-bold text-gray-900">
+                            <span className="bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">โปรไฟล์นักศึกษา</span>
+                        </motion.h1>
+                        <p className="text-gray-500 mt-1">{`${accessibleStudents.length} คนที่อนุญาตให้ดูโปรไฟล์`}</p>
+                    </div>
+                </div>
+            </motion.div>
 
             <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
@@ -102,7 +112,7 @@ export default function StudentProfiles() {
                             transition={{ delay: index * 0.05 }}
                             whileHover={{ scale: 1.02 }}
                         >
-                            <Card className="h-full hover:shadow-lg transition-all cursor-pointer group">
+                            <Card className="h-full hover:shadow-lg transition-all cursor-pointer group bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                                 <CardContent className="pt-6">
                                     <div className="flex items-start gap-4 mb-4">
                                         <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-xl shadow-lg">

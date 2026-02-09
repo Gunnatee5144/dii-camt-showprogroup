@@ -42,8 +42,8 @@ import StudentProfiles from "./pages/StudentProfiles";
 import Cooperation from "./pages/Cooperation";
 import Subscription from "./pages/Subscription";
 import InternTracking from "./pages/InternTracking";
-import PersonalDashboard from "./pages/PersonalDashboard";
-
+import PersonalDashboard from "./pages/PersonalDashboard";import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -57,6 +57,8 @@ const App = () => (
             <Route path="/" element={<LandingPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/personal-dashboard" element={<PersonalDashboard />} />

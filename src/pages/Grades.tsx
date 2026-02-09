@@ -384,10 +384,55 @@ export default function Grades() {
     );
   }
 
-  // Lecturer View Placeholder
+  // Lecturer View
   return (
-    <div className="p-8 text-center text-slate-500">
-      Lecturer/Staff View Coming Soon
-    </div>
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-8 pb-10"
+    >
+      <div>
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
+          <GraduationCap className="w-4 h-4 text-emerald-500" />
+          <span>ระบบบันทึกและตัดเกรด</span>
+        </motion.div>
+        <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          ตัด<span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">เกรด</span>
+        </motion.h1>
+      </div>
+
+      <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { icon: BookOpen, label: 'รายวิชาที่สอน', value: mockCourses.filter(c => c.lecturerId).length.toString(), gradient: 'from-blue-500 to-indigo-500', shadow: 'shadow-blue-200' },
+          { icon: Target, label: 'รอตัดเกรด', value: '3', gradient: 'from-orange-500 to-amber-500', shadow: 'shadow-orange-200' },
+          { icon: Award, label: 'ตัดเกรดแล้ว', value: '2', gradient: 'from-emerald-500 to-teal-500', shadow: 'shadow-emerald-200' },
+          { icon: GraduationCap, label: 'นักศึกษาทั้งหมด', value: '120', gradient: 'from-purple-500 to-pink-500', shadow: 'shadow-purple-200' },
+        ].map((stat, i) => (
+          <motion.div key={i} whileHover={{ scale: 1.02 }} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradient} p-6 text-white shadow-xl ${stat.shadow}`}>
+            <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm"><stat.icon className="w-5 h-5" /></div>
+                <span className="font-medium text-white/90">{stat.label}</span>
+              </div>
+              <div className="text-4xl font-bold">{stat.value}</div>
+            </div>
+          </motion.div>
+        ))}
+      </motion.div>
+
+      <motion.div variants={itemVariants} className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm p-8">
+        <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
+          <div className="w-20 h-20 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-full flex items-center justify-center mb-6">
+            <GraduationCap className="w-10 h-10 text-emerald-500" />
+          </div>
+          <h3 className="text-xl font-semibold text-slate-900 mb-2">ระบบตัดเกรดกำลังพัฒนา</h3>
+          <p className="text-slate-500 max-w-md mx-auto">
+            ฟีเจอร์ตัดเกรดสำหรับอาจารย์จะพร้อมใช้งานในเร็วๆ นี้ กรุณาใช้ระบบเดิมในระหว่างนี้
+          </p>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }

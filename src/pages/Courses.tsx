@@ -293,8 +293,13 @@ export default function Courses() {
       >
         <div className="flex items-end justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">จัดการรายวิชา</h1>
-            <p className="text-slate-500 mt-1">ภาคเรียนที่ 1/2567</p>
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
+              <BookOpen className="w-4 h-4 text-blue-500" />
+              <span>ภาคเรียนที่ 1/2567</span>
+            </motion.div>
+            <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              จัดการ<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">รายวิชา</span>
+            </motion.h1>
           </div>
         </div>
 

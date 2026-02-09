@@ -11,7 +11,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
 import { mockNotifications } from '@/lib/mockData';
 import { toast } from 'sonner';
 
@@ -83,22 +82,30 @@ export default function Notifications() {
     };
 
     return (
-        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-            <ThemedPageHeader
-                title="การแจ้งเตือน"
-                subtitle={`${notifications.length} การแจ้งเตือน • ${unreadCount} ยังไม่อ่าน`}
-                icon={<Bell className="w-7 h-7" />}
-                actions={
-                    <div className="flex gap-2">
-                        {canManage && (
-                            <Button onClick={() => setIsDialogOpen(true)} className="bg-purple-600 hover:bg-purple-700">
-                                <Plus className="w-4 h-4 mr-2" />สร้างประกาศ
-                            </Button>
-                        )}
-                        <Button variant="outline" size="sm"><Check className="w-4 h-4 mr-2" />อ่านทั้งหมด</Button>
-                    </div>
-                }
-            />
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8 pb-10">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                <div>
+                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
+                        <Bell className="w-4 h-4 text-blue-500" />
+                        <span>ระบบแจ้งเตือน</span>
+                    </motion.div>
+                    <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                        การแจ้ง<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">เตือน</span>
+                    </motion.h1>
+                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-slate-500 mt-2">
+                        {notifications.length} การแจ้งเตือน • {unreadCount} ยังไม่อ่าน
+                    </motion.p>
+                </div>
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex gap-2">
+                    {canManage && (
+                        <Button onClick={() => setIsDialogOpen(true)} className="rounded-xl bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-200">
+                            <Plus className="w-4 h-4 mr-2" />สร้างประกาศ
+                        </Button>
+                    )}
+                    <Button variant="outline" size="sm" className="rounded-xl"><Check className="w-4 h-4 mr-2" />อ่านทั้งหมด</Button>
+                </motion.div>
+            </div>
 
             <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[

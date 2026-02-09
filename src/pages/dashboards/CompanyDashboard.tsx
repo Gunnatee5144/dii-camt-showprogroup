@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
 import { mockCompany, mockJobPostings, mockStudents } from '@/lib/mockData';
 
 const containerVariants = {
@@ -28,11 +27,18 @@ export default function CompanyDashboard() {
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-      <ThemedPageHeader
-        title={`สวัสดี, ${company.companyNameThai} 🏢`}
-        subtitle={`${company.industry} • ${company.size === 'medium' ? 'ขนาดกลาง' : company.size}`}
-        icon={<Building className="w-7 h-7" />}
-      />
+      <motion.div variants={itemVariants} className="relative">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-lg">
+            <Building className="w-5 h-5" />
+          </div>
+          <span className="text-sm font-medium text-orange-600">แดชบอร์ดบริษัท</span>
+        </div>
+        <motion.h1 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="text-3xl font-bold text-gray-900">
+          <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">{`สวัสดี, ${company.companyNameThai} 🏢`}</span>
+        </motion.h1>
+        <p className="text-gray-500 mt-1">{`${company.industry} • ${company.size === 'medium' ? 'ขนาดกลาง' : company.size}`}</p>
+      </motion.div>
 
       <motion.div variants={itemVariants} className="flex justify-end">
         <Link to="/job-postings">
@@ -124,7 +130,7 @@ export default function CompanyDashboard() {
           </TabsList>
 
           <TabsContent value="jobs">
-            <Card>
+            <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
               <CardHeader>
                 <CardTitle>ประกาศงานของเรา</CardTitle>
                 <CardDescription>{companyJobPostings.length} ตำแหน่ง</CardDescription>
@@ -152,7 +158,7 @@ export default function CompanyDashboard() {
           </TabsContent>
 
           <TabsContent value="students">
-            <Card>
+            <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
               <CardHeader>
                 <CardTitle>นักศึกษาที่สามารถดูได้</CardTitle>
                 <CardDescription>{accessibleStudents.length} คน (ตาม Consent)</CardDescription>

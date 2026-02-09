@@ -91,7 +91,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="relative z-10 text-center text-slate-500 text-sm mt-12">
-                    © 2024 DII CAMT. All rights reserved.
+                    © 2026 DII CAMT. All rights reserved.
                 </div>
             </div>
 

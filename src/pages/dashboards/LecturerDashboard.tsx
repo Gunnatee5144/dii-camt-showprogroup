@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
 import {
   mockLecturer,
   mockCourses,
@@ -55,14 +54,18 @@ export default function LecturerDashboard() {
       className="space-y-6"
     >
       {/* Welcome Header */}
-      <ThemedPageHeader
-        title={`สวัสดี, ${lecturer.nameThai} 👨‍🏫`}
-        subtitle={`${lecturer.department} • ${lecturer.position === 'assistant_professor' ? 'ผู้ช่วยศาสตราจารย์' :
-          lecturer.position === 'associate_professor' ? 'รองศาสตราจารย์' :
-            lecturer.position === 'professor' ? 'ศาสตราจารย์' : 'อาจารย์'
-          }`}
-        icon={<BookOpen className="w-7 h-7" />}
-      />
+      <div>
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
+          <BookOpen className="w-4 h-4 text-emerald-500" />
+          <span>{`${lecturer.department} • ${lecturer.position === 'assistant_professor' ? 'ผู้ช่วยศาสตราจารย์' :
+            lecturer.position === 'associate_professor' ? 'รองศาสตราจารย์' :
+              lecturer.position === 'professor' ? 'ศาสตราจารย์' : 'อาจารย์'
+            }`}</span>
+        </motion.div>
+        <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          สวัสดี, <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">{lecturer.nameThai} 👨‍🏫</span>
+        </motion.h1>
+      </div>
 
       <motion.div variants={itemVariants} className="flex justify-end gap-2">
         <Link to="/schedule">
@@ -178,7 +181,7 @@ export default function LecturerDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {/* Courses List */}
               <div className="lg:col-span-2 space-y-4">
-                <Card>
+                <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                   <CardHeader>
                     <CardTitle>รายวิชาที่สอน</CardTitle>
                     <CardDescription>เทอม 1/2568 • {lecturerCourses.length} วิชา</CardDescription>
@@ -236,7 +239,7 @@ export default function LecturerDashboard() {
               {/* Sidebar */}
               <div className="space-y-4">
                 {/* Workload */}
-                <Card>
+                <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                   <CardHeader>
                     <CardTitle className="text-sm">ภาระงานสอน</CardTitle>
                   </CardHeader>
@@ -257,7 +260,7 @@ export default function LecturerDashboard() {
                 </Card>
 
                 {/* Upcoming Appointments */}
-                <Card>
+                <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm">นัดหมายที่กำลังมาถึง</CardTitle>
@@ -285,7 +288,7 @@ export default function LecturerDashboard() {
                 </Card>
 
                 {/* Office Hours */}
-                <Card>
+                <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                   <CardHeader>
                     <CardTitle className="text-sm">เวลาให้คำปรึกษา</CardTitle>
                   </CardHeader>
@@ -304,7 +307,7 @@ export default function LecturerDashboard() {
 
           {/* Students Tab */}
           <TabsContent value="students">
-            <Card>
+            <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
               <CardHeader>
                 <CardTitle>นักศึกษาทั้งหมด</CardTitle>
                 <CardDescription>นักศึกษาในรายวิชาที่สอน</CardDescription>
@@ -350,7 +353,7 @@ export default function LecturerDashboard() {
           {/* Advisees Tab */}
           <TabsContent value="advisees" className="space-y-4">
             {atRiskAdvisees.length > 0 && (
-              <Card className="border-red-200 bg-red-50/50">
+              <Card className="bg-red-50/60 backdrop-blur-xl border border-red-200 rounded-3xl shadow-sm">
                 <CardHeader>
                   <CardTitle className="text-red-900 flex items-center gap-2">
                     <AlertCircle className="w-5 h-5" />
@@ -393,7 +396,7 @@ export default function LecturerDashboard() {
               </Card>
             )}
 
-            <Card>
+            <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
               <CardHeader>
                 <CardTitle>นักศึกษาในที่ปรึกษาทั้งหมด</CardTitle>
                 <CardDescription>{adviseesList.length} คน</CardDescription>
@@ -431,7 +434,7 @@ export default function LecturerDashboard() {
 
           {/* Grades Tab */}
           <TabsContent value="grades">
-            <Card>
+            <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
               <CardHeader>
                 <CardTitle>การจัดการเกรด</CardTitle>
                 <CardDescription>บันทึกและแก้ไขเกรดนักศึกษา</CardDescription>
@@ -478,7 +481,7 @@ export default function LecturerDashboard() {
 
           {/* Schedule Tab */}
           <TabsContent value="schedule">
-            <Card>
+            <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
               <CardHeader>
                 <CardTitle>ตารางสอน</CardTitle>
                 <CardDescription>ตารางสอนประจำสัปดาห์</CardDescription>

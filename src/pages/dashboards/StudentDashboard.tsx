@@ -76,7 +76,7 @@ const softSkillScores = {
   feedbackHistory: [
     { projectName: 'Capstone Project', date: '15 ม.ค. 68', communicationScore: 4.5, opennessScore: 4.3, comments: 12 },
     { projectName: 'UX Design Workshop', date: '20 พ.ย. 67', communicationScore: 3.8, opennessScore: 4.1, comments: 8 },
-    { projectName: 'Hackathon 2024', date: '10 มี.ค. 67', communicationScore: 4.2, opennessScore: 4.5, comments: 15 },
+    { projectName: 'Hackathon 2026', date: '10 มี.ค. 67', communicationScore: 4.2, opennessScore: 4.5, comments: 15 },
   ],
 };
 

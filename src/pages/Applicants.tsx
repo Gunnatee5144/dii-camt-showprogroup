@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ThemedPageHeader } from '@/components/common/ThemedPageHeader';
 import { mockJobPostings, mockStudents, mockCompany } from '@/lib/mockData';
 import { toast } from 'sonner';
 
@@ -83,11 +82,23 @@ export default function Applicants() {
 
     return (
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-            <ThemedPageHeader
-                title="ผู้สมัครงาน"
-                subtitle={`${visibleApplicants.length} คน • ${pendingCount} รอพิจารณา`}
-                icon={<Users className="w-7 h-7" />}
-            />
+            {/* Animated Header */}
+            <motion.div variants={itemVariants} className="relative">
+                <div className="flex items-center gap-2 mb-2">
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 text-white shadow-lg">
+                        <Users className="w-5 h-5" />
+                    </div>
+                    <span className="text-sm font-medium text-blue-600">ผู้สมัครงาน</span>
+                </div>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <motion.h1 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="text-3xl font-bold text-gray-900">
+                            <span className="bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent">ผู้สมัครงาน</span>
+                        </motion.h1>
+                        <p className="text-gray-500 mt-1">{`${visibleApplicants.length} คน • ${pendingCount} รอพิจารณา`}</p>
+                    </div>
+                </div>
+            </motion.div>
 
             <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
@@ -127,7 +138,7 @@ export default function Applicants() {
                     </Select>
                 </div>
 
-                <Card>
+                <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                     <CardContent className="pt-6">
                         <div className="space-y-3">
                             <AnimatePresence>

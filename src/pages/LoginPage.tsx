@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function LoginPage() {
+  const { t, language, toggleLanguage } = useLanguage();
   const navigate = useNavigate();
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -20,10 +22,10 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await login(formData.email, formData.password);
-      toast.success('เข้าสู่ระบบสำเร็จ', { description: 'ยินดีต้อนรับกลับสู่ระบบ DII CAMT' });
+      toast.success(t.login.loginSuccess, { description: t.login.loginSuccessDesc });
       navigate('/dashboard');
     } catch (error) {
-      toast.error('เข้าสู่ระบบไม่สำเร็จ', { description: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' });
+      toast.error(t.login.loginFailed, { description: t.login.loginFailedDesc });
     } finally {
       setIsLoading(false);
     }
@@ -59,7 +61,7 @@ export default function LoginPage() {
             transition={{ delay: 0.3 }}
             className="text-5xl font-bold mb-6 leading-tight"
           >
-            ยินดีต้อนรับสู่<br />
+            {t.login.welcomeTo}<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300">DII CAMT</span> Platform
           </motion.h1>
           <motion.p
@@ -68,7 +70,7 @@ export default function LoginPage() {
             transition={{ delay: 0.4 }}
             className="text-slate-300 text-lg leading-relaxed mb-10 font-light"
           >
-            ระบบบริหารการจัดการศึกษาที่เชื่อมโยงทุกภาคส่วนเข้าด้วยกัน เพื่อยกระดับประสบการณ์การเรียนรู้และการทำงานที่มีประสิทธิภาพสูงสุด
+            {t.login.systemDescription}
           </motion.p>
 
           <motion.div
@@ -85,11 +87,11 @@ export default function LoginPage() {
               </div>
               <div className="text-sm font-medium">
                 <div className="text-white">Active Users</div>
-                <div className="text-blue-300">5,000+ คนในระบบ</div>
+                <div className="text-blue-300">5,000+ {t.login.usersInSystem}</div>
               </div>
             </div>
             <p className="text-xs text-slate-400 font-light">
-              "แพลตฟอร์มที่ช่วยให้การบริหารจัดการการศึกษาเป็นเรื่องง่ายและมีประสิทธิภาพ"
+              "{t.login.quote}"
             </p>
           </motion.div>
         </div>
@@ -97,6 +99,16 @@ export default function LoginPage() {
 
       {/* Right Side - Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 bg-slate-50 relative">
+        {/* Language Toggle */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={toggleLanguage}
+          className="absolute top-6 right-6 z-20 font-medium text-slate-500 hover:text-blue-600 hover:bg-blue-50 gap-1.5 rounded-full"
+        >
+          <Globe className="h-4 w-4" />
+          {language === 'th' ? 'EN' : 'TH'}
+        </Button>
         <div className="absolute inset-0 bg-white/40 backdrop-blur-3xl z-0"></div>
         {/* Background blobs */}
         <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
@@ -109,13 +121,13 @@ export default function LoginPage() {
           className="w-full max-w-md space-y-8 relative z-10 bg-white/80 p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-white"
         >
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-slate-900 tracking-tight">เข้าสู่ระบบ</h2>
-            <p className="text-slate-500 mt-2 font-medium">กรอกข้อมูลเพื่อเข้าใช้งานบัญชีของคุณ</p>
+            <h2 className="text-3xl font-bold text-slate-900 tracking-tight">{t.login.title}</h2>
+            <p className="text-slate-500 mt-2 font-medium">{t.login.enterCredentials}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-slate-700 font-medium">อีเมล</Label>
+              <Label htmlFor="email" className="text-slate-700 font-medium">{t.login.email}</Label>
               <div className="relative group">
                 <Mail className="absolute left-3 top-3 h-5 w-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
                 <Input
@@ -132,8 +144,8 @@ export default function LoginPage() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-slate-700 font-medium">รหัสผ่าน</Label>
-                <a href="#" className="text-xs font-semibold text-blue-600 hover:text-blue-500">ลืมรหัสผ่าน?</a>
+                <Label htmlFor="password" className="text-slate-700 font-medium">{t.login.password}</Label>
+                <a href="#" className="text-xs font-semibold text-blue-600 hover:text-blue-500">{t.login.forgotPassword}</a>
               </div>
               <div className="relative group">
                 <Lock className="absolute left-3 top-3 h-5 w-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
@@ -151,17 +163,17 @@ export default function LoginPage() {
 
             <div className="flex items-center space-x-2">
               <Checkbox id="remember" className="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-              <label htmlFor="remember" className="text-sm text-slate-600 cursor-pointer font-medium">จำการเข้าสู่ระบบ</label>
+              <label htmlFor="remember" className="text-sm text-slate-600 cursor-pointer font-medium">{t.login.rememberMe}</label>
             </div>
 
             <Button type="submit" className="w-full h-12 text-base font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/30 rounded-xl transition-all hover:scale-[1.01]" disabled={isLoading}>
-              {isLoading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : 'เข้าสู่ระบบ'}
+              {isLoading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : t.login.loginButton}
             </Button>
           </form>
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-slate-200" /></div>
-            <div className="relative flex justify-center text-xs uppercase"><span className="bg-white/80 px-4 text-slate-400 backdrop-blur-sm">หรือดำเนินการต่อด้วย</span></div>
+            <div className="relative flex justify-center text-xs uppercase"><span className="bg-white/80 px-4 text-slate-400 backdrop-blur-sm">{t.login.orContinueWith}</span></div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -176,7 +188,7 @@ export default function LoginPage() {
           </div>
 
           <p className="text-center text-sm text-slate-500">
-            ยังไม่มีบัญชี? <Link to="/register" className="font-semibold text-blue-600 hover:text-blue-500 transition-colors">สมัครสมาชิกที่นี่</Link>
+            {t.login.noAccount} <Link to="/register" className="font-semibold text-blue-600 hover:text-blue-500 transition-colors">{t.login.registerNow}</Link>
           </p>
         </motion.div>
       </div>

@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -26,11 +27,12 @@ const itemVariants = {
 };
 
 export default function Settings() {
+  const { t } = useLanguage();
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = React.useState('profile');
 
   const handleSave = () => {
-    toast.success('บันทึกการตั้งค่าเรียบร้อยแล้ว');
+    toast.success(t.settingsPage.savedSuccess);
   };
 
   return (
@@ -44,13 +46,13 @@ export default function Settings() {
       <div>
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
           <SettingsIcon className="w-4 h-4 text-indigo-500" />
-          <span>ระบบตั้งค่า</span>
+          <span>{t.settingsPage.systemSettings}</span>
         </motion.div>
         <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          การตั้งค่า<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">ระบบ</span>
+          {t.settingsPage.settingsTitle}<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">{t.settingsPage.system}</span>
         </motion.h1>
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-slate-500 mt-2">
-          จัดการข้อมูลส่วนตัว ความปลอดภัย และความชอบส่วนบุคคล
+          {t.settingsPage.settingsDesc}
         </motion.p>
       </div>
 
@@ -78,10 +80,10 @@ export default function Settings() {
 
             <nav className="space-y-2 relative z-10 px-2">
               {[
-                { id: 'profile', label: 'ข้อมูลโปรไฟล์', icon: User, color: 'text-blue-500', bg: 'bg-blue-50' },
-                { id: 'notifications', label: 'การแจ้งเตือน', icon: Bell, color: 'text-amber-500', bg: 'bg-amber-50' },
-                { id: 'security', label: 'ความปลอดภัย', icon: Shield, color: 'text-indigo-500', bg: 'bg-indigo-50' },
-                { id: 'preferences', label: 'การแสดงผล', icon: Palette, color: 'text-purple-500', bg: 'bg-purple-50' },
+                { id: 'profile', label: t.settingsPage.profileInfo, icon: User, color: 'text-blue-500', bg: 'bg-blue-50' },
+                { id: 'notifications', label: t.settingsPage.notificationsTitle, icon: Bell, color: 'text-amber-500', bg: 'bg-amber-50' },
+                { id: 'security', label: t.settingsPage.security, icon: Shield, color: 'text-indigo-500', bg: 'bg-indigo-50' },
+                { id: 'preferences', label: t.settingsPage.display, icon: Palette, color: 'text-purple-500', bg: 'bg-purple-50' },
               ].map((item) => (
                 <button
                   key={item.id}
@@ -109,7 +111,7 @@ export default function Settings() {
                 <div className="p-2.5 rounded-xl bg-red-50 text-red-500 mr-4 shadow-sm">
                   <LogOut className="w-5 h-5" />
                 </div>
-                ออกจากระบบ
+                {t.settingsPage.logout}
               </Button>
             </div>
           </div>
@@ -120,7 +122,7 @@ export default function Settings() {
             <div className="relative z-10">
               <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-indigo-300" />
-                สถานะบัญชี
+                {t.settingsPage.accountStatus}
               </h3>
               <div className="space-y-4">
                 <div className="p-4 rounded-2xl bg-white/5 border border-white/5 backdrop-blur-md">
@@ -128,7 +130,7 @@ export default function Settings() {
                     <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">Verification</span>
                     <Badge className="bg-emerald-500 text-[10px] h-5">Verified</Badge>
                   </div>
-                  <div className="text-sm font-bold">ยืนยันตัวตนระดับปกติ</div>
+                  <div className="text-sm font-bold">{t.settingsPage.verifiedNormal}</div>
                 </div>
               </div>
             </div>
@@ -149,11 +151,11 @@ export default function Settings() {
                 >
                   <div className="flex flex-col md:flex-row justify-between items-start gap-4 border-b border-slate-100 pb-8">
                     <div>
-                      <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-2">ข้อมูลส่วนตัว</h2>
-                      <p className="text-slate-500 font-medium">จัดการข้อมูลพื้นฐานและการติดต่อที่ใช้ในระบบ</p>
+                      <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-2">{t.settingsPage.personalInfo}</h2>
+                      <p className="text-slate-500 font-medium">{t.settingsPage.personalInfoDesc}</p>
                     </div>
                     <Button onClick={handleSave} className="rounded-2xl h-12 px-8 bg-slate-900 text-white hover:bg-slate-800 shadow-xl shadow-slate-900/20 font-bold transform active:scale-95 transition-all">
-                      <Save className="w-4 h-4 mr-2" /> บันทึกข้อมูล
+                      <Save className="w-4 h-4 mr-2" /> {t.settingsPage.saveData}
                     </Button>
                   </div>
 
@@ -169,30 +171,30 @@ export default function Settings() {
                       </div>
                     </div>
                     <div className="flex-1 text-center md:text-left relative z-10">
-                      <h3 className="font-black text-2xl text-slate-900 mb-2 tracking-tight">รูปโปรไฟล์</h3>
-                      <p className="text-sm text-slate-500 mb-6 font-medium">เปลี่ยนรูปภาพของคุณเพื่อให้คนอื่นจำคุณได้ง่ายขึ้น</p>
+                      <h3 className="font-black text-2xl text-slate-900 mb-2 tracking-tight">{t.settingsPage.profilePhoto}</h3>
+                      <p className="text-sm text-slate-500 mb-6 font-medium">{t.settingsPage.profilePhotoDesc}</p>
                       <div className="flex justify-center md:justify-start gap-3">
-                        <Button className="rounded-xl h-11 bg-white border border-slate-200 text-slate-700 font-bold hover:bg-slate-50 shadow-sm px-6">อัพโหลดรูปใหม่</Button>
-                        <Button variant="ghost" className="rounded-xl h-11 text-red-500 font-bold hover:bg-red-50 px-6">ลบรูปเดิม</Button>
+                        <Button className="rounded-xl h-11 bg-white border border-slate-200 text-slate-700 font-bold hover:bg-slate-50 shadow-sm px-6">{t.settingsPage.uploadNew}</Button>
+                        <Button variant="ghost" className="rounded-xl h-11 text-red-500 font-bold hover:bg-red-50 px-6">{t.settingsPage.deletePhoto}</Button>
                       </div>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2">
-                      <Label className="ml-1 text-slate-700 font-bold">ชื่อ (ภาษาไทย)</Label>
+                      <Label className="ml-1 text-slate-700 font-bold">{t.settingsPage.nameThai}</Label>
                       <Input defaultValue={user?.nameThai} className="h-14 rounded-2xl bg-white border-slate-100 shadow-inner px-5 font-medium focus-visible:ring-indigo-500" />
                     </div>
                     <div className="space-y-2">
-                      <Label className="ml-1 text-slate-700 font-bold">ชื่อ (ภาษาอังกฤษ)</Label>
+                      <Label className="ml-1 text-slate-700 font-bold">{t.settingsPage.nameEnglish}</Label>
                       <Input defaultValue={user?.name} className="h-14 rounded-2xl bg-white border-slate-100 shadow-inner px-5 font-medium focus-visible:ring-indigo-500" />
                     </div>
                     <div className="space-y-2">
-                      <Label className="ml-1 text-slate-700 font-bold">ที่อยู่อีเมล</Label>
+                      <Label className="ml-1 text-slate-700 font-bold">{t.settingsPage.emailAddress}</Label>
                       <Input defaultValue={user?.email} className="h-14 rounded-2xl bg-white border-slate-100 shadow-inner px-5 font-medium focus-visible:ring-indigo-500" />
                     </div>
                     <div className="space-y-2">
-                      <Label className="ml-1 text-slate-700 font-bold">เบอร์โทรศัพท์ติดต่อ</Label>
+                      <Label className="ml-1 text-slate-700 font-bold">{t.settingsPage.phoneNumber}</Label>
                       <Input placeholder="+66 XX XXX XXXX" className="h-14 rounded-2xl bg-white border-slate-100 shadow-inner px-5 font-medium focus-visible:ring-indigo-500" />
                     </div>
                   </div>
@@ -208,21 +210,21 @@ export default function Settings() {
                   className="p-10 space-y-10"
                 >
                   <div className="border-b border-slate-100 pb-8">
-                    <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-2">การแจ้งเตือน</h2>
-                    <p className="text-slate-500 font-medium">ตั้งค่ารูปแบบการรับข้อมูลจากทางคณะและระบบ</p>
+                    <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-2">{t.settingsPage.notificationsTitle}</h2>
+                    <p className="text-slate-500 font-medium">{t.settingsPage.notificationsDesc}</p>
                   </div>
 
                   <div className="space-y-10">
                     <div className="space-y-6">
                       <h3 className="font-black text-xl text-slate-900 flex items-center gap-3 tracking-tight">
                         <div className="p-2 rounded-xl bg-amber-50 text-amber-500 shadow-sm"><Bell className="w-5 h-5" /></div>
-                        แอปพลิเคชัน
+                        {t.settingsPage.application}
                       </h3>
                       <div className="space-y-3">
                         {[
-                          { label: 'ข่าวสารและประกาศ', desc: 'รับข้อมูลข่าวสารล่าสุดจาก CAMT และมหาวิทยาลัย' },
-                          { label: 'กิจกรรมใหม่', desc: 'แจ้งเตือนเมื่อมีกิจกรรมสะสมแต้ม/กิจกรรมพัฒนานักศึกษา' },
-                          { label: 'ความคืบหน้าคำร้อง', desc: 'สถานะการทำงานของคำร้องที่คุณยื่นไว้ในระบบ' }
+                          { label: t.settingsPage.newsAnnouncements, desc: t.settingsPage.newsAnnouncementsDesc },
+                          { label: t.settingsPage.newActivities, desc: t.settingsPage.newActivitiesDesc },
+                          { label: t.settingsPage.requestProgress, desc: t.settingsPage.requestProgressDesc }
                         ].map((pref, i) => (
                           <div key={i} className="flex items-center justify-between p-6 rounded-[2rem] bg-white border border-slate-100 hover:border-amber-200 transition-all shadow-sm">
                             <div className="space-y-1">
@@ -240,12 +242,12 @@ export default function Settings() {
                     <div className="space-y-6">
                       <h3 className="font-black text-xl text-slate-900 flex items-center gap-3 tracking-tight">
                         <div className="p-2 rounded-xl bg-purple-50 text-purple-500 shadow-sm"><Mail className="w-5 h-5" /></div>
-                        อีเมลไดเร็กต์
+                        {t.settingsPage.emailDirect}
                       </h3>
                       <div className="flex items-center justify-between p-6 rounded-[2rem] bg-white border border-slate-100 hover:border-purple-200 transition-all shadow-sm">
                         <div className="space-y-1">
-                          <Label className="text-lg font-bold text-slate-800">สรุปภาพรวมรายสัปดาห์</Label>
-                          <p className="text-sm text-slate-500 font-medium">ส่งผลการเรียนล่าสุดและตารางกิจกรรมประจำสัปดาห์ผ่านอีเมล</p>
+                          <Label className="text-lg font-bold text-slate-800">{t.settingsPage.weeklySummary}</Label>
+                          <p className="text-sm text-slate-500 font-medium">{t.settingsPage.weeklySummaryDesc}</p>
                         </div>
                         <Switch className="data-[state=checked]:bg-purple-500" />
                       </div>
@@ -263,8 +265,8 @@ export default function Settings() {
                   className="p-10 space-y-10"
                 >
                   <div className="border-b border-slate-100 pb-8">
-                    <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-2">ความแข็งแกร่งของบัญชี</h2>
-                    <p className="text-slate-500 font-medium">จัดการรหัสผ่านและระดับการรักษาความปลอดภัย</p>
+                    <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-2">{t.settingsPage.accountStrength}</h2>
+                    <p className="text-slate-500 font-medium">{t.settingsPage.securityDesc}</p>
                   </div>
 
                   <div className="space-y-8">
@@ -272,26 +274,26 @@ export default function Settings() {
                       <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-500/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 transition-all duration-1000 group-hover:bg-indigo-500/30" />
                       <h3 className="font-black text-2xl mb-8 flex items-center gap-3 relative z-10 tracking-tight">
                         <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20"><Lock className="w-7 h-7 text-indigo-300" /></div>
-                        เปลี่ยนรหัสผ่านใหม่
+                        {t.settingsPage.changePassword}
                       </h3>
                       <div className="grid gap-6 relative z-10">
                         <div className="space-y-3">
-                          <Label className="text-slate-300 font-bold ml-1">รหัสผ่านปัจจุบัน</Label>
+                          <Label className="text-slate-300 font-bold ml-1">{t.settingsPage.currentPassword}</Label>
                           <Input type="password" placeholder="••••••••" className="bg-white/5 border-white/10 text-white placeholder:text-white/20 h-14 rounded-2xl focus:bg-white/10 transition-all px-6 text-lg" />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="space-y-3">
-                            <Label className="text-slate-300 font-bold ml-1">รหัสผ่านใหม่</Label>
+                            <Label className="text-slate-300 font-bold ml-1">{t.settingsPage.newPassword}</Label>
                             <Input type="password" placeholder="••••••••" className="bg-white/5 border-white/10 text-white placeholder:text-white/20 h-14 rounded-2xl focus:bg-white/10 transition-all px-6 text-lg" />
                           </div>
                           <div className="space-y-3">
-                            <Label className="text-slate-300 font-bold ml-1">ยืนยันรหัสผ่านใหม่</Label>
+                            <Label className="text-slate-300 font-bold ml-1">{t.settingsPage.confirmNewPassword}</Label>
                             <Input type="password" placeholder="••••••••" className="bg-white/5 border-white/10 text-white placeholder:text-white/20 h-14 rounded-2xl focus:bg-white/10 transition-all px-6 text-lg" />
                           </div>
                         </div>
                       </div>
                       <Button className="mt-10 w-full bg-white text-slate-900 hover:bg-slate-100 rounded-[1.5rem] h-14 font-black text-base shadow-xl transform active:scale-[0.98] transition-all relative z-10">
-                        อัพเดทรหัสผ่านเข้าระบบ
+                        {t.settingsPage.updatePassword}
                       </Button>
                     </div>
 
@@ -302,19 +304,19 @@ export default function Settings() {
                             <div className="p-2 rounded-xl bg-orange-50 text-orange-500"><Smartphone className="w-5 h-5" /></div>
                             <Label className="text-xl font-black text-slate-800 tracking-tight leading-none">2FA Verification</Label>
                           </div>
-                          <p className="text-sm text-slate-500 font-medium">เพิ่มการตรวจสอบผ่าน SMS</p>
+                          <p className="text-sm text-slate-500 font-medium">{t.settingsPage.smsVerification}</p>
                         </div>
-                        <Button variant="outline" className="rounded-xl h-12 border-slate-200 font-bold px-6">เปิดใช้งาน</Button>
+                        <Button variant="outline" className="rounded-xl h-12 border-slate-200 font-bold px-6">{t.settingsPage.enable}</Button>
                       </div>
                       <div className="flex items-center justify-between p-8 rounded-[2rem] bg-white border border-slate-100 shadow-sm group hover:border-slate-300 transition-all">
                         <div className="space-y-2">
                           <div className="flex items-center gap-3">
                             <div className="p-2 rounded-xl bg-slate-50 text-slate-600"><Eye className="w-5 h-5" /></div>
-                            <Label className="text-xl font-black text-slate-800 tracking-tight leading-none">ประวัติการเข้าใช้งาน</Label>
+                            <Label className="text-xl font-black text-slate-800 tracking-tight leading-none">{t.settingsPage.loginHistory}</Label>
                           </div>
-                          <p className="text-sm text-slate-500 font-medium">ตรวจสอบการข้าสู่ระบบล่าสุด</p>
+                          <p className="text-sm text-slate-500 font-medium">{t.settingsPage.loginHistoryDesc}</p>
                         </div>
-                        <Button variant="ghost" className="rounded-xl h-12 text-slate-500 font-bold px-4">ดูข้อมูล</Button>
+                        <Button variant="ghost" className="rounded-xl h-12 text-slate-500 font-bold px-4">{t.settingsPage.viewData}</Button>
                       </div>
                     </div>
                   </div>
@@ -330,8 +332,8 @@ export default function Settings() {
                   className="p-10 space-y-12"
                 >
                   <div className="border-b border-slate-100 pb-8">
-                    <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-2">การแสดงผล & UI</h2>
-                    <p className="text-slate-500 font-medium">ปรับแต่งหน้าตาของระบบให้เหมาะกับการใช้งานของคุณ</p>
+                    <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-2">{t.settingsPage.displayUI}</h2>
+                    <p className="text-slate-500 font-medium">{t.settingsPage.displayDesc}</p>
                   </div>
 
                   <div className="space-y-12">
@@ -342,7 +344,7 @@ export default function Settings() {
                           <div className="absolute top-10 left-10 w-2/3 h-4 bg-slate-50 rounded-full" />
                           <div className="absolute top-18 left-10 w-1/3 h-24 bg-slate-50 rounded-2xl" />
                         </div>
-                        <p className="text-center font-black text-slate-900 text-sm tracking-tight">ธีมสว่าง (Default)</p>
+                        <p className="text-center font-black text-slate-900 text-sm tracking-tight">{t.settingsPage.lightTheme}</p>
                       </div>
                       <div className="cursor-pointer group opacity-60 hover:opacity-100 transition-all">
                         <div className="aspect-[16/10] rounded-[2rem] bg-slate-900 border-4 border-transparent group-hover:border-slate-300 mb-4 relative overflow-hidden shadow-sm">
@@ -350,13 +352,13 @@ export default function Settings() {
                           <div className="absolute top-10 left-10 w-2/3 h-4 bg-slate-700 rounded-full" />
                           <div className="absolute top-18 left-10 w-1/3 h-24 bg-slate-700 rounded-2xl" />
                         </div>
-                        <p className="text-center font-bold text-slate-500 text-sm tracking-tight">ธีมมืด (Dark Mode)</p>
+                        <p className="text-center font-bold text-slate-500 text-sm tracking-tight">{t.settingsPage.darkTheme}</p>
                       </div>
                       <div className="cursor-pointer group opacity-60 hover:opacity-100 transition-all">
                         <div className="aspect-[16/10] rounded-[2rem] bg-gradient-to-br from-indigo-100 to-indigo-900 border-4 border-transparent group-hover:border-slate-300 mb-4 relative overflow-hidden shadow-sm flex items-center justify-center">
                           <Smartphone className="w-12 h-12 text-white/50" />
                         </div>
-                        <p className="text-center font-bold text-slate-500 text-sm tracking-tight">ตามระบบ (Automatic)</p>
+                        <p className="text-center font-bold text-slate-500 text-sm tracking-tight">{t.settingsPage.autoTheme}</p>
                       </div>
                     </div>
 
@@ -365,14 +367,14 @@ export default function Settings() {
                     <div className="space-y-6">
                       <h3 className="font-black text-xl text-slate-900 flex items-center gap-3 tracking-tight">
                         <div className="p-2 rounded-xl bg-indigo-50 text-indigo-500 shadow-sm"><Palette className="w-5 h-5" /></div>
-                        การตั้งค่าภาษา
+                        {t.settingsPage.languageSettings}
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="p-6 rounded-[2rem] border-4 border-indigo-600 bg-white flex items-center justify-between cursor-pointer shadow-lg transform active:scale-[0.98] transition-all">
                           <div className="flex items-center gap-6">
                             <span className="text-4xl filter drop-shadow-md">🇹🇭</span>
                             <div className="flex flex-col">
-                              <span className="font-black text-xl text-slate-900 leading-tight">ภาษาไทย</span>
+                              <span className="font-black text-xl text-slate-900 leading-tight">{t.settingsPage.thai}</span>
                               <span className="text-xs font-bold text-indigo-500 uppercase tracking-widest">Selected</span>
                             </div>
                           </div>

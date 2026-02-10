@@ -9,7 +9,8 @@ import {
   LogOut,
   Settings,
   ChevronDown,
-  User
+  User,
+  Globe
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,6 +28,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { mockNotifications } from '@/lib/mockData';
 
 interface HeaderProps {
@@ -36,6 +38,7 @@ interface HeaderProps {
 
 export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
   const { user, logout, switchRole } = useAuth();
+  const { language, toggleLanguage, t } = useLanguage();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -57,13 +60,7 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
   };
 
   const getRoleLabel = (role: string) => {
-    switch (role) {
-      case 'student': return 'นักศึกษา';
-      case 'teacher': return 'อาจารย์';
-      case 'staff': return 'เจ้าหน้าที่';
-      case 'company': return 'บริษัท';
-      default: return role;
-    }
+    return t.roles[role as keyof typeof t.roles] || role;
   };
 
   return (
@@ -82,13 +79,24 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
 
           {/* Breadcrumbs or Page Title (Placeholder for now, or just Welcome text) */}
           <div className="hidden md:flex flex-col">
-            <h1 className="text-xl font-bold text-slate-800 tracking-tight">Dashboard</h1>
-            <p className="text-xs text-slate-500 font-medium">Overview & Statistics</p>
+            <h1 className="text-xl font-bold text-slate-800 tracking-tight">{t.header.dashboard}</h1>
+            <p className="text-xs text-slate-500 font-medium">{t.header.overview}</p>
           </div>
         </div>
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-3">
+          {/* Language Toggle */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleLanguage}
+            className="h-10 px-3 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-900 gap-2 font-medium"
+          >
+            <Globe className="h-4 w-4" />
+            <span className="text-sm">{language === 'th' ? 'EN' : 'TH'}</span>
+          </Button>
+
           {/* Notifications */}
           <DropdownMenu open={showNotifications} onOpenChange={setShowNotifications}>
             <DropdownMenuTrigger asChild>
@@ -101,7 +109,7 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80 p-0 rounded-2xl shadow-xl border-slate-200">
               <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 rounded-t-2xl">
-                <h3 className="font-semibold text-slate-900">การแจ้งเตือน</h3>
+                <h3 className="font-semibold text-slate-900">{t.header.notifications}</h3>
               </div>
               <div className="max-h-[300px] overflow-y-auto p-2">
                 {mockNotifications.map((notification) => (
@@ -117,7 +125,7 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
               </div>
               <div className="p-2 border-t border-slate-100">
                 <Button variant="ghost" size="sm" className="w-full text-blue-600 font-medium hover:bg-blue-50 hover:text-blue-700 rounded-xl h-9">
-                  ดูทั้งหมด
+                  {t.common.viewAll}
                 </Button>
               </div>
             </DropdownMenuContent>
@@ -151,17 +159,17 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="rounded-xl cursor-pointer py-2.5" onClick={() => navigate('/personal-dashboard')}>
                   <User className="mr-2 h-4 w-4 text-slate-500" />
-                  <span className="font-medium">โปรไฟล์ของฉัน</span>
+                  <span className="font-medium">{t.header.profile}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="rounded-xl cursor-pointer py-2.5" onClick={() => navigate('/settings')}>
                   <Settings className="mr-2 h-4 w-4 text-slate-500" />
-                  <span className="font-medium">ตั้งค่าระบบ</span>
+                  <span className="font-medium">{t.header.systemSettings}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger className="rounded-xl cursor-pointer py-2.5">
                     <Users className="mr-2 h-4 w-4 text-slate-500" />
-                    <span className="font-medium">เปลี่ยนบทบาท (Demo)</span>
+                    <span className="font-medium">{t.header.switchRole}</span>
                   </DropdownMenuSubTrigger>
                   <DropdownMenuPortal>
                     <DropdownMenuSubContent className="p-1 rounded-xl shadow-xl border-slate-200">
@@ -183,7 +191,7 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
                   className="rounded-xl cursor-pointer py-2.5 text-red-600 focus:text-red-700 focus:bg-red-50"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span className="font-medium">ออกจากระบบ</span>
+                  <span className="font-medium">{t.header.logout}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

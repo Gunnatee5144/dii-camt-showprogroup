@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
-import { Users, Search, Filter, Eye, Mail, CheckCircle, XCircle, Clock, Star, FileText, MoreHorizontal } from 'lucide-react';
+import { Users, Search, Filter, Eye, Mail, CheckCircle, XCircle, Clock, Star, FileText, MoreHorizontal, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { mockJobPostings, mockStudents, mockCompany } from '@/lib/mockData';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -32,6 +33,7 @@ const initialApplicants = mockJobPostings.flatMap(job =>
 
 export default function Applicants() {
     const { user } = useAuth();
+    const { t } = useLanguage();
     const isAdmin = user?.role === 'admin';
     const isCompany = user?.role === 'company';
     const canManage = isAdmin || isCompany;
@@ -53,23 +55,23 @@ export default function Applicants() {
         setApplicants(applicants.map(app => app.id === id ? { ...app, status: newStatus as any } : app));
 
         const statusMap: Record<string, string> = {
-            'shortlisted': 'คัดเลือก',
-            'interviewed': 'นัดสัมภาษณ์',
-            'accepted': 'ตอบรับเข้าทำงาน',
-            'rejected': 'ปฏิเสธ'
+            'shortlisted': t.applicants.shortlistAction,
+            'interviewed': t.applicants.interviewAction,
+            'accepted': t.applicants.acceptAction,
+            'rejected': t.applicants.rejectAction
         };
 
-        toast.success(`อัปเดตสถานะเป็น "${statusMap[newStatus]}" เรียบร้อยแล้ว`);
+        toast.success(`${t.applicants.updateSuccess}: "${statusMap[newStatus]}"`);
     };
 
     const getStatusBadge = (status: string) => {
         switch (status) {
-            case 'pending': return <Badge className="bg-orange-100 text-orange-700">รอพิจารณา</Badge>;
-            case 'reviewed': return <Badge className="bg-blue-100 text-blue-700">ตรวจสอบแล้ว</Badge>;
-            case 'shortlisted': return <Badge className="bg-purple-100 text-purple-700">คัดเลือก</Badge>;
-            case 'interviewed': return <Badge className="bg-cyan-100 text-cyan-700">สัมภาษณ์แล้ว</Badge>;
-            case 'accepted': return <Badge className="bg-emerald-100 text-emerald-700">ตอบรับ</Badge>;
-            case 'rejected': return <Badge className="bg-red-100 text-red-700">ปฏิเสธ</Badge>;
+            case 'pending': return <Badge className="bg-orange-100 text-orange-700">{t.applicants.statusPending}</Badge>;
+            case 'reviewed': return <Badge className="bg-blue-100 text-blue-700">{t.applicants.statusReviewed}</Badge>;
+            case 'shortlisted': return <Badge className="bg-purple-100 text-purple-700">{t.applicants.statusShortlisted}</Badge>;
+            case 'interviewed': return <Badge className="bg-cyan-100 text-cyan-700">{t.applicants.statusInterviewed}</Badge>;
+            case 'accepted': return <Badge className="bg-emerald-100 text-emerald-700">{t.applicants.statusAccepted}</Badge>;
+            case 'rejected': return <Badge className="bg-red-100 text-red-700">{t.applicants.statusRejected}</Badge>;
             default: return <Badge>{status}</Badge>;
         }
     };
@@ -81,59 +83,121 @@ export default function Applicants() {
     });
 
     return (
-        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-            {/* Animated Header */}
-            <motion.div variants={itemVariants} className="relative">
-                <div className="flex items-center gap-2 mb-2">
-                    <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 text-white shadow-lg">
-                        <Users className="w-5 h-5" />
-                    </div>
-                    <span className="text-sm font-medium text-blue-600">ผู้สมัครงาน</span>
-                </div>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <motion.h1 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="text-3xl font-bold text-gray-900">
-                            <span className="bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent">ผู้สมัครงาน</span>
-                        </motion.h1>
-                        <p className="text-gray-500 mt-1">{`${visibleApplicants.length} คน • ${pendingCount} รอพิจารณา`}</p>
-                    </div>
-                </div>
-            </motion.div>
-
-            <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {[
-                    { label: 'ทั้งหมด', value: visibleApplicants.length, gradient: 'from-blue-500 to-indigo-500', icon: Users },
-                    { label: 'รอพิจารณา', value: pendingCount, gradient: 'from-orange-500 to-amber-500', icon: Clock },
-                    { label: 'คัดเลือกแล้ว', value: shortlistedCount, gradient: 'from-purple-500 to-pink-500', icon: Star },
-                    { label: 'ตอบรับ', value: visibleApplicants.filter(a => a.status === 'accepted').length, gradient: 'from-emerald-500 to-teal-500', icon: CheckCircle },
-                ].map((stat, i) => (
-                    <motion.div key={i} whileHover={{ scale: 1.02 }} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradient} p-6 text-white shadow-xl`}>
-                        <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
-                        <div className="relative z-10">
-                            <div className="flex items-center gap-2 mb-3">
-                                <div className="p-2 rounded-xl bg-white/20"><stat.icon className="w-5 h-5" /></div>
-                                <span className="font-medium text-white/90">{stat.label}</span>
-                            </div>
-                            <div className="text-4xl font-bold">{stat.value}</div>
-                        </div>
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8 pb-10">
+            {/* Header Section - Bento Grid Style */}
+            <div className="flex flex-col md:flex-row justify-between items-end gap-6">
+                <div>
+                    <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="flex items-center gap-2 text-slate-500 font-medium mb-2"
+                    >
+                        <Users className="w-4 h-4 text-blue-500" />
+                        <span>{visibleApplicants.length} {t.common.person} • {pendingCount} {t.applicants.pending}</span>
                     </motion.div>
-                ))}
-            </motion.div>
+                    <motion.h1
+                        className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                    >
+                        {t.applicants.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-500">{t.applicants.titleHighlight}</span>
+                    </motion.h1>
+                </div>
+            </div>
+
+            {/* Stats Grid - Bento Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <motion.div
+                    variants={itemVariants}
+                    whileHover={{ y: -5 }}
+                    className="p-6 rounded-3xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden"
+                >
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                    <div className="relative z-10">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2.5 rounded-xl bg-white/20 backdrop-blur-sm">
+                                <Users className="w-6 h-6" />
+                            </div>
+                            <span className="font-medium text-white/90">{t.applicants.totalLabel}</span>
+                        </div>
+                        <div className="text-5xl font-bold tracking-tight">{visibleApplicants.length}</div>
+                        <div className="mt-3 text-sm text-blue-100 flex items-center gap-1">
+                            <Sparkles className="w-4 h-4" />
+                            {t.applicants.inSystem}
+                        </div>
+                    </div>
+                </motion.div>
+
+                <motion.div
+                    variants={itemVariants}
+                    whileHover={{ y: -5 }}
+                    className="p-6 rounded-3xl bg-white border border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden group"
+                >
+                    <div className="relative z-10">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2.5 rounded-xl bg-slate-100 text-slate-600 group-hover:bg-orange-50 group-hover:text-orange-600 transition-colors">
+                                <Clock className="w-6 h-6" />
+                            </div>
+                            <span className="font-medium text-slate-600">{t.applicants.pending}</span>
+                        </div>
+                        <div className="text-4xl font-bold text-slate-900 group-hover:text-orange-600 transition-colors">{pendingCount}</div>
+                        <div className="mt-3 text-sm text-slate-400">{t.applicants.pendingDesc}</div>
+                        <div className="absolute bottom-0 right-0 w-24 h-12 bg-gradient-to-t from-orange-50 to-transparent" />
+                    </div>
+                </motion.div>
+
+                <motion.div
+                    variants={itemVariants}
+                    whileHover={{ y: -5 }}
+                    className="p-6 rounded-3xl bg-white border border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden group"
+                >
+                    <div className="relative z-10">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2.5 rounded-xl bg-slate-100 text-slate-600 group-hover:bg-purple-50 group-hover:text-purple-600 transition-colors">
+                                <Star className="w-6 h-6" />
+                            </div>
+                            <span className="font-medium text-slate-600">{t.applicants.shortlisted}</span>
+                        </div>
+                        <div className="text-4xl font-bold text-slate-900 group-hover:text-purple-600 transition-colors">{shortlistedCount}</div>
+                        <div className="mt-3 text-sm text-slate-400">{t.applicants.shortlistedDesc}</div>
+                        <div className="absolute bottom-0 right-0 w-24 h-12 bg-gradient-to-t from-purple-50 to-transparent" />
+                    </div>
+                </motion.div>
+
+                <motion.div
+                    variants={itemVariants}
+                    whileHover={{ y: -5 }}
+                    className="p-6 rounded-3xl bg-white border border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden group"
+                >
+                    <div className="relative z-10">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2.5 rounded-xl bg-slate-100 text-slate-600 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                                <CheckCircle className="w-6 h-6" />
+                            </div>
+                            <span className="font-medium text-slate-600">{t.applicants.accepted}</span>
+                        </div>
+                        <div className="text-4xl font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">{visibleApplicants.filter(a => a.status === 'accepted').length}</div>
+                        <div className="mt-3 text-sm text-slate-400">{t.applicants.acceptedDesc}</div>
+                        <div className="absolute bottom-0 right-0 w-24 h-12 bg-gradient-to-t from-emerald-50 to-transparent" />
+                    </div>
+                </motion.div>
+            </div>
 
             <motion.div variants={itemVariants}>
                 <div className="flex gap-4 mb-4">
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <Input placeholder="ค้นหาผู้สมัคร..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
+                        <Input placeholder={t.common.search} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
                     </div>
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
-                        <SelectTrigger className="w-40"><SelectValue placeholder="สถานะ" /></SelectTrigger>
+                        <SelectTrigger className="w-40"><SelectValue placeholder={t.common.status} /></SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">ทุกสถานะ</SelectItem>
-                            <SelectItem value="pending">รอพิจารณา</SelectItem>
-                            <SelectItem value="shortlisted">คัดเลือก</SelectItem>
-                            <SelectItem value="accepted">ตอบรับ</SelectItem>
-                            <SelectItem value="rejected">ปฏิเสธ</SelectItem>
+                            <SelectItem value="all">{t.common.all}</SelectItem>
+                            <SelectItem value="pending">{t.applicants.statusPending}</SelectItem>
+                            <SelectItem value="shortlisted">{t.applicants.statusShortlisted}</SelectItem>
+                            <SelectItem value="accepted">{t.applicants.statusAccepted}</SelectItem>
+                            <SelectItem value="rejected">{t.applicants.statusRejected}</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -160,14 +224,14 @@ export default function Applicants() {
                                                 <div className="font-semibold">{applicant.student?.nameThai || 'Unknown'}</div>
                                                 <div className="text-sm text-gray-600">{applicant.jobTitle}</div>
                                                 <div className="text-xs text-gray-400 mt-1">
-                                                    สมัครเมื่อ {new Date(applicant.appliedAt).toLocaleDateString('th-TH')}
+                                                    {t.applicants.appliedOn} {new Date(applicant.appliedAt).toLocaleDateString('th-TH')}
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <div className="text-right hidden sm:block">
                                                 <div className="text-sm font-semibold">GPA {applicant.student?.gpa.toFixed(2)}</div>
-                                                <div className="text-xs text-gray-500">ปี {applicant.student?.year}</div>
+                                                <div className="text-xs text-gray-500">{t.studentProfiles.yearPrefix} {applicant.student?.year}</div>
                                             </div>
                                             {getStatusBadge(applicant.status)}
 
@@ -182,19 +246,19 @@ export default function Applicants() {
                                                         <Button size="sm" variant="ghost"><MoreHorizontal className="w-4 h-4" /></Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
-                                                        <DropdownMenuLabel>การจัดการ</DropdownMenuLabel>
+                                                        <DropdownMenuLabel>{t.applicants.manageStatus}</DropdownMenuLabel>
                                                         <DropdownMenuItem onClick={() => handleStatusChange(applicant.id, 'shortlisted')}>
-                                                            <Star className="w-4 h-4 mr-2" /> คัดเลือก (Shortlist)
+                                                            <Star className="w-4 h-4 mr-2" /> {t.applicants.shortlistAction}
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem onClick={() => handleStatusChange(applicant.id, 'interviewed')}>
-                                                            <Users className="w-4 h-4 mr-2" /> นัดสัมภาษณ์
+                                                            <Users className="w-4 h-4 mr-2" /> {t.applicants.interviewAction}
                                                         </DropdownMenuItem>
                                                         <DropdownMenuSeparator />
                                                         <DropdownMenuItem onClick={() => handleStatusChange(applicant.id, 'accepted')} className="text-green-600">
-                                                            <CheckCircle className="w-4 h-4 mr-2" /> ตอบรับเข้าทำงาน
+                                                            <CheckCircle className="w-4 h-4 mr-2" /> {t.applicants.acceptAction}
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem onClick={() => handleStatusChange(applicant.id, 'rejected')} className="text-red-600">
-                                                            <XCircle className="w-4 h-4 mr-2" /> ปฏิเสธ
+                                                            <XCircle className="w-4 h-4 mr-2" /> {t.applicants.rejectAction}
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
@@ -205,7 +269,7 @@ export default function Applicants() {
                             </AnimatePresence>
                             {filteredApplicants.length === 0 && (
                                 <div className="text-center py-8 text-gray-500">
-                                    ไม่พบรายชื่อผู้สมัคร
+                                    {t.common.noData}
                                 </div>
                             )}
                         </div>

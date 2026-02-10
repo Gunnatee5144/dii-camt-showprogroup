@@ -247,7 +247,7 @@ export default function PrivacyPolicy() {
       {/* Footer */}
       <footer className="bg-slate-50 py-10 border-t border-slate-200">
         <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-400">
-          <div>© 2024 DII CAMT. All rights reserved.</div>
+          <div>© 2026 DII CAMT. All rights reserved.</div>
           <div className="flex gap-6">
             <Link to="/privacy-policy" className="text-slate-600 font-medium">Privacy Policy</Link>
             <Link to="/terms-of-service" className="hover:text-slate-600">Terms of Service</Link>

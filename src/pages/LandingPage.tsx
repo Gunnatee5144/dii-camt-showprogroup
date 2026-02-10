@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, BookOpen, Users, Building2, Briefcase, GraduationCap, Trophy, Globe, CheckCircle2, Star, ChevronRight, Play, Mail, Phone, MapPin, Send, Sparkles, Shield, Zap, BarChart3, Handshake, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const FadeIn = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => (
   <motion.div
@@ -18,6 +19,7 @@ const FadeIn = ({ children, delay = 0, className = "" }: { children: React.React
 );
 
 export default function LandingPage() {
+  const { t, language, toggleLanguage } = useLanguage();
   const { scrollYProgress } = useScroll();
   const y = useTransform(scrollYProgress, [0, 1], [0, -50]);
 
@@ -36,18 +38,22 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-            <a href="#features" className="hover:text-blue-600 transition-colors">คุณสมบัติระบบ</a>
-            <a href="#stats" className="hover:text-blue-600 transition-colors">สถิติ</a>
-            <a href="#partners" className="hover:text-blue-600 transition-colors">พันธมิตร</a>
-            <a href="#contact" className="hover:text-blue-600 transition-colors">ติดต่อเรา</a>
+            <a href="#features" className="hover:text-blue-600 transition-colors">{t.landing.navFeatures}</a>
+            <a href="#stats" className="hover:text-blue-600 transition-colors">{t.landing.navStats}</a>
+            <a href="#partners" className="hover:text-blue-600 transition-colors">{t.landing.navPartners}</a>
+            <a href="#contact" className="hover:text-blue-600 transition-colors">{t.landing.navContact}</a>
           </div>
           <div className="flex items-center gap-4">
+            <Button variant="ghost" size="sm" onClick={toggleLanguage} className="font-medium text-slate-600 hover:text-blue-600 hover:bg-blue-50 gap-1.5">
+              <Globe className="h-4 w-4" />
+              {language === 'th' ? 'EN' : 'TH'}
+            </Button>
             <Link to="/login">
-              <Button variant="ghost" className="font-medium hover:text-blue-600 hover:bg-blue-50">เข้าสู่ระบบ</Button>
+              <Button variant="ghost" className="font-medium hover:text-blue-600 hover:bg-blue-50">{t.landing.login}</Button>
             </Link>
             <Link to="/register">
               <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 rounded-full px-6">
-                สมัครสมาชิก
+                {t.landing.register}
               </Button>
             </Link>
           </div>
@@ -92,16 +98,16 @@ export default function LandingPage() {
             <FadeIn delay={0.1} className="relative">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[200px] bg-blue-500/20 blur-[100px] rounded-full -z-10 pointer-events-none"></div>
               <h1 className="text-5xl lg:text-8xl font-bold tracking-tight text-white mb-8 leading-[1.1] text-balance font-sans drop-shadow-lg">
-                ระบบบริหารการศึกษา<br />
+                {t.landing.heroTitle1Alt}<br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 font-sans animate-gradient-x bg-[length:200%_auto]">
-                  ที่เหนือกว่าทุกจินตนาการ
+                  {t.landing.heroTitle2Alt}
                 </span>
               </h1>
             </FadeIn>
 
             <FadeIn delay={0.2}>
               <p className="text-lg lg:text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed text-balance font-light font-sans">
-                เชื่อมต่อทุกความเป็นไปได้ในรั้วมหาวิทยาลัย ด้วยเทคโนโลยีที่ทันสมัยที่สุด ออกแบบเพื่อประสบการณ์การใช้งานระดับ world-class
+                {t.landing.heroDescAlt}
               </p>
             </FadeIn>
 
@@ -109,12 +115,12 @@ export default function LandingPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link to="/register">
                   <Button size="lg" className="h-16 px-10 bg-blue-600 hover:bg-blue-500 text-white rounded-full text-lg font-semibold shadow-lg shadow-blue-900/20 hover:shadow-blue-600/30 hover:-translate-y-1 transition-all duration-300 font-sans">
-                    เริ่มต้นใช้งานฟรี <ArrowRight className="ml-2 w-5 h-5" />
+                    {t.landing.getStartedFree} <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
                 </Link>
                 <Link to="/features">
                   <Button size="lg" variant="outline" className="h-16 px-10 bg-transparent border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800 rounded-full text-lg font-medium transition-all duration-300 font-sans">
-                    <Play className="mr-2 w-5 h-5" /> ดูตัวอย่างระบบ
+                    <Play className="mr-2 w-5 h-5" /> {t.landing.viewDemo}
                   </Button>
                 </Link>
               </div>
@@ -200,11 +206,11 @@ export default function LandingPage() {
                 <Sparkles className="w-3.5 h-3.5 mr-1.5" /> Professional Features
               </Badge>
               <h2 className="text-4xl lg:text-6xl font-bold mb-6 text-slate-900 tracking-tight font-sans">
-                ฟีเจอร์ที่ออกแบบมาเพื่อ<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">ความเป็นเลิศทางวิชาการ</span>
+                {t.landing.featuresTitle1}<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">{t.landing.featuresTitle2}</span>
               </h2>
               <p className="text-slate-500 text-xl font-light leading-relaxed font-sans">
-                ครบครันด้วยเครื่องมือที่ทันสมัย ตอบโจทย์ทุกบทบาทในสถาบันการศึกษา
+                {t.landing.featuresDesc}
               </p>
             </FadeIn>
           </div>
@@ -212,9 +218,9 @@ export default function LandingPage() {
           {/* Highlight Features Row */}
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             {[
-              { icon: Zap, title: 'ประมวลผลรวดเร็ว', desc: 'ระบบตอบสนองภายใน 0.1 วินาที', color: 'from-amber-500 to-orange-600', bg: 'bg-amber-50', text: 'text-amber-700' },
-              { icon: Shield, title: 'ปลอดภัยสูงสุด', desc: 'เข้ารหัสข้อมูลระดับ Enterprise', color: 'from-emerald-500 to-teal-600', bg: 'bg-emerald-50', text: 'text-emerald-700' },
-              { icon: BarChart3, title: 'รายงานอัจฉริยะ', desc: 'วิเคราะห์ข้อมูลเชิงลึกแบบเรียลไทม์', color: 'from-blue-500 to-indigo-600', bg: 'bg-blue-50', text: 'text-blue-700' },
+              { icon: Zap, title: t.landing.fastProcessing, desc: t.landing.fastProcessingDesc, color: 'from-amber-500 to-orange-600', bg: 'bg-amber-50', text: 'text-amber-700' },
+              { icon: Shield, title: t.landing.maxSecurity, desc: t.landing.maxSecurityDesc, color: 'from-emerald-500 to-teal-600', bg: 'bg-emerald-50', text: 'text-emerald-700' },
+              { icon: BarChart3, title: t.landing.smartReports, desc: t.landing.smartReportsDesc, color: 'from-blue-500 to-indigo-600', bg: 'bg-blue-50', text: 'text-blue-700' },
             ].map((feat, i) => (
               <FadeIn key={i} delay={i * 0.1}>
                 <div className="group relative overflow-hidden rounded-2xl bg-white border border-slate-200 p-8 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500 hover:-translate-y-1">
@@ -238,12 +244,12 @@ export default function LandingPage() {
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-lg shadow-blue-500/25">
                     <GraduationCap className="w-8 h-8" />
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-900 font-sans">สำหรับนักศึกษา</h3>
+                  <h3 className="text-2xl font-bold text-slate-900 font-sans">{t.landing.forStudents}</h3>
                   <p className="text-slate-500 text-lg leading-relaxed font-sans">
-                    จัดการชีวิตการเรียนได้ง่ายเพียงปลายนิ้ว ตั้งแต่ลงทะเบียน ตรวจสอบเกรด จนถึงการสร้างพอร์ตโฟลิโอเพื่อเข้าสู่ตลาดงาน
+                    {t.landing.forStudentsDesc}
                   </p>
                   <ul className="grid grid-cols-2 gap-3 pt-4">
-                    {['Dashboard ส่วนตัว', 'แจ้งเตือนเรียลไทม์', 'Transcript ออนไลน์', 'ระบบแนะนำอาชีพ'].map((item, i) => (
+                    {[t.landing.personalDashboard, t.landing.realtimeNotif, t.landing.onlineTranscript, t.landing.careerRecommend].map((item, i) => (
                       <li key={i} className="flex items-center text-slate-600 text-sm font-medium">
                         <CheckCircle2 className="w-4 h-4 mr-2 text-blue-500 flex-shrink-0" /> {item}
                       </li>
@@ -283,12 +289,12 @@ export default function LandingPage() {
                   <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center mb-8 shadow-lg shadow-emerald-500/25">
                     <BookOpen className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold mb-4 font-sans">สำหรับอาจารย์</h3>
+                  <h3 className="text-2xl font-bold mb-4 font-sans">{t.landing.forLecturers}</h3>
                   <p className="text-slate-400 mb-8 leading-relaxed font-sans flex-grow">
-                    ลดภาระงานเอกสาร โฟกัสกับการสอนได้เต็มที่ ด้วยเครื่องมือตัดเกรดและเช็คชื่ออัตโนมัติ
+                    {t.landing.forLecturersDesc}
                   </p>
                   <div className="space-y-3">
-                    {['จัดการรายวิชา', 'ตัดเกรดออนไลน์', 'เช็คชื่ออัตโนมัติ'].map((item, i) => (
+                    {[t.landing.manageCourses, t.landing.onlineGrading, t.landing.autoAttendance].map((item, i) => (
                       <div key={i} className="p-3.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-pointer flex items-center justify-between group/item">
                         <span className="text-sm font-medium">{item}</span>
                         <ChevronRight className="w-4 h-4 text-slate-500 group-hover/item:text-emerald-400 group-hover/item:translate-x-1 transition-all" />
@@ -306,12 +312,12 @@ export default function LandingPage() {
                 <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-violet-600 rounded-2xl flex items-center justify-center mb-8 text-white group-hover:rotate-12 group-hover:scale-110 transition-transform duration-500 shadow-lg shadow-purple-500/25">
                   <Building2 className="w-7 h-7" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-4 font-sans">สำหรับเจ้าหน้าที่</h3>
+                <h3 className="text-xl font-bold text-slate-900 mb-4 font-sans">{t.landing.forStaff}</h3>
                 <p className="text-slate-500 text-sm leading-relaxed mb-6 font-sans">
-                  บริหารจัดการข้อมูลบุคลากรและงบประมาณได้อย่างแม่นยำ รวดเร็ว และตรวจสอบได้
+                  {t.landing.forStaffDesc}
                 </p>
                 <div className="space-y-2 mb-6">
-                  {[{ label: 'ประสิทธิภาพ', w: 'w-[85%]', color: 'bg-purple-500' }, { label: 'ความพึงพอใจ', w: 'w-[92%]', color: 'bg-violet-500' }].map((bar, i) => (
+                  {[{ label: t.landing.efficiency, w: 'w-[85%]', color: 'bg-purple-500' }, { label: t.landing.satisfaction, w: 'w-[92%]', color: 'bg-violet-500' }].map((bar, i) => (
                     <div key={i}>
                       <div className="flex justify-between text-xs mb-1">
                         <span className="text-slate-500 font-medium">{bar.label}</span>
@@ -347,21 +353,21 @@ export default function LandingPage() {
                     <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-amber-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-orange-500/30 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500">
                       <Briefcase className="w-8 h-8 text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold mb-4 font-sans">สำหรับภาคอุตสาหกรรม</h3>
+                    <h3 className="text-2xl font-bold mb-4 font-sans">{t.landing.forIndustry}</h3>
                     <p className="text-slate-300 text-lg leading-relaxed mb-8 font-sans">
-                      เข้าถึงฐานข้อมูล Talent Pool คุณภาพ ค้นหานักศึกษาฝึกงานและพนักงานที่ตรงโจทย์ธุรกิจของคุณที่สุด
+                      {t.landing.forIndustryDesc}
                     </p>
                     <Button variant="outline" className="border-orange-500/30 text-orange-300 hover:bg-orange-500 hover:text-white hover:border-orange-500 rounded-full px-8 transition-all duration-300">
-                      ดูรายละเอียดความร่วมมือ <ArrowRight className="ml-2 w-4 h-4" />
+                      {t.landing.viewCoopDetails} <ArrowRight className="ml-2 w-4 h-4" />
                     </Button>
                   </div>
                   <div className="w-full md:w-1/3">
                     <div className="grid grid-cols-2 gap-4">
                       {[
-                        { value: '96%', label: 'ได้งาน' },
-                        { value: '200+', label: 'พันธมิตร' },
-                        { value: '4.9', label: 'คะแนน' },
-                        { value: '500+', label: 'ฝึกงาน' },
+                        { value: '96%', label: t.landing.gotJobs },
+                        { value: '200+', label: t.landing.partners },
+                        { value: '4.9', label: t.landing.score },
+                        { value: '500+', label: t.landing.internship },
                       ].map((stat, i) => (
                         <div key={i} className="bg-white/5 backdrop-blur-sm border border-white/10 p-4 rounded-xl text-center hover:bg-white/10 hover:border-orange-500/30 transition-all duration-300 group/stat">
                           <div className="text-2xl font-bold text-orange-400 mb-1 group-hover/stat:scale-110 transition-transform">{stat.value}</div>
@@ -414,11 +420,11 @@ export default function LandingPage() {
                 <Handshake className="w-3.5 h-3.5 mr-1.5" /> Trusted Partners
               </Badge>
               <h2 className="text-4xl lg:text-6xl font-bold mb-6 text-slate-900 tracking-tight font-sans">
-                พันธมิตรที่ร่วมสร้าง<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600">อนาคตการศึกษา</span>
+                {t.landing.partnersTitle1}<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600">{t.landing.partnersTitle2}</span>
               </h2>
               <p className="text-slate-500 text-xl font-light leading-relaxed font-sans">
-                เชื่อมต่อกับองค์กรชั้นนำทั่วประเทศ เพื่อโอกาสที่ดีที่สุดสำหรับนักศึกษา
+                {t.landing.partnersDesc}
               </p>
             </FadeIn>
           </div>
@@ -437,16 +443,16 @@ export default function LandingPage() {
                   {[...Array(2)].map((_, setIdx) => (
                     <React.Fragment key={setIdx}>
                       {[
-                        { name: 'Google', color: 'from-blue-500 to-green-500' },
-                        { name: 'Microsoft', color: 'from-blue-600 to-cyan-500' },
-                        { name: 'SCB', color: 'from-purple-600 to-purple-500' },
-                        { name: 'PTT', color: 'from-blue-700 to-blue-500' },
-                        { name: 'AIS', color: 'from-green-600 to-emerald-500' },
-                        { name: 'True', color: 'from-red-600 to-orange-500' },
-                        { name: 'KBANK', color: 'from-green-700 to-green-500' },
-                        { name: 'CP', color: 'from-red-700 to-red-500' },
-                        { name: 'Agoda', color: 'from-blue-500 to-indigo-500' },
-                        { name: 'LINE', color: 'from-green-500 to-green-400' },
+                        { name: 'CLBS', color: 'from-blue-500 to-green-500' },
+                        { name: 'Move+', color: 'from-blue-600 to-cyan-500' },
+                        { name: 'Mercil', color: 'from-purple-600 to-purple-500' },
+                        { name: 'Axons', color: 'from-blue-700 to-blue-500' },
+                        { name: 'Gable', color: 'from-green-600 to-emerald-500' },
+                        { name: 'BeNeat', color: 'from-red-600 to-orange-500' },
+                        { name: 'Big Data', color: 'from-green-700 to-green-500' },
+                        { name: 'Hylife Group', color: 'from-red-700 to-red-500' },
+                        { name: 'Day Work', color: 'from-blue-500 to-indigo-500' },
+                        { name: 'TCC', color: 'from-green-500 to-green-400' },
                       ].map((partner, i) => (
                         <div key={`${setIdx}-${i}`} className="group flex-shrink-0 w-48 h-24 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 flex items-center justify-center transition-all duration-300 hover:-translate-y-1 hover:border-slate-200">
                           <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${partner.color} flex items-center justify-center text-white font-bold text-lg shadow-sm mr-3`}>
@@ -468,24 +474,24 @@ export default function LandingPage() {
               {
                 icon: Handshake,
                 value: '200+',
-                label: 'องค์กรพันธมิตร',
-                desc: 'บริษัทชั้นนำทั้งในและต่างประเทศ',
+                label: t.landing.partnerOrgs,
+                desc: t.landing.partnerOrgsDesc,
                 gradient: 'from-blue-600 to-indigo-600',
                 bg: 'bg-blue-50',
               },
               {
                 icon: Users,
                 value: '5,000+',
-                label: 'ตำแหน่งงานต่อปี',
-                desc: 'โอกาสฝึกงานและงานประจำ',
+                label: t.landing.positionsPerYear,
+                desc: t.landing.positionsPerYearDesc,
                 gradient: 'from-indigo-600 to-purple-600',
                 bg: 'bg-indigo-50',
               },
               {
                 icon: Trophy,
                 value: '98%',
-                label: 'อัตราการจ้างงาน',
-                desc: 'ของนักศึกษาที่สำเร็จการศึกษา',
+                label: t.landing.employmentRateLabel,
+                desc: t.landing.employmentRateDesc,
                 gradient: 'from-purple-600 to-pink-600',
                 bg: 'bg-purple-50',
               },
@@ -519,24 +525,24 @@ export default function LandingPage() {
                     ))}
                   </div>
                   <blockquote className="text-2xl lg:text-3xl font-light leading-relaxed text-slate-200 font-sans">
-                    "ระบบ DII CAMT ช่วยให้เราเข้าถึง Talent Pool คุณภาพสูง ลดเวลาการสรรหาบุคลากรลง 60% และเพิ่มคุณภาพการจ้างงานอย่างเห็นได้ชัด"
+                    "{t.landing.testimonialQuote}"
                   </blockquote>
                   <div className="flex items-center gap-4 pt-4">
                     <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
                       K
                     </div>
                     <div>
-                      <div className="font-semibold text-lg">คุณสมศักดิ์ พรมจันทร์</div>
-                      <div className="text-slate-400 text-sm">HR Director, บริษัทชั้นนำด้านเทคโนโลยี</div>
+                      <div className="font-semibold text-lg">{t.landing.testimonialName}</div>
+                      <div className="text-slate-400 text-sm">{t.landing.testimonialRole}</div>
                     </div>
                   </div>
                 </div>
                 <div className="w-full lg:w-1/3 grid grid-cols-2 gap-4">
                   {[
-                    { icon: Clock, label: 'ลดเวลาสรรหา', value: '60%' },
-                    { icon: Users, label: 'Talent Pool', value: '2K+' },
-                    { icon: CheckCircle2, label: 'Match Rate', value: '95%' },
-                    { icon: Star, label: 'ความพึงพอใจ', value: '4.9' },
+                    { icon: Clock, label: t.landing.reducedRecruitment, value: '60%' },
+                    { icon: Users, label: t.landing.talentPool, value: '2K+' },
+                    { icon: CheckCircle2, label: t.landing.matchRate, value: '95%' },
+                    { icon: Star, label: t.landing.satisfaction, value: '4.9' },
                   ].map((item, i) => (
                     <div key={i} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-5 text-center hover:bg-white/10 transition-all duration-300">
                       <item.icon className="w-5 h-5 text-blue-400 mx-auto mb-2" />
@@ -562,11 +568,11 @@ export default function LandingPage() {
                 <Send className="w-3.5 h-3.5 mr-1.5" /> Get In Touch
               </Badge>
               <h2 className="text-4xl lg:text-6xl font-bold mb-6 text-slate-900 tracking-tight font-sans">
-                พร้อมให้บริการ<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600">ทุกคำถามของคุณ</span>
+                {t.landing.contactTitle1}<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600">{t.landing.contactTitle2}</span>
               </h2>
               <p className="text-slate-500 text-xl font-light leading-relaxed font-sans">
-                ติดต่อทีมงานของเราได้ทุกช่องทาง เรายินดีให้คำปรึกษาและสาธิตระบบ
+                {t.landing.contactDesc}
               </p>
             </FadeIn>
           </div>
@@ -577,27 +583,27 @@ export default function LandingPage() {
               {[
                 {
                   icon: MapPin,
-                  title: 'ที่ตั้ง',
-                  info: 'วิทยาลัยศิลปะ สื่อ และเทคโนโลยี',
-                  detail: 'มหาวิทยาลัยเชียงใหม่ 239 ถ.ห้วยแก้ว ต.สุเทพ อ.เมือง จ.เชียงใหม่ 50200',
+                  title: t.landing.locationLabel,
+                  info: t.landing.locationInfo,
+                  detail: t.landing.locationDetail,
                   gradient: 'from-blue-600 to-indigo-600',
                   bg: 'bg-blue-50',
                   iconColor: 'text-blue-600',
                 },
                 {
                   icon: Phone,
-                  title: 'โทรศัพท์',
-                  info: '053-942-110',
-                  detail: 'จันทร์ - ศุกร์ 08:30 - 16:30 น.',
+                  title: t.landing.phoneLabel,
+                  info: t.landing.phoneInfo,
+                  detail: t.landing.phoneDetail,
                   gradient: 'from-emerald-600 to-teal-600',
                   bg: 'bg-emerald-50',
                   iconColor: 'text-emerald-600',
                 },
                 {
                   icon: Mail,
-                  title: 'อีเมล',
-                  info: 'dii@camt.cmu.ac.th',
-                  detail: 'ตอบกลับภายใน 24 ชั่วโมง',
+                  title: t.landing.emailLabel,
+                  info: t.landing.emailInfo,
+                  detail: t.landing.emailDetail,
                   gradient: 'from-purple-600 to-pink-600',
                   bg: 'bg-purple-50',
                   iconColor: 'text-purple-600',
@@ -628,21 +634,21 @@ export default function LandingPage() {
                 <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-50 rounded-full blur-[60px] translate-y-1/2 -translate-x-1/2 opacity-50" />
                 
                 <div className="relative z-10">
-                  <h3 className="text-2xl font-bold text-slate-900 mb-2 font-sans">ส่งข้อความถึงเรา</h3>
-                  <p className="text-slate-500 mb-8 font-sans">กรอกข้อมูลด้านล่าง เราจะติดต่อกลับโดยเร็วที่สุด</p>
+                  <h3 className="text-2xl font-bold text-slate-900 mb-2 font-sans">{t.landing.sendMessage}</h3>
+                  <p className="text-slate-500 mb-8 font-sans">{t.landing.formSubtitle}</p>
                   
                   <div className="space-y-5">
                     <div className="grid md:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">ชื่อ-นามสกุล</label>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">{t.landing.fullNameLabel}</label>
                         <input
                           type="text"
-                          placeholder="กรอกชื่อ-นามสกุล"
+                          placeholder={t.landing.fullNamePlaceholder}
                           className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all font-sans"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">อีเมล</label>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">{t.landing.emailFormLabel}</label>
                         <input
                           type="email"
                           placeholder="example@email.com"
@@ -651,25 +657,25 @@ export default function LandingPage() {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">หัวข้อ</label>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">{t.landing.subjectLabel}</label>
                       <select className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all font-sans appearance-none">
-                        <option value="">เลือกหัวข้อที่ต้องการ</option>
-                        <option value="demo">ขอนัดสาธิตระบบ</option>
-                        <option value="partnership">สนใจเป็นพันธมิตร</option>
-                        <option value="support">ขอความช่วยเหลือ</option>
-                        <option value="other">อื่นๆ</option>
+                        <option value="">{t.landing.subjectPlaceholder}</option>
+                        <option value="demo">{t.landing.subjectDemo}</option>
+                        <option value="partnership">{t.landing.subjectPartnership}</option>
+                        <option value="support">{t.landing.subjectSupport}</option>
+                        <option value="other">{t.landing.subjectOther}</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">ข้อความ</label>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">{t.landing.messageLabel}</label>
                       <textarea
                         rows={4}
-                        placeholder="พิมพ์ข้อความของคุณที่นี่..."
+                        placeholder={t.landing.messagePlaceholder}
                         className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none font-sans"
                       />
                     </div>
                     <Button className="w-full h-14 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-lg font-semibold shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 font-sans">
-                      <Send className="w-5 h-5 mr-2" /> ส่งข้อความ
+                      <Send className="w-5 h-5 mr-2" /> {t.landing.sendButton}
                     </Button>
                   </div>
                 </div>
@@ -688,19 +694,19 @@ export default function LandingPage() {
             <div className="absolute bottom-0 left-0 w-96 h-96 bg-black/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
             <div className="relative z-10 max-w-3xl mx-auto space-y-8">
-              <h2 className="text-3xl lg:text-5xl font-bold text-white tracking-tight font-sans">พร้อมก้าวสู่โลกการศึกษายุคใหม่?</h2>
+              <h2 className="text-3xl lg:text-5xl font-bold text-white tracking-tight font-sans">{t.landing.ctaTitle}</h2>
               <p className="text-blue-100 text-lg lg:text-xl font-light font-sans">
-                เข้าร่วมกับเราวันนี้เพื่อสัมผัสประสบการณ์การบริหารจัดการการศึกษาที่ทันสมัย ครบวงจร และตอบโจทย์ทุกความต้องการ
+                {t.landing.ctaDesc}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
                 <Link to="/register">
                   <Button size="lg" className="h-14 px-8 bg-white text-blue-600 hover:bg-blue-50 border-0 rounded-full text-lg font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 font-sans">
-                    สมัครสมาชิกเลย
+                    {t.landing.registerNow}
                   </Button>
                 </Link>
                 <Link to="/contact">
                   <Button size="lg" variant="outline" className="h-14 px-8 bg-white/10 border-2 border-white/30 text-white hover:bg-white hover:text-blue-600 rounded-full text-lg font-semibold backdrop-blur-sm transition-all font-sans">
-                    ติดต่อสอบถาม
+                    {t.landing.contactUs}
                   </Button>
                 </Link>
               </div>
@@ -719,34 +725,34 @@ export default function LandingPage() {
                 <span className="font-bold text-xl text-slate-900">DII CAMT</span>
               </div>
               <p className="text-slate-500 leading-relaxed">
-                หลักสูตรบูรณาการอุตสาหกรรมดิจิทัล<br />
-                วิทยาลัยศิลปะ สื่อ และเทคโนโลยี<br />
-                มหาวิทยาลัยเชียงใหม่
+                {t.landing.footerDesc1}<br />
+                {t.landing.footerDesc2}<br />
+                {t.landing.footerDesc3}
               </p>
             </div>
 
             <div>
-              <h4 className="font-bold text-slate-900 mb-6">เมนูหลัก</h4>
+              <h4 className="font-bold text-slate-900 mb-6">{t.landing.mainMenu}</h4>
               <ul className="space-y-3 text-slate-500">
-                <li><a href="#" className="hover:text-blue-600 transition-colors">หน้าหลัก</a></li>
-                <li><a href="#" className="hover:text-blue-600 transition-colors">เกี่ยวกับเรา</a></li>
-                <li><a href="#" className="hover:text-blue-600 transition-colors">หลักสูตร</a></li>
-                <li><a href="#" className="hover:text-blue-600 transition-colors">ข่าวสาร</a></li>
+                <li><a href="#" className="hover:text-blue-600 transition-colors">{t.landing.home}</a></li>
+                <li><a href="#" className="hover:text-blue-600 transition-colors">{t.landing.aboutUs}</a></li>
+                <li><a href="#" className="hover:text-blue-600 transition-colors">{t.landing.curriculum}</a></li>
+                <li><a href="#" className="hover:text-blue-600 transition-colors">{t.landing.news}</a></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="font-bold text-slate-900 mb-6">สำหรับผู้ใช้งาน</h4>
+              <h4 className="font-bold text-slate-900 mb-6">{t.landing.forUsers}</h4>
               <ul className="space-y-3 text-slate-500">
-                <li><Link to="/login" className="hover:text-blue-600 transition-colors">เข้าสู่ระบบ</Link></li>
-                <li><Link to="/register" className="hover:text-blue-600 transition-colors">สมัครสมาชิก</Link></li>
-                <li><a href="#" className="hover:text-blue-600 transition-colors">คู่มือการใช้งาน</a></li>
-                <li><a href="#" className="hover:text-blue-600 transition-colors">แจ้งปัญหา</a></li>
+                <li><Link to="/login" className="hover:text-blue-600 transition-colors">{t.landing.login}</Link></li>
+                <li><Link to="/register" className="hover:text-blue-600 transition-colors">{t.landing.register}</Link></li>
+                <li><a href="#" className="hover:text-blue-600 transition-colors">{t.landing.userGuide}</a></li>
+                <li><a href="#" className="hover:text-blue-600 transition-colors">{t.landing.reportIssue}</a></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="font-bold text-slate-900 mb-6">ติดต่อเรา</h4>
+              <h4 className="font-bold text-slate-900 mb-6">{t.landing.footerContact}</h4>
               <ul className="space-y-3 text-slate-500">
                 <li className="flex items-center gap-2"><Globe className="w-4 h-4" /> www.camt.cmu.ac.th</li>
                 <li className="flex items-center gap-2"><Trophy className="w-4 h-4" /> 053-942110</li>
@@ -755,7 +761,7 @@ export default function LandingPage() {
           </div>
 
           <div className="border-t border-slate-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-400">
-            <div>© 2026 DII CAMT. All rights reserved.</div>
+            <div>{t.landing.allRightsReserved}</div>
             <div className="flex gap-6">
               <Link to="/privacy-policy" className="hover:text-slate-600">Privacy Policy</Link>
               <Link to="/terms-of-service" className="hover:text-slate-600">Terms of Service</Link>

@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { UserRole } from '@/types';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -43,88 +44,84 @@ interface SidebarProps {
   onClose: () => void;
 }
 
-const getNavItems = (role: UserRole): NavItem[] => {
+const getNavItems = (role: UserRole, nav: Record<string, string>): NavItem[] => {
   const commonItems: NavItem[] = [
-    { icon: LayoutDashboard, label: 'แดชบอร์ด', href: '/dashboard' },
+    { icon: LayoutDashboard, label: nav.dashboard, href: '/dashboard' },
   ];
 
   switch (role) {
     case 'student':
       return [
         ...commonItems,
-        { icon: BookOpen, label: 'ลงทะเบียนเรียน', href: '/courses' },
-        { icon: Calendar, label: 'ตารางเรียน', href: '/schedule' },
-        { icon: GraduationCap, label: 'ผลการเรียน', href: '/grades' },
-        { icon: Trophy, label: 'กิจกรรม & สะสมแต้ม', href: '/activities' },
-        { icon: FileText, label: 'Portfolio & CV', href: '/portfolio' },
-        { icon: Briefcase, label: 'ฝึกงาน', href: '/internships' },
-        { icon: ClipboardList, label: 'คำร้อง/ฟอร์ม', href: '/requests' },
-        { icon: MessageSquare, label: 'ข้อความ', href: '/messages' },
-        { icon: Settings, label: 'ตั้งค่า', href: '/settings' },
+        { icon: BookOpen, label: nav.courses, href: '/courses' },
+        { icon: Calendar, label: nav.schedule, href: '/schedule' },
+        { icon: GraduationCap, label: nav.grades, href: '/grades' },
+        { icon: Trophy, label: nav.activities, href: '/activities' },
+        { icon: FileText, label: nav.portfolio, href: '/portfolio' },
+        { icon: Briefcase, label: nav.internships, href: '/internships' },
+        { icon: ClipboardList, label: nav.requests, href: '/requests' },
+        { icon: MessageSquare, label: nav.messages, href: '/messages' },
+        { icon: Settings, label: nav.settings, href: '/settings' },
       ];
     case 'lecturer':
       return [
         ...commonItems,
-        { icon: Calendar, label: 'ตารางสอน', href: '/schedule' },
-        { icon: Users, label: 'นักศึกษาในที่ปรึกษา', href: '/students' },
-        { icon: BookOpen, label: 'จัดการรายวิชา', href: '/courses' },
-        { icon: ClipboardList, label: 'การเข้าเรียน/พฤติกรรม', href: '/attendance' },
-        { icon: GraduationCap, label: 'ตัดเกรด', href: '/grades' },
-        { icon: FileText, label: 'นัดหมาย', href: '/appointments' },
-        { icon: BarChart3, label: 'รายงานภาระงาน', href: '/workload' },
-        { icon: MessageSquare, label: 'ข้อความ', href: '/messages' },
-        { icon: Settings, label: 'ตั้งค่า', href: '/settings' },
+        { icon: Calendar, label: nav.teachingSchedule, href: '/schedule' },
+        { icon: Users, label: nav.adviseeStudents, href: '/students' },
+        { icon: BookOpen, label: nav.courseManagement, href: '/courses' },
+        { icon: ClipboardList, label: nav.attendanceBehavior, href: '/attendance' },
+        { icon: GraduationCap, label: nav.grading, href: '/grades' },
+        { icon: FileText, label: nav.appointments, href: '/appointments' },
+        { icon: BarChart3, label: nav.workloadReport, href: '/workload' },
+        { icon: MessageSquare, label: nav.messages, href: '/messages' },
+        { icon: Settings, label: nav.settings, href: '/settings' },
       ];
     case 'staff':
       return [
         ...commonItems,
-        { icon: Users, label: 'ผู้ใช้งาน', href: '/users' },
-        { icon: DollarSign, label: 'งบประมาณ & พัสดุ', href: '/budget' },
-        { icon: Building2, label: 'เครือข่ายความร่วมมือ', href: '/network' },
-        { icon: FileText, label: 'ออกเอกสารสำคัญ', href: '/documents' },
-        { icon: UserCog, label: 'บริหารงานบุคคล', href: '/personnel' },
-        { icon: Calendar, label: 'ตารางเรียนและห้อง', href: '/schedule-management' },
-        { icon: Trophy, label: 'จัดการกิจกรรม', href: '/activities-management' },
-        { icon: Clock, label: 'ติดตามภาระงาน', href: '/workload-tracking' },
-        { icon: BarChart3, label: 'รายงานและสถิติ', href: '/reports' },
-        { icon: Shield, label: 'ตรวจสอบ (Audit)', href: '/audit' },
-        { icon: Bell, label: 'จัดการประกาศ', href: '/notifications' },
-        { icon: Settings, label: 'ตั้งค่า', href: '/settings' },
+        { icon: Users, label: nav.users, href: '/users' },
+        { icon: DollarSign, label: nav.budgetProcurement, href: '/budget' },
+        { icon: Building2, label: nav.cooperationNetwork, href: '/network' },
+        { icon: FileText, label: nav.issueDocuments, href: '/documents' },
+        { icon: UserCog, label: nav.personnelManagement, href: '/personnel' },
+        { icon: Calendar, label: nav.scheduleRoomManagement, href: '/schedule-management' },
+        { icon: Trophy, label: nav.activityManagement, href: '/activities-management' },
+        { icon: Clock, label: nav.workloadTracking, href: '/workload-tracking' },
+        { icon: BarChart3, label: nav.reportsStats, href: '/reports' },
+        { icon: Shield, label: nav.audit, href: '/audit' },
+        { icon: Bell, label: nav.announcementManagement, href: '/notifications' },
+        { icon: Settings, label: nav.settings, href: '/settings' },
       ];
     case 'company':
       return [
         ...commonItems,
-        { icon: Briefcase, label: 'ประกาศรับสมัครงาน', href: '/job-postings' },
-        { icon: Search, label: 'ค้นหานักศึกษา', href: '/student-profiles' },
-        { icon: Users, label: 'ผู้สมัครงาน', href: '/applicants' },
-        { icon: UserCog, label: 'ติดตามนักศึกษาฝึกงาน', href: '/intern-tracking' },
-        { icon: Building2, label: 'ความร่วมมือ (MOU)', href: '/cooperation' },
-        { icon: DollarSign, label: 'แพ็คเกจสมาชิก', href: '/subscription' },
-        { icon: Settings, label: 'ตั้งค่า', href: '/settings' },
+        { icon: Briefcase, label: nav.jobPostings, href: '/job-postings' },
+        { icon: Search, label: nav.searchStudents, href: '/student-profiles' },
+        { icon: Users, label: nav.applicants, href: '/applicants' },
+        { icon: UserCog, label: nav.internTracking, href: '/intern-tracking' },
+        { icon: Building2, label: nav.cooperationMOU, href: '/cooperation' },
+        { icon: DollarSign, label: nav.subscriptionPackage, href: '/subscription' },
+        { icon: Settings, label: nav.settings, href: '/settings' },
       ];
     case 'admin':
       return [
         ...commonItems,
-        { icon: Shield, label: 'ภาพรวมระบบ (Admin)', href: '/dashboard' },
-        { icon: Users, label: 'จัดการผู้ใช้งาน', href: '/users' },
-        // Academic
-        { icon: BookOpen, label: 'หลักสูตร & รายวิชา', href: '/courses' },
-        { icon: Calendar, label: 'ตารางเรียน/สอน', href: '/schedule-management' },
-        // Staff Functions
-        { icon: DollarSign, label: 'งบประมาณ & พัสดุ', href: '/budget' },
-        { icon: UserCog, label: 'บริหารงานบุคคล', href: '/personnel' },
-        { icon: FileText, label: 'เอกสาร & คำร้อง', href: '/documents' },
-        { icon: Building2, label: 'เครือข่ายความร่วมมือ', href: '/network' },
-        { icon: Trophy, label: 'กิจกรรม', href: '/activities-management' },
-        // Company Functions
-        { icon: Briefcase, label: 'งาน & ฝึกงาน', href: '/job-postings' },
-        { icon: Search, label: 'ฐานข้อมูลนักศึกษา', href: '/student-profiles' },
-        { icon: Building, label: 'บริษัทพันธมิตร', href: '/cooperation' },
-        // System
-        { icon: Bell, label: 'ประกาศ & แจ้งเตือน', href: '/notifications' },
-        { icon: BarChart3, label: 'รายงาน & สถิติ', href: '/reports' },
-        { icon: Shield, label: 'Audit Logs', href: '/audit' },
-        { icon: Settings, label: 'ตั้งค่าระบบ', href: '/settings' },
+        { icon: Shield, label: nav.systemOverview, href: '/dashboard' },
+        { icon: Users, label: nav.userManagement, href: '/users' },
+        { icon: BookOpen, label: nav.curriculumCourses, href: '/courses' },
+        { icon: Calendar, label: nav.teachingScheduleAdmin, href: '/schedule-management' },
+        { icon: DollarSign, label: nav.budgetProcurement, href: '/budget' },
+        { icon: UserCog, label: nav.personnelManagement, href: '/personnel' },
+        { icon: FileText, label: nav.documentsRequests, href: '/documents' },
+        { icon: Building2, label: nav.cooperationNetwork, href: '/network' },
+        { icon: Trophy, label: nav.activityAdmin, href: '/activities-management' },
+        { icon: Briefcase, label: nav.jobsInternships, href: '/job-postings' },
+        { icon: Search, label: nav.studentDatabase, href: '/student-profiles' },
+        { icon: Building, label: nav.partnerCompanies, href: '/cooperation' },
+        { icon: Bell, label: nav.announcementsNotifications, href: '/notifications' },
+        { icon: BarChart3, label: nav.reportsStats, href: '/reports' },
+        { icon: Shield, label: nav.auditLogs, href: '/audit' },
+        { icon: Settings, label: nav.systemSettingsAdmin, href: '/settings' },
       ];
     default:
       return commonItems;
@@ -134,10 +131,11 @@ const getNavItems = (role: UserRole): NavItem[] => {
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const location = useLocation();
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   if (!user) return null;
 
-  const navItems = getNavItems(user.role);
+  const navItems = getNavItems(user.role, t.nav as unknown as Record<string, string>);
 
   const getRoleGradient = (role: UserRole) => {
     switch (role) {

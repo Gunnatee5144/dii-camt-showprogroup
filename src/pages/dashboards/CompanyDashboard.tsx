@@ -1,12 +1,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Briefcase, Users, FileText, Building, Send } from 'lucide-react';
+import { Briefcase, Users, FileText, Building, Send, Sparkles } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mockCompany, mockJobPostings, mockStudents } from '@/lib/mockData';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -20,120 +21,144 @@ const itemVariants = {
 
 export default function CompanyDashboard() {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
   const company = mockCompany;
   const companyJobPostings = mockJobPostings.filter(j => j.companyId === company.id);
   const totalApplications = companyJobPostings.reduce((sum, job) => sum + job.applicants.length, 0);
   const accessibleStudents = mockStudents.filter(s => company.studentViewConsent.includes(s.id));
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-      <motion.div variants={itemVariants} className="relative">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-lg">
-            <Building className="w-5 h-5" />
-          </div>
-          <span className="text-sm font-medium text-orange-600">แดชบอร์ดบริษัท</span>
+    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8 pb-10">
+      {/* Header Section - Bento Grid Style */}
+      <div className="flex flex-col md:flex-row justify-between items-end gap-6">
+        <div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-2 text-slate-500 font-medium mb-2"
+          >
+            <Building className="w-4 h-4 text-orange-500" />
+            <span>{company.industry} • {company.size}</span>
+          </motion.div>
+          <motion.h1
+            className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            {t.companyDashboard.hello} <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">{company.companyNameThai}</span> 🏢
+          </motion.h1>
         </div>
-        <motion.h1 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="text-3xl font-bold text-gray-900">
-          <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">{`สวัสดี, ${company.companyNameThai} 🏢`}</span>
-        </motion.h1>
-        <p className="text-gray-500 mt-1">{`${company.industry} • ${company.size === 'medium' ? 'ขนาดกลาง' : company.size}`}</p>
-      </motion.div>
 
-      <motion.div variants={itemVariants} className="flex justify-end">
-        <Link to="/job-postings">
-          <Button className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-lg shadow-orange-200/50">
-            <Send className="w-4 h-4 mr-2" />ลงประกาศงาน
-          </Button>
-        </Link>
-      </motion.div>
+        <motion.div className="flex gap-3" variants={itemVariants}>
+          <Link to="/job-postings">
+            <Button className="rounded-xl bg-slate-900 text-white hover:bg-slate-800 shadow-lg shadow-slate-900/20">
+              <Send className="w-4 h-4 mr-2" />{t.companyDashboard.postJob}
+            </Button>
+          </Link>
+        </motion.div>
+      </div>
 
-      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Stats Grid - Bento Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <motion.div
-          whileHover={{ scale: 1.02 }}
+          variants={itemVariants}
+          whileHover={{ y: -5 }}
           onClick={() => navigate('/job-postings')}
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 p-6 text-white shadow-xl shadow-orange-200 cursor-pointer"
+          className="p-6 rounded-3xl bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-xl shadow-orange-500/20 relative overflow-hidden cursor-pointer"
         >
-          <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
-                <Briefcase className="w-5 h-5" />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2.5 rounded-xl bg-white/20 backdrop-blur-sm">
+                <Briefcase className="w-6 h-6" />
               </div>
-              <span className="font-medium text-white/90">ตำแหน่งงาน</span>
+              <span className="font-medium text-white/90">{t.companyDashboard.jobPositions}</span>
             </div>
-            <div className="text-4xl font-bold">{companyJobPostings.length}</div>
-            <div className="text-sm text-white/80 mt-2">ประกาศที่เปิดรับ</div>
+            <div className="text-5xl font-bold tracking-tight">{companyJobPostings.length}</div>
+            <div className="mt-3 text-sm text-orange-100 flex items-center gap-1">
+              <Sparkles className="w-4 h-4" />
+              {t.companyDashboard.openPositions}
+            </div>
           </div>
         </motion.div>
 
         <motion.div
-          whileHover={{ scale: 1.02 }}
+          variants={itemVariants}
+          whileHover={{ y: -5 }}
           onClick={() => navigate('/applicants')}
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 p-6 text-white shadow-xl shadow-blue-200 cursor-pointer"
+          className="p-6 rounded-3xl bg-white border border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden group cursor-pointer"
         >
-          <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
           <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
-                <Users className="w-5 h-5" />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2.5 rounded-xl bg-slate-100 text-slate-600 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                <Users className="w-6 h-6" />
               </div>
-              <span className="font-medium text-white/90">ผู้สมัคร</span>
+              <span className="font-medium text-slate-600">{t.companyDashboard.applicantsLabel}</span>
             </div>
-            <div className="text-4xl font-bold">{totalApplications}</div>
-            <div className="text-sm text-white/80 mt-2">ผู้สมัครทั้งหมด</div>
+            <div className="text-4xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{totalApplications}</div>
+            <div className="mt-3 text-sm text-slate-400">
+              {t.companyDashboard.totalApplicants}
+            </div>
+            <div className="absolute bottom-0 right-0 w-24 h-12 bg-gradient-to-t from-blue-50 to-transparent" />
           </div>
         </motion.div>
 
         <motion.div
-          whileHover={{ scale: 1.02 }}
+          variants={itemVariants}
+          whileHover={{ y: -5 }}
           onClick={() => navigate('/student-profiles')}
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 p-6 text-white shadow-xl shadow-emerald-200 cursor-pointer"
+          className="p-6 rounded-3xl bg-white border border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden group cursor-pointer"
         >
-          <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
           <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
-                <FileText className="w-5 h-5" />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2.5 rounded-xl bg-slate-100 text-slate-600 group-hover:bg-purple-50 group-hover:text-purple-600 transition-colors">
+                <FileText className="w-6 h-6" />
               </div>
-              <span className="font-medium text-white/90">นักศึกษาที่ดูได้</span>
+              <span className="font-medium text-slate-600">{t.companyDashboard.accessibleStudents}</span>
             </div>
-            <div className="text-4xl font-bold">{accessibleStudents.length}</div>
-            <div className="text-sm text-white/80 mt-2">ตาม Consent</div>
+            <div className="text-4xl font-bold text-slate-900 group-hover:text-purple-600 transition-colors">{accessibleStudents.length}</div>
+            <div className="mt-3 text-sm text-slate-400">
+              {t.companyDashboard.byConsent}
+            </div>
+            <div className="absolute bottom-0 right-0 w-24 h-12 bg-gradient-to-t from-purple-50 to-transparent" />
           </div>
         </motion.div>
 
         <motion.div
-          whileHover={{ scale: 1.02 }}
+          variants={itemVariants}
+          whileHover={{ y: -5 }}
           onClick={() => navigate('/intern-tracking')}
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 p-6 text-white shadow-xl shadow-purple-200 cursor-pointer"
+          className="p-6 rounded-3xl bg-white border border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden group cursor-pointer"
         >
-          <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
           <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
-                <Building className="w-5 h-5" />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2.5 rounded-xl bg-slate-100 text-slate-600 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                <Building className="w-6 h-6" />
               </div>
-              <span className="font-medium text-white/90">นักศึกษาฝึกงาน</span>
+              <span className="font-medium text-slate-600">{t.companyDashboard.interns}</span>
             </div>
-            <div className="text-3xl font-bold">{company.currentInterns}/{company.internshipSlots}</div>
-            <div className="text-sm text-white/80 mt-2">ปัจจุบัน</div>
+            <div className="text-4xl font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">{company.currentInterns}/{company.internshipSlots}</div>
+            <div className="mt-3 text-sm text-slate-400">
+              {t.companyDashboard.current}
+            </div>
+            <div className="absolute bottom-0 right-0 w-24 h-12 bg-gradient-to-t from-emerald-50 to-transparent" />
           </div>
         </motion.div>
-      </motion.div>
+      </div>
 
       <motion.div variants={itemVariants}>
         <Tabs defaultValue="jobs" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="jobs">ประกาศงาน</TabsTrigger>
-            <TabsTrigger value="students">นักศึกษา</TabsTrigger>
+            <TabsTrigger value="jobs">{t.companyDashboard.ourJobs}</TabsTrigger>
+            <TabsTrigger value="students">{t.companyDashboard.accessibleStudentsTab}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="jobs">
             <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
               <CardHeader>
-                <CardTitle>ประกาศงานของเรา</CardTitle>
-                <CardDescription>{companyJobPostings.length} ตำแหน่ง</CardDescription>
+                <CardTitle>{t.companyDashboard.ourJobs}</CardTitle>
+                <CardDescription>{companyJobPostings.length} {t.companyDashboard.positions}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {companyJobPostings.map(job => (
@@ -141,16 +166,16 @@ export default function CompanyDashboard() {
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <h3 className="font-semibold text-lg">{job.title}</h3>
-                        <p className="text-sm text-gray-600">{job.type === 'internship' ? 'ฝึกงาน' : 'งานเต็มเวลา'} • {job.location}</p>
+                        <p className="text-sm text-gray-600">{job.type === 'internship' ? t.companyDashboard.internship : t.companyDashboard.fullTime} • {job.location}</p>
                       </div>
-                      <Badge variant={job.status === 'open' ? 'default' : 'secondary'}>{job.status === 'open' ? 'เปิดรับ' : 'ปิดรับ'}</Badge>
+                      <Badge variant={job.status === 'open' ? 'default' : 'secondary'}>{job.status === 'open' ? t.companyDashboard.open : t.companyDashboard.closed}</Badge>
                     </div>
                     <div className="grid grid-cols-3 gap-4 mb-3">
-                      <div><div className="text-xs text-gray-600">ตำแหน่ง</div><div className="font-semibold">{job.positions} อัตรา</div></div>
-                      <div><div className="text-xs text-gray-600">ผู้สมัคร</div><div className="font-semibold">{job.applicants.length} คน</div></div>
-                      <div><div className="text-xs text-gray-600">ปิดรับ</div><div className="font-semibold">{new Date(job.deadline).toLocaleDateString('th-TH', { month: 'short', day: 'numeric' })}</div></div>
+                      <div><div className="text-xs text-gray-600">{t.common.position}</div><div className="font-semibold">{job.positions} {t.companyDashboard.positionsCount}</div></div>
+                      <div><div className="text-xs text-gray-600">{t.companyDashboard.applicantsLabel}</div><div className="font-semibold">{job.applicants.length} {t.common.person}</div></div>
+                      <div><div className="text-xs text-gray-600">{t.companyDashboard.closeDate}</div><div className="font-semibold">{new Date(job.deadline).toLocaleDateString(language === 'th' ? 'th-TH' : 'en-US', { month: 'short', day: 'numeric' })}</div></div>
                     </div>
-                    <Button size="sm" variant="outline" className="w-full" onClick={() => navigate('/applicants')}>ดูผู้สมัครทั้งหมด</Button>
+                    <Button size="sm" variant="outline" className="w-full" onClick={() => navigate('/applicants')}>{t.companyDashboard.viewApplicants}</Button>
                   </div>
                 ))}
               </CardContent>
@@ -160,8 +185,8 @@ export default function CompanyDashboard() {
           <TabsContent value="students">
             <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
               <CardHeader>
-                <CardTitle>นักศึกษาที่สามารถดูได้</CardTitle>
-                <CardDescription>{accessibleStudents.length} คน (ตาม Consent)</CardDescription>
+                <CardTitle>{t.companyDashboard.accessibleStudentsTab}</CardTitle>
+                <CardDescription>{accessibleStudents.length} {t.common.person} ({t.companyDashboard.byConsent})</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 {accessibleStudents.map(student => (
@@ -172,10 +197,10 @@ export default function CompanyDashboard() {
                       </div>
                       <div>
                         <div className="font-semibold">{student.nameThai}</div>
-                        <div className="text-sm text-gray-600">ชั้นปี {student.year} • GPA {student.gpa.toFixed(2)}</div>
+                        <div className="text-sm text-gray-600">{t.companyDashboard.year} {student.year} • GPA {student.gpa.toFixed(2)}</div>
                       </div>
                     </div>
-                    <Button size="sm" variant="outline" onClick={() => navigate('/student-profiles')}>ดูโปรไฟล์</Button>
+                    <Button size="sm" variant="outline" onClick={() => navigate('/student-profiles')}>{t.companyDashboard.viewProfile}</Button>
                   </div>
                 ))}
               </CardContent>

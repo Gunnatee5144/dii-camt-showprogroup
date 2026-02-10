@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GraduationCap, Building2, User, Mail, Lock, CheckCircle, ArrowRight, ArrowLeft, BookOpen, UserCog } from 'lucide-react';
+import { GraduationCap, Building2, User, Mail, Lock, CheckCircle, ArrowRight, ArrowLeft, BookOpen, UserCog, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function RegisterPage() {
+    const { t, language, toggleLanguage } = useLanguage();
     const navigate = useNavigate();
     const { login } = useAuth(); // Assuming we auto-login or just use this for potential future direct register hook
     const [step, setStep] = useState(1);
@@ -24,12 +26,12 @@ export default function RegisterPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (formData.password !== formData.confirmPassword) {
-            toast.error('รหัสผ่านไม่ตรงกัน');
+            toast.error(t.register.passwordMismatch);
             return;
         }
 
         // Mock registration
-        toast.success('สมัครสมาชิกสำเร็จ', { description: 'กรุณาเข้าสู่ระบบ' });
+        toast.success(t.register.registerSuccess, { description: t.register.pleaseLogin });
         navigate('/login');
     };
 
@@ -58,8 +60,8 @@ export default function RegisterPage() {
                         animate={{ opacity: 1, y: 0 }}
                         className="text-4xl font-bold mb-6 text-white leading-tight"
                     >
-                        เริ่มต้นการเดินทาง<br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-400">สู่ความสำเร็จกับ DII</span>
+                        {t.register.startJourney}<br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-400">{t.register.successWithDII}</span>
                     </motion.h1>
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
@@ -67,14 +69,14 @@ export default function RegisterPage() {
                         transition={{ delay: 0.1 }}
                         className="text-slate-300 text-lg leading-relaxed mb-12"
                     >
-                        ไม่ว่าคุณจะเป็นนักศึกษาที่กำลังมองหาโอกาส หรือบริษัทที่ต้องการคนรุ่นใหม่ไฟแรง ระบบของเราพร้อมสนับสนุนทุกก้าวของคุณให้มั่นคงและยั่งยืน
+                        {t.register.journeyDesc}
                     </motion.p>
 
                     <div className="space-y-6">
                         {[
-                            { text: 'เข้าถึงแหล่งข้อมูลการเรียนรู้ครบวงจร', color: 'text-emerald-400' },
-                            { text: 'เชื่อมต่อกับบริษัทชั้นนำมากมาย', color: 'text-blue-400' },
-                            { text: 'ระบบติดตามผลการเรียนและฝึกงาน', color: 'text-purple-400' }
+                            { text: t.register.feature1, color: 'text-emerald-400' },
+                            { text: t.register.feature2, color: 'text-blue-400' },
+                            { text: t.register.feature3, color: 'text-purple-400' }
                         ].map((item, i) => (
                             <motion.div
                                 key={i}
@@ -97,6 +99,16 @@ export default function RegisterPage() {
 
             {/* Right Side: Form */}
             <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 relative bg-slate-50">
+                {/* Language Toggle */}
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={toggleLanguage}
+                    className="absolute top-6 right-6 z-20 font-medium text-slate-500 hover:text-blue-600 hover:bg-blue-50 gap-1.5 rounded-full"
+                >
+                    <Globe className="h-4 w-4" />
+                    {language === 'th' ? 'EN' : 'TH'}
+                </Button>
                 <div className="absolute inset-0 bg-white/40 backdrop-blur-3xl z-0"></div>
                 {/* Background blobs */}
                 <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-emerald-100 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
@@ -113,8 +125,8 @@ export default function RegisterPage() {
                                 className="space-y-8"
                             >
                                 <div className="text-center">
-                                    <h2 className="text-3xl font-bold text-slate-900 mb-2">เลือกประเภทบัญชี</h2>
-                                    <p className="text-slate-500">คุณต้องการสมัครสมาชิกในฐานะอะไร?</p>
+                                    <h2 className="text-3xl font-bold text-slate-900 mb-2">{t.register.chooseAccountType}</h2>
+                                    <p className="text-slate-500">{t.register.whatRoleQuestion}</p>
                                 </div>
 
                                 <div className="grid gap-4">
@@ -127,8 +139,8 @@ export default function RegisterPage() {
                                                 <GraduationCap className="w-6 h-6 text-blue-600 group-hover:text-white" />
                                             </div>
                                             <div className="flex-1">
-                                                <h3 className="font-bold text-slate-900 text-lg group-hover:text-blue-600 transition-colors">นักศึกษา</h3>
-                                                <p className="text-slate-500 text-sm">สำหรับนักศึกษาที่ต้องการใช้งานระบบ</p>
+                                                <h3 className="font-bold text-slate-900 text-lg group-hover:text-blue-600 transition-colors">{t.roles.student}</h3>
+                                                <p className="text-slate-500 text-sm">{t.register.studentDesc}</p>
                                             </div>
                                             <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
                                         </div>
@@ -143,8 +155,8 @@ export default function RegisterPage() {
                                                 <Building2 className="w-6 h-6 text-orange-600 group-hover:text-white" />
                                             </div>
                                             <div className="flex-1">
-                                                <h3 className="font-bold text-slate-900 text-lg group-hover:text-orange-600 transition-colors">บริษัท / องค์กร</h3>
-                                                <p className="text-slate-500 text-sm">สำหรับบริษัทที่ต้องการรับนักศึกษา</p>
+                                                <h3 className="font-bold text-slate-900 text-lg group-hover:text-orange-600 transition-colors">{t.register.companyOrg}</h3>
+                                                <p className="text-slate-500 text-sm">{t.register.companyDesc}</p>
                                             </div>
                                             <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all" />
                                         </div>
@@ -159,8 +171,8 @@ export default function RegisterPage() {
                                                 <BookOpen className="w-6 h-6 text-emerald-600 group-hover:text-white" />
                                             </div>
                                             <div className="flex-1">
-                                                <h3 className="font-bold text-slate-900 text-lg group-hover:text-emerald-600 transition-colors">อาจารย์</h3>
-                                                <p className="text-slate-500 text-sm">สำหรับอาจารย์ผู้สอน</p>
+                                                <h3 className="font-bold text-slate-900 text-lg group-hover:text-emerald-600 transition-colors">{t.roles.lecturer}</h3>
+                                                <p className="text-slate-500 text-sm">{t.register.lecturerDesc}</p>
                                             </div>
                                             <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
                                         </div>
@@ -175,8 +187,8 @@ export default function RegisterPage() {
                                                 <UserCog className="w-6 h-6 text-purple-600 group-hover:text-white" />
                                             </div>
                                             <div className="flex-1">
-                                                <h3 className="font-bold text-slate-900 text-lg group-hover:text-purple-600 transition-colors">เจ้าหน้าที่</h3>
-                                                <p className="text-slate-500 text-sm">สำหรับเจ้าหน้าที่คณะ</p>
+                                                <h3 className="font-bold text-slate-900 text-lg group-hover:text-purple-600 transition-colors">{t.roles.staff}</h3>
+                                                <p className="text-slate-500 text-sm">{t.register.staffDesc}</p>
                                             </div>
                                             <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-purple-500 group-hover:translate-x-1 transition-all" />
                                         </div>
@@ -184,7 +196,7 @@ export default function RegisterPage() {
                                 </div>
 
                                 <div className="text-center pt-4">
-                                    <Link to="/login" className="text-sm font-medium text-slate-500 hover:text-blue-600 transition-colors">มีบัญชีอยู่แล้ว? เข้าสู่ระบบ</Link>
+                                    <Link to="/login" className="text-sm font-medium text-slate-500 hover:text-blue-600 transition-colors">{t.register.hasAccount} {t.register.loginNow}</Link>
                                 </div>
                             </motion.div>
                         ) : (
@@ -197,49 +209,49 @@ export default function RegisterPage() {
                             >
                                 <div>
                                     <Button variant="ghost" className="pl-0 hover:bg-transparent text-slate-500 hover:text-slate-900 mb-2 group" onClick={() => setStep(1)}>
-                                        <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" /> ย้อนกลับ
+                                        <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" /> {t.common.back}
                                     </Button>
-                                    <h2 className="text-3xl font-bold text-slate-900 mb-2 tracking-tight">ข้อมูลส่วนตัว</h2>
+                                    <h2 className="text-3xl font-bold text-slate-900 mb-2 tracking-tight">{t.register.personalInfo}</h2>
                                     <p className="text-slate-500">
-                                        สมัครสมาชิกในฐานะ <span className="font-bold text-blue-600 px-2 py-1 bg-blue-50 rounded-lg">
-                                            {role === 'student' ? 'นักศึกษา' :
-                                                role === 'company' ? 'บริษัท' :
-                                                    role === 'lecturer' ? 'อาจารย์' : 'เจ้าหน้าที่'}
+                                        {t.register.registerAs} <span className="font-bold text-blue-600 px-2 py-1 bg-blue-50 rounded-lg">
+                                            {role === 'student' ? t.roles.student :
+                                                role === 'company' ? t.roles.company :
+                                                    role === 'lecturer' ? t.roles.lecturer : t.roles.staff}
                                         </span>
                                     </p>
                                 </div>
 
                                 <form onSubmit={handleSubmit} className="space-y-4">
                                     <div className="space-y-2">
-                                        <Label>ชื่อ-นามสกุล / ชื่อบริษัท</Label>
+                                        <Label>{t.register.fullNameOrCompany}</Label>
                                         <div className="relative group">
                                             <User className="absolute left-3 top-3 h-5 w-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
                                             <Input className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all" required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>อีเมล</Label>
+                                        <Label>{t.register.email}</Label>
                                         <div className="relative group">
                                             <Mail className="absolute left-3 top-3 h-5 w-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
                                             <Input type="email" className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all" required value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>รหัสผ่าน</Label>
+                                        <Label>{t.register.password}</Label>
                                         <div className="relative group">
                                             <Lock className="absolute left-3 top-3 h-5 w-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
                                             <Input type="password" className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all" required value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>ยืนยันรหัสผ่าน</Label>
+                                        <Label>{t.register.confirmPassword}</Label>
                                         <div className="relative group">
                                             <Lock className="absolute left-3 top-3 h-5 w-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
                                             <Input type="password" className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all" required value={formData.confirmPassword} onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })} />
                                         </div>
                                     </div>
 
-                                    <Button type="submit" className="w-full h-12 text-lg font-semibold mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30 rounded-xl transition-all hover:scale-[1.01]">สมัครสมาชิก</Button>
+                                    <Button type="submit" className="w-full h-12 text-lg font-semibold mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30 rounded-xl transition-all hover:scale-[1.01]">{t.register.registerButton}</Button>
                                 </form>
                             </motion.div>
                         )}

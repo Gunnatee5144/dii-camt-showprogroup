@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { mockStudent, mockGrades, getStudentGrades, mockCourses } from '@/lib/mockData';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -27,6 +28,7 @@ const itemVariants = {
 
 export default function Grades() {
   const { user } = useAuth();
+  const { t, language } = useLanguage();
 
   if (user?.role === 'student') {
     const studentGrades = getStudentGrades(mockStudent.id);
@@ -72,7 +74,7 @@ export default function Grades() {
               className="flex items-center gap-2 text-slate-500 font-medium mb-2"
             >
               <GraduationCap className="w-4 h-4 text-emerald-500" />
-              <span>ผลการเรียนภาคเรียนที่ 1/2568</span>
+              <span>{t.grades.subtitle}</span>
             </motion.div>
             <motion.h1
               className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight"
@@ -80,18 +82,18 @@ export default function Grades() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              สรุป<span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">ผลการเรียน</span>
+              {t.grades.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">{t.grades.titleHighlight}</span>
             </motion.h1>
           </div>
 
           <motion.div className="flex gap-3" variants={itemVariants}>
             <Button variant="outline" className="rounded-xl border-slate-200 hover:bg-white hover:text-emerald-600">
               <Share2 className="w-4 h-4 mr-2" />
-              แชร์ผลการเรียน
+              {t.grades.shareGrades}
             </Button>
             <Button className="rounded-xl bg-slate-900 text-white hover:bg-slate-800 shadow-lg shadow-slate-900/20">
               <Download className="w-4 h-4 mr-2" />
-              Transcript (PDF)
+              {t.grades.transcriptPDF}
             </Button>
           </motion.div>
         </div>
@@ -109,12 +111,12 @@ export default function Grades() {
                 <div className="p-2.5 rounded-xl bg-white/20 backdrop-blur-sm">
                   <Star className="w-6 h-6" />
                 </div>
-                <span className="font-medium text-white/90">GPAX สะสม</span>
+                <span className="font-medium text-white/90">{t.grades.gpaxCumulative}</span>
               </div>
               <div className="text-5xl font-bold tracking-tight">{mockStudent.gpax.toFixed(2)}</div>
               <div className="mt-3 text-sm text-emerald-100 flex items-center gap-1">
                 {mockStudent.gpax >= 3.5 ? <Sparkles className="w-4 h-4" /> : null}
-                {mockStudent.gpax >= 3.5 ? 'ผลการเรียนดีเยี่ยม' : 'อยู่ในเกณฑ์ปกติ'}
+                {mockStudent.gpax >= 3.5 ? t.grades.excellent : t.grades.normalRange}
               </div>
             </div>
           </motion.div>
@@ -129,11 +131,11 @@ export default function Grades() {
                 <div className="p-2.5 rounded-xl bg-slate-100 text-slate-600 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
                   <Award className="w-6 h-6" />
                 </div>
-                <span className="font-medium text-slate-600">GPA ภาคนี้</span>
+                <span className="font-medium text-slate-600">{t.grades.gpaSemester}</span>
               </div>
               <div className="text-4xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{gpa.toFixed(2)}</div>
               <div className="mt-3 text-sm text-slate-400">
-                เป้าหมาย: <span className="text-slate-600 font-semibold">3.80</span>
+                {t.grades.target}: <span className="text-slate-600 font-semibold">3.80</span>
               </div>
               {/* Mini chart placeholder */}
               <div className="absolute bottom-0 right-0 w-24 h-12 bg-gradient-to-t from-blue-50 to-transparent" />
@@ -150,11 +152,11 @@ export default function Grades() {
                 <div className="p-2.5 rounded-xl bg-slate-100 text-slate-600 group-hover:bg-purple-50 group-hover:text-purple-600 transition-colors">
                   <BookOpen className="w-6 h-6" />
                 </div>
-                <span className="font-medium text-slate-600">หน่วยกิตสะสม</span>
+                <span className="font-medium text-slate-600">{t.grades.creditsCumulative}</span>
               </div>
               <div className="text-4xl font-bold text-slate-900 group-hover:text-purple-600 transition-colors">{mockStudent.earnedCredits}</div>
               <div className="mt-3 flex items-center justify-between text-sm text-slate-400">
-                <span>จาก {mockStudent.totalCredits}</span>
+                <span>{t.grades.from} {mockStudent.totalCredits}</span>
                 <span>{(mockStudent.earnedCredits / mockStudent.totalCredits * 100).toFixed(0)}%</span>
               </div>
               <div className="mt-2 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
@@ -177,11 +179,11 @@ export default function Grades() {
                 <div className="p-2.5 rounded-xl bg-slate-100 text-slate-600 group-hover:bg-orange-50 group-hover:text-orange-600 transition-colors">
                   <Target className="w-6 h-6" />
                 </div>
-                <span className="font-medium text-slate-600">สถานะ</span>
+                <span className="font-medium text-slate-600">{t.grades.statusLabel}</span>
               </div>
-              <div className="text-4xl font-bold text-slate-900 group-hover:text-orange-600 transition-colors">ปกติ</div>
+              <div className="text-4xl font-bold text-slate-900 group-hover:text-orange-600 transition-colors">{t.grades.normal}</div>
               <div className="mt-3 text-sm text-green-600 font-medium bg-green-50 w-fit px-2 py-1 rounded-lg">
-                ไม่มีความเสี่ยง
+                {t.grades.noRisk}
               </div>
             </div>
           </motion.div>
@@ -192,15 +194,15 @@ export default function Grades() {
           <TabsList className="bg-white/40 backdrop-blur-xl border border-white/40 p-1.5 h-auto rounded-2xl shadow-sm w-full md:w-auto flex overflow-x-auto">
             <TabsTrigger value="current" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-md font-medium text-slate-600 flex-1 md:flex-none">
               <BookOpen className="w-4 h-4 mr-2" />
-              ภาคปัจจุบัน
+              {t.grades.currentSemester}
             </TabsTrigger>
             <TabsTrigger value="all" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-md font-medium text-slate-600 flex-1 md:flex-none">
               <BarChart3 className="w-4 h-4 mr-2" />
-              ทุกภาค
+              {t.grades.allSemesters}
             </TabsTrigger>
             <TabsTrigger value="analysis" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-md font-medium text-slate-600 flex-1 md:flex-none">
               <PieChart className="w-4 h-4 mr-2" />
-              วิเคราะห์
+              {t.grades.analysis}
             </TabsTrigger>
             <TabsTrigger value="transcript" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-md font-medium text-slate-600 flex-1 md:flex-none">
               <FileText className="w-4 h-4 mr-2" />
@@ -262,7 +264,7 @@ export default function Grades() {
                     </div>
 
                     <div className="flex items-center justify-between text-sm">
-                      <Badge variant="outline" className="text-slate-500 border-slate-200 font-normal">{course.credits} หน่วยกิต</Badge>
+                      <Badge variant="outline" className="text-slate-500 border-slate-200 font-normal">{course.credits} {t.grades.credits}</Badge>
                       {grade.remarks && <span className="text-orange-500 text-xs flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {grade.remarks}</span>}
                     </div>
                   </motion.div>
@@ -287,8 +289,8 @@ export default function Grades() {
                       {data.gpa.toFixed(2)}
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-slate-900 mb-1">ภาคเรียนที่ {semester}</h3>
-                      <p className="text-slate-500">{data.credits} หน่วยกิต • {data.gpa >= 3.0 ? 'ผ่านเกณฑ์ดี' : 'ต้องพยายามเพิ่ม'}</p>
+                      <h3 className="text-xl font-bold text-slate-900 mb-1">{t.grades.semester} {semester}</h3>
+                      <p className="text-slate-500">{data.credits} {t.grades.credits} • {data.gpa >= 3.0 ? t.grades.goodStanding : t.grades.needsImprovement}</p>
                     </div>
                   </div>
                   <ChevronRight className="w-6 h-6 text-slate-300 group-hover:text-emerald-500 transition-colors" />
@@ -302,7 +304,7 @@ export default function Grades() {
               <motion.div variants={itemVariants} className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
                 <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
                   <BarChart3 className="w-5 h-5 text-emerald-500" />
-                  การกระจายเกรด
+                  {t.grades.distribution}
                 </h3>
                 <div className="space-y-4">
                   {Object.entries(gradeDistribution).map(([grade, count]) => {
@@ -311,8 +313,8 @@ export default function Grades() {
                     return (
                       <div key={grade}>
                         <div className="flex justify-between text-sm mb-2 font-medium">
-                          <span className="text-slate-700">เกรด {grade}</span>
-                          <span className="text-slate-500">{count} วิชา ({percentage.toFixed(0)}%)</span>
+                          <span className="text-slate-700">{t.grades.grade} {grade}</span>
+                          <span className="text-slate-500">{count} {t.grades.subjects} ({percentage.toFixed(0)}%)</span>
                         </div>
                         <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
                           <motion.div
@@ -332,9 +334,9 @@ export default function Grades() {
                 <div className="w-32 h-32 rounded-full bg-emerald-50 flex items-center justify-center mb-6">
                   <TrendingUp className="w-12 h-12 text-emerald-600" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">แนวโน้มดีเยี่ยม!</h3>
+                <h3 className="text-2xl font-bold text-slate-900 mb-2">{t.grades.excellentTrend}</h3>
                 <p className="text-slate-500 max-w-xs mx-auto">
-                  ผลการเรียนของคุณมีแนวโน้มสูงขึ้นเรื่อยๆ รักษามาตรฐานนี้ไว้เพื่อเกียรตินิยมอันดับ 1
+                  {t.grades.trendDescription}
                 </p>
               </motion.div>
             </div>
@@ -346,8 +348,8 @@ export default function Grades() {
                 <div className="w-20 h-20 bg-purple-600 rounded-2xl mx-auto flex items-center justify-center text-white text-2xl font-bold mb-4 shadow-xl shadow-purple-500/30">
                   CMU
                 </div>
-                <h2 className="text-2xl font-bold text-slate-900">มหาวิทยาลัยเชียงใหม่</h2>
-                <p className="text-slate-500">Official Transcript of Records</p>
+                <h2 className="text-2xl font-bold text-slate-900">{t.grades.universityName}</h2>
+                <p className="text-slate-500">{t.grades.officialTranscript}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-y-4 gap-x-12 mb-10 text-sm">
@@ -371,10 +373,10 @@ export default function Grades() {
 
               <div className="md:flex gap-4 justify-center">
                 <Button className="w-full md:w-auto bg-slate-900 text-white hover:bg-slate-800 h-12 px-8 rounded-xl">
-                  <Download className="w-4 h-4 mr-2" /> Download PDF
+                  <Download className="w-4 h-4 mr-2" /> {t.grades.downloadPDF}
                 </Button>
                 <Button variant="outline" className="w-full md:w-auto h-12 px-8 rounded-xl">
-                  <Printer className="w-4 h-4 mr-2" /> Print
+                  <Printer className="w-4 h-4 mr-2" /> {t.grades.print}
                 </Button>
               </div>
             </motion.div>
@@ -395,19 +397,19 @@ export default function Grades() {
       <div>
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
           <GraduationCap className="w-4 h-4 text-emerald-500" />
-          <span>ระบบบันทึกและตัดเกรด</span>
+          <span>{t.grades.lecturerSubtitle}</span>
         </motion.div>
         <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          ตัด<span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">เกรด</span>
+          {t.grades.lecturerTitle}<span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">{t.grades.lecturerTitleHighlight}</span>
         </motion.h1>
       </div>
 
       <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { icon: BookOpen, label: 'รายวิชาที่สอน', value: mockCourses.filter(c => c.lecturerId).length.toString(), gradient: 'from-blue-500 to-indigo-500', shadow: 'shadow-blue-200' },
-          { icon: Target, label: 'รอตัดเกรด', value: '3', gradient: 'from-orange-500 to-amber-500', shadow: 'shadow-orange-200' },
-          { icon: Award, label: 'ตัดเกรดแล้ว', value: '2', gradient: 'from-emerald-500 to-teal-500', shadow: 'shadow-emerald-200' },
-          { icon: GraduationCap, label: 'นักศึกษาทั้งหมด', value: '120', gradient: 'from-purple-500 to-pink-500', shadow: 'shadow-purple-200' },
+          { icon: BookOpen, label: t.grades.coursesTaught, value: mockCourses.filter(c => c.lecturerId).length.toString(), gradient: 'from-blue-500 to-indigo-500', shadow: 'shadow-blue-200' },
+          { icon: Target, label: t.grades.pendingGrading, value: '3', gradient: 'from-orange-500 to-amber-500', shadow: 'shadow-orange-200' },
+          { icon: Award, label: t.grades.gradingCompleted, value: '2', gradient: 'from-emerald-500 to-teal-500', shadow: 'shadow-emerald-200' },
+          { icon: GraduationCap, label: t.grades.totalStudents, value: '120', gradient: 'from-purple-500 to-pink-500', shadow: 'shadow-purple-200' },
         ].map((stat, i) => (
           <motion.div key={i} whileHover={{ scale: 1.02 }} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradient} p-6 text-white shadow-xl ${stat.shadow}`}>
             <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
@@ -427,9 +429,9 @@ export default function Grades() {
           <div className="w-20 h-20 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-full flex items-center justify-center mb-6">
             <GraduationCap className="w-10 h-10 text-emerald-500" />
           </div>
-          <h3 className="text-xl font-semibold text-slate-900 mb-2">ระบบตัดเกรดกำลังพัฒนา</h3>
+          <h3 className="text-xl font-semibold text-slate-900 mb-2">{t.grades.gradingSystemDeveloping}</h3>
           <p className="text-slate-500 max-w-md mx-auto">
-            ฟีเจอร์ตัดเกรดสำหรับอาจารย์จะพร้อมใช้งานในเร็วๆ นี้ กรุณาใช้ระบบเดิมในระหว่างนี้
+            {t.grades.gradingSystemDescription}
           </p>
         </div>
       </motion.div>

@@ -9,22 +9,24 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme={theme as ToasterProps["theme"]}
-      className="toaster group"
-      position="top-right"
-      expand={false}
+      className="toaster group font-['IBM_Plex_Sans_Thai']"
+      position="bottom-right"
+      expand={true}
       richColors
+      duration={4000}
+      gap={12}
       toastOptions={{
         classNames: {
           toast:
-            "group toast group-[.toaster]:bg-white/95 group-[.toaster]:backdrop-blur-xl group-[.toaster]:text-slate-900 group-[.toaster]:border-slate-200/60 group-[.toaster]:shadow-2xl group-[.toaster]:shadow-slate-200/50 group-[.toaster]:rounded-2xl group-[.toaster]:p-5",
-          description: "group-[.toast]:text-slate-500 group-[.toast]:text-sm",
-          actionButton: "group-[.toast]:bg-slate-900 group-[.toast]:text-white group-[.toast]:rounded-xl group-[.toast]:font-semibold group-[.toast]:shadow-lg",
-          cancelButton: "group-[.toast]:bg-slate-100 group-[.toast]:text-slate-600 group-[.toast]:rounded-xl group-[.toast]:font-medium",
-          success: "group-[.toaster]:!bg-gradient-to-r group-[.toaster]:!from-emerald-50/95 group-[.toaster]:!to-teal-50/95 group-[.toaster]:!border-emerald-200/60 group-[.toaster]:!text-emerald-900",
-          error: "group-[.toaster]:!bg-gradient-to-r group-[.toaster]:!from-red-50/95 group-[.toaster]:!to-rose-50/95 group-[.toaster]:!border-red-200/60 group-[.toaster]:!text-red-900",
-          warning: "group-[.toaster]:!bg-gradient-to-r group-[.toaster]:!from-amber-50/95 group-[.toaster]:!to-yellow-50/95 group-[.toaster]:!border-amber-200/60 group-[.toaster]:!text-amber-900",
-          info: "group-[.toaster]:!bg-gradient-to-r group-[.toaster]:!from-blue-50/95 group-[.toaster]:!to-indigo-50/95 group-[.toaster]:!border-blue-200/60 group-[.toaster]:!text-blue-900",
-          title: "group-[.toast]:font-bold group-[.toast]:text-sm",
+            "group toast min-w-[380px] group-[.toaster]:bg-white group-[.toaster]:text-slate-900 group-[.toaster]:border group-[.toaster]:border-slate-200 group-[.toaster]:shadow-lg group-[.toaster]:rounded-lg group-[.toaster]:p-4",
+          description: "group-[.toast]:text-slate-600 group-[.toast]:text-sm group-[.toast]:mt-1",
+          actionButton: "group-[.toast]:bg-slate-900 group-[.toast]:text-white group-[.toast]:rounded-md group-[.toast]:font-medium group-[.toast]:px-3 group-[.toast]:py-1.5 group-[.toast]:text-sm",
+          cancelButton: "group-[.toast]:bg-slate-100 group-[.toast]:text-slate-700 group-[.toast]:rounded-md group-[.toast]:font-medium group-[.toast]:px-3 group-[.toast]:py-1.5 group-[.toast]:text-sm",
+          success: "group-[.toaster]:!bg-emerald-50 group-[.toaster]:!border-emerald-200 group-[.toaster]:!text-emerald-900",
+          error: "group-[.toaster]:!bg-red-50 group-[.toaster]:!border-red-200 group-[.toaster]:!text-red-900",
+          warning: "group-[.toaster]:!bg-amber-50 group-[.toaster]:!border-amber-200 group-[.toaster]:!text-amber-900",
+          info: "group-[.toaster]:!bg-blue-50 group-[.toaster]:!border-blue-200 group-[.toaster]:!text-blue-900",
+          title: "group-[.toast]:font-semibold group-[.toast]:text-base",
         },
       }}
       {...props}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Calendar, Search, MapPin, Plus, Clock, Edit3, Save, AlertCircle, CheckCircle, XCircle, Bell } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,7 @@ const mockRequests = [
 ];
 
 export default function ScheduleManagement() {
+    const { t } = useLanguage();
     const [isEditMode, setIsEditMode] = useState(false);
     const [schedule, setSchedule] = useState(initialScheduleData);
     const [requests, setRequests] = useState(mockRequests);
@@ -45,14 +47,14 @@ export default function ScheduleManagement() {
     ];
 
     const handleApprove = (req: any) => {
-        toast.success(`อนุมัติคำขอของ ${req.lecturer} เรียบร้อยแล้ว`, {
-            description: 'ระบบได้ทำการอัปเดตตารางและแจ้งเตือนนักศึกษาเรียบร้อยแล้ว'
+        toast.success(`${t.scheduleManagementPage.approveSuccess} - ${req.lecturer}`, {
+            description: t.scheduleManagementPage.approveDesc
         });
         setRequests(prev => prev.filter(r => r.id !== req.id));
     };
 
     const handleReject = (id: number) => {
-        toast.error('ปฏิเสธคำขอเรียบร้อยแล้ว');
+        toast.error(t.scheduleManagementPage.rejectSuccess);
         setRequests(prev => prev.filter(r => r.id !== id));
     };
 
@@ -63,15 +65,15 @@ export default function ScheduleManagement() {
                 <div>
                     <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
                         <Calendar className="w-4 h-4 text-purple-500" />
-                        <span>ระบบจัดการตารางเรียน</span>
+                        <span>{t.scheduleManagementPage.subtitle}</span>
                     </motion.div>
                     <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                        จัดการ<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-violet-600">ตารางเรียนและห้อง</span>
+                        {t.scheduleManagementPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-violet-600">{t.scheduleManagementPage.titleHighlight}</span>
                     </motion.h1>
                 </div>
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                     <Button className="rounded-xl bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-200 h-11">
-                        <Plus className="w-4 h-4 mr-2" /> จองห้องเรียน
+                        <Plus className="w-4 h-4 mr-2" /> {t.scheduleManagementPage.bookRoom}
                     </Button>
                 </motion.div>
             </div>
@@ -82,7 +84,7 @@ export default function ScheduleManagement() {
                     <motion.div variants={itemVariants} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
                         className="bg-amber-50/80 backdrop-blur-xl border border-amber-200 rounded-3xl p-6 shadow-sm">
                         <h3 className="text-lg font-bold text-amber-800 mb-4 flex items-center gap-2">
-                            <Bell className="w-5 h-5 animate-pulse" /> คำขอแก้ไขตารางสอน ({requests.length})
+                            <Bell className="w-5 h-5 animate-pulse" /> {t.scheduleManagementPage.editRequests} ({requests.length})
                         </h3>
                         <div className="space-y-3">
                             {requests.map(req => (
@@ -92,20 +94,20 @@ export default function ScheduleManagement() {
                                             <span className="font-bold text-slate-800">{req.lecturer}</span>
                                             <Badge variant="outline" className="rounded-lg text-xs">{req.courseCode}</Badge>
                                             <Badge className={`rounded-lg text-xs ${req.type === 'permanent' ? 'bg-purple-100 text-purple-700 border-purple-200' : 'bg-blue-100 text-blue-700 border-blue-200'}`}>
-                                                {req.type === 'permanent' ? 'เปลี่ยนถาวร' : 'เฉพาะครั้งนี้'}
+                                                {req.type === 'permanent' ? t.scheduleManagementPage.permanentChange : t.scheduleManagementPage.oneTime}
                                             </Badge>
                                         </div>
                                         <p className="text-sm text-slate-600">
                                             จาก <span className="text-red-500 font-medium">{req.oldTime}</span> เป็น <span className="text-emerald-600 font-medium">{req.newTime}</span>
                                         </p>
-                                        <p className="text-sm text-slate-400 mt-1">เหตุผล: {req.reason}</p>
+                                        <p className="text-sm text-slate-400 mt-1">{t.scheduleManagementPage.reason} {req.reason}</p>
                                     </div>
                                     <div className="flex gap-2">
                                         <Button size="sm" variant="outline" className="text-red-500 hover:bg-red-50 border-red-200 rounded-xl" onClick={() => handleReject(req.id)}>
-                                            <XCircle className="w-4 h-4 mr-1" /> ปฏิเสธ
+                                            <XCircle className="w-4 h-4 mr-1" /> {t.scheduleManagementPage.reject}
                                         </Button>
                                         <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600 rounded-xl shadow-lg shadow-emerald-200" onClick={() => handleApprove(req)}>
-                                            <CheckCircle className="w-4 h-4 mr-1" /> อนุมัติ
+                                            <CheckCircle className="w-4 h-4 mr-1" /> {t.scheduleManagementPage.approve}
                                         </Button>
                                     </div>
                                 </motion.div>
@@ -125,11 +127,11 @@ export default function ScheduleManagement() {
                             <div className={`w-3 h-3 rounded-full ${room.status === 'available' ? 'bg-emerald-500' : room.status === 'occupied' ? 'bg-red-500' : 'bg-amber-500'}`} />
                         </div>
                         <p className="text-sm text-slate-400 flex items-center gap-2 mb-4">
-                            <MapPin className="w-3.5 h-3.5" /> ความจุ {room.capacity} ที่นั่ง
+                            <MapPin className="w-3.5 h-3.5" /> {t.scheduleManagementPage.capacity} {room.capacity} {t.scheduleManagementPage.seats}
                         </p>
                         <div className="flex gap-2">
-                            <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs">ตาราง</Button>
-                            <Button size="sm" className="flex-1 rounded-xl text-xs bg-purple-600 hover:bg-purple-700">จอง</Button>
+                            <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs">{t.scheduleManagementPage.scheduleTab}</Button>
+                            <Button size="sm" className="flex-1 rounded-xl text-xs bg-purple-600 hover:bg-purple-700">{t.scheduleManagementPage.bookingTab}</Button>
                         </div>
                     </motion.div>
                 ))}
@@ -139,21 +141,21 @@ export default function ScheduleManagement() {
             <motion.div variants={itemVariants} className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm min-h-[600px]">
                 <div className="flex items-center justify-between mb-5">
                     <div>
-                        <h3 className="text-lg font-bold text-slate-800">ตารางสอนรวม</h3>
-                        <p className="text-sm text-slate-500">จัดการตารางสอนอาจารย์และห้องเรียน</p>
+                        <h3 className="text-lg font-bold text-slate-800">{t.scheduleManagementPage.combinedSchedule}</h3>
+                        <p className="text-sm text-slate-500">{t.scheduleManagementPage.combinedDesc}</p>
                     </div>
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200">
                             <Switch id="edit-mode" checked={isEditMode} onCheckedChange={setIsEditMode} />
                             <Label htmlFor="edit-mode" className="cursor-pointer flex items-center gap-2 text-sm">
-                                <Edit3 className="w-4 h-4" /> แก้ไขตาราง
+                                <Edit3 className="w-4 h-4" /> {t.scheduleManagementPage.editMode}
                             </Label>
                         </div>
                     </div>
                 </div>
                 {isEditMode && (
                     <div className="mb-4 p-3.5 bg-blue-50 border border-blue-100 rounded-2xl text-sm text-blue-700 flex items-center gap-2">
-                        <Edit3 className="w-4 h-4" /> คุณอยู่ในโหมดแก้ไข สามารถลากวิชาเพื่อเปลี่ยนเวลาได้
+                        <Edit3 className="w-4 h-4" /> {t.scheduleManagementPage.editModeDesc}
                     </div>
                 )}
                 <DraggableSchedule initialSchedule={schedule} editable={isEditMode} />

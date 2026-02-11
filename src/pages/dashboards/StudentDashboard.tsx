@@ -8,6 +8,7 @@ import {
   MoreHorizontal, User
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -98,6 +99,7 @@ const transformGradesForCard = () => {
 };
 
 export default function StudentDashboard() {
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const student = mockStudent;
   const timeline = getStudentTimeline(student.id);
@@ -117,7 +119,7 @@ export default function StudentDashboard() {
 
   // Time-based greeting
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'สวัสดีตอนเช้า' : hour < 18 ? 'สวัสดีตอนบ่าย' : 'สวัสดีตอนเย็น';
+  const greeting = hour < 12 ? t.studentDashboard.goodMorning : hour < 18 ? t.studentDashboard.goodAfternoon : t.studentDashboard.goodEvening;
 
   const yearLabel = ['', 'ปี 1', 'ปี 2', 'ปี 3', 'ปี 4'][student.year] || `ปี ${student.year}`;
 
@@ -172,7 +174,7 @@ export default function StudentDashboard() {
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-emerald-400" />
-                <span>ภาคเรียน {student.semester}/{student.academicYear}</span>
+                <span>{t.studentDashboard.semester} {student.semester}/{student.academicYear}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Award className="w-4 h-4 text-yellow-400" />
@@ -182,14 +184,14 @@ export default function StudentDashboard() {
 
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mt-4">
               <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30">
-                รหัส: {student.studentId}
+                {t.studentDashboard.studentId} {student.studentId}
               </Badge>
               <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30">
                 GPAX: {student.gpax.toFixed(2)}
               </Badge>
               {student.academicStatus === 'normal' && (
                 <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
-                  สถานะ: ปกติ
+                  {t.studentDashboard.statusNormal}
                 </Badge>
               )}
             </div>
@@ -202,14 +204,14 @@ export default function StudentDashboard() {
               className="bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl"
             >
               <Trophy className="w-4 h-4 mr-2 text-yellow-500" />
-              ดู Portfolio
+              {t.studentDashboard.viewPortfolio}
             </Button>
             <Button
               onClick={() => navigate('/settings')}
               variant="ghost"
               className="text-slate-300 hover:text-white hover:bg-white/10 rounded-xl"
             >
-              แก้ไขโปรไฟล์
+              {t.studentDashboard.editProfile}
             </Button>
           </div>
         </div>
@@ -220,10 +222,10 @@ export default function StudentDashboard() {
         <div className="flex justify-center md:justify-start">
           <TabsList className="bg-white/40 backdrop-blur-xl border border-white/40 p-1.5 h-auto rounded-2xl shadow-sm flex-wrap">
             {[
-              { id: 'overview', icon: Target, label: 'ภาพรวม' },
-              { id: 'schedule', icon: Calendar, label: 'ตารางเรียน' },
-              { id: 'grades', icon: TrendingUp, label: 'ผลการเรียน' },
-              { id: 'skills', icon: Zap, label: 'ทักษะ' },
+              { id: 'overview', icon: Target, label: t.studentDashboard.overview },
+              { id: 'schedule', icon: Calendar, label: t.studentDashboard.schedule },
+              { id: 'grades', icon: TrendingUp, label: t.studentDashboard.grades },
+              { id: 'skills', icon: Zap, label: t.studentDashboard.skills },
               { id: 'timeline', icon: ActivityIcon, label: 'Timeline' },
             ].map((tab) => (
               <TabsTrigger
@@ -250,14 +252,14 @@ export default function StudentDashboard() {
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
                         <Calendar className="w-5 h-5 text-purple-500" />
-                        ตารางเรียนสัปดาห์นี้
+                        {t.studentDashboard.weeklySchedule}
                       </h2>
                       <Button
                         variant="ghost"
                         onClick={() => navigate('/schedule')}
                         className="text-slate-500 hover:text-purple-600"
                       >
-                        ดูเต็มจอ <ChevronRight className="w-4 h-4 ml-1" />
+                        {t.studentDashboard.fullscreen} <ChevronRight className="w-4 h-4 ml-1" />
                       </Button>
                     </div>
                     <div className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">
@@ -273,9 +275,9 @@ export default function StudentDashboard() {
                   <motion.div variants={itemVariants} className="space-y-4">
                     <div className="flex items-center justify-between">
                       <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                        <BookOpen className="w-5 h-5 text-purple-500" /> รายวิชาเทอมนี้
+                        <BookOpen className="w-5 h-5 text-purple-500" /> {t.studentDashboard.coursesThisSem}
                       </h3>
-                      <Button variant="ghost" className="text-slate-500 hover:text-purple-600" onClick={() => navigate('/courses')}>ดูทั้งหมด</Button>
+                      <Button variant="ghost" className="text-slate-500 hover:text-purple-600" onClick={() => navigate('/courses')}>{t.studentDashboard.viewAll}</Button>
                     </div>
 
                     <div className="grid gap-4">
@@ -298,7 +300,7 @@ export default function StudentDashboard() {
                                 <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
                                   <span className="bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">{course.code}</span>
                                   <span>•</span>
-                                  <span>{course.credits} หน่วยกิต</span>
+                                  <span>{course.credits} {t.studentDashboard.credits}</span>
                                   <span>•</span>
                                   <span className="flex items-center gap-1"><GraduationCap className="w-3 h-3" /> {course.lecturerName}</span>
                                 </div>
@@ -329,7 +331,7 @@ export default function StudentDashboard() {
                   {/* Upcoming Events */}
                   <motion.div variants={itemVariants} className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">
                     <h3 className="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
-                      <Calendar className="w-5 h-5 text-orange-500" /> กิจกรรมเร็วๆ นี้
+                      <Calendar className="w-5 h-5 text-orange-500" /> {t.studentDashboard.upcomingActivities}
                     </h3>
                     <div className="space-y-5">
                       {upcomingActivities.map((activity, i) => (
@@ -349,7 +351,7 @@ export default function StudentDashboard() {
                         </div>
                       ))}
                       <Button variant="outline" className="w-full rounded-xl border-dashed border-slate-300 text-slate-500 hover:text-orange-600 hover:border-orange-300" onClick={() => navigate('/activities')}>
-                        ดูปฏิทินกิจกรรมทั้งหมด
+                        {t.studentDashboard.viewCalendar}
                       </Button>
                     </div>
                   </motion.div>

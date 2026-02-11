@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { FileText, Printer, File, Download, CheckCircle, Search, Clock, Plus, FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,11 +16,12 @@ const itemVariants = {
 };
 
 export default function Documents() {
+    const { t } = useLanguage();
     const docTemplates = [
-        { title: 'หนังสือรับรองสถานภาพ', desc: 'ใบรับรองการเป็นนักศึกษา', icon: FileText, color: 'from-blue-500 to-indigo-500' },
-        { title: 'Transcript', desc: 'ใบแสดงผลการเรียน', icon: FileText, color: 'from-emerald-500 to-teal-500' },
-        { title: 'หนังสือขอความอนุเคราะห์', desc: 'หนังสือขอฝึกงาน/สหกิจ', icon: File, color: 'from-amber-500 to-orange-500' },
-        { title: 'หนังสือลากิจ/ลาป่วย', desc: 'แบบฟอร์มการลา', icon: FileText, color: 'from-purple-500 to-violet-500' },
+        { title: t.documentsPage.statusCert, desc: t.documentsPage.statusCertDesc, icon: FileText, color: 'from-blue-500 to-indigo-500' },
+        { title: 'Transcript', desc: t.documentsPage.transcript, icon: FileText, color: 'from-emerald-500 to-teal-500' },
+        { title: t.documentsPage.courtesyLetter, desc: t.documentsPage.courtesyLetterDesc, icon: File, color: 'from-amber-500 to-orange-500' },
+        { title: t.documentsPage.leaveLetter, desc: t.documentsPage.leaveLetterDesc, icon: FileText, color: 'from-purple-500 to-violet-500' },
     ];
 
     return (
@@ -28,10 +30,10 @@ export default function Documents() {
             <div>
                 <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
                     <Printer className="w-4 h-4 text-blue-500" />
-                    <span>ระบบออกเอกสาร</span>
+                    <span>{t.documentsPage.subtitle}</span>
                 </motion.div>
                 <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                    ออกเอกสาร<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">สำคัญ</span>
+                    {t.documentsPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">{t.documentsPage.titleHighlight}</span>
                 </motion.h1>
             </div>
 
@@ -57,12 +59,12 @@ export default function Documents() {
                 <motion.div variants={itemVariants} className="lg:col-span-3 bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">
                     <div className="flex justify-between items-center mb-5">
                         <div>
-                            <h3 className="text-lg font-bold text-slate-800">คำร้องที่รอดำเนินการ</h3>
-                            <p className="text-sm text-slate-500">เอกสารที่รอตรวจสอบและออก</p>
+                            <h3 className="text-lg font-bold text-slate-800">{t.documentsPage.pendingRequests}</h3>
+                            <p className="text-sm text-slate-500">{t.documentsPage.pendingDesc}</p>
                         </div>
                         <div className="relative w-56">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                            <Input placeholder="ค้นหาคำร้อง..." className="pl-9 rounded-xl bg-white/80" />
+                            <Input placeholder={t.documentsPage.searchRequests} className="pl-9 rounded-xl bg-white/80" />
                         </div>
                     </div>
                     <div className="space-y-2">
@@ -78,9 +80,9 @@ export default function Documents() {
                                     </div>
                                 </div>
                                 <div className="flex gap-2">
-                                    <Button size="sm" variant="outline" className="rounded-xl text-xs">ดูรายละเอียด</Button>
+                                    <Button size="sm" variant="outline" className="rounded-xl text-xs">{t.documentsPage.viewDetails}</Button>
                                     <Button size="sm" className="rounded-xl bg-blue-600 hover:bg-blue-700 text-xs shadow-lg shadow-blue-200">
-                                        <Printer className="w-3.5 h-3.5 mr-1.5" /> ออกเอกสาร
+                                        <Printer className="w-3.5 h-3.5 mr-1.5" /> {t.documentsPage.issueDoc}
                                     </Button>
                                 </div>
                             </motion.div>
@@ -91,7 +93,7 @@ export default function Documents() {
                 {/* History - 2 cols */}
                 <motion.div variants={itemVariants} className="lg:col-span-2 bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">
                     <h3 className="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
-                        <FolderOpen className="w-5 h-5 text-emerald-500" /> ประวัติการออกเอกสาร
+                        <FolderOpen className="w-5 h-5 text-emerald-500" /> {t.documentsPage.history}
                     </h3>
                     <div className="space-y-3">
                         {[

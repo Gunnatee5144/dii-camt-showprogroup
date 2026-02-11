@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Scale, ArrowLeft, FileText, AlertCircle, ShieldCheck, Ban, RefreshCw, Gavel, BookOpen, Users, Mail, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const FadeIn = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => (
   <motion.div
@@ -15,95 +16,97 @@ const FadeIn = ({ children, delay = 0, className = "" }: { children: React.React
   </motion.div>
 );
 
-const sections = [
-  {
-    icon: FileText,
-    title: 'การยอมรับเงื่อนไข',
-    color: 'from-blue-600 to-indigo-600',
-    bg: 'bg-blue-50',
-    iconColor: 'text-blue-600',
-    items: [
-      { subtitle: 'การเข้าใช้งาน', desc: 'การลงทะเบียนและเข้าใช้งานระบบ DII CAMT ถือว่าคุณได้อ่านและยอมรับข้อกำหนดและเงื่อนไขทั้งหมดที่ระบุไว้ในเอกสารนี้' },
-      { subtitle: 'อายุขั้นต่ำ', desc: 'ผู้ใช้งานต้องมีอายุไม่ต่ำกว่า 16 ปี หรือได้รับความยินยอมจากผู้ปกครองตามกฎหมาย PDPA' },
-      { subtitle: 'การเปลี่ยนแปลง', desc: 'เราขอสงวนสิทธิ์ในการแก้ไขเงื่อนไขการให้บริการ โดยจะแจ้งให้ทราบล่วงหน้าผ่านอีเมลและระบบแจ้งเตือน' },
-    ],
-  },
-  {
-    icon: Users,
-    title: 'บัญชีผู้ใช้งาน',
-    color: 'from-emerald-600 to-teal-600',
-    bg: 'bg-emerald-50',
-    iconColor: 'text-emerald-600',
-    items: [
-      { subtitle: 'การลงทะเบียน', desc: 'คุณต้องให้ข้อมูลที่ถูกต้อง ครบถ้วน และเป็นปัจจุบันในการลงทะเบียน หากพบว่าข้อมูลไม่ถูกต้อง อาจส่งผลให้บัญชีถูกระงับ' },
-      { subtitle: 'ความรับผิดชอบ', desc: 'คุณเป็นผู้รับผิดชอบในการรักษาความลับของรหัสผ่าน และกิจกรรมทั้งหมดที่เกิดขึ้นภายใต้บัญชีของคุณ' },
-      { subtitle: 'ประเภทบัญชี', desc: 'ระบบรองรับผู้ใช้ 5 ประเภท: นักศึกษา, อาจารย์, เจ้าหน้าที่, ผู้บริหาร และภาคอุตสาหกรรม แต่ละประเภทมีสิทธิ์และข้อจำกัดที่แตกต่างกัน' },
-    ],
-  },
-  {
-    icon: ShieldCheck,
-    title: 'การใช้งานที่อนุญาต',
-    color: 'from-violet-600 to-purple-600',
-    bg: 'bg-violet-50',
-    iconColor: 'text-violet-600',
-    items: [
-      { subtitle: 'วัตถุประสงค์ทางการศึกษา', desc: 'ระบบนี้ออกแบบมาเพื่อใช้ในวัตถุประสงค์ทางการศึกษาและการบริหารจัดการของหลักสูตร DII วิทยาลัยศิลปะ สื่อ และเทคโนโลยี' },
-      { subtitle: 'การเข้าถึงข้อมูล', desc: 'คุณสามารถเข้าถึงเฉพาะข้อมูลที่เกี่ยวข้องกับบทบาทของคุณในระบบ ห้ามพยายามเข้าถึงข้อมูลของผู้อื่นโดยไม่ได้รับอนุญาต' },
-      { subtitle: 'ทรัพย์สินทางปัญญา', desc: 'เนื้อหา, การออกแบบ, โค้ด และทรัพย์สินทางปัญญาทั้งหมดของระบบเป็นของ DII CAMT มหาวิทยาลัยเชียงใหม่' },
-    ],
-  },
-  {
-    icon: Ban,
-    title: 'การใช้งานที่ห้าม',
-    color: 'from-red-600 to-rose-600',
-    bg: 'bg-red-50',
-    iconColor: 'text-red-600',
-    items: [
-      { subtitle: 'การกระทำที่ผิดกฎหมาย', desc: 'ห้ามใช้ระบบเพื่อกิจกรรมที่ผิดกฎหมาย หลอกลวง หรือละเมิดสิทธิ์ของผู้อื่น' },
-      { subtitle: 'การโจมตีระบบ', desc: 'ห้ามพยายาม hack, reverse engineer, หรือโจมตีระบบในทุกรูปแบบ รวมถึง DDoS, SQL Injection หรือ XSS' },
-      { subtitle: 'การใช้งานเชิงพาณิชย์', desc: 'ห้ามนำข้อมูลจากระบบไปใช้เพื่อวัตถุประสงค์เชิงพาณิชย์โดยไม่ได้รับอนุญาตเป็นลายลักษณ์อักษร' },
-      { subtitle: 'การแชร์บัญชี', desc: 'ห้ามแชร์บัญชีหรือรหัสผ่านกับบุคคลอื่น แต่ละบัญชีสามารถใช้ได้โดยเจ้าของบัญชีเท่านั้น' },
-    ],
-  },
-  {
-    icon: BookOpen,
-    title: 'เนื้อหาและข้อมูล',
-    color: 'from-amber-600 to-orange-600',
-    bg: 'bg-amber-50',
-    iconColor: 'text-amber-600',
-    items: [
-      { subtitle: 'เนื้อหาของผู้ใช้', desc: 'ข้อมูลที่คุณอัปโหลด เช่น รายงาน, พอร์ตโฟลิโอ หรือเอกสาร ยังคงเป็นทรัพย์สินของคุณ แต่คุณให้สิทธิ์แก่ระบบในการจัดเก็บและแสดงผลตามฟังก์ชันที่กำหนด' },
-      { subtitle: 'ความถูกต้อง', desc: 'เราพยายามอย่างดีที่สุดเพื่อให้ข้อมูลในระบบ (เกรด, ตารางเรียน, สถิติ) มีความถูกต้อง แต่ข้อมูลอย่างเป็นทางการยังคงอ้างอิงจากระบบสารสนเทศของมหาวิทยาลัย' },
-      { subtitle: 'การสำรองข้อมูล', desc: 'เราทำการสำรองข้อมูลอัตโนมัติทุกวัน แต่แนะนำให้ผู้ใช้สำรองข้อมูลสำคัญของตนเองไว้ด้วย' },
-    ],
-  },
-  {
-    icon: RefreshCw,
-    title: 'การระงับและยกเลิกบริการ',
-    color: 'from-cyan-600 to-teal-600',
-    bg: 'bg-cyan-50',
-    iconColor: 'text-cyan-600',
-    items: [
-      { subtitle: 'การระงับบัญชี', desc: 'เราอาจระงับบัญชีชั่วคราวหากตรวจพบกิจกรรมที่ผิดปกติ หรือการละเมิดข้อกำหนดการใช้งาน โดยจะแจ้งเหตุผลให้ทราบ' },
-      { subtitle: 'การยกเลิกโดยผู้ใช้', desc: 'คุณสามารถยกเลิกบัญชีได้ตลอดเวลาผ่านหน้าตั้งค่า ข้อมูลจะถูกเก็บไว้ 90 วันก่อนลบถาวร' },
-      { subtitle: 'การบำรุงรักษา', desc: 'เราอาจหยุดให้บริการชั่วคราวเพื่อการบำรุงรักษาหรืออัปเกรดระบบ โดยจะแจ้งล่วงหน้าเมื่อเป็นไปได้' },
-    ],
-  },
-  {
-    icon: Gavel,
-    title: 'การจำกัดความรับผิดชอบ',
-    color: 'from-slate-600 to-gray-600',
-    bg: 'bg-slate-100',
-    iconColor: 'text-slate-600',
-    items: [
-      { subtitle: 'การให้บริการ', desc: 'ระบบให้บริการ "ตามสภาพ" (as is) เราไม่รับประกันว่าบริการจะปราศจากข้อผิดพลาดหรือหยุดชะงัก 100%' },
-      { subtitle: 'ความเสียหาย', desc: 'เราจะไม่รับผิดชอบต่อความเสียหายทางอ้อม, ความเสียหายจากการสูญเสียข้อมูล หรือการหยุดชะงักของธุรกิจที่เกิดจากการใช้งานระบบ' },
-      { subtitle: 'กฎหมายที่ใช้บังคับ', desc: 'ข้อกำหนดนี้อยู่ภายใต้กฎหมายแห่งราชอาณาจักรไทย รวมถึง พ.ร.บ.คุ้มครองข้อมูลส่วนบุคคล (PDPA) และ พ.ร.บ.คอมพิวเตอร์' },
-    ],
-  },
-];
-
 export default function TermsOfService() {
+  const { t } = useLanguage();
+
+  const sections = [
+    {
+      icon: FileText,
+      title: t.termsOfServicePage.section1Title,
+      color: 'from-blue-600 to-indigo-600',
+      bg: 'bg-blue-50',
+      iconColor: 'text-blue-600',
+      items: [
+        { subtitle: t.termsOfServicePage.section1Sub1, desc: t.termsOfServicePage.section1Desc1 },
+        { subtitle: t.termsOfServicePage.section1Sub2, desc: t.termsOfServicePage.section1Desc2 },
+        { subtitle: t.termsOfServicePage.section1Sub3, desc: t.termsOfServicePage.section1Desc3 },
+      ],
+    },
+    {
+      icon: Users,
+      title: t.termsOfServicePage.section2Title,
+      color: 'from-emerald-600 to-teal-600',
+      bg: 'bg-emerald-50',
+      iconColor: 'text-emerald-600',
+      items: [
+        { subtitle: t.termsOfServicePage.section2Sub1, desc: t.termsOfServicePage.section2Desc1 },
+        { subtitle: t.termsOfServicePage.section2Sub2, desc: t.termsOfServicePage.section2Desc2 },
+        { subtitle: t.termsOfServicePage.section2Sub3, desc: t.termsOfServicePage.section2Desc3 },
+      ],
+    },
+    {
+      icon: ShieldCheck,
+      title: t.termsOfServicePage.section3Title,
+      color: 'from-violet-600 to-purple-600',
+      bg: 'bg-violet-50',
+      iconColor: 'text-violet-600',
+      items: [
+        { subtitle: t.termsOfServicePage.section3Sub1, desc: t.termsOfServicePage.section3Desc1 },
+        { subtitle: t.termsOfServicePage.section3Sub2, desc: t.termsOfServicePage.section3Desc2 },
+        { subtitle: t.termsOfServicePage.section3Sub3, desc: t.termsOfServicePage.section3Desc3 },
+      ],
+    },
+    {
+      icon: Ban,
+      title: t.termsOfServicePage.section4Title,
+      color: 'from-red-600 to-rose-600',
+      bg: 'bg-red-50',
+      iconColor: 'text-red-600',
+      items: [
+        { subtitle: t.termsOfServicePage.section4Sub1, desc: t.termsOfServicePage.section4Desc1 },
+        { subtitle: t.termsOfServicePage.section4Sub2, desc: t.termsOfServicePage.section4Desc2 },
+        { subtitle: t.termsOfServicePage.section4Sub3, desc: t.termsOfServicePage.section4Desc3 },
+        { subtitle: t.termsOfServicePage.section4Sub4, desc: t.termsOfServicePage.section4Desc4 },
+      ],
+    },
+    {
+      icon: BookOpen,
+      title: t.termsOfServicePage.section5Title,
+      color: 'from-amber-600 to-orange-600',
+      bg: 'bg-amber-50',
+      iconColor: 'text-amber-600',
+      items: [
+        { subtitle: t.termsOfServicePage.section5Sub1, desc: t.termsOfServicePage.section5Desc1 },
+        { subtitle: t.termsOfServicePage.section5Sub2, desc: t.termsOfServicePage.section5Desc2 },
+        { subtitle: t.termsOfServicePage.section5Sub3, desc: t.termsOfServicePage.section5Desc3 },
+      ],
+    },
+    {
+      icon: RefreshCw,
+      title: t.termsOfServicePage.section6Title,
+      color: 'from-cyan-600 to-teal-600',
+      bg: 'bg-cyan-50',
+      iconColor: 'text-cyan-600',
+      items: [
+        { subtitle: t.termsOfServicePage.section6Sub1, desc: t.termsOfServicePage.section6Desc1 },
+        { subtitle: t.termsOfServicePage.section6Sub2, desc: t.termsOfServicePage.section6Desc2 },
+        { subtitle: t.termsOfServicePage.section6Sub3, desc: t.termsOfServicePage.section6Desc3 },
+      ],
+    },
+    {
+      icon: Gavel,
+      title: t.termsOfServicePage.section7Title,
+      color: 'from-slate-600 to-gray-600',
+      bg: 'bg-slate-100',
+      iconColor: 'text-slate-600',
+      items: [
+        { subtitle: t.termsOfServicePage.section7Sub1, desc: t.termsOfServicePage.section7Desc1 },
+        { subtitle: t.termsOfServicePage.section7Sub2, desc: t.termsOfServicePage.section7Desc2 },
+        { subtitle: t.termsOfServicePage.section7Sub3, desc: t.termsOfServicePage.section7Desc3 },
+      ],
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900">
       {/* Navbar */}
@@ -120,7 +123,7 @@ export default function TermsOfService() {
           </Link>
           <Link to="/">
             <Button variant="ghost" className="font-medium hover:text-blue-600 hover:bg-blue-50">
-              <ArrowLeft className="w-4 h-4 mr-2" /> กลับหน้าหลัก
+              <ArrowLeft className="w-4 h-4 mr-2" /> {t.termsOfServicePage.backToHome}
             </Button>
           </Link>
         </div>
@@ -142,23 +145,23 @@ export default function TermsOfService() {
           </FadeIn>
           <FadeIn delay={0.1}>
             <h1 className="text-4xl lg:text-7xl font-bold text-white mb-6 tracking-tight leading-[1.1]">
-              ข้อกำหนด<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400">การให้บริการ</span>
+              {t.termsOfServicePage.heroTitle}<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400">{t.termsOfServicePage.heroTitleHighlight}</span>
             </h1>
           </FadeIn>
           <FadeIn delay={0.2}>
             <p className="text-lg text-slate-400 mb-6 max-w-2xl mx-auto leading-relaxed font-light">
-              กรุณาอ่านข้อกำหนดการให้บริการอย่างละเอียดก่อนเริ่มใช้งานระบบ DII CAMT
+              {t.termsOfServicePage.heroDesc}
             </p>
           </FadeIn>
           <FadeIn delay={0.3}>
             <div className="flex items-center justify-center gap-6 text-sm text-slate-500">
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4" />
-                <span>อัปเดตล่าสุด: 1 กุมภาพันธ์ 2026</span>
+                <span>{t.termsOfServicePage.lastUpdated}</span>
               </div>
               <div className="w-1 h-1 rounded-full bg-slate-600" />
               <div className="flex items-center gap-2">
-                <span>เวอร์ชัน 2.0</span>
+                <span>{t.termsOfServicePage.version}</span>
               </div>
             </div>
           </FadeIn>
@@ -176,19 +179,18 @@ export default function TermsOfService() {
                   <AlertCircle className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-slate-900 mb-2">ข้อควรรู้ก่อนใช้งาน</h2>
+                  <h2 className="text-2xl font-bold text-slate-900 mb-2">{t.termsOfServicePage.summaryTitle}</h2>
                   <p className="text-slate-600 leading-relaxed">
-                    การลงทะเบียนและใช้งานระบบ DII CAMT หมายความว่าคุณยอมรับข้อกำหนดเหล่านี้ หากไม่เห็นด้วยกับข้อกำหนดใดๆ 
-                    กรุณาอย่าใช้บริการ ข้อกำหนดนี้ครอบคลุมสิทธิ์และหน้าที่ของผู้ใช้ทุกประเภท
+                    {t.termsOfServicePage.summaryDesc}
                   </p>
                 </div>
               </div>
               <div className="grid sm:grid-cols-4 gap-3">
                 {[
-                  { label: 'นักศึกษา', icon: '🎓' },
-                  { label: 'อาจารย์', icon: '📚' },
-                  { label: 'เจ้าหน้าที่', icon: '🏢' },
-                  { label: 'ภาคอุตสาหกรรม', icon: '🏭' },
+                  { label: t.termsOfServicePage.roleStudent, icon: '🎓' },
+                  { label: t.termsOfServicePage.roleLecturer, icon: '📚' },
+                  { label: t.termsOfServicePage.roleStaff, icon: '🏢' },
+                  { label: t.termsOfServicePage.roleIndustry, icon: '🏭' },
                 ].map((role, i) => (
                   <div key={i} className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm text-center">
                     <div className="text-2xl mb-2">{role.icon}</div>
@@ -245,9 +247,9 @@ export default function TermsOfService() {
                 <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[120px]" />
                 <div className="relative z-10 space-y-6">
                   <HelpCircle className="w-12 h-12 text-blue-400 mx-auto" />
-                  <h2 className="text-3xl lg:text-4xl font-bold">มีข้อสงสัยเกี่ยวกับเงื่อนไขการใช้งาน?</h2>
+                  <h2 className="text-3xl lg:text-4xl font-bold">{t.termsOfServicePage.contactTitle}</h2>
                   <p className="text-slate-300 text-lg max-w-xl mx-auto">
-                    ทีมกฎหมายของเราพร้อมให้คำอธิบายเพิ่มเติมเกี่ยวกับข้อกำหนดการให้บริการ
+                    {t.termsOfServicePage.contactDesc}
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
                     <a href="mailto:legal@camt.cmu.ac.th">

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { BarChart3, Clock, Users, BookOpen, Search, Download, Briefcase, FlaskConical, CalendarDays } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,7 @@ const itemVariants = {
 };
 
 export default function Workload() {
+    const { t } = useLanguage();
     const { user } = useAuth();
 
     const scheduleSlots = [
@@ -41,10 +43,10 @@ export default function Workload() {
             <div>
                 <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
                     <BarChart3 className="w-4 h-4 text-emerald-500" />
-                    <span>สรุปภาระงานสอนและงานบริการวิชาการ ประจำภาคการศึกษา 1/2568</span>
+                    <span>{t.workloadPage.subtitle} 1/2568</span>
                 </motion.div>
                 <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                    รายงาน<span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">ภาระงาน</span>
+                    {t.workloadPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">{t.workloadPage.titleHighlight}</span>
                 </motion.h1>
             </div>
 
@@ -60,13 +62,13 @@ export default function Workload() {
                             <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                                 <Clock className="w-5 h-5" />
                             </div>
-                            <span className="font-medium text-white/90">ชั่วโมงสอน</span>
+                            <span className="font-medium text-white/90">{t.workloadPage.teachingHours}</span>
                         </div>
                         <div className="text-4xl font-bold">12</div>
-                        <p className="text-white/70 text-sm mt-1">ชั่วโมง/สัปดาห์</p>
+                        <p className="text-white/70 text-sm mt-1">{t.workloadPage.hoursPerWeek}</p>
                         <div className="mt-3">
                             <div className="flex justify-between text-xs mb-1 text-white/80">
-                                <span>เป้าหมาย</span>
+                                <span>{t.workloadPage.target}</span>
                                 <span>80%</span>
                             </div>
                             <Progress value={80} className="bg-white/20 h-1.5" />
@@ -84,10 +86,10 @@ export default function Workload() {
                             <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                                 <Users className="w-5 h-5" />
                             </div>
-                            <span className="font-medium text-white/90">ที่ปรึกษา</span>
+                            <span className="font-medium text-white/90">{t.workloadPage.advisees}</span>
                         </div>
                         <div className="text-4xl font-bold">25</div>
-                        <p className="text-white/70 text-sm mt-1">นักศึกษาในความดูแล</p>
+                        <p className="text-white/70 text-sm mt-1">{t.workloadPage.adviseesDesc}</p>
                     </div>
                 </motion.div>
 
@@ -101,10 +103,10 @@ export default function Workload() {
                             <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                                 <BookOpen className="w-5 h-5" />
                             </div>
-                            <span className="font-medium text-white/90">รายวิชา</span>
+                            <span className="font-medium text-white/90">{t.workloadPage.coursesLabel}</span>
                         </div>
                         <div className="text-4xl font-bold">3</div>
-                        <p className="text-white/70 text-sm mt-1">วิชาที่รับผิดชอบ</p>
+                        <p className="text-white/70 text-sm mt-1">{t.workloadPage.coursesDesc}</p>
                     </div>
                 </motion.div>
 
@@ -118,10 +120,10 @@ export default function Workload() {
                             <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                                 <FlaskConical className="w-5 h-5" />
                             </div>
-                            <span className="font-medium text-white/90">วิจัย</span>
+                            <span className="font-medium text-white/90">{t.workloadPage.research}</span>
                         </div>
                         <div className="text-4xl font-bold">2</div>
-                        <p className="text-white/70 text-sm mt-1">งานวิจัยตีพิมพ์</p>
+                        <p className="text-white/70 text-sm mt-1">{t.workloadPage.researchDesc}</p>
                     </div>
                 </motion.div>
             </motion.div>
@@ -139,7 +141,7 @@ export default function Workload() {
                             <CalendarDays className="w-5 h-5" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-gray-900">ตารางสอนรายสัปดาห์</h3>
+                            <h3 className="text-lg font-bold text-gray-900">{t.workloadPage.weeklySchedule}</h3>
                             <p className="text-sm text-gray-500">ภาคการศึกษา 1/2568</p>
                         </div>
                     </div>
@@ -190,8 +192,8 @@ export default function Workload() {
                             <Briefcase className="w-5 h-5" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-gray-900">ภาระงานอื่นๆ</h3>
-                            <p className="text-sm text-gray-500">งานบริการวิชาการและงานบริหาร</p>
+                            <h3 className="text-lg font-bold text-gray-900">{t.workloadPage.otherWork}</h3>
+                            <p className="text-sm text-gray-500">{t.workloadPage.otherWorkDesc}</p>
                         </div>
                     </div>
                     <div className="space-y-3">
@@ -219,7 +221,7 @@ export default function Workload() {
                             className="w-full rounded-2xl h-12 border-dashed border-2 hover:border-green-300 hover:bg-green-50 transition-all"
                         >
                             <Download className="w-4 h-4 mr-2" />
-                            ดาวน์โหลดรายงานภาระงาน (TOR)
+                            {t.workloadPage.downloadTOR}
                         </Button>
                     </motion.div>
                 </motion.div>

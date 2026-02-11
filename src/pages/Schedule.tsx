@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Calendar, Clock, MapPin, ChevronLeft, ChevronRight,
   BookOpen, GraduationCap, GripVertical, Info
@@ -25,6 +26,7 @@ const itemVariants = {
 
 export default function Schedule() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [currentWeek, setCurrentWeek] = React.useState(0);
   const [isEditMode, setIsEditMode] = React.useState(false);
 
@@ -44,8 +46,8 @@ export default function Schedule() {
   }, []);
 
   const handleRequestMove = (item: any, targetDay: number, targetTime: string, mode: string) => {
-    toast.success('ส่งคำขอแก้ไขตารางสอนเรียบร้อยแล้ว', {
-      description: `ระบบได้ส่งแจ้งเตือนไปยังเจ้าหน้าที่เพื่อตรวจสอบและอนุมัติ (${mode === 'permanent' ? 'ถาวร' : 'เฉพาะวันนี้'})`
+    toast.success(t.schedulePage.editSuccess, {
+      description: `${t.schedulePage.editSuccessDesc} (${mode === 'permanent' ? t.schedulePage.permanent : t.schedulePage.todayOnly})`
     });
     setIsEditMode(false);
   };
@@ -86,7 +88,7 @@ export default function Schedule() {
               className="flex items-center gap-2 text-slate-500 font-medium mb-2"
             >
               <Calendar className="w-4 h-4 text-purple-500" />
-              <span>ภาคเรียนที่ 1/2568</span>
+              <span>{t.schedulePage.semester}</span>
             </motion.div>
             <motion.h1
               className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight"
@@ -94,7 +96,7 @@ export default function Schedule() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              ตารางเรียน<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">สัปดาห์นี้</span>
+              {t.schedulePage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">{t.schedulePage.titleHighlight}</span>
             </motion.h1>
           </div>
 
@@ -125,7 +127,7 @@ export default function Schedule() {
               <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                 <BookOpen className="w-5 h-5" />
               </div>
-              <span className="font-medium text-white/90 text-sm">วิชาทั้งหมด</span>
+              <span className="font-medium text-white/90 text-sm">{t.schedulePage.totalCourses}</span>
             </div>
             <div className="text-3xl font-bold">{studentCourses.length}</div>
           </motion.div>
@@ -139,7 +141,7 @@ export default function Schedule() {
               <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                 <GraduationCap className="w-5 h-5" />
               </div>
-              <span className="font-medium text-white/90 text-sm">หน่วยกิต</span>
+              <span className="font-medium text-white/90 text-sm">{t.schedulePage.totalCredits}</span>
             </div>
             <div className="text-3xl font-bold">{totalCredits}</div>
           </motion.div>
@@ -153,7 +155,7 @@ export default function Schedule() {
               <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                 <Clock className="w-5 h-5" />
               </div>
-              <span className="font-medium text-white/90 text-sm">ชม./สัปดาห์</span>
+              <span className="font-medium text-white/90 text-sm">{t.schedulePage.hoursPerWeek}</span>
             </div>
             <div className="text-3xl font-bold">{totalHours}</div>
           </motion.div>
@@ -167,9 +169,9 @@ export default function Schedule() {
               <div className="p-2 rounded-xl bg-slate-100">
                 <Calendar className="w-5 h-5 text-slate-500" />
               </div>
-              <span className="font-medium text-slate-500 text-sm">วันเรียน</span>
+              <span className="font-medium text-slate-500 text-sm">{t.schedulePage.studyDays}</span>
             </div>
-            <div className="text-3xl font-bold">จ-ศ</div>
+            <div className="text-3xl font-bold">{t.schedulePage.monFri}</div>
           </motion.div>
         </div>
 
@@ -186,7 +188,7 @@ export default function Schedule() {
         <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="space-y-4">
             <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-purple-500" /> คลาสวันนี้
+              <Calendar className="w-5 h-5 text-purple-500" /> {t.schedulePage.todayClasses}
             </h3>
             <div className="space-y-3">
               {studentCourses.slice(0, 3).map((course, index) => (
@@ -209,7 +211,7 @@ export default function Schedule() {
                     </div>
                   </div>
                   <Badge variant="secondary" className="bg-purple-100 text-purple-600 group-hover:bg-white group-hover:text-purple-600">
-                    กำลังเรียน
+                    {t.schedulePage.inClass}
                   </Badge>
                 </motion.div>
               ))}
@@ -220,24 +222,24 @@ export default function Schedule() {
             <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/20 rounded-full blur-[80px]" />
             <div className="relative z-10">
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <Info className="w-5 h-5 text-purple-400" /> ข้อควรระวัง
+                <Info className="w-5 h-5 text-purple-400" /> {t.schedulePage.warnings}
               </h3>
               <ul className="space-y-4 text-slate-300 text-sm">
                 <li className="flex gap-3">
                   <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold shrink-0">1</div>
-                  กรุณาเข้าเรียนตรงเวลา หากสายเกิน 15 นาทีถือว่าขาดเรียน
+                  {t.schedulePage.warningLate}
                 </li>
                 <li className="flex gap-3">
                   <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold shrink-0">2</div>
-                  การลากิจต้องยื่นใบลาล่วงหน้าอย่างน้อย 3 วัน
+                  {t.schedulePage.warningLeave}
                 </li>
                 <li className="flex gap-3">
                   <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold shrink-0">3</div>
-                  แต่งกายชุดนักศึกษาให้เรียบร้อยทุกครั้ง
+                  {t.schedulePage.warningDress}
                 </li>
               </ul>
               <Button className="w-full mt-8 bg-purple-600 hover:bg-purple-500 text-white border-0">
-                ดูระเบียบการเข้าเรียน
+                {t.schedulePage.viewRules}
               </Button>
             </div>
           </div>
@@ -258,10 +260,10 @@ export default function Schedule() {
         <div>
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
             <Calendar className="w-4 h-4 text-purple-500" />
-            <span>จัดการเวลาและตารางสอนของคุณ</span>
+            <span>{t.schedulePage.lecturerSubtitle}</span>
           </motion.div>
           <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            ตาราง<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">สอน</span>
+              {t.schedulePage.lecturerTitle}<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">{t.schedulePage.lecturerHighlight}</span>
           </motion.h1>
         </div>
         <Button
@@ -269,7 +271,7 @@ export default function Schedule() {
           onClick={() => setIsEditMode(!isEditMode)}
           className="rounded-xl px-6"
         >
-          {isEditMode ? 'บันทึกการแก้ไข' : 'ขอแก้ไขตาราง'}
+          {isEditMode ? t.schedulePage.saveChanges : t.schedulePage.editSchedule}
         </Button>
       </div>
 

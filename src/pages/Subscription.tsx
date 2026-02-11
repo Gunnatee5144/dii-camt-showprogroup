@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { CreditCard, Check, Shield, Zap, Star, Crown, Sparkles, Receipt } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -14,6 +15,8 @@ const itemVariants = {
 };
 
 export default function Subscription() {
+    const { t } = useLanguage();
+
     const plans = [
         {
             name: 'Basic', price: 'ฟรี', description: 'สำหรับเริ่มต้นใช้งาน', icon: Zap, current: false,
@@ -38,13 +41,13 @@ export default function Subscription() {
             <div className="text-center">
                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 text-slate-500 font-medium mb-2">
                     <CreditCard className="w-4 h-4 text-orange-500" />
-                    <span>แพ็คเกจสมาชิก</span>
+                    <span>{t.subscriptionPage.subtitle}</span>
                 </motion.div>
                 <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                    เลือกแพ็คเกจ<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">ที่เหมาะกับคุณ</span>
+                    {t.subscriptionPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">{t.subscriptionPage.titleHighlight}</span>
                 </motion.h1>
                 <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-slate-500 mt-3 max-w-lg mx-auto">
-                    เลือกแพ็คเกจที่เหมาะสมกับองค์กรของคุณเพื่อเข้าถึงบุคลากรคุณภาพ
+                    {t.subscriptionPage.desc}
                 </motion.p>
             </div>
 
@@ -55,7 +58,7 @@ export default function Subscription() {
                         className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${plan.gradient} border ${plan.border} p-7 shadow-sm hover:shadow-xl transition-all flex flex-col ${plan.current ? 'ring-2 ring-orange-400 shadow-xl shadow-orange-200 scale-[1.02]' : ''}`}>
                         {plan.current && (
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-5 py-1.5 rounded-full text-sm font-bold shadow-lg shadow-orange-200">
-                                แพ็คเกจปัจจุบัน
+                                {t.subscriptionPage.currentPlan}
                             </div>
                         )}
                         <div className={`${plan.text} mt-${plan.current ? '4' : '0'}`}>
@@ -79,7 +82,7 @@ export default function Subscription() {
                             </ul>
                         </div>
                         <Button className={`w-full rounded-xl h-12 text-sm font-semibold ${plan.btnClass || ''}`} variant={plan.current || plan.btnClass ? 'default' : 'outline'} disabled={plan.current}>
-                            {plan.current ? '✓ ใช้งานอยู่' : 'เลือกแพ็คเกจนี้'}
+                            {plan.current ? t.subscriptionPage.inUse : t.subscriptionPage.selectPlan}
                         </Button>
                     </motion.div>
                 ))}
@@ -88,17 +91,17 @@ export default function Subscription() {
             {/* Payment History */}
             <motion.div variants={itemVariants} className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm max-w-5xl mx-auto">
                 <h3 className="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
-                    <Receipt className="w-5 h-5 text-slate-500" /> ประวัติการชำระเงิน
+                    <Receipt className="w-5 h-5 text-slate-500" /> {t.subscriptionPage.paymentHistory}
                 </h3>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="border-b border-slate-100">
-                                <th className="pb-3 text-left font-medium text-slate-500">วันที่</th>
-                                <th className="pb-3 text-left font-medium text-slate-500">รายการ</th>
-                                <th className="pb-3 text-left font-medium text-slate-500">จำนวนเงิน</th>
-                                <th className="pb-3 text-left font-medium text-slate-500">สถานะ</th>
-                                <th className="pb-3 text-right font-medium text-slate-500">ใบเสร็จ</th>
+                                <th className="pb-3 text-left font-medium text-slate-500">{t.subscriptionPage.date}</th>
+                                <th className="pb-3 text-left font-medium text-slate-500">{t.subscriptionPage.item}</th>
+                                <th className="pb-3 text-left font-medium text-slate-500">{t.subscriptionPage.amount}</th>
+                                <th className="pb-3 text-left font-medium text-slate-500">{t.subscriptionPage.status}</th>
+                                <th className="pb-3 text-right font-medium text-slate-500">{t.subscriptionPage.receipt}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -106,8 +109,8 @@ export default function Subscription() {
                                 <td className="py-4 text-slate-700">1 ม.ค. 2567</td>
                                 <td className="text-slate-700">Professional Plan (1 ปี)</td>
                                 <td className="font-semibold text-slate-800">฿5,000</td>
-                                <td><Badge className="bg-emerald-50 text-emerald-600 border-emerald-200 rounded-lg">ชำระแล้ว</Badge></td>
-                                <td className="text-right"><Button variant="ghost" size="sm" className="text-blue-500 hover:text-blue-600 rounded-xl text-xs">ดาวน์โหลด</Button></td>
+                                <td><Badge className="bg-emerald-50 text-emerald-600 border-emerald-200 rounded-lg">{t.subscriptionPage.paid}</Badge></td>
+                                <td className="text-right"><Button variant="ghost" size="sm" className="text-blue-500 hover:text-blue-600 rounded-xl text-xs">{t.subscriptionPage.downloadReceipt}</Button></td>
                             </tr>
                         </tbody>
                     </table>

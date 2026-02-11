@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Trophy, Calendar, Users, CheckCircle, Clock, MapPin,
@@ -25,6 +26,7 @@ const itemVariants = {
 
 export default function Activities() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = React.useState('upcoming');
 
   const upcomingActivities = mockActivities.filter(a => a.status === 'upcoming');
@@ -91,7 +93,7 @@ export default function Activities() {
             className="flex items-center gap-2 text-slate-500 font-medium mb-2"
           >
             <Trophy className="w-4 h-4 text-amber-500" />
-            <span>สะสมแต้มและกิจกรรม</span>
+            <span>{t.activitiesPage.subtitle}</span>
           </motion.div>
           <motion.h1
             className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight"
@@ -99,7 +101,7 @@ export default function Activities() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            กิจกรรม<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600">และแต้มสะสม</span>
+            {t.activitiesPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600">{t.activitiesPage.titleHighlight}</span>
           </motion.h1>
         </div>
       </div>
@@ -108,7 +110,7 @@ export default function Activities() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           icon={Trophy}
-          label="แต้มสะสมทั้งหมด"
+          label={t.activitiesPage.totalPoints}
           value={studentPoints}
           gradient="bg-gradient-to-br from-amber-400 via-orange-500 to-red-500"
           subtext={
@@ -120,8 +122,8 @@ export default function Activities() {
         />
         <StatCard
           icon={Clock}
-          label="ชั่วโมงกิจกรรม"
-          value={`${studentHours} ชม.`}
+          label={t.activitiesPage.activityHours}
+          value={`${studentHours} ${t.activitiesPage.hours}`}
           gradient="bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-600"
           subtext={
             <div className="h-1.5 w-full bg-black/20 rounded-full mt-2 overflow-hidden">
@@ -134,17 +136,17 @@ export default function Activities() {
         />
         <StatCard
           icon={Star}
-          label="Badges ที่ได้รับ"
+          label={t.activitiesPage.badgesEarned}
           value="8"
           gradient="bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600"
-          subtext={<span className="text-blue-100 text-xs">เหลืออีก 2 เพื่อปลดล็อคเลเวลถัดไป</span>}
+          subtext={<span className="text-blue-100 text-xs">{t.activitiesPage.unlockNext}</span>}
         />
         <StatCard
           icon={Target}
-          label="เป้าหมายเทอมนี้"
+          label={t.activitiesPage.semesterGoal}
           value="4/5"
           gradient="bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500"
-          subtext={<span className="text-purple-100 text-xs text-right block">80% สำเร็จ</span>}
+          subtext={<span className="text-purple-100 text-xs text-right block">80% {t.activitiesPage.achieved}</span>}
         />
       </div>
 
@@ -153,19 +155,19 @@ export default function Activities() {
         <motion.div variants={itemVariants} className="lg:col-span-2 space-y-6">
           <Tabs defaultValue="upcoming" onValueChange={setActiveTab} className="w-full space-y-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <h2 className="text-2xl font-bold text-slate-900 tracking-tight">รายการกิจกรรม</h2>
+              <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{t.activitiesPage.activityList}</h2>
               <TabsList className="bg-white/40 backdrop-blur-xl border border-white/40 p-1.5 h-auto rounded-2xl shadow-sm">
                 <TabsTrigger
                   value="upcoming"
                   className="rounded-xl px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-lg shadow-blue-500/10 transition-all duration-300 font-medium text-slate-600"
                 >
-                  กำลังจะมาถึง
+                  {t.activitiesPage.upcomingTab}
                 </TabsTrigger>
                 <TabsTrigger
                   value="history"
                   className="rounded-xl px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-lg shadow-blue-500/10 transition-all duration-300 font-medium text-slate-600"
                 >
-                  ประวัติกิจกรรม
+                  {t.activitiesPage.historyTab}
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -197,7 +199,7 @@ export default function Activities() {
                           <div>
                             <div className="flex gap-2 mb-3">
                               <Badge variant="secondary" className="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border-0 rounded-lg px-2.5">{activity.type}</Badge>
-                              {index === 0 && <Badge className="bg-orange-500 hover:bg-orange-600 border-0 rounded-lg px-2.5 shadow-lg shadow-orange-500/20">HOT กิจกรรมแนะนำ</Badge>}
+                              {index === 0 && <Badge className="bg-orange-500 hover:bg-orange-600 border-0 rounded-lg px-2.5 shadow-lg shadow-orange-500/20">{t.activitiesPage.hotRecommended}</Badge>}
                             </div>
                             <h3 className="text-2xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors mb-2 tracking-tight">{activity.title}</h3>
                             <div className="flex flex-wrap gap-4 text-sm text-slate-500 font-medium">
@@ -211,16 +213,16 @@ export default function Activities() {
                               </div>
                               <div className="flex items-center gap-1.5">
                                 <Users className="w-4 h-4 text-slate-400" />
-                                {activity.enrolledStudents.length}/{activity.maxParticipants || '-'} คน
+                                {activity.enrolledStudents.length}/{activity.maxParticipants || '-'} {t.activitiesPage.people}
                               </div>
                             </div>
                           </div>
                           <div className="mt-6 flex gap-3">
                             <Button className="rounded-xl h-11 bg-slate-900 hover:bg-slate-800 text-white shadow-xl shadow-slate-900/20 px-8 font-bold border border-slate-700">
-                              ลงทะเบียนเข้าร่วม
+                              {t.activitiesPage.joinActivity}
                             </Button>
                             <Button variant="ghost" className="rounded-xl h-11 border border-slate-200 hover:bg-slate-100 font-medium px-6">
-                              รายละเอียด
+                              {t.activitiesPage.details}
                             </Button>
                           </div>
                         </div>
@@ -236,8 +238,8 @@ export default function Activities() {
                     <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-200">
                       <Hourglass className="w-10 h-10 opacity-30" />
                     </div>
-                    <p className="text-lg font-medium">ยังไม่มีประวัติกิจกรรมสะสม</p>
-                    <p className="text-sm">เข้าร่วมกิจกรรมวันนี้เพื่อเริ่มสะสมแต้ม!</p>
+                    <p className="text-lg font-medium">{t.activitiesPage.noHistory}</p>
+                    <p className="text-sm">{t.activitiesPage.startCollecting}</p>
                   </div>
                 </TabsContent>
               )}
@@ -251,9 +253,9 @@ export default function Activities() {
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-amber-500" />
-                อันดับผู้นำ (Leaderboard)
+                {t.activitiesPage.leaderboard}
               </h3>
-              <Badge variant="outline" className="rounded-full border-slate-200 text-slate-400 text-[10px] uppercase tracking-wider">เทอมนี้</Badge>
+              <Badge variant="outline" className="rounded-full border-slate-200 text-slate-400 text-[10px] uppercase tracking-wider">{t.activitiesPage.thisSemester}</Badge>
             </div>
             <div className="space-y-4">
               {leaderboard.map((user, idx) => (
@@ -278,7 +280,7 @@ export default function Activities() {
                 </div>
               ))}
             </div>
-            <Button variant="outline" className="w-full mt-8 rounded-xl border-dashed border-slate-300 text-slate-500 hover:text-indigo-600 hover:border-indigo-300 h-11 font-medium">ดูอันดับทั้งหมด</Button>
+            <Button variant="outline" className="w-full mt-8 rounded-xl border-dashed border-slate-300 text-slate-500 hover:text-indigo-600 hover:border-indigo-300 h-11 font-medium">{t.activitiesPage.viewAllRanks}</Button>
           </div>
 
           <div className="relative overflow-hidden bg-gradient-to-br from-indigo-900 via-slate-900 to-black rounded-[2rem] shadow-2xl p-7 text-white">
@@ -289,7 +291,7 @@ export default function Activities() {
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-bold flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-purple-300" />
-                  Badges สะสม
+                  {t.activitiesPage.badgesCollection}
                 </h3>
                 <div className="text-[10px] text-slate-400 font-bold tracking-widest uppercase">8 Unlocked</div>
               </div>
@@ -311,13 +313,13 @@ export default function Activities() {
               <div className="mt-8 pt-6 border-t border-white/10">
                 <div className="flex justify-between items-end mb-2">
                   <div>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Badge ถัดไป</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">{t.activitiesPage.nextBadge}</p>
                     <p className="text-sm font-bold text-purple-200">Activity Master</p>
                   </div>
                   <div className="text-xs font-bold text-white">60%</div>
                 </div>
                 <Progress value={60} className="h-2 bg-white/10" indicatorClassName="bg-gradient-to-r from-purple-400 to-indigo-400" />
-                <p className="text-[10px] text-slate-500 mt-2 text-center font-medium">เข้าร่วมกิจกรรมให้ครบ 10 ครั้งเพื่อปลดล็อค</p>
+                <p className="text-[10px] text-slate-500 mt-2 text-center font-medium">{t.activitiesPage.joinToUnlock}</p>
               </div>
             </div>
           </div>

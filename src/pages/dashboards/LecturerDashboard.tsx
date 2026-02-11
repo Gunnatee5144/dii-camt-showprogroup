@@ -6,6 +6,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,6 +32,7 @@ const itemVariants = {
 };
 
 export default function LecturerDashboard() {
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const lecturer = mockLecturer;
   const appointments = getLecturerAppointments(lecturer.id);
@@ -63,7 +65,7 @@ export default function LecturerDashboard() {
             }`}</span>
         </motion.div>
         <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          สวัสดี, <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">{lecturer.nameThai} 👨‍🏫</span>
+          {t.lecturerDashboard.hello} <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">{lecturer.nameThai} 👨‍🏫</span>
         </motion.h1>
       </div>
 
@@ -71,13 +73,13 @@ export default function LecturerDashboard() {
         <Link to="/schedule">
           <Button variant="outline">
             <Calendar className="w-4 h-4 mr-2" />
-            จัดการตารางสอน
+            {t.lecturerDashboard.manageSchedule}
           </Button>
         </Link>
         <Link to="/messages">
           <Button className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg shadow-emerald-200/50">
             <MessageSquare className="w-4 h-4 mr-2" />
-            ข้อความ
+            {t.lecturerDashboard.messages}
           </Button>
         </Link>
       </motion.div>
@@ -95,10 +97,10 @@ export default function LecturerDashboard() {
               <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                 <BookOpen className="w-5 h-5" />
               </div>
-              <span className="font-medium text-white/90">รายวิชาที่สอน</span>
+              <span className="font-medium text-white/90">{t.lecturerDashboard.coursesTaught}</span>
             </div>
             <div className="text-4xl font-bold">{lecturerCourses.length}</div>
-            <div className="text-sm text-white/80 mt-2">วิชาในเทอมนี้</div>
+            <div className="text-sm text-white/80 mt-2">{t.lecturerDashboard.coursesThisSem}</div>
           </div>
         </motion.div>
 
@@ -113,10 +115,10 @@ export default function LecturerDashboard() {
               <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                 <Users className="w-5 h-5" />
               </div>
-              <span className="font-medium text-white/90">จำนวนนักศึกษา</span>
+              <span className="font-medium text-white/90">{t.lecturerDashboard.totalStudents}</span>
             </div>
             <div className="text-4xl font-bold">{totalStudents}</div>
-            <div className="text-sm text-white/80 mt-2">นักศึกษาทั้งหมด</div>
+            <div className="text-sm text-white/80 mt-2">{t.lecturerDashboard.allStudents}</div>
           </div>
         </motion.div>
 
@@ -134,11 +136,11 @@ export default function LecturerDashboard() {
               <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                 <Award className="w-5 h-5" />
               </div>
-              <span className="font-medium text-white/90">นักศึกษาในที่ปรึกษา</span>
+              <span className="font-medium text-white/90">{t.lecturerDashboard.advisees}</span>
             </div>
             <div className="text-4xl font-bold">{adviseesList.length}/{lecturer.maxAdvisees}</div>
             <div className="text-sm text-white/80 mt-2">
-              {atRiskAdvisees.length > 0 ? `เสี่ยง ${atRiskAdvisees.length} คน` : 'ทุกคนปกติ'}
+              {atRiskAdvisees.length > 0 ? `${t.lecturerDashboard.atRisk} ${atRiskAdvisees.length} ${t.lecturerDashboard.people}` : t.lecturerDashboard.allNormal}
             </div>
           </div>
         </motion.div>
@@ -157,10 +159,10 @@ export default function LecturerDashboard() {
               <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                 <Clock className="w-5 h-5" />
               </div>
-              <span className="font-medium text-white/90">ภาระงาน</span>
+              <span className="font-medium text-white/90">{t.lecturerDashboard.workload}</span>
             </div>
             <div className="text-3xl font-bold">{lecturer.teachingHours}/{lecturer.maxTeachingHours} ชม.</div>
-            <div className="text-sm text-white/80 mt-2">{workloadPercentage.toFixed(0)}% ของเวลาทำงาน</div>
+            <div className="text-sm text-white/80 mt-2">{workloadPercentage.toFixed(0)}% {t.lecturerDashboard.ofWorkTime}</div>
           </div>
         </motion.div>
       </motion.div>
@@ -169,11 +171,11 @@ export default function LecturerDashboard() {
       <motion.div variants={itemVariants}>
         <Tabs defaultValue="courses" className="space-y-4">
           <TabsList className="grid w-full grid-cols-5 lg:w-auto">
-            <TabsTrigger value="courses">รายวิชา</TabsTrigger>
-            <TabsTrigger value="students">นักศึกษา</TabsTrigger>
-            <TabsTrigger value="advisees">ที่ปรึกษา</TabsTrigger>
-            <TabsTrigger value="grades">เกรด</TabsTrigger>
-            <TabsTrigger value="schedule">ตารางสอน</TabsTrigger>
+            <TabsTrigger value="courses">{t.lecturerDashboard.coursesTab}</TabsTrigger>
+            <TabsTrigger value="students">{t.lecturerDashboard.studentsTab}</TabsTrigger>
+            <TabsTrigger value="advisees">{t.lecturerDashboard.adviseesTab}</TabsTrigger>
+            <TabsTrigger value="grades">{t.lecturerDashboard.gradesTab}</TabsTrigger>
+            <TabsTrigger value="schedule">{t.lecturerDashboard.scheduleTab}</TabsTrigger>
           </TabsList>
 
           {/* Courses Tab */}
@@ -183,7 +185,7 @@ export default function LecturerDashboard() {
               <div className="lg:col-span-2 space-y-4">
                 <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                   <CardHeader>
-                    <CardTitle>รายวิชาที่สอน</CardTitle>
+                    <CardTitle>{t.lecturerDashboard.courseList}</CardTitle>
                     <CardDescription>เทอม 1/2568 • {lecturerCourses.length} วิชา</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -193,7 +195,7 @@ export default function LecturerDashboard() {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <h3 className="font-semibold text-lg">{course.code}</h3>
-                              <Badge variant="secondary">{course.credits} หน่วยกิต</Badge>
+                              <Badge variant="secondary">{course.credits} {t.lecturerDashboard.credits}</Badge>
                             </div>
                             <p className="text-gray-600">{course.nameThai}</p>
                           </div>
@@ -204,7 +206,7 @@ export default function LecturerDashboard() {
                             <div className="text-2xl font-bold text-blue-600">
                               {course.enrolledStudents.length}
                             </div>
-                            <div className="text-xs text-gray-600">นักศึกษา</div>
+                            <div className="text-xs text-gray-600">{t.lecturerDashboard.students}</div>
                           </div>
                           <div className="text-center">
                             <div className="text-2xl font-bold text-green-600">
@@ -216,18 +218,18 @@ export default function LecturerDashboard() {
                             <div className="text-2xl font-bold text-purple-600">
                               {course.assignments?.length || 0}
                             </div>
-                            <div className="text-xs text-gray-600">งานที่มอบหมาย</div>
+                            <div className="text-xs text-gray-600">{t.lecturerDashboard.assignments}</div>
                           </div>
                         </div>
 
                         <div className="flex gap-2 pt-2">
                           <Button size="sm" variant="outline" className="flex-1" onClick={() => navigate('/courses')}>
                             <FileText className="w-4 h-4 mr-2" />
-                            จัดการวิชา
+                            {t.lecturerDashboard.manageCourse}
                           </Button>
                           <Button size="sm" variant="outline" className="flex-1" onClick={() => navigate('/students')}>
                             <Users className="w-4 h-4 mr-2" />
-                            ดูนักศึกษา
+                            {t.lecturerDashboard.viewStudents}
                           </Button>
                         </div>
                       </div>
@@ -241,19 +243,19 @@ export default function LecturerDashboard() {
                 {/* Workload */}
                 <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                   <CardHeader>
-                    <CardTitle className="text-sm">ภาระงานสอน</CardTitle>
+                    <CardTitle className="text-sm">{t.lecturerDashboard.teachingWorkload}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm">ชั่วโมงสอน</span>
+                        <span className="text-sm">{t.lecturerDashboard.teachingHours}</span>
                         <span className="text-sm font-semibold">
                           {lecturer.teachingHours}/{lecturer.maxTeachingHours} ชม.
                         </span>
                       </div>
                       <Progress value={workloadPercentage} className="h-2" />
                       <p className="text-xs text-gray-500 mt-2">
-                        {workloadPercentage < 80 ? 'ภาระงานปกติ' : 'ภาระงานใกล้เต็ม'}
+                        {workloadPercentage < 80 ? t.lecturerDashboard.workloadNormal : t.lecturerDashboard.workloadHigh}
                       </p>
                     </div>
                   </CardContent>
@@ -263,8 +265,8 @@ export default function LecturerDashboard() {
                 <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-sm">นัดหมายที่กำลังมาถึง</CardTitle>
-                      <Button variant="ghost" size="sm">ดูทั้งหมด</Button>
+                      <CardTitle className="text-sm">{t.lecturerDashboard.upcomingAppointments}</CardTitle>
+                      <Button variant="ghost" size="sm">{t.lecturerDashboard.viewAll}</Button>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
@@ -281,7 +283,7 @@ export default function LecturerDashboard() {
                       ))
                     ) : (
                       <p className="text-sm text-gray-500 text-center py-4">
-                        ไม่มีนัดหมาย
+                        {t.lecturerDashboard.noAppointments}
                       </p>
                     )}
                   </CardContent>
@@ -290,7 +292,7 @@ export default function LecturerDashboard() {
                 {/* Office Hours */}
                 <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                   <CardHeader>
-                    <CardTitle className="text-sm">เวลาให้คำปรึกษา</CardTitle>
+                    <CardTitle className="text-sm">{t.lecturerDashboard.consultHours}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
                     {lecturer.officeHours.map(hour => (
@@ -309,8 +311,8 @@ export default function LecturerDashboard() {
           <TabsContent value="students">
             <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
               <CardHeader>
-                <CardTitle>นักศึกษาทั้งหมด</CardTitle>
-                <CardDescription>นักศึกษาในรายวิชาที่สอน</CardDescription>
+                <CardTitle>{t.lecturerDashboard.allStudentsInCourses}</CardTitle>
+                <CardDescription>{t.lecturerDashboard.studentsInCourses}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -337,7 +339,7 @@ export default function LecturerDashboard() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <Badge variant="secondary">GPA {student.gpa.toFixed(2)}</Badge>
-                                <Button size="sm" variant="ghost">ดูข้อมูล</Button>
+                                <Button size="sm" variant="ghost">{t.lecturerDashboard.viewData}</Button>
                               </div>
                             </div>
                           ))}
@@ -357,7 +359,7 @@ export default function LecturerDashboard() {
                 <CardHeader>
                   <CardTitle className="text-red-900 flex items-center gap-2">
                     <AlertCircle className="w-5 h-5" />
-                    นักศึกษาเสี่ยง ({atRiskAdvisees.length} คน)
+                    {t.lecturerDashboard.atRiskStudents} ({atRiskAdvisees.length} {t.lecturerDashboard.people})
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -376,18 +378,18 @@ export default function LecturerDashboard() {
                           <div className="font-semibold text-red-600">{student.gpa.toFixed(2)}</div>
                         </div>
                         <div>
-                          <div className="text-xs text-gray-600">หน่วยกิต</div>
+                          <div className="text-xs text-gray-600">{t.lecturerDashboard.credits}</div>
                           <div className="font-semibold">{student.earnedCredits}/{student.totalCredits}</div>
                         </div>
                         <div>
-                          <div className="text-xs text-gray-600">ชั้นปี</div>
+                          <div className="text-xs text-gray-600">{t.lecturerDashboard.year}</div>
                           <div className="font-semibold">{student.year}</div>
                         </div>
                       </div>
                       <Link to={`/students`}>
                         <Button size="sm" className="w-full">
                           <MessageSquare className="w-4 h-4 mr-2" />
-                          ติดต่อและให้คำปรึกษา
+                          {t.lecturerDashboard.contactConsult}
                         </Button>
                       </Link>
                     </div>
@@ -398,8 +400,8 @@ export default function LecturerDashboard() {
 
             <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
               <CardHeader>
-                <CardTitle>นักศึกษาในที่ปรึกษาทั้งหมด</CardTitle>
-                <CardDescription>{adviseesList.length} คน</CardDescription>
+                <CardTitle>{t.lecturerDashboard.allAdvisees}</CardTitle>
+                <CardDescription>{adviseesList.length} {t.lecturerDashboard.people}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-3">
@@ -413,17 +415,17 @@ export default function LecturerDashboard() {
                         </div>
                         <div>
                           <h3 className="font-semibold">{student.nameThai}</h3>
-                          <p className="text-sm text-gray-600">{student.studentId} • ชั้นปีที่ {student.year}</p>
+                          <p className="text-sm text-gray-600">{student.studentId} • {t.lecturerDashboard.yearLevel} {student.year}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="text-right">
                           <div className="text-sm font-semibold">GPA {student.gpa.toFixed(2)}</div>
                           <Badge variant={student.academicStatus === 'normal' ? 'default' : 'destructive'}>
-                            {student.academicStatus === 'normal' ? 'ปกติ' : 'เสี่ยง'}
+                            {student.academicStatus === 'normal' ? t.lecturerDashboard.normal : t.lecturerDashboard.risk}
                           </Badge>
                         </div>
-                        <Button size="sm" variant="outline">ดูข้อมูล</Button>
+                        <Button size="sm" variant="outline">{t.lecturerDashboard.viewData}</Button>
                       </div>
                     </div>
                   ))}
@@ -436,8 +438,8 @@ export default function LecturerDashboard() {
           <TabsContent value="grades">
             <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
               <CardHeader>
-                <CardTitle>การจัดการเกรด</CardTitle>
-                <CardDescription>บันทึกและแก้ไขเกรดนักศึกษา</CardDescription>
+                <CardTitle>{t.lecturerDashboard.gradeManagement}</CardTitle>
+                <CardDescription>{t.lecturerDashboard.gradeManagementDesc}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -448,11 +450,11 @@ export default function LecturerDashboard() {
                         <div className="flex items-center justify-between mb-4">
                           <div>
                             <h3 className="font-semibold">{course.code} - {course.nameThai}</h3>
-                            <p className="text-sm text-gray-600">{courseGrades.length} คะแนน</p>
+                            <p className="text-sm text-gray-600">{courseGrades.length} {t.lecturerDashboard.points}</p>
                           </div>
                           <Button size="sm">
                             <FileText className="w-4 h-4 mr-2" />
-                            บันทึกเกรด
+                            {t.lecturerDashboard.saveGrade}
                           </Button>
                         </div>
                         {courseGrades.length > 0 && (
@@ -464,7 +466,7 @@ export default function LecturerDashboard() {
                                   <span className="text-sm">{student?.nameThai}</span>
                                   <div className="flex items-center gap-2">
                                     <Badge>{grade.letterGrade}</Badge>
-                                    <span className="text-sm text-gray-600">{grade.total?.toFixed(0)} คะแนน</span>
+                                    <span className="text-sm text-gray-600">{grade.total?.toFixed(0)} {t.lecturerDashboard.points}</span>
                                   </div>
                                 </div>
                               );
@@ -483,8 +485,8 @@ export default function LecturerDashboard() {
           <TabsContent value="schedule">
             <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
               <CardHeader>
-                <CardTitle>ตารางสอน</CardTitle>
-                <CardDescription>ตารางสอนประจำสัปดาห์</CardDescription>
+                <CardTitle>{t.lecturerDashboard.weeklySchedule}</CardTitle>
+                <CardDescription>{t.lecturerDashboard.weeklyScheduleDesc}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -500,7 +502,7 @@ export default function LecturerDashboard() {
                             </div>
                             <div className="flex items-center gap-4 text-sm text-gray-600">
                               <span>{schedule.startTime} - {schedule.endTime}</span>
-                              <span>ห้อง {schedule.room}</span>
+                              <span>{t.lecturerDashboard.room} {schedule.room}</span>
                               <Badge variant="secondary">{schedule.type}</Badge>
                             </div>
                           </div>

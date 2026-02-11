@@ -24,6 +24,8 @@ import {
   Clock,
   Building,
   Command,
+  Swords,
+  Target,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -60,6 +62,7 @@ const getNavItems = (role: UserRole, nav: Record<string, string>): NavItem[] => 
         { icon: FileText, label: nav.portfolio, href: '/portfolio' },
         { icon: Briefcase, label: nav.internships, href: '/internships' },
         { icon: ClipboardList, label: nav.requests, href: '/requests' },
+        { icon: Swords, label: nav.training, href: '/training' },
         { icon: MessageSquare, label: nav.messages, href: '/messages' },
         { icon: Settings, label: nav.settings, href: '/settings' },
       ];
@@ -96,6 +99,7 @@ const getNavItems = (role: UserRole, nav: Record<string, string>): NavItem[] => 
       return [
         ...commonItems,
         { icon: Briefcase, label: nav.jobPostings, href: '/job-postings' },
+        { icon: Target, label: nav.skillsRequirement, href: '/skills-requirement' },
         { icon: Search, label: nav.searchStudents, href: '/student-profiles' },
         { icon: Users, label: nav.applicants, href: '/applicants' },
         { icon: UserCog, label: nav.internTracking, href: '/intern-tracking' },

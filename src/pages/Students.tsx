@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { 
   Users, Search, Filter, GraduationCap, AlertTriangle, 
   Eye, Mail, TrendingUp, ChevronRight, Award, BookOpen
@@ -24,6 +25,7 @@ const itemVariants = {
 };
 
 export default function Students() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = React.useState('');
   const [yearFilter, setYearFilter] = React.useState('all');
@@ -44,10 +46,10 @@ export default function Students() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'normal': return <Badge className="bg-emerald-100 text-emerald-700">ปกติ</Badge>;
-      case 'probation': return <Badge className="bg-orange-100 text-orange-700">ทดลอง</Badge>;
-      case 'risk': return <Badge className="bg-red-100 text-red-700">เสี่ยง</Badge>;
-      case 'dropped': return <Badge className="bg-gray-100 text-gray-700">พ้นสภาพ</Badge>;
+      case 'normal': return <Badge className="bg-emerald-100 text-emerald-700">{t.studentsPage.normal}</Badge>;
+      case 'probation': return <Badge className="bg-orange-100 text-orange-700">{t.studentsPage.probation}</Badge>;
+      case 'risk': return <Badge className="bg-red-100 text-red-700">{t.studentsPage.risk}</Badge>;
+      case 'dropped': return <Badge className="bg-gray-100 text-gray-700">{t.studentsPage.dismissed}</Badge>;
       default: return <Badge>{status}</Badge>;
     }
   };
@@ -62,10 +64,10 @@ export default function Students() {
       <div>
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
               <Users className="w-4 h-4 text-blue-500" />
-              <span>{`ทั้งหมด ${mockStudents.length} คน • เสี่ยง ${atRiskCount} คน`}</span>
+              <span>{`${t.studentsPage.totalStudents} ${mockStudents.length} • ${t.studentsPage.atRisk} ${atRiskCount}`}</span>
           </motion.div>
           <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-              จัดการ<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">นักศึกษา</span>
+              {t.studentsPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">{t.studentsPage.titleHighlight}</span>
           </motion.h1>
       </div>
 
@@ -81,7 +83,7 @@ export default function Students() {
               <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                 <Users className="w-5 h-5" />
               </div>
-              <span className="font-medium text-white/90">นักศึกษาทั้งหมด</span>
+              <span className="font-medium text-white/90">{t.studentsPage.totalStudents}</span>
             </div>
             <div className="text-4xl font-bold">{mockStudents.length}</div>
           </div>
@@ -97,7 +99,7 @@ export default function Students() {
               <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                 <TrendingUp className="w-5 h-5" />
               </div>
-              <span className="font-medium text-white/90">GPA เฉลี่ย</span>
+              <span className="font-medium text-white/90">{t.studentsPage.avgGPA}</span>
             </div>
             <div className="text-4xl font-bold">{avgGPA}</div>
           </div>
@@ -113,7 +115,7 @@ export default function Students() {
               <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                 <AlertTriangle className="w-5 h-5" />
               </div>
-              <span className="font-medium text-white/90">นักศึกษาเสี่ยง</span>
+              <span className="font-medium text-white/90">{t.studentsPage.atRisk}</span>
             </div>
             <div className="text-4xl font-bold">{atRiskCount}</div>
           </div>
@@ -129,7 +131,7 @@ export default function Students() {
               <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                 <Award className="w-5 h-5" />
               </div>
-              <span className="font-medium text-white/90">สถานะปกติ</span>
+              <span className="font-medium text-white/90">{t.studentsPage.normalStatus}</span>
             </div>
             <div className="text-4xl font-bold">{mockStudents.filter(s => s.academicStatus === 'normal').length}</div>
           </div>
@@ -141,7 +143,7 @@ export default function Students() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <Input
-            placeholder="ค้นหาชื่อ, รหัสนักศึกษา..."
+            placeholder={t.studentsPage.searchPlaceholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -149,25 +151,25 @@ export default function Students() {
         </div>
         <Select value={yearFilter} onValueChange={setYearFilter}>
           <SelectTrigger className="w-full sm:w-40">
-            <SelectValue placeholder="ชั้นปี" />
+            <SelectValue placeholder={t.studentsPage.yearFilter} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">ทุกชั้นปี</SelectItem>
-            <SelectItem value="1">ชั้นปี 1</SelectItem>
-            <SelectItem value="2">ชั้นปี 2</SelectItem>
-            <SelectItem value="3">ชั้นปี 3</SelectItem>
-            <SelectItem value="4">ชั้นปี 4</SelectItem>
+            <SelectItem value="all">{t.studentsPage.allYears}</SelectItem>
+            <SelectItem value="1">{t.studentsPage.year} 1</SelectItem>
+            <SelectItem value="2">{t.studentsPage.year} 2</SelectItem>
+            <SelectItem value="3">{t.studentsPage.year} 3</SelectItem>
+            <SelectItem value="4">{t.studentsPage.year} 4</SelectItem>
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-full sm:w-40">
-            <SelectValue placeholder="สถานะ" />
+            <SelectValue placeholder={t.studentsPage.statusFilter} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">ทุกสถานะ</SelectItem>
-            <SelectItem value="normal">ปกติ</SelectItem>
-            <SelectItem value="probation">ทดลอง</SelectItem>
-            <SelectItem value="risk">เสี่ยง</SelectItem>
+            <SelectItem value="all">{t.studentsPage.allStatus}</SelectItem>
+            <SelectItem value="normal">{t.studentsPage.normal}</SelectItem>
+            <SelectItem value="probation">{t.studentsPage.probation}</SelectItem>
+            <SelectItem value="risk">{t.studentsPage.risk}</SelectItem>
           </SelectContent>
         </Select>
       </motion.div>
@@ -178,9 +180,9 @@ export default function Students() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <GraduationCap className="w-5 h-5" />
-              รายชื่อนักศึกษา
+              {t.studentsPage.studentList}
             </CardTitle>
-            <CardDescription>แสดง {filteredStudents.length} จาก {mockStudents.length} คน</CardDescription>
+            <CardDescription>{t.studentsPage.showing} {filteredStudents.length} {t.studentsPage.fromTotal} {mockStudents.length}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -203,7 +205,7 @@ export default function Students() {
                       </div>
                       <div className="text-sm text-gray-600">{student.studentId}</div>
                       <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="outline" className="text-xs">ปี {student.year}</Badge>
+                        <Badge variant="outline" className="text-xs">{t.studentsPage.year} {student.year}</Badge>
                         <span className="text-xs text-gray-500">{student.major}</span>
                       </div>
                     </div>
@@ -211,7 +213,7 @@ export default function Students() {
                   <div className="flex items-center gap-4">
                     <div className="text-right hidden sm:block">
                       <div className="text-sm font-semibold">GPA {student.gpa.toFixed(2)}</div>
-                      <div className="text-xs text-gray-500">{student.earnedCredits}/{student.totalCredits} หน่วยกิต</div>
+                      <div className="text-xs text-gray-500">{student.earnedCredits}/{student.totalCredits} {t.studentsPage.credits}</div>
                     </div>
                     {getStatusBadge(student.academicStatus)}
                     <div className="flex gap-1">

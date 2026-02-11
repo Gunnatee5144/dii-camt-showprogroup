@@ -1,5 +1,6 @@
 ﻿import React from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { PieChart, TrendingUp, TrendingDown, DollarSign, FileText, CreditCard, AlertCircle, Plus, Wallet, Receipt } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,7 @@ const itemVariants = {
 };
 
 export default function Budget() {
+    const { t } = useLanguage();
     const transactions = [
         { id: 1, type: 'expense', category: 'วัสดุสำนักงาน', amount: 5400, description: 'สั่งซื้อกระดาษ A4 40 รีม', date: '2026-03-15', status: 'approved' },
         { id: 2, type: 'expense', category: 'ครุภัณฑ์', amount: 25900, description: 'โปรเจคเตอร์ห้อง DII-302', date: '2026-03-12', status: 'pending' },
@@ -29,19 +31,19 @@ export default function Budget() {
             <div>
                 <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
                     <Wallet className="w-4 h-4 text-purple-500" />
-                    <span>ระบบงบประมาณและพัสดุ</span>
+                    <span>{t.budgetPage.subtitle}</span>
                 </motion.div>
                 <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                    งบประมาณ<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-violet-600">และพัสดุ</span>
+                    {t.budgetPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-violet-600">{t.budgetPage.titleHighlight}</span>
                 </motion.h1>
             </div>
 
             {/* Stat Cards */}
             <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
-                    { icon: DollarSign, label: 'งบประมาณคงเหลือ', value: '฿456,700', sub: 'จากทั้งหมด ฿1,000,000', gradient: 'from-emerald-500 to-teal-500', shadow: 'shadow-emerald-200' },
-                    { icon: TrendingDown, label: 'รายจ่ายเดือนนี้', value: '฿43,300', sub: '+12.5% จากเดือนที่แล้ว', gradient: 'from-blue-500 to-indigo-500', shadow: 'shadow-blue-200' },
-                    { icon: Receipt, label: 'รายการรออนุมัติ', value: '3', sub: 'คำขอเบิกจ่าย', gradient: 'from-amber-500 to-orange-500', shadow: 'shadow-amber-200' },
+                    { icon: DollarSign, label: t.budgetPage.remaining, value: '฿456,700', sub: `${t.budgetPage.fromTotal} ฿1,000,000`, gradient: 'from-emerald-500 to-teal-500', shadow: 'shadow-emerald-200' },
+                    { icon: TrendingDown, label: t.budgetPage.monthlyExpense, value: '฿43,300', sub: t.budgetPage.increaseFromLast, gradient: 'from-blue-500 to-indigo-500', shadow: 'shadow-blue-200' },
+                    { icon: Receipt, label: t.budgetPage.pendingApproval, value: '3', sub: t.budgetPage.disbursementReqs, gradient: 'from-amber-500 to-orange-500', shadow: 'shadow-amber-200' },
                 ].map((stat, i) => (
                     <motion.div key={i} whileHover={{ scale: 1.02 }} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradient} p-6 text-white shadow-xl ${stat.shadow}`}>
                         <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
@@ -62,14 +64,14 @@ export default function Budget() {
                 {/* Budget Progress - 2 cols */}
                 <motion.div variants={itemVariants} className="lg:col-span-2 bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">
                     <h3 className="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
-                        <PieChart className="w-5 h-5 text-purple-500" /> สัดส่วนรายจ่าย
+                        <PieChart className="w-5 h-5 text-purple-500" /> {t.budgetPage.expenseRatio}
                     </h3>
                     <div className="space-y-4">
                         {[
-                            { label: 'ครุภัณฑ์คอมพิวเตอร์', percent: 45, color: 'bg-blue-500' },
-                            { label: 'วัสดุสำนักงาน', percent: 20, color: 'bg-emerald-500' },
-                            { label: 'ค่าจ้างบริการ', percent: 15, color: 'bg-orange-500' },
-                            { label: 'อื่นๆ', percent: 20, color: 'bg-slate-400' },
+                            { label: t.budgetPage.computerEquipment, percent: 45, color: 'bg-blue-500' },
+                            { label: t.budgetPage.officeSupplies, percent: 20, color: 'bg-emerald-500' },
+                            { label: t.budgetPage.serviceCharges, percent: 15, color: 'bg-orange-500' },
+                            { label: t.budgetPage.others, percent: 20, color: 'bg-slate-400' },
                         ].map((item, idx) => (
                             <div key={idx}>
                                 <div className="flex justify-between text-sm mb-1.5">
@@ -84,7 +86,7 @@ export default function Budget() {
                     </div>
                     <div className="mt-6 pt-4 border-t border-slate-100">
                         <div className="flex justify-between items-center text-sm">
-                            <span className="text-slate-500">งบประมาณใช้ไป</span>
+                            <span className="text-slate-500">{t.budgetPage.budgetUsed}</span>
                             <span className="font-bold text-slate-800">54.33%</span>
                         </div>
                         <div className="h-3 bg-slate-100 rounded-full overflow-hidden mt-2">
@@ -97,31 +99,31 @@ export default function Budget() {
                 <motion.div variants={itemVariants} className="lg:col-span-3 bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">
                     <div className="flex justify-between items-center mb-5">
                         <div>
-                            <h3 className="text-lg font-bold text-slate-800">รายการล่าสุด</h3>
-                            <p className="text-sm text-slate-500">ประวัติการเบิกจ่ายและการอนุมัติ</p>
+                            <h3 className="text-lg font-bold text-slate-800">{t.budgetPage.recentItems}</h3>
+                            <p className="text-sm text-slate-500">{t.budgetPage.recentDesc}</p>
                         </div>
                         <Button className="rounded-xl bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-200">
-                            <Plus className="w-4 h-4 mr-2" /> ขอเบิกงบ
+                            <Plus className="w-4 h-4 mr-2" /> {t.budgetPage.requestBudget}
                         </Button>
                     </div>
                     <div className="space-y-2">
-                        {transactions.map((t) => (
-                            <motion.div key={t.id} whileHover={{ x: 4 }} className="flex items-center justify-between p-4 rounded-2xl hover:bg-white border border-transparent hover:border-slate-100 hover:shadow-sm transition-all">
+                        {transactions.map((tx) => (
+                            <motion.div key={tx.id} whileHover={{ x: 4 }} className="flex items-center justify-between p-4 rounded-2xl hover:bg-white border border-transparent hover:border-slate-100 hover:shadow-sm transition-all">
                                 <div className="flex items-center gap-4">
-                                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${t.type === 'expense' ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-500'}`}>
-                                        {t.type === 'expense' ? <TrendingDown className="w-5 h-5" /> : <TrendingUp className="w-5 h-5" />}
+                                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${tx.type === 'expense' ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-500'}`}>
+                                        {tx.type === 'expense' ? <TrendingDown className="w-5 h-5" /> : <TrendingUp className="w-5 h-5" />}
                                     </div>
                                     <div>
-                                        <h4 className="font-semibold text-slate-800">{t.description}</h4>
-                                        <p className="text-sm text-slate-400">{t.category} • {t.date}</p>
+                                        <h4 className="font-semibold text-slate-800">{tx.description}</h4>
+                                        <p className="text-sm text-slate-400">{tx.category} • {tx.date}</p>
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <div className={`font-bold ${t.type === 'expense' ? 'text-red-500' : 'text-emerald-500'}`}>
-                                        {t.type === 'expense' ? '-' : '+'}฿{t.amount.toLocaleString()}
+                                    <div className={`font-bold ${tx.type === 'expense' ? 'text-red-500' : 'text-emerald-500'}`}>
+                                        {tx.type === 'expense' ? '-' : '+'}฿{tx.amount.toLocaleString()}
                                     </div>
-                                    <Badge variant="outline" className={`text-xs mt-1 ${t.status === 'approved' ? 'border-emerald-200 text-emerald-600 bg-emerald-50' : 'border-amber-200 text-amber-600 bg-amber-50'}`}>
-                                        {t.status === 'approved' ? 'อนุมัติแล้ว' : 'รอตรวจสอบ'}
+                                    <Badge variant="outline" className={`text-xs mt-1 ${tx.status === 'approved' ? 'border-emerald-200 text-emerald-600 bg-emerald-50' : 'border-amber-200 text-amber-600 bg-amber-50'}`}>
+                                        {tx.status === 'approved' ? t.budgetPage.approved : t.budgetPage.pendingReview}
                                     </Badge>
                                 </div>
                             </motion.div>

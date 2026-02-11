@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileBox, FileText, Clock, CheckCircle, XCircle, Plus, Filter, Send,
@@ -29,7 +30,7 @@ const itemVariants = {
 const initialRequests = [
   {
     id: 1,
-    type: 'ลงทะเบียนเรียนเกิน',
+    type: 'Over-registration / ลงทะเบียนเรียนเกิน',
     title: 'ขอลงทะเบียนเรียนเกิน 22 หน่วยกิต',
     status: 'pending',
     step: 2,
@@ -41,7 +42,7 @@ const initialRequests = [
   },
   {
     id: 2,
-    type: 'ขอใบรับรอง',
+    type: 'Certificate Request / ขอใบรับรอง',
     title: 'ขอใบรับรองนักศึกษา (ภาษาอังกฤษ)',
     status: 'approved',
     step: 3,
@@ -53,7 +54,7 @@ const initialRequests = [
   },
   {
     id: 3,
-    type: 'ขอเปลี่ยนกลุ่ม',
+    type: 'Section Change / ขอเปลี่ยนกลุ่ม',
     title: 'ขอเปลี่ยนกลุ่มเรียน DII345',
     status: 'rejected',
     step: 1,
@@ -65,16 +66,17 @@ const initialRequests = [
   },
 ];
 
-const requestTypes = [
-  { id: 'reg_over', name: 'ลงทะเบียนเรียนเกิน', icon: <FileText className="w-5 h-5" />, color: 'bg-blue-50 text-blue-600' },
-  { id: 'cert', name: 'ขอใบรับรอง', icon: <FileBox className="w-5 h-5" />, color: 'bg-purple-50 text-purple-600' },
-  { id: 'leave', name: 'ลาพักการศึกษา', icon: <Clock className="w-5 h-5" />, color: 'bg-orange-50 text-orange-600' },
-  { id: 'resign', name: 'ลาออก', icon: <XCircle className="w-5 h-5" />, color: 'bg-red-50 text-red-600' },
-  { id: 'general', name: 'คำร้องทั่วไป', icon: <FileQuestion className="w-5 h-5" />, color: 'bg-slate-50 text-slate-600' },
-];
-
 export default function Requests() {
   const { user } = useAuth();
+  const { t, language } = useLanguage();
+
+  const requestTypes = [
+    { id: 'reg_over', name: language === 'en' ? 'Over-registration' : 'ลงทะเบียนเรียนเกิน', icon: <FileText className="w-5 h-5" />, color: 'bg-blue-50 text-blue-600' },
+    { id: 'cert', name: language === 'en' ? 'Certificate Request' : 'ขอใบรับรอง', icon: <FileBox className="w-5 h-5" />, color: 'bg-purple-50 text-purple-600' },
+    { id: 'leave', name: language === 'en' ? 'Leave of Absence' : 'ลาพักการศึกษา', icon: <Clock className="w-5 h-5" />, color: 'bg-orange-50 text-orange-600' },
+    { id: 'resign', name: language === 'en' ? 'Resignation' : 'ลาออก', icon: <XCircle className="w-5 h-5" />, color: 'bg-red-50 text-red-600' },
+    { id: 'general', name: language === 'en' ? 'General Request' : 'คำร้องทั่วไป', icon: <FileQuestion className="w-5 h-5" />, color: 'bg-slate-50 text-slate-600' },
+  ];
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [requests, setRequests] = React.useState(initialRequests);
   const [formData, setFormData] = React.useState({
@@ -85,7 +87,7 @@ export default function Requests() {
 
   const handleSubmit = () => {
     if (!formData.type || !formData.title || !formData.description) {
-      toast.error('กรุณากรอกข้อมูลให้ครบถ้วน');
+      toast.error(t.requestsPage.fillComplete);
       return;
     }
 
@@ -105,7 +107,7 @@ export default function Requests() {
     setRequests([newRequest, ...requests]);
     setIsDialogOpen(false);
     setFormData({ type: '', title: '', description: '' });
-    toast.success('ยื่นคำร้องเรียบร้อยแล้ว');
+    toast.success(t.requestsPage.submitSuccess);
   };
 
   const getStatusColor = (status: string) => {
@@ -126,9 +128,9 @@ export default function Requests() {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'approved': return 'อนุมัติแล้ว';
-      case 'rejected': return 'ไม่ผ่านการอนุมัติ';
-      default: return 'กำลังดำเนินการ';
+      case 'approved': return t.requestsPage.approved;
+      case 'rejected': return t.requestsPage.rejected;
+      default: return t.requestsPage.processing;
     }
   };
 
@@ -167,7 +169,7 @@ export default function Requests() {
             className="flex items-center gap-2 text-slate-500 font-medium mb-2"
           >
             <FileBox className="w-4 h-4 text-indigo-500" />
-            <span>ยื่นคำร้องออนไลน์</span>
+            <span>{t.requestsPage.subtitle}</span>
           </motion.div>
           <motion.h1
             className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight"
@@ -175,28 +177,28 @@ export default function Requests() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            คำร้อง<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">และฟอร์ม</span>
+            {t.requestsPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">{t.requestsPage.titleHighlight}</span>
           </motion.h1>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button size="lg" className="rounded-2xl px-8 bg-slate-900 text-white hover:bg-slate-800 shadow-xl shadow-slate-900/20 h-12 font-bold transform active:scale-95 transition-all">
-              <Plus className="w-5 h-5 mr-2" /> ยื่นคำร้องใหม่
+              <Plus className="w-5 h-5 mr-2" /> {t.requestsPage.newRequest}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px] bg-white/90 backdrop-blur-2xl p-0 overflow-hidden gap-0 rounded-[2.5rem] border-white/50 shadow-2xl">
             <div className="p-8 bg-slate-900 text-white relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-              <DialogTitle className="text-2xl font-bold tracking-tight">ยื่นคำร้องใหม่</DialogTitle>
-              <DialogDescription className="mt-1 text-slate-400">กรอกรายละเอียดเพื่อส่งคำร้องไปยังฝ่ายที่เกี่ยวข้อง</DialogDescription>
+              <DialogTitle className="text-2xl font-bold tracking-tight">{t.requestsPage.newRequest}</DialogTitle>
+              <DialogDescription className="mt-1 text-slate-400">{t.requestsPage.formDesc}</DialogDescription>
             </div>
 
             <div className="p-8 space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="type" className="text-slate-700 font-bold ml-1">ประเภทคำร้อง</Label>
+                <Label htmlFor="type" className="text-slate-700 font-bold ml-1">{t.requestsPage.requestType}</Label>
                 <Select onValueChange={(val) => setFormData({ ...formData, type: val })}>
                   <SelectTrigger className="rounded-2xl h-14 bg-slate-50/50 border-slate-100 focus:ring-indigo-500 text-base">
-                    <SelectValue placeholder="เลือกหัวข้อคำร้อง..." />
+                    <SelectValue placeholder={t.requestsPage.selectTopic} />
                   </SelectTrigger>
                   <SelectContent className="rounded-2xl border-slate-100 shadow-2xl p-2">
                     {requestTypes.map(t => (
@@ -212,10 +214,10 @@ export default function Requests() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="title" className="text-slate-700 font-bold ml-1">หัวข้อคำร้อง</Label>
+                <Label htmlFor="title" className="text-slate-700 font-bold ml-1">{t.requestsPage.requestTitle}</Label>
                 <Input
                   id="title"
-                  placeholder="เช่น ขอลงทะเบียนเรียนล่าช้า"
+                  placeholder={t.requestsPage.titlePlaceholder}
                   className="rounded-2xl h-14 bg-slate-50/50 border-slate-100 focus-visible:ring-indigo-500 text-base"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
@@ -223,10 +225,10 @@ export default function Requests() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="desc" className="text-slate-700 font-bold ml-1">รายละเอียดและเหตุผล</Label>
+                <Label htmlFor="desc" className="text-slate-700 font-bold ml-1">{t.requestsPage.requestDetails}</Label>
                 <Textarea
                   id="desc"
-                  placeholder="ระบุเหตุผลความจำเป็นและรายละเอียดเพิ่มเติม..."
+                  placeholder={t.requestsPage.detailsPlaceholder}
                   className="rounded-2xl min-h-[140px] bg-slate-50/50 border-slate-100 focus-visible:ring-indigo-500 resize-none text-base p-4"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -234,20 +236,20 @@ export default function Requests() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-700 font-bold ml-1">เอกสารแนบ</Label>
+                <Label className="text-slate-700 font-bold ml-1">{t.requestsPage.attachments}</Label>
                 <div className="border-2 border-dashed border-slate-200 rounded-[2rem] p-10 flex flex-col items-center justify-center text-slate-400 hover:bg-slate-50 hover:border-indigo-200 hover:text-indigo-400 transition-all cursor-pointer group">
                   <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-indigo-50 transition-all">
                     <Upload className="w-8 h-8 opacity-50 text-slate-400 group-hover:text-indigo-500" />
                   </div>
-                  <p className="font-bold">คลิกเพื่ออัพโหลด หรือลากไฟล์มาที่นี่</p>
-                  <p className="text-xs mt-1 opacity-60">รองรับ PDF, JPG, PNG (สูงสุด 10MB)</p>
+                  <p className="font-bold">{t.requestsPage.uploadClick}</p>
+                  <p className="text-xs mt-1 opacity-60">{t.requestsPage.fileSupport}</p>
                 </div>
               </div>
             </div>
 
             <DialogFooter className="p-8 bg-slate-50/50 border-t border-slate-100 gap-3 sm:gap-0">
-              <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="rounded-2xl h-14 px-8 font-bold text-slate-500 hover:bg-white">ยกเลิก</Button>
-              <Button onClick={handleSubmit} className="rounded-2xl h-14 px-12 bg-slate-900 text-white hover:bg-slate-800 font-bold shadow-xl shadow-slate-900/20 transform active:scale-95 transition-all">ส่งคำร้องทันที</Button>
+              <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="rounded-2xl h-14 px-8 font-bold text-slate-500 hover:bg-white">{t.common.cancel}</Button>
+              <Button onClick={handleSubmit} className="rounded-2xl h-14 px-12 bg-slate-900 text-white hover:bg-slate-800 font-bold shadow-xl shadow-slate-900/20 transform active:scale-95 transition-all">{t.requestsPage.submitNow}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -255,17 +257,17 @@ export default function Requests() {
 
       {/* Bento Stats for Requests */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard icon={Inbox} label="คำร้องทั้งหมด" value={requests.length} gradient="bg-gradient-to-br from-indigo-500 to-indigo-700" />
-        <StatCard icon={Hourglass} label="กำลังดำเนินการ" value={requests.filter(r => r.status === 'pending').length} gradient="bg-gradient-to-br from-amber-400 to-orange-500" />
-        <StatCard icon={CheckCircle} label="อนุมัติแล้ว" value={requests.filter(r => r.status === 'approved').length} gradient="bg-gradient-to-br from-emerald-400 to-teal-600" />
-        <StatCard icon={XCircle} label="ไม่ผ่านอนุมัติ" value={requests.filter(r => r.status === 'rejected').length} gradient="bg-gradient-to-br from-red-500 to-rose-600" />
+        <StatCard icon={Inbox} label={t.requestsPage.allRequests} value={requests.length} gradient="bg-gradient-to-br from-indigo-500 to-indigo-700" />
+        <StatCard icon={Hourglass} label={t.requestsPage.processingTab} value={requests.filter(r => r.status === 'pending').length} gradient="bg-gradient-to-br from-amber-400 to-orange-500" />
+        <StatCard icon={CheckCircle} label={t.requestsPage.approvedTab} value={requests.filter(r => r.status === 'approved').length} gradient="bg-gradient-to-br from-emerald-400 to-teal-600" />
+        <StatCard icon={XCircle} label={t.requestsPage.rejectedTab} value={requests.filter(r => r.status === 'rejected').length} gradient="bg-gradient-to-br from-red-500 to-rose-600" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-4">
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between px-2">
-            <h3 className="text-2xl font-bold text-slate-900 tracking-tight">ติดตามสถานะล่าสุด</h3>
-            <Button variant="ghost" className="text-slate-500 hover:text-indigo-600 font-bold">ดูประวัติทั้งหมด <ArrowRight className="w-4 h-4 ml-2" /></Button>
+            <h3 className="text-2xl font-bold text-slate-900 tracking-tight">{t.requestsPage.trackStatus}</h3>
+            <Button variant="ghost" className="text-slate-500 hover:text-indigo-600 font-bold">{t.requestsPage.viewHistory} <ArrowRight className="w-4 h-4 ml-2" /></Button>
           </div>
 
           <div className="space-y-5">
@@ -297,10 +299,10 @@ export default function Requests() {
                     {/* Premium Step Visualizer */}
                     <div className="bg-slate-50/80 p-6 rounded-[2rem] border border-slate-100 mb-6">
                       <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 px-2">
-                        <span className={req.step >= 1 ? 'text-indigo-600' : ''}>ยื่นคำร้อง</span>
-                        <span className={req.step >= 2 ? 'text-indigo-600' : ''}>เจ้าหน้าที่ตรวจสอบ</span>
-                        <span className={req.step >= 3 ? 'text-indigo-600' : ''}>พิจารณาผล</span>
-                        <span className={req.step >= 4 ? 'text-indigo-600' : ''}>เสร็จสมบูรณ์</span>
+                        <span className={req.step >= 1 ? 'text-indigo-600' : ''}>{t.requestsPage.step1}</span>
+                        <span className={req.step >= 2 ? 'text-indigo-600' : ''}>{t.requestsPage.step2}</span>
+                        <span className={req.step >= 3 ? 'text-indigo-600' : ''}>{t.requestsPage.step3}</span>
+                        <span className={req.step >= 4 ? 'text-indigo-600' : ''}>{t.requestsPage.step4}</span>
                       </div>
                       <div className="relative h-2.5 bg-slate-200/50 rounded-full overflow-hidden shadow-inner">
                         <motion.div
@@ -327,11 +329,11 @@ export default function Requests() {
 
                   <div className="flex md:flex-col gap-3 justify-center border-t md:border-t-0 md:border-l border-slate-100 pt-6 md:pt-0 md:pl-8 md:w-40 shrink-0">
                     <Button variant="outline" className="flex-1 rounded-2xl h-12 text-sm font-bold border-slate-200 hover:text-indigo-600 hover:border-indigo-200 hover:bg-slate-50 transition-all shadow-sm">
-                      รายละเอียด
+                      {t.common.details}
                     </Button>
                     {req.status === 'pending' && (
                       <Button variant="ghost" className="flex-1 rounded-2xl h-12 text-sm font-bold text-slate-400 hover:text-red-500 hover:bg-red-50">
-                        ยกเลิก
+                        {t.common.cancel}
                       </Button>
                     )}
                   </div>
@@ -367,9 +369,9 @@ export default function Requests() {
                 <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center">
                   <Info className="w-6 h-6 text-indigo-300" />
                 </div>
-                <h3 className="font-bold text-xl tracking-tight">ศูนย์บริการช่วยเหลือ</h3>
+                <h3 className="font-bold text-xl tracking-tight">{t.requestsPage.helpCenter}</h3>
               </div>
-              <p className="text-slate-400 text-sm mb-8 leading-relaxed font-medium">หากพบปัญหาในการยื่นคำร้อง หรือต้องการความช่วยเหลือเร่งด่วน สามารถติดต่อเราได้ที่นี่</p>
+              <p className="text-slate-400 text-sm mb-8 leading-relaxed font-medium">{t.requestsPage.helpDesc}</p>
 
               <div className="space-y-4">
                 <div className="flex items-center gap-4 p-4 rounded-3xl bg-white/5 backdrop-blur-sm border border-white/5 hover:bg-white/10 transition-colors cursor-pointer group">
@@ -392,24 +394,24 @@ export default function Requests() {
                 </div>
               </div>
 
-              <Button className="w-full mt-8 rounded-2xl h-14 bg-white text-slate-900 hover:bg-slate-100 font-bold transform active:scale-95 transition-all">แชทคุยกับเจ้าหน้าที่</Button>
+              <Button className="w-full mt-8 rounded-2xl h-14 bg-white text-slate-900 hover:bg-slate-100 font-bold transform active:scale-95 transition-all">{t.requestsPage.chatStaff}</Button>
             </div>
           </div>
 
           <div className="bg-white/40 backdrop-blur-xl rounded-[2.5rem] border border-white/60 shadow-sm p-8">
             <h3 className="font-black text-slate-900 mb-6 text-sm uppercase tracking-[0.15em] flex items-center gap-2">
               <div className="w-1 h-4 bg-indigo-500 rounded-full" />
-              คำถามที่พบบ่อย
+              {t.requestsPage.faq}
             </h3>
             <div className="space-y-2">
-              {['การขอใบรับรองใช้เวลากี่วัน?', 'ขั้นตอนการลาพักการศึกษา', 'ลืมรหัสผ่านทำอย่างไร?', 'ดาวน์โหลดแบบฟอร์ม ก.01'].map((q, i) => (
+              {(language === 'en' ? ['How many days does a certificate request take?', 'Steps for leave of absence', 'How to reset password?', 'Download form G.01'] : ['การขอใบรับรองใช้เวลากี่วัน?', 'ขั้นตอนการลาพักการศึกษา', 'ลืมรหัสผ่านทำอย่างไร?', 'ดาวน์โหลดแบบฟอร์ม ก.01']).map((q, i) => (
                 <div key={i} className="flex items-center justify-between p-4 hover:bg-white rounded-2xl cursor-pointer group transition-all shadow-none hover:shadow-md border border-transparent hover:border-slate-100">
                   <span className="text-sm text-slate-600 group-hover:text-slate-900 font-medium">{q}</span>
                   <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-500 transition-all group-hover:translate-x-1" />
                 </div>
               ))}
             </div>
-            <Button variant="ghost" className="w-full mt-4 text-xs font-bold text-slate-400 rounded-xl">ดูคำถามทั้งหมด</Button>
+            <Button variant="ghost" className="w-full mt-4 text-xs font-bold text-slate-400 rounded-xl">{t.requestsPage.viewAllFAQ}</Button>
           </div>
         </div>
       </div>

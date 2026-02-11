@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
     User, Calendar, GraduationCap, Sparkles, ChevronRight,
     Mail, Phone, MapPin, Award
@@ -75,15 +76,16 @@ const transformGradesForCard = () => {
 
 export default function PersonalDashboard() {
     const navigate = useNavigate();
+    const { t } = useLanguage();
     const student = mockStudent;
     const studentCourses = mockCourses.filter(c => c.enrolledStudents.includes(student.id));
     const courseGrades = transformGradesForCard();
 
     // Time-based greeting
     const hour = new Date().getHours();
-    const greeting = hour < 12 ? 'สวัสดีตอนเช้า' : hour < 18 ? 'สวัสดีตอนบ่าย' : 'สวัสดีตอนเย็น';
+    const greeting = hour < 12 ? t.personalDashboard.goodMorning : hour < 18 ? t.personalDashboard.goodAfternoon : t.personalDashboard.goodEvening;
 
-    const yearLabel = ['', 'ปี 1', 'ปี 2', 'ปี 3', 'ปี 4'][student.year] || `ปี ${student.year}`;
+    const yearLabel = ['', t.personalDashboard.year1, t.personalDashboard.year2, t.personalDashboard.year3, t.personalDashboard.year4][student.year] || `${t.personalDashboard.year1.split(' ')[0]} ${student.year}`;
 
     return (
         <motion.div
@@ -136,7 +138,7 @@ export default function PersonalDashboard() {
                             </div>
                             <div className="flex items-center gap-2">
                                 <Calendar className="w-4 h-4 text-emerald-400" />
-                                <span>ภาคเรียน {student.semester}/{student.academicYear}</span>
+                                <span>{t.personalDashboard.semester} {student.semester}/{student.academicYear}</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <Award className="w-4 h-4 text-yellow-400" />
@@ -146,14 +148,14 @@ export default function PersonalDashboard() {
 
                         <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mt-4">
                             <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30">
-                                รหัสนักศึกษา: {student.studentId}
+                                {t.personalDashboard.studentId} {student.studentId}
                             </Badge>
                             <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30">
                                 GPAX: {student.gpax.toFixed(2)}
                             </Badge>
                             {student.academicStatus === 'normal' && (
                                 <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
-                                    สถานะ: ปกติ
+                                    {t.personalDashboard.statusNormal}
                                 </Badge>
                             )}
                         </div>
@@ -166,14 +168,14 @@ export default function PersonalDashboard() {
                             className="bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl"
                         >
                             <User className="w-4 h-4 mr-2" />
-                            ดู Portfolio
+                            {t.common.details} Portfolio
                         </Button>
                         <Button
                             onClick={() => navigate('/settings')}
                             variant="ghost"
                             className="text-slate-300 hover:text-white hover:bg-white/10 rounded-xl"
                         >
-                            แก้ไขโปรไฟล์
+                            {t.personalDashboard.editProfile}
                         </Button>
                     </div>
                 </div>
@@ -188,14 +190,14 @@ export default function PersonalDashboard() {
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
                                 <Calendar className="w-5 h-5 text-purple-500" />
-                                ตารางเรียน
+                                {t.personalDashboard.schedule}
                             </h2>
                             <Button
                                 variant="ghost"
                                 onClick={() => navigate('/schedule')}
                                 className="text-slate-500 hover:text-purple-600"
                             >
-                                ดูเต็มจอ <ChevronRight className="w-4 h-4 ml-1" />
+                                {t.personalDashboard.fullscreen} <ChevronRight className="w-4 h-4 ml-1" />
                             </Button>
                         </div>
                         <div className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import {
   Briefcase, Award, Code, Download, Share2, Edit, Plus,
@@ -29,6 +30,7 @@ const itemVariants = {
 
 export default function Portfolio() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = React.useState('projects');
 
   const projects = getProjectsByStudentId(mockStudent.id);
@@ -91,7 +93,7 @@ export default function Portfolio() {
             className="flex items-center gap-2 text-slate-500 font-medium mb-2"
           >
             <Briefcase className="w-4 h-4 text-indigo-500" />
-            <span>โปรไฟล์และผลงาน</span>
+            <span>{t.portfolioPage.subtitle}</span>
           </motion.div>
           <motion.h1
             className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight"
@@ -104,7 +106,7 @@ export default function Portfolio() {
         </div>
         <div className="flex gap-3">
           <Button variant="outline" className="rounded-xl border-slate-200">
-            <Share2 className="w-4 h-4 mr-2" /> แชร์โปรไฟล์
+            <Share2 className="w-4 h-4 mr-2" /> {t.portfolioPage.shareProfile}
           </Button>
           <Button className="rounded-xl bg-slate-900 text-white hover:bg-slate-800 shadow-lg shadow-slate-900/20">
             <Download className="w-4 h-4 mr-2" /> ดาวน์โหลด CV
@@ -116,25 +118,25 @@ export default function Portfolio() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           icon={Code}
-          label="โปรเจกต์ทั้งหมด"
+          label={t.portfolioPage.totalProjects}
           value={projects.length}
           gradient="bg-gradient-to-br from-indigo-500 via-indigo-600 to-purple-600"
         />
         <StatCard
           icon={Award}
-          label="ความสำเร็จ"
+          label={t.portfolioPage.achievements}
           value={achievements.length}
           gradient="bg-gradient-to-br from-amber-400 via-orange-500 to-red-500"
         />
         <StatCard
           icon={Zap}
-          label="ทักษะ"
+          label={t.portfolioPage.skills}
           value={skills.length}
           gradient="bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-600"
         />
         <StatCard
           icon={Target}
-          label="ความสมบูรณ์"
+          label={t.portfolioPage.completeness}
           value="95%"
           gradient="bg-gradient-to-br from-blue-500 via-blue-600 to-cyan-600"
         />
@@ -148,13 +150,13 @@ export default function Portfolio() {
                 value="projects"
                 className="rounded-xl px-6 py-3 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-lg shadow-blue-500/10 transition-all duration-300 font-medium text-slate-600"
               >
-                ผลงาน ({projects.length})
+                {t.portfolioPage.works} ({projects.length})
               </TabsTrigger>
               <TabsTrigger
                 value="achievements"
                 className="rounded-xl px-6 py-3 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-lg shadow-blue-500/10 transition-all duration-300 font-medium text-slate-600"
               >
-                รางวัล & เกียรติบัตร
+                {t.portfolioPage.awards}
               </TabsTrigger>
             </TabsList>
 
@@ -179,7 +181,7 @@ export default function Portfolio() {
                       />
                       <div className="absolute bottom-4 left-4 right-4 z-20 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">
                         <Button size="sm" className="w-full bg-white text-slate-900 hover:bg-slate-100">
-                          ดูรายละเอียด
+                          {t.portfolioPage.viewDetails}
                         </Button>
                       </div>
                     </div>
@@ -212,7 +214,7 @@ export default function Portfolio() {
                   <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-4 group-hover:bg-white">
                     <Plus className="w-8 h-8" />
                   </div>
-                  <span className="font-bold">เพิ่มโปรเจกต์ใหม่</span>
+                  <span className="font-bold">{t.portfolioPage.addProject}</span>
                 </motion.div>
               </div>
             </TabsContent>
@@ -264,7 +266,7 @@ export default function Portfolio() {
 
               <div className="flex flex-wrap gap-2 justify-center mb-6">
                 <Badge variant="secondary" className="bg-slate-100">{mockStudent.major}</Badge>
-                <Badge variant="secondary" className="bg-slate-100">ชั้นปีที่ {mockStudent.year}</Badge>
+                <Badge variant="secondary" className="bg-slate-100">{t.portfolioPage.year} {mockStudent.year}</Badge>
               </div>
 
               <div className="flex gap-2 justify-center">
@@ -302,7 +304,7 @@ export default function Portfolio() {
           >
             <h3 className="font-bold text-lg mb-6 flex items-center gap-2">
               <Zap className="w-5 h-5 text-yellow-500" />
-              ทักษะ
+              {t.portfolioPage.skills}
             </h3>
             <div className="space-y-5">
               {skills.map((skill, idx) => (

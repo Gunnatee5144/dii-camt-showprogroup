@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Activity, CheckCircle, XCircle, Search, Calendar, Users, Star, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +16,7 @@ const itemVariants = {
 };
 
 export default function ActivitiesManagement() {
+    const { t } = useLanguage();
     return (
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8 pb-10">
             {/* Header */}
@@ -22,28 +24,28 @@ export default function ActivitiesManagement() {
                 <div>
                     <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
                         <Activity className="w-4 h-4 text-purple-500" />
-                        <span>ระบบจัดการกิจกรรม</span>
+                        <span>{t.activitiesManagementPage.subtitle}</span>
                     </motion.div>
                     <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                        จัดการ<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-violet-600">กิจกรรม</span>
+                        {t.activitiesManagementPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-violet-600">{t.activitiesManagementPage.titleHighlight}</span>
                     </motion.h1>
                     <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-slate-500 mt-2">
-                        อนุมัติและจัดการกิจกรรมนักศึกษา
+                        {t.activitiesManagementPage.desc}
                     </motion.p>
                 </div>
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative w-full md:w-72">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <Input placeholder="ค้นหากิจกรรม..." className="pl-10 rounded-xl bg-white/80 border-slate-200" />
+                    <Input placeholder={t.activitiesManagementPage.searchPlaceholder} className="pl-10 rounded-xl bg-white/80 border-slate-200" />
                 </motion.div>
             </div>
 
             {/* Stats */}
             <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                    { icon: Clock, label: 'รออนุมัติ', value: '2', gradient: 'from-amber-500 to-orange-500', shadow: 'shadow-amber-200' },
-                    { icon: CheckCircle, label: 'อนุมัติแล้ว', value: '15', gradient: 'from-emerald-500 to-teal-500', shadow: 'shadow-emerald-200' },
-                    { icon: Calendar, label: 'กำลังดำเนินการ', value: '3', gradient: 'from-blue-500 to-indigo-500', shadow: 'shadow-blue-200' },
-                    { icon: Star, label: 'เสร็จสิ้น', value: '12', gradient: 'from-purple-500 to-violet-500', shadow: 'shadow-purple-200' },
+                    { icon: Clock, label: t.activitiesManagementPage.pendingTab, value: '2', gradient: 'from-amber-500 to-orange-500', shadow: 'shadow-amber-200' },
+                    { icon: CheckCircle, label: t.activitiesManagementPage.approvedTab, value: '15', gradient: 'from-emerald-500 to-teal-500', shadow: 'shadow-emerald-200' },
+                    { icon: Calendar, label: t.activitiesManagementPage.inProgressTab, value: '3', gradient: 'from-blue-500 to-indigo-500', shadow: 'shadow-blue-200' },
+                    { icon: Star, label: t.activitiesManagementPage.completedTab, value: '12', gradient: 'from-purple-500 to-violet-500', shadow: 'shadow-purple-200' },
                 ].map((stat, i) => (
                     <motion.div key={i} whileHover={{ scale: 1.02 }} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradient} p-5 text-white shadow-xl ${stat.shadow}`}>
                         <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
@@ -64,9 +66,9 @@ export default function ActivitiesManagement() {
                 <motion.div variants={itemVariants} className="lg:col-span-3 bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">
                     <div className="mb-5">
                         <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                            <Clock className="w-5 h-5 text-amber-500" /> คำร้องขอกิจกรรมใหม่
+                            <Clock className="w-5 h-5 text-amber-500" /> {t.activitiesManagementPage.newActivityRequests}
                         </h3>
-                        <p className="text-sm text-slate-500">รายการที่รอการอนุมัติจากผู้ดูแล</p>
+                        <p className="text-sm text-slate-500">{t.activitiesManagementPage.pendingDesc}</p>
                     </div>
                     <div className="space-y-3">
                         {[
@@ -83,16 +85,16 @@ export default function ActivitiesManagement() {
                                             <h4 className="font-bold text-lg text-slate-800">{act.title}</h4>
                                             <p className="text-sm text-slate-500 mt-0.5">{act.org} • {act.date}</p>
                                             <div className="flex items-center gap-1 mt-2 text-xs text-slate-400">
-                                                <Users className="w-3.5 h-3.5" /> ผู้เข้าร่วม {act.participants} คน
+                                                <Users className="w-3.5 h-3.5" /> {t.activitiesManagementPage.participants} {act.participants} {t.activitiesManagementPage.people}
                                             </div>
                                         </div>
                                     </div>
                                     <div className="flex gap-2">
                                         <Button className="bg-emerald-500 hover:bg-emerald-600 rounded-xl shadow-lg shadow-emerald-200">
-                                            <CheckCircle className="w-4 h-4 mr-2" /> อนุมัติ
+                                            <CheckCircle className="w-4 h-4 mr-2" /> {t.activitiesManagementPage.approveBtn}
                                         </Button>
                                         <Button variant="outline" className="text-red-500 border-red-200 hover:bg-red-50 rounded-xl">
-                                            <XCircle className="w-4 h-4 mr-2" /> ปฏิเสธ
+                                            <XCircle className="w-4 h-4 mr-2" /> {t.activitiesManagementPage.rejectBtn}
                                         </Button>
                                     </div>
                                 </div>
@@ -104,7 +106,7 @@ export default function ActivitiesManagement() {
                 {/* Approved Activities - 2 cols */}
                 <motion.div variants={itemVariants} className="lg:col-span-2 bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">
                     <h3 className="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
-                        <CheckCircle className="w-5 h-5 text-emerald-500" /> กิจกรรมที่อนุมัติแล้ว
+                        <CheckCircle className="w-5 h-5 text-emerald-500" /> {t.activitiesManagementPage.approvedActivities}
                     </h3>
                     <div className="space-y-3">
                         {[
@@ -124,7 +126,7 @@ export default function ActivitiesManagement() {
                                     </div>
                                 </div>
                                 <Badge variant="outline" className={`rounded-xl text-xs ${act.status === 'completed' ? 'border-slate-200 text-slate-500 bg-slate-50' : 'border-emerald-200 text-emerald-600 bg-emerald-50'}`}>
-                                    {act.status === 'completed' ? 'เสร็จสิ้น' : 'กำลังดำเนินการ'}
+                                    {act.status === 'completed' ? t.activitiesManagementPage.completed : t.activitiesManagementPage.inProgress}
                                 </Badge>
                             </motion.div>
                         ))}

@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { StatsCard } from '@/components/common/StatsCard';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { mockLecturer, mockCourses, mockAppointments } from '@/lib/mockData';
 import { Link } from 'react-router-dom';
 
@@ -39,6 +40,7 @@ const atRiskStudents = [
 ];
 
 export default function TeacherDashboard() {
+  const { t, language } = useLanguage();
   const teacher = mockLecturer;
   const teacherCourses = mockCourses.filter(c => c.instructorId === teacher.id);
   const totalCourses = teacherCourses.length;
@@ -57,7 +59,7 @@ export default function TeacherDashboard() {
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-            สวัสดี, {teacher.nameThai}
+            {t.teacherDashboard.hello} {teacher.nameThai}
           </h1>
           <p className="text-muted-foreground mt-1">
             {teacher.position} • สาขา {teacher.department}
@@ -66,7 +68,7 @@ export default function TeacherDashboard() {
         <Button variant="teacher" asChild>
           <Link to="/grades">
             <GraduationCap className="mr-2 h-4 w-4" />
-            บันทึกเกรด
+            {t.teacherDashboard.manageSchedule}
           </Link>
         </Button>
       </motion.div>
@@ -74,30 +76,30 @@ export default function TeacherDashboard() {
       {/* Stats Cards */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard
-          title="รายวิชาที่สอน"
+          title={t.teacherDashboard.coursesTaught}
           value={totalCourses}
-          subtitle="วิชาในเทอมนี้"
+          subtitle={t.teacherDashboard.coursesThisSem}
           icon={<BookOpen className="w-5 h-5" />}
           variant="teacher"
         />
         <StatsCard
-          title="นักศึกษาทั้งหมด"
+          title={t.teacherDashboard.totalStudents}
           value={totalStudents}
-          subtitle="คน"
+          subtitle={t.teacherDashboard.people}
           icon={<Users className="w-5 h-5" />}
           variant="default"
         />
         <StatsCard
-          title="เกรดที่รอบันทึก"
+          title={t.teacherDashboard.pendingGrades}
           value={12}
-          subtitle="รายการ"
+          subtitle={t.teacherDashboard.items}
           icon={<ClipboardList className="w-5 h-5" />}
           variant="warning"
         />
         <StatsCard
-          title="นัดหมายรอยืนยัน"
+          title={t.teacherDashboard.pendingAppointments}
           value={pendingAppointments}
-          subtitle="นัดหมาย"
+          subtitle={t.teacherDashboard.appointmentsLabel}
           icon={<Calendar className="w-5 h-5" />}
           variant="default"
         />
@@ -111,12 +113,12 @@ export default function TeacherDashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle>รายวิชาที่สอน</CardTitle>
-                <CardDescription>ภาคเรียนที่ 1/2567</CardDescription>
+                <CardTitle>{t.teacherDashboard.courseList}</CardTitle>
+                <CardDescription>{t.teacherDashboard.semester}</CardDescription>
               </div>
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/courses">
-                  ดูทั้งหมด
+                  {t.teacherDashboard.viewAll}
                   <ChevronRight className="ml-1 h-4 w-4" />
                 </Link>
               </Button>
@@ -139,7 +141,7 @@ export default function TeacherDashboard() {
                     </div>
                     <div className="text-right">
                       <p className="text-lg font-semibold text-foreground">{course.students}</p>
-                      <p className="text-xs text-muted-foreground">นักศึกษา</p>
+                      <p className="text-xs text-muted-foreground">{t.teacherDashboard.students}</p>
                     </div>
                   </div>
                 ))}
@@ -153,13 +155,13 @@ export default function TeacherDashboard() {
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-warning" />
                 <div>
-                  <CardTitle>นักศึกษาที่ต้องดูแล</CardTitle>
-                  <CardDescription>นักศึกษาในที่ปรึกษาที่มีความเสี่ยง</CardDescription>
+                  <CardTitle>{t.teacherDashboard.atRiskStudents}</CardTitle>
+                  <CardDescription>{t.teacherDashboard.atRiskDesc}</CardDescription>
                 </div>
               </div>
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/students">
-                  ดูทั้งหมด
+                  {t.teacherDashboard.viewAll}
                   <ChevronRight className="ml-1 h-4 w-4" />
                 </Link>
               </Button>
@@ -200,8 +202,8 @@ export default function TeacherDashboard() {
           {/* Upcoming Appointments */}
           <Card>
             <CardHeader>
-              <CardTitle>นัดหมายที่จะถึง</CardTitle>
-              <CardDescription>การนัดพบนักศึกษา</CardDescription>
+              <CardTitle>{t.teacherDashboard.upcomingAppointments}</CardTitle>
+              <CardDescription>{t.teacherDashboard.appointmentsDesc}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -225,14 +227,14 @@ export default function TeacherDashboard() {
                         variant={appointment.status === 'confirmed' ? 'default' : 'outline'}
                         className="mt-1 text-xs"
                       >
-                        {appointment.status === 'confirmed' ? 'ยืนยันแล้ว' : 'รอยืนยัน'}
+                        {appointment.status === 'confirmed' ? t.teacherDashboard.confirmed : t.teacherDashboard.pending}
                       </Badge>
                     </div>
                   </div>
                 ))}
               </div>
               <Button variant="outline" className="w-full mt-4" asChild>
-                <Link to="/appointments">ดูนัดหมายทั้งหมด</Link>
+                <Link to="/appointments">{t.teacherDashboard.viewAllAppointments}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -240,20 +242,20 @@ export default function TeacherDashboard() {
           {/* Advisees Summary */}
           <Card>
             <CardHeader>
-              <CardTitle>สรุปนักศึกษาในที่ปรึกษา</CardTitle>
+              <CardTitle>{t.teacherDashboard.adviseeSummary}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">นักศึกษาทั้งหมด</span>
+                  <span className="text-sm text-muted-foreground">{t.teacherDashboard.allStudents}</span>
                   <span className="font-semibold">{advisees}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">สถานะปกติ</span>
+                  <span className="text-sm text-muted-foreground">{t.teacherDashboard.normalStatus}</span>
                   <span className="font-semibold text-success">{advisees - atRiskStudents.length}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">ต้องดูแลพิเศษ</span>
+                  <span className="text-sm text-muted-foreground">{t.teacherDashboard.needsAttention}</span>
                   <span className="font-semibold text-warning">{atRiskStudents.length}</span>
                 </div>
               </div>
@@ -263,25 +265,25 @@ export default function TeacherDashboard() {
           {/* Quick Actions */}
           <Card>
             <CardHeader>
-              <CardTitle>การดำเนินการด่วน</CardTitle>
+              <CardTitle>{t.teacherDashboard.quickActions}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               <Button variant="outline" className="w-full justify-start" asChild>
                 <Link to="/grades">
                   <ClipboardList className="mr-2 h-4 w-4" />
-                  บันทึกเกรด
+                  {t.teacherDashboard.recordGrades}
                 </Link>
               </Button>
               <Button variant="outline" className="w-full justify-start" asChild>
                 <Link to="/assignments">
                   <BookOpen className="mr-2 h-4 w-4" />
-                  สร้างงานใหม่
+                  {t.teacherDashboard.createAssignment}
                 </Link>
               </Button>
               <Button variant="outline" className="w-full justify-start" asChild>
                 <Link to="/students">
                   <Users className="mr-2 h-4 w-4" />
-                  ดูรายชื่อนักศึกษา
+                  {t.teacherDashboard.viewStudentList}
                 </Link>
               </Button>
             </CardContent>

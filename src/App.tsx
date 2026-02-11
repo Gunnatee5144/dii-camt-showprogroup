@@ -45,6 +45,8 @@ import Subscription from "./pages/Subscription";
 import InternTracking from "./pages/InternTracking";
 import PersonalDashboard from "./pages/PersonalDashboard";import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
+import Training from './pages/Training';
+import SkillsRequirement from './pages/SkillsRequirement';
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -75,6 +77,7 @@ const App = () => (
               <Route path="/portfolio" element={<Portfolio />} />
               <Route path="/internships" element={<Internships />} />
               <Route path="/requests" element={<Requests />} />
+              <Route path="/training" element={<Training />} />
 
               {/* Lecturer Routes */}
               <Route path="/students" element={<Students />} />
@@ -98,6 +101,7 @@ const App = () => (
 
               {/* Company Routes */}
               <Route path="/job-postings" element={<JobPostings />} />
+              <Route path="/skills-requirement" element={<SkillsRequirement />} />
               <Route path="/applicants" element={<Applicants />} />
               <Route path="/student-profiles" element={<StudentProfiles />} />
               <Route path="/subscription" element={<Subscription />} />

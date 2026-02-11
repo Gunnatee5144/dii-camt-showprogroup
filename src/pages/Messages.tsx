@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Send, Inbox, Archive, Trash2, Search, Star, Paperclip, Filter, MoreVertical,
@@ -25,6 +26,7 @@ const itemVariants = {
 
 export default function Messages() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [selectedMessage, setSelectedMessage] = React.useState<string | null>(null);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [replyText, setReplyText] = React.useState('');
@@ -56,7 +58,7 @@ export default function Messages() {
               className="flex items-center gap-2 text-slate-500 font-medium mb-2"
             >
               <Mail className="w-4 h-4 text-blue-500" />
-              <span>การสื่อสารและประกาศ</span>
+              <span>{t.messagesPage.subtitle}</span>
             </motion.div>
             <motion.h1
               className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight"
@@ -64,7 +66,7 @@ export default function Messages() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              ข้อความ<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">และประกาศ</span>
+              {t.messagesPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">{t.messagesPage.titleHighlight}</span>
             </motion.h1>
           </div>
         </div>
@@ -77,7 +79,7 @@ export default function Messages() {
             <div className="relative group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
               <Input
-                placeholder="ค้นหาข้อความ..."
+                placeholder={t.messagesPage.searchMessages}
                 className="pl-11 h-12 bg-slate-50/50 border-none rounded-2xl focus-visible:ring-indigo-500 font-medium"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -85,8 +87,8 @@ export default function Messages() {
             </div>
             <div className="flex gap-2 p-1 bg-slate-100/50 rounded-2xl">
               <Button size="sm" variant="ghost" className="rounded-xl text-xs h-9 flex-1 bg-white shadow-sm text-indigo-600 font-bold">Inbox</Button>
-              <Button size="sm" variant="ghost" className="rounded-xl text-xs h-9 flex-1 text-slate-500 font-bold hover:bg-white/50">ติดดาว</Button>
-              <Button size="sm" variant="ghost" className="rounded-xl text-xs h-9 flex-1 text-slate-500 font-bold hover:bg-white/50">ประกาศ</Button>
+              <Button size="sm" variant="ghost" className="rounded-xl text-xs h-9 flex-1 text-slate-500 font-bold hover:bg-white/50">{t.messagesPage.starred}</Button>
+              <Button size="sm" variant="ghost" className="rounded-xl text-xs h-9 flex-1 text-slate-500 font-bold hover:bg-white/50">{t.messagesPage.announcements}</Button>
             </div>
           </div>
 
@@ -158,7 +160,7 @@ export default function Messages() {
                       </div>
                       <div className="text-xs text-slate-500 font-medium flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        ออนไลน์ตอนนี้
+                        {t.messagesPage.onlineNow}
                       </div>
                     </div>
                   </div>
@@ -217,7 +219,7 @@ export default function Messages() {
                   <div className="relative flex items-end gap-3">
                     <div className="flex-1 relative">
                       <Textarea
-                        placeholder="พิมพ์ข้อความตอบกลับ..."
+                        placeholder={t.messagesPage.typeReply}
                         className="min-h-[56px] w-full rounded-[1.5rem] border-none bg-white shadow-inner focus-visible:ring-indigo-500 p-4 font-medium text-slate-700 resize-none pr-12 scrollbar-hide"
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
@@ -239,19 +241,19 @@ export default function Messages() {
                 <div className="absolute inset-0 bg-indigo-500/5 rounded-[2.5rem] scale-0 group-hover:scale-110 transition-transform blur-2xl" />
                 <Inbox className="w-14 h-14 text-slate-200 group-hover:text-indigo-200 transition-colors" />
               </div>
-              <h3 className="text-2xl font-bold text-slate-800 mb-3 tracking-tight">กล่องข้อความว่างเปล่า</h3>
-              <p className="text-slate-500 max-w-xs leading-relaxed font-medium">เลือกการสนทนาจากทางซ้ายเพื่อเริ่มต้นอ่านและจัดการข้อความของคุณ</p>
+              <h3 className="text-2xl font-bold text-slate-800 mb-3 tracking-tight">{t.messagesPage.emptyInbox}</h3>
+              <p className="text-slate-500 max-w-xs leading-relaxed font-medium">{t.messagesPage.emptyDesc}</p>
 
               <div className="mt-12 grid grid-cols-2 gap-4 w-full max-w-sm">
                 <div className="bg-white/80 p-4 rounded-3xl border border-white shadow-sm flex flex-col items-center gap-2">
                   <Sparkles className="w-6 h-6 text-amber-400" />
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">การติดต่อล่าสุด</span>
-                  <span className="text-sm font-bold text-slate-900">3 ใหม่</span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.messagesPage.recentContacts}</span>
+                  <span className="text-sm font-bold text-slate-900">3 {t.messagesPage.newLabel}</span>
                 </div>
                 <div className="bg-white/80 p-4 rounded-3xl border border-white shadow-sm flex flex-col items-center gap-2">
                   <Zap className="w-6 h-6 text-indigo-500" />
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">สถานะระบบ</span>
-                  <span className="text-sm font-bold text-slate-900">ปกติ</span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.messagesPage.systemStatus}</span>
+                  <span className="text-sm font-bold text-slate-900">{t.messagesPage.normalStatus}</span>
                 </div>
               </div>
             </div>

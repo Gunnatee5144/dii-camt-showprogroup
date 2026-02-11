@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Shield, ArrowLeft, Lock, Eye, Database, UserCheck, Globe, Bell, FileText, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const FadeIn = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => (
   <motion.div
@@ -15,81 +16,82 @@ const FadeIn = ({ children, delay = 0, className = "" }: { children: React.React
   </motion.div>
 );
 
-const sections = [
-  {
-    icon: Database,
-    title: 'ข้อมูลที่เราเก็บรวบรวม',
-    color: 'from-blue-600 to-indigo-600',
-    bg: 'bg-blue-50',
-    iconColor: 'text-blue-600',
-    items: [
-      { subtitle: 'ข้อมูลส่วนบุคคล', desc: 'ชื่อ-นามสกุล, อีเมล, หมายเลขโทรศัพท์, รหัสนักศึกษา/พนักงาน และข้อมูลที่จำเป็นสำหรับการลงทะเบียนเข้าใช้งานระบบ' },
-      { subtitle: 'ข้อมูลการศึกษา', desc: 'ผลการเรียน, ตารางเรียน, กิจกรรม, ข้อมูลฝึกงาน และข้อมูลทางวิชาการอื่นๆ ที่เกี่ยวข้อง' },
-      { subtitle: 'ข้อมูลการใช้งาน', desc: 'Log การเข้าสู่ระบบ, ประวัติการใช้งานฟีเจอร์ต่างๆ, IP Address และข้อมูล Device เพื่อปรับปรุงคุณภาพบริการ' },
-    ],
-  },
-  {
-    icon: Eye,
-    title: 'วัตถุประสงค์ในการใช้ข้อมูล',
-    color: 'from-emerald-600 to-teal-600',
-    bg: 'bg-emerald-50',
-    iconColor: 'text-emerald-600',
-    items: [
-      { subtitle: 'การให้บริการ', desc: 'ใช้ข้อมูลเพื่อให้บริการระบบบริหารการศึกษา รวมถึงการจัดตารางเรียน, ประมวลผลเกรด, และการติดต่อสื่อสาร' },
-      { subtitle: 'การพัฒนาระบบ', desc: 'วิเคราะห์พฤติกรรมการใช้งานเพื่อปรับปรุง UX/UI และเพิ่มฟีเจอร์ที่ตอบโจทย์ผู้ใช้มากยิ่งขึ้น' },
-      { subtitle: 'การเชื่อมต่อพันธมิตร', desc: 'แชร์ข้อมูลโปรไฟล์กับองค์กรพันธมิตรเฉพาะเมื่อได้รับความยินยอมจากผู้ใช้เท่านั้น' },
-    ],
-  },
-  {
-    icon: Lock,
-    title: 'การรักษาความปลอดภัยข้อมูล',
-    color: 'from-purple-600 to-pink-600',
-    bg: 'bg-purple-50',
-    iconColor: 'text-purple-600',
-    items: [
-      { subtitle: 'การเข้ารหัส', desc: 'ข้อมูลทั้งหมดถูกเข้ารหัสด้วย AES-256 ทั้งขณะจัดเก็บ (at rest) และขณะส่งผ่าน (in transit) ผ่าน TLS 1.3' },
-      { subtitle: 'การควบคุมการเข้าถึง', desc: 'ใช้ระบบ Role-Based Access Control (RBAC) เพื่อให้แน่ใจว่าผู้ใช้เข้าถึงเฉพาะข้อมูลที่เกี่ยวข้องกับตนเท่านั้น' },
-      { subtitle: 'การตรวจสอบ', desc: 'ระบบ Audit Log บันทึกทุกการเข้าถึงและการเปลี่ยนแปลงข้อมูล เพื่อความโปร่งใสและตรวจสอบย้อนกลับได้' },
-    ],
-  },
-  {
-    icon: UserCheck,
-    title: 'สิทธิ์ของเจ้าของข้อมูล',
-    color: 'from-orange-600 to-amber-600',
-    bg: 'bg-orange-50',
-    iconColor: 'text-orange-600',
-    items: [
-      { subtitle: 'สิทธิ์ในการเข้าถึง', desc: 'คุณสามารถขอดูข้อมูลส่วนบุคคลทั้งหมดที่เราจัดเก็บเกี่ยวกับคุณได้ตลอดเวลาผ่านหน้าตั้งค่าในระบบ' },
-      { subtitle: 'สิทธิ์ในการแก้ไข', desc: 'คุณสามารถแก้ไข อัปเดต หรือเปลี่ยนแปลงข้อมูลส่วนบุคคลของคุณได้ทุกเมื่อ' },
-      { subtitle: 'สิทธิ์ในการลบ', desc: 'คุณสามารถขอลบข้อมูลส่วนบุคคลได้ โดยเราจะดำเนินการภายใน 30 วันนับจากวันที่ได้รับคำขอ' },
-      { subtitle: 'สิทธิ์ในการโอนย้าย', desc: 'คุณสามารถขอรับข้อมูลในรูปแบบที่อ่านได้ด้วยเครื่อง เพื่อนำไปใช้กับบริการอื่น' },
-    ],
-  },
-  {
-    icon: Globe,
-    title: 'คุกกี้และเทคโนโลยีติดตาม',
-    color: 'from-cyan-600 to-blue-600',
-    bg: 'bg-cyan-50',
-    iconColor: 'text-cyan-600',
-    items: [
-      { subtitle: 'คุกกี้ที่จำเป็น', desc: 'ใช้เพื่อให้ระบบทำงานได้อย่างถูกต้อง เช่น การรักษา session และการตั้งค่าภาษา ไม่สามารถปิดได้' },
-      { subtitle: 'คุกกี้วิเคราะห์', desc: 'ช่วยให้เราเข้าใจวิธีการใช้งานเว็บไซต์ เพื่อปรับปรุงประสบการณ์ สามารถเลือกปิดได้ในหน้าตั้งค่า' },
-    ],
-  },
-  {
-    icon: Bell,
-    title: 'การเปลี่ยนแปลงนโยบาย',
-    color: 'from-rose-600 to-pink-600',
-    bg: 'bg-rose-50',
-    iconColor: 'text-rose-600',
-    items: [
-      { subtitle: 'การแจ้งเตือน', desc: 'เราจะแจ้งให้ทราบล่วงหน้าอย่างน้อย 30 วันก่อนการเปลี่ยนแปลงนโยบายความเป็นส่วนตัวที่สำคัญ ผ่านอีเมลและการแจ้งเตือนในระบบ' },
-      { subtitle: 'การยินยอม', desc: 'การเปลี่ยนแปลงที่กระทบสิทธิ์ของผู้ใช้จะต้องได้รับความยินยอมใหม่ก่อนมีผลบังคับใช้' },
-    ],
-  },
-];
-
 export default function PrivacyPolicy() {
+  const { t } = useLanguage();
+
+  const sections = [
+    {
+      icon: Database,
+      title: t.privacyPolicyPage.section1Title,
+      color: 'from-blue-600 to-indigo-600',
+      bg: 'bg-blue-50',
+      iconColor: 'text-blue-600',
+      items: [
+        { subtitle: t.privacyPolicyPage.section1Sub1, desc: t.privacyPolicyPage.section1Desc1 },
+        { subtitle: t.privacyPolicyPage.section1Sub2, desc: t.privacyPolicyPage.section1Desc2 },
+        { subtitle: t.privacyPolicyPage.section1Sub3, desc: t.privacyPolicyPage.section1Desc3 },
+      ],
+    },
+    {
+      icon: Eye,
+      title: t.privacyPolicyPage.section2Title,
+      color: 'from-emerald-600 to-teal-600',
+      bg: 'bg-emerald-50',
+      iconColor: 'text-emerald-600',
+      items: [
+        { subtitle: t.privacyPolicyPage.section2Sub1, desc: t.privacyPolicyPage.section2Desc1 },
+        { subtitle: t.privacyPolicyPage.section2Sub2, desc: t.privacyPolicyPage.section2Desc2 },
+        { subtitle: t.privacyPolicyPage.section2Sub3, desc: t.privacyPolicyPage.section2Desc3 },
+      ],
+    },
+    {
+      icon: Lock,
+      title: t.privacyPolicyPage.section3Title,
+      color: 'from-purple-600 to-pink-600',
+      bg: 'bg-purple-50',
+      iconColor: 'text-purple-600',
+      items: [
+        { subtitle: t.privacyPolicyPage.section3Sub1, desc: t.privacyPolicyPage.section3Desc1 },
+        { subtitle: t.privacyPolicyPage.section3Sub2, desc: t.privacyPolicyPage.section3Desc2 },
+        { subtitle: t.privacyPolicyPage.section3Sub3, desc: t.privacyPolicyPage.section3Desc3 },
+      ],
+    },
+    {
+      icon: UserCheck,
+      title: t.privacyPolicyPage.section4Title,
+      color: 'from-orange-600 to-amber-600',
+      bg: 'bg-orange-50',
+      iconColor: 'text-orange-600',
+      items: [
+        { subtitle: t.privacyPolicyPage.section4Sub1, desc: t.privacyPolicyPage.section4Desc1 },
+        { subtitle: t.privacyPolicyPage.section4Sub2, desc: t.privacyPolicyPage.section4Desc2 },
+        { subtitle: t.privacyPolicyPage.section4Sub3, desc: t.privacyPolicyPage.section4Desc3 },
+        { subtitle: t.privacyPolicyPage.section4Sub4, desc: t.privacyPolicyPage.section4Desc4 },
+      ],
+    },
+    {
+      icon: Globe,
+      title: t.privacyPolicyPage.section5Title,
+      color: 'from-cyan-600 to-blue-600',
+      bg: 'bg-cyan-50',
+      iconColor: 'text-cyan-600',
+      items: [
+        { subtitle: t.privacyPolicyPage.section5Sub1, desc: t.privacyPolicyPage.section5Desc1 },
+        { subtitle: t.privacyPolicyPage.section5Sub2, desc: t.privacyPolicyPage.section5Desc2 },
+      ],
+    },
+    {
+      icon: Bell,
+      title: t.privacyPolicyPage.section6Title,
+      color: 'from-rose-600 to-pink-600',
+      bg: 'bg-rose-50',
+      iconColor: 'text-rose-600',
+      items: [
+        { subtitle: t.privacyPolicyPage.section6Sub1, desc: t.privacyPolicyPage.section6Desc1 },
+        { subtitle: t.privacyPolicyPage.section6Sub2, desc: t.privacyPolicyPage.section6Desc2 },
+      ],
+    },
+  ];
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900">
       {/* Navbar */}
@@ -106,7 +108,7 @@ export default function PrivacyPolicy() {
           </Link>
           <Link to="/">
             <Button variant="ghost" className="font-medium hover:text-blue-600 hover:bg-blue-50">
-              <ArrowLeft className="w-4 h-4 mr-2" /> กลับหน้าหลัก
+              <ArrowLeft className="w-4 h-4 mr-2" /> {t.privacyPolicyPage.backToHome}
             </Button>
           </Link>
         </div>
@@ -128,23 +130,23 @@ export default function PrivacyPolicy() {
           </FadeIn>
           <FadeIn delay={0.1}>
             <h1 className="text-4xl lg:text-7xl font-bold text-white mb-6 tracking-tight leading-[1.1]">
-              นโยบาย<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-rose-400">ความเป็นส่วนตัว</span>
+              {t.privacyPolicyPage.heroTitle}<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-rose-400">{t.privacyPolicyPage.heroTitleHighlight}</span>
             </h1>
           </FadeIn>
           <FadeIn delay={0.2}>
             <p className="text-lg text-slate-400 mb-6 max-w-2xl mx-auto leading-relaxed font-light">
-              เราให้ความสำคัญกับความเป็นส่วนตัวและความปลอดภัยของข้อมูลของคุณเป็นอันดับสูงสุด
+              {t.privacyPolicyPage.heroDesc}
             </p>
           </FadeIn>
           <FadeIn delay={0.3}>
             <div className="flex items-center justify-center gap-6 text-sm text-slate-500">
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4" />
-                <span>อัปเดตล่าสุด: 1 กุมภาพันธ์ 2026</span>
+                <span>{t.privacyPolicyPage.lastUpdated}</span>
               </div>
               <div className="w-1 h-1 rounded-full bg-slate-600" />
               <div className="flex items-center gap-2">
-                <span>เวอร์ชัน 2.0</span>
+                <span>{t.privacyPolicyPage.version}</span>
               </div>
             </div>
           </FadeIn>
@@ -157,15 +159,13 @@ export default function PrivacyPolicy() {
         <div className="container mx-auto px-6">
           <FadeIn>
             <div className="max-w-4xl mx-auto bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl p-8 lg:p-12 border border-purple-100">
-              <h2 className="text-2xl font-bold text-slate-900 mb-4">สรุปสาระสำคัญ</h2>
+              <h2 className="text-2xl font-bold text-slate-900 mb-4">{t.privacyPolicyPage.summaryTitle}</h2>
               <p className="text-slate-600 leading-relaxed mb-6">
-                DII CAMT เก็บรวบรวมข้อมูลเท่าที่จำเป็นสำหรับการให้บริการระบบบริหารการศึกษา ข้อมูลของคุณจะถูกเข้ารหัส 
-                จัดเก็บอย่างปลอดภัย และจะไม่ถูกแบ่งปันกับบุคคลที่สามโดยไม่ได้รับความยินยอมจากคุณ คุณมีสิทธิ์เข้าถึง 
-                แก้ไข และลบข้อมูลของคุณได้ตลอดเวลา
+                {t.privacyPolicyPage.summaryDesc}
               </p>
               <div className="grid sm:grid-cols-3 gap-4">
                 {[
-                  { icon: Lock, label: 'เข้ารหัส AES-256', color: 'text-purple-600 bg-purple-100' },
+                  { icon: Lock, label: t.privacyPolicyPage.encryptedAES, color: 'text-purple-600 bg-purple-100' },
                   { icon: UserCheck, label: 'PDPA Compliant', color: 'text-pink-600 bg-pink-100' },
                   { icon: Shield, label: 'ISO 27001', color: 'text-indigo-600 bg-indigo-100' },
                 ].map((badge, i) => (
@@ -226,9 +226,9 @@ export default function PrivacyPolicy() {
                 <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[120px]" />
                 <div className="relative z-10 space-y-6">
                   <Mail className="w-12 h-12 text-purple-400 mx-auto" />
-                  <h2 className="text-3xl lg:text-4xl font-bold">มีคำถามเกี่ยวกับความเป็นส่วนตัว?</h2>
+                  <h2 className="text-3xl lg:text-4xl font-bold">{t.privacyPolicyPage.contactTitle}</h2>
                   <p className="text-slate-300 text-lg max-w-xl mx-auto">
-                    ทีม Data Protection Officer ของเราพร้อมตอบทุกคำถามเกี่ยวกับการจัดการข้อมูลส่วนบุคคล
+                    {t.privacyPolicyPage.contactDesc}
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
                     <a href="mailto:dpo@camt.cmu.ac.th">

@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
     ClipboardList, Plus, Calendar, CheckCircle, Clock, AlertCircle,
     FileText, Users, Filter, Search, Upload, ChevronRight
@@ -75,6 +76,7 @@ const mockAssignments = [
 ];
 
 export default function Assignments() {
+    const { t } = useLanguage();
     const { user } = useAuth();
     const [searchQuery, setSearchQuery] = React.useState('');
     const [statusFilter, setStatusFilter] = React.useState('all');
@@ -85,9 +87,9 @@ export default function Assignments() {
 
     const getStatusBadge = (status: string) => {
         switch (status) {
-            case 'active': return <Badge className="bg-blue-100 text-blue-700">กำลังดำเนินการ</Badge>;
-            case 'completed': return <Badge className="bg-emerald-100 text-emerald-700">เสร็จสิ้น</Badge>;
-            case 'draft': return <Badge className="bg-gray-100 text-gray-700">แบบร่าง</Badge>;
+            case 'active': return <Badge className="bg-blue-100 text-blue-700">{t.assignmentsPage.inProgressTab}</Badge>;
+            case 'completed': return <Badge className="bg-emerald-100 text-emerald-700">{t.assignmentsPage.completedTab}</Badge>;
+            case 'draft': return <Badge className="bg-gray-100 text-gray-700">{t.assignmentsPage.draftTab}</Badge>;
             default: return <Badge>{status}</Badge>;
         }
     };
@@ -104,15 +106,15 @@ export default function Assignments() {
                 <div>
                     <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
                         <ClipboardList className="w-4 h-4 text-blue-500" />
-                        <span>{`${mockAssignments.length} งาน • ${activeAssignments} กำลังดำเนินการ`}</span>
+                        <span>{`${mockAssignments.length} ${t.assignmentsPage.titleHighlight} • ${activeAssignments} ${t.assignmentsPage.subtitle}`}</span>
                     </motion.div>
                     <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                        งาน<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">มอบหมาย</span>
+                        {t.assignmentsPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">{t.assignmentsPage.titleHighlight}</span>
                     </motion.h1>
                 </div>
                 <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg">
                     <Plus className="w-4 h-4 mr-2" />
-                    สร้างงานใหม่
+                    {t.assignmentsPage.createNew}
                 </Button>
             </div>
 
@@ -128,7 +130,7 @@ export default function Assignments() {
                             <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                                 <Clock className="w-5 h-5" />
                             </div>
-                            <span className="font-medium text-white/90">กำลังดำเนินการ</span>
+                            <span className="font-medium text-white/90">{t.assignmentsPage.inProgressTab}</span>
                         </div>
                         <div className="text-4xl font-bold">{activeAssignments}</div>
                     </div>
@@ -144,7 +146,7 @@ export default function Assignments() {
                             <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                                 <CheckCircle className="w-5 h-5" />
                             </div>
-                            <span className="font-medium text-white/90">เสร็จสิ้น</span>
+                            <span className="font-medium text-white/90">{t.assignmentsPage.completedTab}</span>
                         </div>
                         <div className="text-4xl font-bold">{completedAssignments}</div>
                     </div>
@@ -160,7 +162,7 @@ export default function Assignments() {
                             <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                                 <FileText className="w-5 h-5" />
                             </div>
-                            <span className="font-medium text-white/90">แบบร่าง</span>
+                            <span className="font-medium text-white/90">{t.assignmentsPage.draftTab}</span>
                         </div>
                         <div className="text-4xl font-bold">{draftAssignments}</div>
                     </div>
@@ -176,7 +178,7 @@ export default function Assignments() {
                             <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                                 <ClipboardList className="w-5 h-5" />
                             </div>
-                            <span className="font-medium text-white/90">ทั้งหมด</span>
+                            <span className="font-medium text-white/90">{t.assignmentsPage.allTab}</span>
                         </div>
                         <div className="text-4xl font-bold">{mockAssignments.length}</div>
                     </div>
@@ -187,10 +189,10 @@ export default function Assignments() {
             <motion.div variants={itemVariants}>
                 <Tabs defaultValue="all" className="space-y-4">
                     <TabsList className="bg-white/80 backdrop-blur-sm border shadow-sm">
-                        <TabsTrigger value="all">ทั้งหมด</TabsTrigger>
-                        <TabsTrigger value="active">กำลังดำเนินการ</TabsTrigger>
-                        <TabsTrigger value="completed">เสร็จสิ้น</TabsTrigger>
-                        <TabsTrigger value="draft">แบบร่าง</TabsTrigger>
+                        <TabsTrigger value="all">{t.assignmentsPage.allTab}</TabsTrigger>
+                        <TabsTrigger value="active">{t.assignmentsPage.inProgressTab}</TabsTrigger>
+                        <TabsTrigger value="completed">{t.assignmentsPage.completedTab}</TabsTrigger>
+                        <TabsTrigger value="draft">{t.assignmentsPage.draftTab}</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="all" className="space-y-4">
@@ -198,7 +200,7 @@ export default function Assignments() {
                             <div className="relative flex-1">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                 <Input
-                                    placeholder="ค้นหางาน..."
+                                    placeholder={t.assignmentsPage.searchAssignment}
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="pl-10"
@@ -227,7 +229,7 @@ export default function Assignments() {
                                                         {getStatusBadge(assignment.status)}
                                                         <Badge variant="outline">
                                                             {assignment.type === 'group' ? <Users className="w-3 h-3 mr-1" /> : null}
-                                                            {assignment.type === 'group' ? 'กลุ่ม' : 'รายบุคคล'}
+                                                            {assignment.type === 'group' ? t.assignmentsPage.group : t.assignmentsPage.individual}
                                                         </Badge>
                                                     </div>
                                                     <p className="text-sm text-gray-600">
@@ -236,11 +238,11 @@ export default function Assignments() {
                                                 </div>
                                                 <div className="text-right">
                                                     <div className="text-sm font-semibold text-gray-700">
-                                                        {assignment.maxScore} คะแนน
+                                                        {assignment.maxScore} {t.assignmentsPage.score}
                                                     </div>
                                                     <div className="text-xs text-gray-500 flex items-center justify-end gap-1">
                                                         <Calendar className="w-3 h-3" />
-                                                        กำหนดส่ง {assignment.dueDate.toLocaleDateString('th-TH')}
+                                                        {t.assignmentsPage.deadline} {assignment.dueDate.toLocaleDateString('th-TH')}
                                                     </div>
                                                 </div>
                                             </div>
@@ -248,8 +250,8 @@ export default function Assignments() {
                                             <div className="flex items-center justify-between">
                                                 <div className="flex-1 mr-6">
                                                     <div className="flex items-center justify-between text-sm mb-2">
-                                                        <span className="text-gray-600">ส่งงานแล้ว</span>
-                                                        <span className="font-semibold">{assignment.submissionCount}/{assignment.totalStudents} คน</span>
+                                                        <span className="text-gray-600">{t.assignmentsPage.submitted}</span>
+                                                        <span className="font-semibold">{assignment.submissionCount}/{assignment.totalStudents} {t.assignmentsPage.people}</span>
                                                     </div>
                                                     <Progress
                                                         value={(assignment.submissionCount / assignment.totalStudents) * 100}
@@ -257,8 +259,8 @@ export default function Assignments() {
                                                     />
                                                 </div>
                                                 <div className="flex gap-2">
-                                                    <Button size="sm" variant="outline">ดูงาน</Button>
-                                                    <Button size="sm" variant="outline">ตรวจงาน</Button>
+                                                    <Button size="sm" variant="outline">{t.assignmentsPage.viewAssignment}</Button>
+                                                    <Button size="sm" variant="outline">{t.assignmentsPage.gradeAssignment}</Button>
                                                 </div>
                                             </div>
                                         </motion.div>
@@ -290,9 +292,9 @@ export default function Assignments() {
                                             <div className="flex items-center justify-between">
                                                 <div className="flex-1 mr-6">
                                                     <Progress value={(assignment.submissionCount / assignment.totalStudents) * 100} className="h-2" />
-                                                    <div className="text-sm text-gray-600 mt-1">{assignment.submissionCount}/{assignment.totalStudents} ส่งแล้ว</div>
+                                                    <div className="text-sm text-gray-600 mt-1">{assignment.submissionCount}/{assignment.totalStudents} {t.assignmentsPage.submitted}</div>
                                                 </div>
-                                                <Button size="sm">ตรวจงาน</Button>
+                                                <Button size="sm">{t.assignmentsPage.gradeAssignment}</Button>
                                             </div>
                                         </motion.div>
                                     ))}
@@ -314,7 +316,7 @@ export default function Assignments() {
                                                 </div>
                                                 <div className="flex items-center gap-3">
                                                     <CheckCircle className="w-5 h-5 text-emerald-600" />
-                                                    <span className="text-sm text-emerald-700">ตรวจเสร็จ {assignment.submissionCount} คน</span>
+                                                    <span className="text-sm text-emerald-700">{t.assignmentsPage.gradedDone} {assignment.submissionCount} {t.assignmentsPage.people}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -336,8 +338,8 @@ export default function Assignments() {
                                                     <p className="text-sm text-gray-600">{assignment.courseCode}</p>
                                                 </div>
                                                 <div className="flex gap-2">
-                                                    <Button size="sm" variant="outline">แก้ไข</Button>
-                                                    <Button size="sm">เผยแพร่</Button>
+                                                    <Button size="sm" variant="outline">{t.assignmentsPage.edit}</Button>
+                                                    <Button size="sm">{t.assignmentsPage.publish}</Button>
                                                 </div>
                                             </div>
                                         </div>

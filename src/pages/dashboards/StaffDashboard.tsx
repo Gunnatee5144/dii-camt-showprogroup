@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link, useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,6 +32,7 @@ const itemVariants = {
 };
 
 export default function StaffDashboard() {
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const staff = mockStaff;
   const totalStudents = mockStudents.length;
@@ -54,23 +56,23 @@ export default function StaffDashboard() {
           <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-violet-500 text-white shadow-lg">
             <Settings className="w-5 h-5" />
           </div>
-          <span className="text-sm font-medium text-purple-600">แดชบอร์ดเจ้าหน้าที่</span>
+          <span className="text-sm font-medium text-purple-600">{t.staffDashboard.title}</span>
         </div>
         <motion.h1 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="text-3xl font-bold text-gray-900">
-          <span className="bg-gradient-to-r from-purple-500 to-violet-500 bg-clip-text text-transparent">{`สวัสดี, ${staff.nameThai} 👔`}</span>
+          <span className="bg-gradient-to-r from-purple-500 to-violet-500 bg-clip-text text-transparent">{`${t.staffDashboard.hello} ${staff.nameThai} 👔`}</span>
         </motion.h1>
         <p className="text-gray-500 mt-1">{`${staff.department} • ${staff.position}`}</p>
       </motion.div>
 
       <motion.div variants={itemVariants} className="flex justify-end gap-2">
-        <Button variant="outline" onClick={() => toast.info('ระบบจัดการตารางเรียนกำลังเปิดใช้งานเร็วๆนี้')}>
-          <Calendar className="w-4 h-4 mr-2" />จัดการตารางเรียน
+        <Button variant="outline" onClick={() => toast.info(t.staffDashboard.scheduleComingSoon)}>
+          <Calendar className="w-4 h-4 mr-2" />{t.staffDashboard.manageSchedule}
         </Button>
         <Button
           className="bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 shadow-lg shadow-purple-200/50"
-          onClick={() => toast.info('ระบบตั้งค่ากำลังเปิดใช้งานเร็วๆนี้')}
+          onClick={() => toast.info(t.staffDashboard.settingsComingSoon)}
         >
-          <Settings className="w-4 h-4 mr-2" />ตั้งค่าระบบ
+          <Settings className="w-4 h-4 mr-2" />{t.staffDashboard.systemSettings}
         </Button>
       </motion.div>
 
@@ -89,10 +91,10 @@ export default function StaffDashboard() {
               <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                 <Users className="w-5 h-5" />
               </div>
-              <span className="font-medium text-white/90">นักศึกษาทั้งหมด</span>
+              <span className="font-medium text-white/90">{t.staffDashboard.totalStudents}</span>
             </div>
             <div className="text-4xl font-bold">{totalStudents}</div>
-            <div className="text-sm text-white/80 mt-2">เสี่ยง {atRiskStudents} คน</div>
+            <div className="text-sm text-white/80 mt-2">{t.staffDashboard.atRisk} {atRiskStudents} {t.lecturerDashboard.people}</div>
           </div>
         </motion.div>
 
@@ -107,10 +109,10 @@ export default function StaffDashboard() {
               <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                 <BookOpen className="w-5 h-5" />
               </div>
-              <span className="font-medium text-white/90">รายวิชา</span>
+              <span className="font-medium text-white/90">{t.staffDashboard.courses}</span>
             </div>
             <div className="text-4xl font-bold">{totalCourses}</div>
-            <div className="text-sm text-white/80 mt-2">วิชาในเทอมนี้</div>
+            <div className="text-sm text-white/80 mt-2">{t.staffDashboard.coursesThisSem}</div>
           </div>
         </motion.div>
 
@@ -128,10 +130,10 @@ export default function StaffDashboard() {
               <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                 <Users className="w-5 h-5" />
               </div>
-              <span className="font-medium text-white/90">อาจารย์</span>
+              <span className="font-medium text-white/90">{t.staffDashboard.lecturers}</span>
             </div>
             <div className="text-4xl font-bold">{totalLecturers}</div>
-            <div className="text-sm text-white/80 mt-2">โหลดเกิน {overloadedLecturers.length} คน</div>
+            <div className="text-sm text-white/80 mt-2">{t.staffDashboard.overloaded} {overloadedLecturers.length} {t.lecturerDashboard.people}</div>
           </div>
         </motion.div>
 
@@ -149,10 +151,10 @@ export default function StaffDashboard() {
               <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
                 <FileText className="w-5 h-5" />
               </div>
-              <span className="font-medium text-white/90">คำร้องรอดำเนินการ</span>
+              <span className="font-medium text-white/90">{t.staffDashboard.pendingRequests}</span>
             </div>
             <div className="text-4xl font-bold">{pendingRequests.length}</div>
-            <div className="text-sm text-white/80 mt-2">ต้องตรวจสอบ</div>
+            <div className="text-sm text-white/80 mt-2">{t.staffDashboard.needsReview}</div>
           </div>
         </motion.div>
       </motion.div>
@@ -160,8 +162,8 @@ export default function StaffDashboard() {
       <motion.div variants={itemVariants}>
         <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
           <CardHeader>
-            <CardTitle>ภาพรวมระบบ DII CAMT</CardTitle>
-            <CardDescription>ข้อมูลสรุปของระบบบริหารจัดการ</CardDescription>
+            <CardTitle>{t.staffDashboard.systemOverview}</CardTitle>
+            <CardDescription>{t.staffDashboard.systemOverviewDesc}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -169,17 +171,17 @@ export default function StaffDashboard() {
                 <div className="border-l-4 border-red-500 bg-red-50 p-4 rounded">
                   <div className="flex items-center gap-2 mb-2">
                     <AlertTriangle className="w-5 h-5 text-red-600" />
-                    <h3 className="font-semibold text-red-900">นักศึกษาเสี่ยง</h3>
+                    <h3 className="font-semibold text-red-900">{t.staffDashboard.atRiskStudents}</h3>
                   </div>
-                  <p className="text-sm text-red-700">พบนักศึกษาที่มีความเสี่ยง {atRiskStudents} คน ต้องติดตามและให้ความช่วยเหลือ</p>
+                  <p className="text-sm text-red-700">{t.staffDashboard.atRiskDesc} ({atRiskStudents})</p>
                 </div>
               )}
               <div className="border-l-4 border-blue-500 bg-blue-50 p-4 rounded">
                 <div className="flex items-center gap-2 mb-2">
                   <CheckCircle className="w-5 h-5 text-blue-600" />
-                  <h3 className="font-semibold text-blue-900">ระบบพร้อมใช้งาน</h3>
-                </div>
-                <p className="text-sm text-blue-700">ระบบทั้งหมดทำงานปกติและพร้อมให้บริการ</p>
+                    <h3 className="font-semibold text-blue-900">{t.staffDashboard.systemReady}</h3>
+                  </div>
+                  <p className="text-sm text-blue-700">{t.staffDashboard.systemReadyDesc}</p>
               </div>
             </div>
           </CardContent>

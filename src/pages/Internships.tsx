@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Briefcase, Building, MapPin, CheckCircle,
@@ -25,6 +26,7 @@ const itemVariants = {
 
 export default function Internships() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = React.useState('');
   const [selectedJobId, setSelectedJobId] = React.useState<string | null>(null);
   const [savedJobs, setSavedJobs] = React.useState<string[]>([]);
@@ -86,7 +88,7 @@ export default function Internships() {
               className="flex items-center gap-2 text-slate-500 font-medium mb-2"
             >
               <Briefcase className="w-4 h-4 text-blue-500" />
-              <span>โอกาสฝึกงานและสหกิจ</span>
+              <span>{t.internshipsPage.subtitle}</span>
             </motion.div>
             <motion.h1
               className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight"
@@ -94,17 +96,17 @@ export default function Internships() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              ฝึกงาน<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">และสหกิจ</span>
+              {t.internshipsPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">{t.internshipsPage.titleHighlight}</span>
             </motion.h1>
           </div>
         </div>
 
         {/* Bento Stats for Internships */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-          <StatCard icon={TrendingUp} label="ตำแหน่งงานทั้งหมด" value={mockJobPostings.length} gradient="bg-gradient-to-br from-blue-500 to-indigo-600" />
-          <StatCard icon={Building} label="บริษัทพาร์ทเนอร์" value="48" gradient="bg-gradient-to-br from-violet-500 to-purple-600" />
-          <StatCard icon={Users} label="นักศึกษาที่ได้งาน" value="124" gradient="bg-gradient-to-br from-emerald-400 to-teal-600" />
-          <StatCard icon={Sparkles} label="คัดสรรตามทักษะคุณ" value="12" gradient="bg-gradient-to-br from-amber-400 to-orange-500" />
+          <StatCard icon={TrendingUp} label={t.internshipsPage.totalPositions} value={mockJobPostings.length} gradient="bg-gradient-to-br from-blue-500 to-indigo-600" />
+          <StatCard icon={Building} label={t.internshipsPage.partnerCompanies} value="48" gradient="bg-gradient-to-br from-violet-500 to-purple-600" />
+          <StatCard icon={Users} label={t.internshipsPage.studentsPlaced} value="124" gradient="bg-gradient-to-br from-emerald-400 to-teal-600" />
+          <StatCard icon={Sparkles} label={t.internshipsPage.matchedForYou} value="12" gradient="bg-gradient-to-br from-amber-400 to-orange-500" />
         </div>
       </div>
 
@@ -112,7 +114,7 @@ export default function Internships() {
         <div className="relative flex-1 w-full">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <Input
-            placeholder="ค้นหาตำแหน่ง, บริษัท, หรือสถานที่..."
+            placeholder={t.internshipsPage.searchPlaceholder}
             className="pl-11 h-12 text-base border-none bg-slate-50/50 focus-visible:ring-0 rounded-2xl font-medium"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -120,9 +122,9 @@ export default function Internships() {
         </div>
         <div className="flex gap-2 p-1 bg-slate-100/50 rounded-2xl w-full sm:w-auto">
           {[
-            { id: 'all', label: 'ทั้งหมด' },
-            { id: 'internship', label: 'ฝึกงาน' },
-            { id: 'coop', label: 'สหกิจ' }
+            { id: 'all', label: t.internshipsPage.allTab },
+            { id: 'internship', label: t.internshipsPage.internshipTab },
+            { id: 'coop', label: t.internshipsPage.coopTab }
           ].map(opt => (
             <Button
               key={opt.id}
@@ -166,10 +168,10 @@ export default function Internships() {
 
               <div className="flex flex-wrap gap-2 relative z-10">
                 <Badge variant="secondary" className={`rounded-lg px-2.5 py-0.5 border-0 ${selectedJob?.id === job.id ? 'bg-white/10 text-white' : 'bg-slate-100 text-slate-600'}`}>
-                  {job.type === 'internship' ? 'ฝึกงาน' : 'สหกิจ'}
+                  {job.type === 'internship' ? t.internshipsPage.internshipTab : t.internshipsPage.coopTab}
                 </Badge>
                 <div className={`ml-auto text-lg font-black tracking-tight ${selectedJob?.id === job.id ? 'text-emerald-400' : 'text-emerald-600'}`}>
-                  {job.salary || 'ตามตกลง'}
+                  {job.salary || t.internshipsPage.negotiable}
                 </div>
               </div>
             </motion.div>
@@ -215,10 +217,10 @@ export default function Internships() {
 
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
                       {[
-                        { label: 'รูปแบบงาน', value: selectedJob.type === 'internship' ? 'ฝึกงาน' : 'สหกิจ', icon: Briefcase, color: 'text-blue-600', bg: 'bg-blue-50' },
-                        { label: 'สถานที่', value: selectedJob.workType || 'On-site', icon: MapPin, color: 'text-purple-600', bg: 'bg-purple-50' },
-                        { label: 'ค่าตอบแทน', value: selectedJob.salary || 'N/A', icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-                        { label: 'ระยะเวลา', value: '3-6 เดือน', icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50' }
+                        { label: t.internshipsPage.jobType, value: selectedJob.type === 'internship' ? t.internshipsPage.internshipTab : t.internshipsPage.coopTab, icon: Briefcase, color: 'text-blue-600', bg: 'bg-blue-50' },
+                        { label: t.internshipsPage.locationLabel, value: selectedJob.workType || 'On-site', icon: MapPin, color: 'text-purple-600', bg: 'bg-purple-50' },
+                        { label: t.internshipsPage.salary, value: selectedJob.salary || 'N/A', icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+                        { label: t.internshipsPage.duration, value: t.internshipsPage.durationValue, icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50' }
                       ].map((stat, i) => (
                         <div key={i} className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm">
                           <div className={`w-8 h-8 rounded-lg ${stat.bg} ${stat.color} flex items-center justify-center mb-2`}>
@@ -234,7 +236,7 @@ export default function Internships() {
                       <section>
                         <h3 className="text-2xl font-bold text-slate-900 mb-5 tracking-tight flex items-center gap-3">
                           <div className="w-1.5 h-6 bg-indigo-600 rounded-full" />
-                          รายละเอียดงาน
+                          {t.internshipsPage.jobDescription}
                         </h3>
                         <p className="text-slate-600 leading-relaxed whitespace-pre-line text-lg italic bg-slate-50/50 p-6 rounded-2xl border border-slate-100 font-medium">
                           "{selectedJob.description}"
@@ -244,7 +246,7 @@ export default function Internships() {
                       <section>
                         <h3 className="text-2xl font-bold text-slate-900 mb-6 tracking-tight flex items-center gap-3">
                           <div className="w-1.5 h-6 bg-emerald-500 rounded-full" />
-                          คุณสมบัติที่ต้องการ
+                          {t.internshipsPage.requirements}
                         </h3>
                         <div className="grid gap-3">
                           {selectedJob.requirements?.map((req, i) => (
@@ -264,10 +266,10 @@ export default function Internships() {
                 {/* Sticky Footer Action */}
                 <div className="absolute bottom-0 left-0 right-0 p-8 bg-white/60 backdrop-blur-2xl border-t border-white/60 flex justify-between items-center z-20">
                   <Button variant="outline" size="lg" className="rounded-2xl h-14 px-8 border-slate-200 font-bold hover:bg-slate-50">
-                    <Globe className="w-5 h-5 mr-3" /> เว็บไซต์บริษัท
+                    <Globe className="w-5 h-5 mr-3" /> {t.internshipsPage.website}
                   </Button>
                   <Button size="lg" className="rounded-2xl h-14 px-16 bg-slate-900 text-lg hover:bg-slate-800 shadow-2xl shadow-slate-900/40 font-bold tracking-tight transform active:scale-95 transition-all">
-                    สมัครงานตอนนี้
+                    {t.internshipsPage.applyNow}
                     <ChevronRight className="w-5 h-5 ml-2" />
                   </Button>
                 </div>
@@ -277,8 +279,8 @@ export default function Internships() {
                 <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6 border-2 border-dashed border-slate-200 shadow-inner">
                   <Briefcase className="w-12 h-12 opacity-20" />
                 </div>
-                <p className="font-bold text-lg">เลือกโอกาสที่คุณสนใจเพื่อดูรายละเอียด</p>
-                <p className="text-sm">ค้นหางานที่ใช่สำหรับอนาคตของคุณ</p>
+                <p className="font-bold text-lg">{t.internshipsPage.selectToView}</p>
+                <p className="text-sm">{t.internshipsPage.findYourFuture}</p>
               </div>
             )}
           </AnimatePresence>

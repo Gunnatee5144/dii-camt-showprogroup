@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { GraduationCap, BookOpen, CheckCircle2, Clock } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface DegreeProgressProps {
     totalCredits: number;
@@ -15,26 +16,27 @@ export function DegreeProgressCard({
     registeredCredits,
     requiredCredits,
 }: DegreeProgressProps) {
+    const { t } = useLanguage();
     const remainingCredits = requiredCredits - earnedCredits;
     const progressPercent = Math.min((earnedCredits / requiredCredits) * 100, 100);
 
     const stats = [
         {
-            label: 'หน่วยกิตที่ลงทะเบียน',
+            label: t.degreeProgress.registeredCredits,
             value: registeredCredits,
             icon: BookOpen,
             color: 'text-blue-600',
             bgColor: 'bg-blue-50',
         },
         {
-            label: 'หน่วยกิตที่เรียนแล้ว',
+            label: t.degreeProgress.completedCredits,
             value: earnedCredits,
             icon: CheckCircle2,
             color: 'text-emerald-600',
             bgColor: 'bg-emerald-50',
         },
         {
-            label: 'หน่วยกิตที่เหลือ',
+            label: t.degreeProgress.remainingCredits,
             value: remainingCredits,
             icon: Clock,
             color: 'text-orange-600',

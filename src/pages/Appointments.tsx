@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
     Calendar, Clock, Plus, CheckCircle, XCircle, User, MapPin, MessageSquare
 } from 'lucide-react';
@@ -22,6 +23,7 @@ const itemVariants = {
 };
 
 export default function Appointments() {
+    const { t } = useLanguage();
     const { user } = useAuth();
     const pendingCount = mockAppointments.filter(a => a.status === 'pending').length;
     const confirmedCount = mockAppointments.filter(a => a.status === 'confirmed').length;
@@ -29,9 +31,9 @@ export default function Appointments() {
 
     const getStatusBadge = (status: string) => {
         switch (status) {
-            case 'pending': return <Badge className="bg-orange-100 text-orange-700">รอยืนยัน</Badge>;
-            case 'confirmed': return <Badge className="bg-blue-100 text-blue-700">ยืนยันแล้ว</Badge>;
-            case 'completed': return <Badge className="bg-emerald-100 text-emerald-700">เสร็จสิ้น</Badge>;
+            case 'pending': return <Badge className="bg-orange-100 text-orange-700">{t.appointmentsPage.pendingTab}</Badge>;
+            case 'confirmed': return <Badge className="bg-blue-100 text-blue-700">{t.appointmentsPage.confirmedTab}</Badge>;
+            case 'completed': return <Badge className="bg-emerald-100 text-emerald-700">{t.appointmentsPage.completedTab}</Badge>;
             default: return <Badge>{status}</Badge>;
         }
     };
@@ -43,25 +45,25 @@ export default function Appointments() {
                 <div>
                     <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
                         <Calendar className="w-4 h-4 text-blue-500" />
-                        <span>{`${mockAppointments.length} นัดหมาย • ${pendingCount} รอยืนยัน`}</span>
+                        <span>{`${mockAppointments.length} ${t.appointmentsPage.titleHighlight} • ${pendingCount} ${t.appointmentsPage.subtitle}`}</span>
                     </motion.div>
                     <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                        ระบบ<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">นัดหมาย</span>
+                        {t.appointmentsPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">{t.appointmentsPage.titleHighlight}</span>
                     </motion.h1>
                 </div>
                 {!isTeacher && (
-                    <Button className="bg-gradient-to-r from-blue-500 to-cyan-500" onClick={() => toast.info('ระบบการจองกำลังปรับปรุง โปรดติดต่อเจ้าหน้าที่')}>
-                        <Plus className="w-4 h-4 mr-2" />จองนัดหมายใหม่
+                    <Button className="bg-gradient-to-r from-blue-500 to-cyan-500" onClick={() => toast.info(t.appointmentsPage.systemUpgrade)}>
+                        <Plus className="w-4 h-4 mr-2" />{t.appointmentsPage.newAppointment}
                     </Button>
                 )}
             </div>
 
             <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                    { label: 'รอยืนยัน', value: pendingCount, gradient: 'from-orange-500 to-amber-500', icon: Clock },
-                    { label: 'ยืนยันแล้ว', value: confirmedCount, gradient: 'from-blue-500 to-indigo-500', icon: Calendar },
-                    { label: 'เสร็จสิ้น', value: mockAppointments.filter(a => a.status === 'completed').length, gradient: 'from-emerald-500 to-teal-500', icon: CheckCircle },
-                    { label: 'ทั้งหมด', value: mockAppointments.length, gradient: 'from-purple-500 to-pink-500', icon: Calendar },
+                    { label: t.appointmentsPage.pendingTab, value: pendingCount, gradient: 'from-orange-500 to-amber-500', icon: Clock },
+                    { label: t.appointmentsPage.confirmedTab, value: confirmedCount, gradient: 'from-blue-500 to-indigo-500', icon: Calendar },
+                    { label: t.appointmentsPage.completedTab, value: mockAppointments.filter(a => a.status === 'completed').length, gradient: 'from-emerald-500 to-teal-500', icon: CheckCircle },
+                    { label: t.appointmentsPage.allTab, value: mockAppointments.length, gradient: 'from-purple-500 to-pink-500', icon: Calendar },
                 ].map((stat, i) => (
                     <motion.div key={i} whileHover={{ scale: 1.02 }} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradient} p-6 text-white shadow-xl`}>
                         <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
@@ -80,7 +82,7 @@ export default function Appointments() {
                 <motion.div variants={itemVariants}>
                     <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2"><User className="w-5 h-5" />อาจารย์ที่เปิดให้นัดพบ</CardTitle>
+                            <CardTitle className="flex items-center gap-2"><User className="w-5 h-5" />{t.appointmentsPage.availableLecturers}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -97,7 +99,7 @@ export default function Appointments() {
                                                     ))}
                                                 </div>
                                             </div>
-                                            <Button size="sm" onClick={() => toast.success(`ส่งคำขอจองเวลากับ ${lecturer.nameThai} แล้ว`)}>จองเวลา</Button>
+                                            <Button size="sm" onClick={() => toast.success(`${t.appointmentsPage.bookSuccess} ${lecturer.nameThai}`)}>{ t.appointmentsPage.bookTime}</Button>
                                         </div>
                                     </div>
                                 ))}
@@ -110,9 +112,9 @@ export default function Appointments() {
             <motion.div variants={itemVariants}>
                 <Tabs defaultValue="upcoming" className="space-y-4">
                     <TabsList className="bg-white/80 backdrop-blur-sm border shadow-sm">
-                        <TabsTrigger value="upcoming">กำลังจะมาถึง</TabsTrigger>
-                        <TabsTrigger value="pending">รอยืนยัน</TabsTrigger>
-                        <TabsTrigger value="completed">ประวัติ</TabsTrigger>
+                        <TabsTrigger value="upcoming">{t.appointmentsPage.upcomingTab}</TabsTrigger>
+                        <TabsTrigger value="pending">{t.appointmentsPage.pendingConfirm}</TabsTrigger>
+                        <TabsTrigger value="completed">{t.appointmentsPage.historyTab}</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="upcoming">
@@ -153,7 +155,7 @@ export default function Appointments() {
                                         </div>
                                         {isTeacher ? (
                                             <div className="flex gap-2">
-                                                <Button size="sm" className="bg-emerald-500"><CheckCircle className="w-4 h-4 mr-1" />ยืนยัน</Button>
+                                                <Button size="sm" className="bg-emerald-500"><CheckCircle className="w-4 h-4 mr-1" />{t.appointmentsPage.confirm}</Button>
                                                 <Button size="sm" variant="outline" className="text-red-600"><XCircle className="w-4 h-4" /></Button>
                                             </div>
                                         ) : getStatusBadge(apt.status)}

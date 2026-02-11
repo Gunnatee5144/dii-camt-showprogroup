@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { MapPin, Clock, GripVertical } from 'lucide-react';
 import { RescheduleDialog } from './RescheduleDialog';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Mock schedule data structure
 export interface ScheduleItem {
@@ -26,13 +27,14 @@ interface DraggableScheduleProps {
     onRequestMove?: (item: ScheduleItem, targetDay: number, targetTime: string, mode: 'permanent' | 'one-time') => void;
 }
 
-const DAYS = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์'];
 const TIME_SLOTS = [
     '08:00', '09:00', '10:00', '11:00', '12:00',
     '13:00', '14:00', '15:00', '16:00', '17:00'
 ];
 
 export function DraggableSchedule({ initialSchedule, editable = false, onRequestMove }: DraggableScheduleProps) {
+    const { t } = useLanguage();
+    const DAYS = [t.scheduleComponent.monday, t.scheduleComponent.tuesday, t.scheduleComponent.wednesday, t.scheduleComponent.thursday, t.scheduleComponent.friday];
     const [schedule, setSchedule] = useState(initialSchedule);
     const [draggedItem, setDraggedItem] = useState<ScheduleItem | null>(null);
     const [dropTarget, setDropTarget] = useState<{ day: number, time: string } | null>(null);

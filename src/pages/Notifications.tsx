@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Bell, Check, Trash2, Settings, Filter, Mail, Calendar, AlertTriangle, Info, CheckCircle, Plus, Save } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ const itemVariants = {
 };
 
 export default function Notifications() {
+    const { t } = useLanguage();
     const { user } = useAuth();
     const canManage = user?.role === 'admin' || user?.role === 'staff';
 
@@ -35,9 +37,9 @@ export default function Notifications() {
     const unreadCount = notifications.filter(n => !n.isRead).length;
 
     const handleDelete = (id: string) => {
-        if (confirm('ลบการแจ้งเตือนนี้?')) {
+        if (confirm(t.notificationsPage.deleteConfirm)) {
             setNotifications(notifications.filter(n => n.id !== id));
-            toast.success('ลบการแจ้งเตือนแล้ว');
+            toast.success(t.notificationsPage.deleteSuccess);
         }
     };
 
@@ -57,7 +59,7 @@ export default function Notifications() {
             channels: ['in-app']
         };
         setNotifications([newNotif as any, ...notifications]);
-        toast.success('สร้างประกาศใหม่แล้ว');
+        toast.success(t.notificationsPage.createSuccess);
         setIsDialogOpen(false);
         setFormData({ title: '', message: '', type: 'info', priority: 'normal' });
     };
@@ -74,10 +76,10 @@ export default function Notifications() {
 
     const getPriorityBadge = (priority: string) => {
         switch (priority) {
-            case 'urgent': return <Badge className="bg-red-100 text-red-700">ด่วนมาก</Badge>;
-            case 'high': return <Badge className="bg-orange-100 text-orange-700">ด่วน</Badge>;
-            case 'medium': return <Badge className="bg-blue-100 text-blue-700">ปานกลาง</Badge>;
-            default: return <Badge className="bg-gray-100 text-gray-700">ทั่วไป</Badge>;
+            case 'urgent': return <Badge className="bg-red-100 text-red-700">{t.notificationsPage.urgentHigh}</Badge>;
+            case 'high': return <Badge className="bg-orange-100 text-orange-700">{t.notificationsPage.urgent}</Badge>;
+            case 'medium': return <Badge className="bg-blue-100 text-blue-700">{t.notificationsPage.mediumPriority}</Badge>;
+            default: return <Badge className="bg-gray-100 text-gray-700">{t.notificationsPage.general}</Badge>;
         }
     };
 
@@ -88,31 +90,31 @@ export default function Notifications() {
                 <div>
                     <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
                         <Bell className="w-4 h-4 text-blue-500" />
-                        <span>ระบบแจ้งเตือน</span>
+                        <span>{t.notificationsPage.subtitle}</span>
                     </motion.div>
                     <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                        การแจ้ง<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">เตือน</span>
+                        {t.notificationsPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">{t.notificationsPage.titleHighlight}</span>
                     </motion.h1>
                     <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-slate-500 mt-2">
-                        {notifications.length} การแจ้งเตือน • {unreadCount} ยังไม่อ่าน
+                        {notifications.length} {t.notificationsPage.subtitle} • {unreadCount} {t.notificationsPage.unread}
                     </motion.p>
                 </div>
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex gap-2">
                     {canManage && (
                         <Button onClick={() => setIsDialogOpen(true)} className="rounded-xl bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-200">
-                            <Plus className="w-4 h-4 mr-2" />สร้างประกาศ
+                            <Plus className="w-4 h-4 mr-2" />{t.notificationsPage.createAnnouncement}
                         </Button>
                     )}
-                    <Button variant="outline" size="sm" className="rounded-xl"><Check className="w-4 h-4 mr-2" />อ่านทั้งหมด</Button>
+                    <Button variant="outline" size="sm" className="rounded-xl"><Check className="w-4 h-4 mr-2" />{t.notificationsPage.markAllRead}</Button>
                 </motion.div>
             </div>
 
             <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                    { label: 'ทั้งหมด', value: notifications.length, gradient: 'from-blue-500 to-indigo-500', icon: Bell },
-                    { label: 'ยังไม่อ่าน', value: unreadCount, gradient: 'from-orange-500 to-amber-500', icon: Mail },
-                    { label: 'ด่วน', value: notifications.filter(n => n.priority === 'urgent' || n.priority === 'high').length, gradient: 'from-red-500 to-rose-500', icon: AlertTriangle },
-                    { label: 'อ่านแล้ว', value: notifications.filter(n => n.isRead).length, gradient: 'from-emerald-500 to-teal-500', icon: CheckCircle },
+                    { label: t.notificationsPage.allTab, value: notifications.length, gradient: 'from-blue-500 to-indigo-500', icon: Bell },
+                    { label: t.notificationsPage.unreadTab, value: unreadCount, gradient: 'from-orange-500 to-amber-500', icon: Mail },
+                    { label: t.notificationsPage.urgentTab, value: notifications.filter(n => n.priority === 'urgent' || n.priority === 'high').length, gradient: 'from-red-500 to-rose-500', icon: AlertTriangle },
+                    { label: t.notificationsPage.readTab, value: notifications.filter(n => n.isRead).length, gradient: 'from-emerald-500 to-teal-500', icon: CheckCircle },
                 ].map((stat, i) => (
                     <motion.div key={i} whileHover={{ scale: 1.02 }} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradient} p-6 text-white shadow-xl`}>
                         <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
@@ -130,9 +132,9 @@ export default function Notifications() {
             <motion.div variants={itemVariants}>
                 <Tabs defaultValue="all" className="space-y-4">
                     <TabsList className="bg-white/80 backdrop-blur-sm border shadow-sm">
-                        <TabsTrigger value="all">ทั้งหมด</TabsTrigger>
-                        <TabsTrigger value="unread">ยังไม่อ่าน</TabsTrigger>
-                        <TabsTrigger value="urgent">ด่วน</TabsTrigger>
+                        <TabsTrigger value="all">{t.notificationsPage.allTab}</TabsTrigger>
+                        <TabsTrigger value="unread">{t.notificationsPage.unreadTab}</TabsTrigger>
+                        <TabsTrigger value="urgent">{t.notificationsPage.urgentTab}</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="all">
@@ -181,10 +183,10 @@ export default function Notifications() {
 
                     {/* Other tabs reusing similar structure or simplifying for brevity */}
                     <TabsContent value="unread">
-                        <div className="p-4 text-center text-gray-500">แสดงรายการที่ยังไม่อ่าน (Implementation same as All)</div>
+                        <div className="p-4 text-center text-gray-500">{t.notificationsPage.showUnread}</div>
                     </TabsContent>
                     <TabsContent value="urgent">
-                        <div className="p-4 text-center text-gray-500">แสดงรายการด่วน (Implementation same as All)</div>
+                        <div className="p-4 text-center text-gray-500">{t.notificationsPage.showUrgent}</div>
                     </TabsContent>
                 </Tabs>
             </motion.div>
@@ -193,48 +195,48 @@ export default function Notifications() {
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>สร้างประกาศ / แจ้งเตือน</DialogTitle>
-                        <DialogDescription>ส่งข้อความแจ้งเตือนถึงผู้ใช้งานทุกคน</DialogDescription>
+                        <DialogTitle>{t.notificationsPage.createTitle}</DialogTitle>
+                        <DialogDescription>{t.notificationsPage.createDesc}</DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="grid gap-2">
-                            <Label>หัวข้อ</Label>
+                            <Label>{t.notificationsPage.titleLabel}</Label>
                             <Input value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
                         </div>
                         <div className="grid gap-2">
-                            <Label>ข้อความ</Label>
+                            <Label>{t.notificationsPage.messageLabel}</Label>
                             <Textarea value={formData.message} onChange={e => setFormData({ ...formData, message: e.target.value })} />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="grid gap-2">
-                                <Label>ประเภท</Label>
+                                <Label>{t.notificationsPage.typeLabel}</Label>
                                 <Select value={formData.type} onValueChange={v => setFormData({ ...formData, type: v })}>
                                     <SelectTrigger><SelectValue /></SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="info">ทั่วไป (Information)</SelectItem>
-                                        <SelectItem value="success">สำเร็จ (Success)</SelectItem>
-                                        <SelectItem value="warning">เตือน (Warning)</SelectItem>
-                                        <SelectItem value="error">ข้อผิดพลาด (Error)</SelectItem>
+                                        <SelectItem value="info">{t.notificationsPage.typeGeneral}</SelectItem>
+                                        <SelectItem value="success">{t.notificationsPage.typeSuccess}</SelectItem>
+                                        <SelectItem value="warning">{t.notificationsPage.typeWarning}</SelectItem>
+                                        <SelectItem value="error">{t.notificationsPage.typeError}</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
                             <div className="grid gap-2">
-                                <Label>ความสำคัญ</Label>
+                                <Label>{t.notificationsPage.importanceLabel}</Label>
                                 <Select value={formData.priority} onValueChange={v => setFormData({ ...formData, priority: v })}>
                                     <SelectTrigger><SelectValue /></SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="normal">ปกติ</SelectItem>
-                                        <SelectItem value="high">ด่วน</SelectItem>
-                                        <SelectItem value="urgent">ด่วนมาก</SelectItem>
+                                        <SelectItem value="normal">{t.notificationsPage.importanceNormal}</SelectItem>
+                                        <SelectItem value="high">{t.notificationsPage.importanceUrgent}</SelectItem>
+                                        <SelectItem value="urgent">{t.notificationsPage.importanceVeryUrgent}</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsDialogOpen(false)}>ยกเลิก</Button>
+                        <Button variant="outline" onClick={() => setIsDialogOpen(false)}>{t.notificationsPage.cancelBtn}</Button>
                         <Button onClick={handleCreate} className="bg-purple-600 hover:bg-purple-700">
-                            <Save className="w-4 h-4 mr-2" />ส่งประกาศ
+                            <Save className="w-4 h-4 mr-2" />{t.notificationsPage.sendBtn}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

@@ -168,14 +168,7 @@ export function CreditMatrixCard() {
     const openCell = useCallback((row: RowKey, col: ColKey) => { setSelectedCell({ row, col }); setSheetMode('cell'); setSearch(''); setYearFilter('all'); setListTab('all'); setSheetOpen(true); }, []);
     const openRow  = useCallback((row: RowKey) => { setSelectedRow(row); setSheetMode('row'); setSearch(''); setYearFilter('all'); setListTab('all'); setSheetOpen(true); }, []);
     const openAll  = useCallback(() => { setSheetMode('all'); setSearch(''); setYearFilter('all'); setListTab('all'); setSheetOpen(true); }, []);
-    const togglePlanned = useCallback((id: string) => {
-        setPlanned(prev => {
-            const n = new Set(prev);
-            if (n.has(id)) n.delete(id);
-            else n.add(id);
-            return n;
-        });
-    }, []);
+    const togglePlanned = useCallback((id: string) => { setPlanned(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; }); }, []);
 
     return (
         <>

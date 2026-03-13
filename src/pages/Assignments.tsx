@@ -80,10 +80,26 @@ export default function Assignments() {
     const { user } = useAuth();
     const [searchQuery, setSearchQuery] = React.useState('');
     const [statusFilter, setStatusFilter] = React.useState('all');
+    const [selectedAssignment, setSelectedAssignment] = React.useState<typeof mockAssignments[0] | null>(null);
+    const [viewMode, setViewMode] = React.useState<'view' | 'grade'>('view');
 
     const activeAssignments = mockAssignments.filter(a => a.status === 'active').length;
     const completedAssignments = mockAssignments.filter(a => a.status === 'completed').length;
     const draftAssignments = mockAssignments.filter(a => a.status === 'draft').length;
+
+    const filterAssignments = (assignments: typeof mockAssignments, status?: string) => {
+        let result = assignments;
+        if (status && status !== 'all') result = result.filter(a => a.status === status);
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase();
+            result = result.filter(a =>
+                a.title.toLowerCase().includes(q) ||
+                a.courseName.toLowerCase().includes(q) ||
+                a.courseCode.toLowerCase().includes(q)
+            );
+        }
+        return result;
+    };
 
     const getStatusBadge = (status: string) => {
         switch (status) {
@@ -93,6 +109,109 @@ export default function Assignments() {
             default: return <Badge>{status}</Badge>;
         }
     };
+
+    // Detail / Grade view
+    if (selectedAssignment) {
+        const mockSubmissions = Array.from({ length: selectedAssignment.submissionCount }, (_, i) => ({
+            id: `S${i + 1}`,
+            name: `นักศึกษา ${i + 1}`,
+            studentId: `6421${10000 + i}`,
+            submittedAt: new Date(Date.now() - Math.random() * 86400000 * 5),
+            score: selectedAssignment.status === 'completed' ? Math.floor(Math.random() * selectedAssignment.maxScore * 0.4 + selectedAssignment.maxScore * 0.6) : null,
+        }));
+
+        return (
+            <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
+                <motion.div variants={itemVariants}>
+                    <Button variant="ghost" size="sm" onClick={() => setSelectedAssignment(null)} className="gap-2">
+                        <ChevronRight className="w-4 h-4 rotate-180" /> {t.assignmentsPage.allTab}
+                    </Button>
+                </motion.div>
+
+                <motion.div variants={itemVariants} className="p-6 rounded-3xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 text-white relative overflow-hidden">
+                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:20px_20px]" />
+                    <div className="relative z-10 flex items-start justify-between">
+                        <div>
+                            <h1 className="text-2xl font-bold mb-1">{selectedAssignment.title}</h1>
+                            <p className="text-white/80">{selectedAssignment.courseCode} • {selectedAssignment.courseName}</p>
+                            <div className="flex gap-3 mt-3">
+                                <Badge className="bg-white/20 text-white border-white/20">{selectedAssignment.type === 'group' ? t.assignmentsPage.group : t.assignmentsPage.individual}</Badge>
+                                <Badge className="bg-white/20 text-white border-white/20">{t.assignmentsPage.deadline} {selectedAssignment.dueDate.toLocaleDateString('th-TH')}</Badge>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <div className="text-sm text-white/70">{t.assignmentsPage.submitted}</div>
+                            <div className="text-3xl font-bold">{selectedAssignment.submissionCount}/{selectedAssignment.totalStudents}</div>
+                        </div>
+                    </div>
+                </motion.div>
+
+                <motion.div variants={itemVariants} className="flex gap-2">
+                    <Button variant={viewMode === 'view' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('view')}>{t.assignmentsPage.viewAssignment}</Button>
+                    <Button variant={viewMode === 'grade' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('grade')}>{t.assignmentsPage.gradeAssignment}</Button>
+                </motion.div>
+
+                <motion.div variants={itemVariants}>
+                    <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <FileText className="w-5 h-5 text-blue-500" />
+                                {viewMode === 'grade' ? t.assignmentsPage.gradeAssignment : t.assignmentsPage.viewAssignment}
+                                <span className="ml-auto text-sm font-normal text-gray-500">{mockSubmissions.length} {t.assignmentsPage.people}</span>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                            {mockSubmissions.length === 0 ? (
+                                <div className="text-center py-8 text-gray-400">ยังไม่มีนักศึกษาส่งงาน</div>
+                            ) : mockSubmissions.map((sub) => (
+                                <div key={sub.id} className="flex items-center gap-4 p-4 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
+                                    <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center font-bold text-blue-600 text-sm">
+                                        {sub.studentId.slice(-2)}
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="font-medium text-sm">{sub.name}</div>
+                                        <div className="text-xs text-gray-500">{sub.studentId} • ส่งเมื่อ {sub.submittedAt.toLocaleDateString('th-TH')}</div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        {viewMode === 'grade' ? (
+                                            <div className="flex items-center gap-2">
+                                                <Input
+                                                    type="number"
+                                                    defaultValue={sub.score ?? ''}
+                                                    placeholder="0"
+                                                    min={0}
+                                                    max={selectedAssignment.maxScore}
+                                                    className="w-20 h-8 text-center rounded-lg text-sm"
+                                                />
+                                                <span className="text-xs text-gray-400">/ {selectedAssignment.maxScore}</span>
+                                            </div>
+                                        ) : (
+                                            sub.score !== null ? (
+                                                <Badge className="bg-emerald-100 text-emerald-700">{sub.score}/{selectedAssignment.maxScore}</Badge>
+                                            ) : (
+                                                <Badge variant="outline" className="text-gray-500">รอตรวจ</Badge>
+                                            )
+                                        )}
+                                        <Button size="sm" variant="ghost" className="text-xs text-blue-500 hover:bg-blue-50">
+                                            <Upload className="w-3.5 h-3.5 mr-1" /> ดูไฟล์
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))}
+                            {viewMode === 'grade' && mockSubmissions.length > 0 && (
+                                <div className="pt-4 flex justify-end">
+                                    <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-200"
+                                        onClick={() => { setSelectedAssignment(null); }}>
+                                        <CheckCircle className="w-4 h-4 mr-2" /> บันทึกคะแนน
+                                    </Button>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            </motion.div>
+        );
+    }
 
     return (
         <motion.div
@@ -211,7 +330,9 @@ export default function Assignments() {
                         <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                             <CardContent className="pt-6">
                                 <div className="space-y-4">
-                                    {mockAssignments.map((assignment, index) => (
+                                    {filterAssignments(mockAssignments).length === 0 ? (
+                                        <div className="text-center py-8 text-gray-400">ไม่พบงานที่ค้นหา</div>
+                                    ) : filterAssignments(mockAssignments).map((assignment, index) => (
                                         <motion.div
                                             key={assignment.id}
                                             initial={{ opacity: 0, y: 10 }}
@@ -219,6 +340,7 @@ export default function Assignments() {
                                             transition={{ delay: index * 0.05 }}
                                             whileHover={{ scale: 1.01, x: 4 }}
                                             className="p-5 border rounded-xl hover:border-primary/30 hover:shadow-md transition-all cursor-pointer group bg-gradient-to-r from-gray-50/50 to-white"
+                                            onClick={() => { setSelectedAssignment(assignment); setViewMode('view'); }}
                                         >
                                             <div className="flex items-start justify-between mb-4">
                                                 <div className="flex-1">
@@ -259,8 +381,8 @@ export default function Assignments() {
                                                     />
                                                 </div>
                                                 <div className="flex gap-2">
-                                                    <Button size="sm" variant="outline">{t.assignmentsPage.viewAssignment}</Button>
-                                                    <Button size="sm" variant="outline">{t.assignmentsPage.gradeAssignment}</Button>
+                                                    <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setSelectedAssignment(assignment); setViewMode('view'); }}>{t.assignmentsPage.viewAssignment}</Button>
+                                                    <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setSelectedAssignment(assignment); setViewMode('grade'); }}>{t.assignmentsPage.gradeAssignment}</Button>
                                                 </div>
                                             </div>
                                         </motion.div>
@@ -274,13 +396,14 @@ export default function Assignments() {
                         <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                             <CardContent className="pt-6">
                                 <div className="space-y-4">
-                                    {mockAssignments.filter(a => a.status === 'active').map((assignment, index) => (
+                                    {filterAssignments(mockAssignments, 'active').map((assignment, index) => (
                                         <motion.div
                                             key={assignment.id}
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ delay: index * 0.05 }}
                                             className="p-5 border rounded-xl hover:border-primary/30 hover:shadow-md transition-all cursor-pointer group bg-gradient-to-r from-blue-50/50 to-white"
+                                            onClick={() => { setSelectedAssignment(assignment); setViewMode('view'); }}
                                         >
                                             <div className="flex items-start justify-between mb-4">
                                                 <div>
@@ -294,7 +417,7 @@ export default function Assignments() {
                                                     <Progress value={(assignment.submissionCount / assignment.totalStudents) * 100} className="h-2" />
                                                     <div className="text-sm text-gray-600 mt-1">{assignment.submissionCount}/{assignment.totalStudents} {t.assignmentsPage.submitted}</div>
                                                 </div>
-                                                <Button size="sm">{t.assignmentsPage.gradeAssignment}</Button>
+                                                <Button size="sm" onClick={(e) => { e.stopPropagation(); setSelectedAssignment(assignment); setViewMode('grade'); }}>{t.assignmentsPage.gradeAssignment}</Button>
                                             </div>
                                         </motion.div>
                                     ))}
@@ -307,8 +430,9 @@ export default function Assignments() {
                         <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                             <CardContent className="pt-6">
                                 <div className="space-y-4">
-                                    {mockAssignments.filter(a => a.status === 'completed').map((assignment) => (
-                                        <div key={assignment.id} className="p-5 border rounded-xl bg-emerald-50/50">
+                                    {filterAssignments(mockAssignments, 'completed').map((assignment) => (
+                                        <div key={assignment.id} className="p-5 border rounded-xl bg-emerald-50/50 hover:shadow-md transition-all cursor-pointer"
+                                            onClick={() => { setSelectedAssignment(assignment); setViewMode('view'); }}>
                                             <div className="flex items-center justify-between">
                                                 <div>
                                                     <h3 className="font-semibold text-lg">{assignment.title}</h3>
@@ -330,7 +454,7 @@ export default function Assignments() {
                         <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
                             <CardContent className="pt-6">
                                 <div className="space-y-4">
-                                    {mockAssignments.filter(a => a.status === 'draft').map((assignment) => (
+                                    {filterAssignments(mockAssignments, 'draft').map((assignment) => (
                                         <div key={assignment.id} className="p-5 border rounded-xl bg-gray-50/50">
                                             <div className="flex items-center justify-between">
                                                 <div>
@@ -338,7 +462,7 @@ export default function Assignments() {
                                                     <p className="text-sm text-gray-600">{assignment.courseCode}</p>
                                                 </div>
                                                 <div className="flex gap-2">
-                                                    <Button size="sm" variant="outline">{t.assignmentsPage.edit}</Button>
+                                                    <Button size="sm" variant="outline" onClick={() => { setSelectedAssignment(assignment); setViewMode('view'); }}>{t.assignmentsPage.edit}</Button>
                                                     <Button size="sm">{t.assignmentsPage.publish}</Button>
                                                 </div>
                                             </div>

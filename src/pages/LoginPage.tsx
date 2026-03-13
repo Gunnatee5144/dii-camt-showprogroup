@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { Mail, Lock, ArrowRight, Loader2, Globe } from 'lucide-react';
+import { Mail, Lock, ArrowRight, ArrowLeft, Loader2, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -33,42 +33,37 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex font-sans bg-white selection:bg-blue-100 selection:text-blue-900 overflow-hidden">
-      {/* Left Side - Visual */}
-      <div className="hidden lg:flex w-1/2 bg-slate-900 relative overflow-hidden items-center justify-center p-12">
+      {/* Left Side - Visual Form Premium Dark matching Register */}
+      <div className="hidden lg:flex w-1/2 bg-slate-900 relative overflow-hidden flex-col justify-between p-12">
         <div className="absolute inset-0 z-0">
           <img
             src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop"
             alt="Background"
-            className="w-full h-full object-cover opacity-30 mix-blend-overlay"
+            className="w-full h-full object-cover opacity-20 mix-blend-overlay"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-slate-900/10" />
-          {/* Animated particles or grid for premium feel */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/50 to-slate-900/80" />
+          {/* Animated particles */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] opacity-20"></div>
         </div>
 
-        <div className="relative z-10 text-white max-w-lg">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mb-8 shadow-2xl shadow-blue-500/20 border border-white/10"
-          >
-            <span className="text-2xl font-bold">D</span>
-          </motion.div>
+        <div className="relative z-10 w-full max-w-lg mx-auto">
+          <Link to="/" className="inline-block p-3 bg-white/10 rounded-2xl mb-8 backdrop-blur-sm border border-white/10 hover:bg-white/20 transition-colors">
+            <ArrowLeft className="w-6 h-6 text-white" />
+          </Link>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="text-5xl font-bold mb-6 leading-tight"
+            transition={{ delay: 0.2 }}
+            className="text-4xl font-bold mb-6 text-white leading-tight"
           >
             {t.login.welcomeTo}<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300">DII CAMT</span> Platform
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-400">DII CAMT</span> Platform
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="text-slate-300 text-lg leading-relaxed mb-10 font-light"
+            transition={{ delay: 0.3 }}
+            className="text-slate-300 text-lg leading-relaxed mb-12"
           >
             {t.login.systemDescription}
           </motion.p>
@@ -76,8 +71,8 @@ export default function LoginPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.5 }}
-            className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10"
+            transition={{ delay: 0.4 }}
+            className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/5"
           >
             <div className="flex items-center gap-4 mb-3">
               <div className="flex -space-x-3">
@@ -95,10 +90,14 @@ export default function LoginPage() {
             </p>
           </motion.div>
         </div>
+        
+        <div className="relative z-10 text-center text-slate-500 text-sm mt-12">
+            © 2026 DII CAMT. All rights reserved.
+        </div>
       </div>
 
       {/* Right Side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 bg-slate-50 relative">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 relative bg-slate-50">
         {/* Language Toggle */}
         <Button
           variant="ghost"

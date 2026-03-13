@@ -1,5 +1,7 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   User, Bell, Lock, Palette, LogOut, Settings as SettingsIcon, Shield,
@@ -14,7 +16,6 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -27,12 +28,47 @@ const itemVariants = {
 };
 
 export default function Settings() {
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const { user, logout } = useAuth();
+  const { theme, setTheme } = useTheme();
   const [activeTab, setActiveTab] = React.useState('profile');
 
+  // Profile form state
+  const [nameThai, setNameThai] = React.useState(user?.nameThai || '');
+  const [nameEn, setNameEn] = React.useState(user?.name || '');
+  const [email, setEmail] = React.useState(user?.email || '');
+  const [phone, setPhone] = React.useState('');
+
+  // Password form state
+  const [currentPwd, setCurrentPwd] = React.useState('');
+  const [newPwd, setNewPwd] = React.useState('');
+  const [confirmPwd, setConfirmPwd] = React.useState('');
+
   const handleSave = () => {
+    if (!nameThai.trim() || !nameEn.trim() || !email.trim()) {
+      toast.error('กรุณากรอกข้อมูลให้ครบถ้วน');
+      return;
+    }
     toast.success(t.settingsPage.savedSuccess);
+  };
+
+  const handlePasswordChange = () => {
+    if (!currentPwd) {
+      toast.error('กรุณากรอกรหัสผ่านปัจจุบัน');
+      return;
+    }
+    if (newPwd.length < 8) {
+      toast.error('รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร');
+      return;
+    }
+    if (newPwd !== confirmPwd) {
+      toast.error('รหัสผ่านใหม่ไม่ตรงกัน');
+      return;
+    }
+    setCurrentPwd('');
+    setNewPwd('');
+    setConfirmPwd('');
+    toast.success('เปลี่ยนรหัสผ่านเรียบร้อยแล้ว');
   };
 
   return (
@@ -183,19 +219,19 @@ export default function Settings() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2">
                       <Label className="ml-1 text-slate-700 font-bold">{t.settingsPage.nameThai}</Label>
-                      <Input defaultValue={user?.nameThai} className="h-14 rounded-2xl bg-white border-slate-100 shadow-inner px-5 font-medium focus-visible:ring-indigo-500" />
+                      <Input value={nameThai} onChange={e => setNameThai(e.target.value)} className="h-14 rounded-2xl bg-white border-slate-100 shadow-inner px-5 font-medium focus-visible:ring-indigo-500" />
                     </div>
                     <div className="space-y-2">
                       <Label className="ml-1 text-slate-700 font-bold">{t.settingsPage.nameEnglish}</Label>
-                      <Input defaultValue={user?.name} className="h-14 rounded-2xl bg-white border-slate-100 shadow-inner px-5 font-medium focus-visible:ring-indigo-500" />
+                      <Input value={nameEn} onChange={e => setNameEn(e.target.value)} className="h-14 rounded-2xl bg-white border-slate-100 shadow-inner px-5 font-medium focus-visible:ring-indigo-500" />
                     </div>
                     <div className="space-y-2">
                       <Label className="ml-1 text-slate-700 font-bold">{t.settingsPage.emailAddress}</Label>
-                      <Input defaultValue={user?.email} className="h-14 rounded-2xl bg-white border-slate-100 shadow-inner px-5 font-medium focus-visible:ring-indigo-500" />
+                      <Input value={email} onChange={e => setEmail(e.target.value)} className="h-14 rounded-2xl bg-white border-slate-100 shadow-inner px-5 font-medium focus-visible:ring-indigo-500" />
                     </div>
                     <div className="space-y-2">
                       <Label className="ml-1 text-slate-700 font-bold">{t.settingsPage.phoneNumber}</Label>
-                      <Input placeholder="+66 XX XXX XXXX" className="h-14 rounded-2xl bg-white border-slate-100 shadow-inner px-5 font-medium focus-visible:ring-indigo-500" />
+                      <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+66 XX XXX XXXX" className="h-14 rounded-2xl bg-white border-slate-100 shadow-inner px-5 font-medium focus-visible:ring-indigo-500" />
                     </div>
                   </div>
                 </motion.div>
@@ -279,20 +315,20 @@ export default function Settings() {
                       <div className="grid gap-6 relative z-10">
                         <div className="space-y-3">
                           <Label className="text-slate-300 font-bold ml-1">{t.settingsPage.currentPassword}</Label>
-                          <Input type="password" placeholder="••••••••" className="bg-white/5 border-white/10 text-white placeholder:text-white/20 h-14 rounded-2xl focus:bg-white/10 transition-all px-6 text-lg" />
+                          <Input type="password" value={currentPwd} onChange={e => setCurrentPwd(e.target.value)} placeholder="••••••••" className="bg-white/5 border-white/10 text-white placeholder:text-white/20 h-14 rounded-2xl focus:bg-white/10 transition-all px-6 text-lg" />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="space-y-3">
                             <Label className="text-slate-300 font-bold ml-1">{t.settingsPage.newPassword}</Label>
-                            <Input type="password" placeholder="••••••••" className="bg-white/5 border-white/10 text-white placeholder:text-white/20 h-14 rounded-2xl focus:bg-white/10 transition-all px-6 text-lg" />
+                            <Input type="password" value={newPwd} onChange={e => setNewPwd(e.target.value)} placeholder="••••••••" className="bg-white/5 border-white/10 text-white placeholder:text-white/20 h-14 rounded-2xl focus:bg-white/10 transition-all px-6 text-lg" />
                           </div>
                           <div className="space-y-3">
                             <Label className="text-slate-300 font-bold ml-1">{t.settingsPage.confirmNewPassword}</Label>
-                            <Input type="password" placeholder="••••••••" className="bg-white/5 border-white/10 text-white placeholder:text-white/20 h-14 rounded-2xl focus:bg-white/10 transition-all px-6 text-lg" />
+                            <Input type="password" value={confirmPwd} onChange={e => setConfirmPwd(e.target.value)} placeholder="••••••••" className="bg-white/5 border-white/10 text-white placeholder:text-white/20 h-14 rounded-2xl focus:bg-white/10 transition-all px-6 text-lg" />
                           </div>
                         </div>
                       </div>
-                      <Button className="mt-10 w-full bg-white text-slate-900 hover:bg-slate-100 rounded-[1.5rem] h-14 font-black text-base shadow-xl transform active:scale-[0.98] transition-all relative z-10">
+                      <Button onClick={handlePasswordChange} className="mt-10 w-full bg-white text-slate-900 hover:bg-slate-100 rounded-[1.5rem] h-14 font-black text-base shadow-xl transform active:scale-[0.98] transition-all relative z-10">
                         {t.settingsPage.updatePassword}
                       </Button>
                     </div>
@@ -338,24 +374,24 @@ export default function Settings() {
 
                   <div className="space-y-12">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="cursor-pointer group">
-                        <div className="aspect-[16/10] rounded-[2rem] bg-slate-50 border-4 border-indigo-600 mb-4 relative overflow-hidden shadow-2xl scale-[1.05]">
+                      <div className="cursor-pointer group" onClick={() => setTheme('light')}>
+                        <div className={`aspect-[16/10] rounded-[2rem] bg-slate-50 border-4 ${theme === 'light' || theme === undefined ? 'border-indigo-600' : 'border-transparent group-hover:border-slate-300'} mb-4 relative overflow-hidden shadow-2xl ${theme === 'light' || theme === undefined ? 'scale-[1.05]' : ''}`}>
                           <div className="absolute inset-4 bg-white rounded-[1.25rem] border border-slate-100 shadow-inner" />
                           <div className="absolute top-10 left-10 w-2/3 h-4 bg-slate-50 rounded-full" />
                           <div className="absolute top-18 left-10 w-1/3 h-24 bg-slate-50 rounded-2xl" />
                         </div>
                         <p className="text-center font-black text-slate-900 text-sm tracking-tight">{t.settingsPage.lightTheme}</p>
                       </div>
-                      <div className="cursor-pointer group opacity-60 hover:opacity-100 transition-all">
-                        <div className="aspect-[16/10] rounded-[2rem] bg-slate-900 border-4 border-transparent group-hover:border-slate-300 mb-4 relative overflow-hidden shadow-sm">
+                      <div className="cursor-pointer group" onClick={() => setTheme('dark')}>
+                        <div className={`aspect-[16/10] rounded-[2rem] bg-slate-900 border-4 ${theme === 'dark' ? 'border-indigo-600' : 'border-transparent group-hover:border-slate-300'} mb-4 relative overflow-hidden shadow-sm ${theme === 'dark' ? '' : 'opacity-60 group-hover:opacity-100 transition-all'}`}>
                           <div className="absolute inset-4 bg-slate-800 rounded-[1.25rem] border border-slate-700" />
                           <div className="absolute top-10 left-10 w-2/3 h-4 bg-slate-700 rounded-full" />
                           <div className="absolute top-18 left-10 w-1/3 h-24 bg-slate-700 rounded-2xl" />
                         </div>
                         <p className="text-center font-bold text-slate-500 text-sm tracking-tight">{t.settingsPage.darkTheme}</p>
                       </div>
-                      <div className="cursor-pointer group opacity-60 hover:opacity-100 transition-all">
-                        <div className="aspect-[16/10] rounded-[2rem] bg-gradient-to-br from-indigo-100 to-indigo-900 border-4 border-transparent group-hover:border-slate-300 mb-4 relative overflow-hidden shadow-sm flex items-center justify-center">
+                      <div className="cursor-pointer group" onClick={() => setTheme('system')}>
+                        <div className={`aspect-[16/10] rounded-[2rem] bg-gradient-to-br from-indigo-100 to-indigo-900 border-4 ${theme === 'system' ? 'border-indigo-600' : 'border-transparent group-hover:border-slate-300'} mb-4 relative overflow-hidden shadow-sm flex items-center justify-center ${theme === 'system' ? '' : 'opacity-60 group-hover:opacity-100 transition-all'}`}>
                           <Smartphone className="w-12 h-12 text-white/50" />
                         </div>
                         <p className="text-center font-bold text-slate-500 text-sm tracking-tight">{t.settingsPage.autoTheme}</p>
@@ -370,25 +406,25 @@ export default function Settings() {
                         {t.settingsPage.languageSettings}
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="p-6 rounded-[2rem] border-4 border-indigo-600 bg-white flex items-center justify-between cursor-pointer shadow-lg transform active:scale-[0.98] transition-all">
+                        <div onClick={() => setLanguage('th')} className={`p-6 rounded-[2rem] border-4 bg-white flex items-center justify-between cursor-pointer shadow-lg transform active:scale-[0.98] transition-all ${language === 'th' ? 'border-indigo-600' : 'border-slate-100 hover:border-slate-200'}`}>
                           <div className="flex items-center gap-6">
                             <span className="text-4xl filter drop-shadow-md">🇹🇭</span>
                             <div className="flex flex-col">
                               <span className="font-black text-xl text-slate-900 leading-tight">{t.settingsPage.thai}</span>
-                              <span className="text-xs font-bold text-indigo-500 uppercase tracking-widest">Selected</span>
+                              <span className={`text-xs font-bold uppercase tracking-widest ${language === 'th' ? 'text-indigo-500' : 'text-slate-400'}`}>{language === 'th' ? 'Selected' : 'Thai'}</span>
                             </div>
                           </div>
-                          <div className="w-6 h-6 rounded-full bg-indigo-600 border-4 border-white shadow-md" />
+                          <div className={`w-6 h-6 rounded-full border-4 border-white shadow-md ${language === 'th' ? 'bg-indigo-600' : 'border-slate-200'}`} />
                         </div>
-                        <div className="p-6 rounded-[2rem] border-2 border-slate-100 bg-white/50 hover:bg-white flex items-center justify-between cursor-pointer transition-all hover:border-slate-200">
+                        <div onClick={() => setLanguage('en')} className={`p-6 rounded-[2rem] border-2 bg-white/50 hover:bg-white flex items-center justify-between cursor-pointer transition-all ${language === 'en' ? 'border-indigo-600 border-4' : 'border-slate-100 hover:border-slate-200'}`}>
                           <div className="flex items-center gap-6">
-                            <span className="text-4xl filter drop-shadow-sm opacity-60">🇬🇧</span>
+                            <span className={`text-4xl filter drop-shadow-sm ${language === 'en' ? '' : 'opacity-60'}`}>🇬🇧</span>
                             <div className="flex flex-col">
-                              <span className="font-black text-xl text-slate-400 group-hover:text-slate-900 transition-colors leading-tight">English</span>
-                              <span className="text-[10px] font-bold text-slate-400 tracking-tight">EN-US / EN-GB</span>
+                              <span className={`font-black text-xl leading-tight ${language === 'en' ? 'text-slate-900' : 'text-slate-400'}`}>English</span>
+                              <span className={`text-xs font-bold tracking-tight ${language === 'en' ? 'text-indigo-500' : 'text-slate-400'}`}>{language === 'en' ? 'Selected' : 'EN-US / EN-GB'}</span>
                             </div>
                           </div>
-                          <div className="w-6 h-6 rounded-full border-2 border-slate-200 group-hover:border-slate-300 transition-colors" />
+                          <div className={`w-6 h-6 rounded-full border-4 border-white shadow-md ${language === 'en' ? 'bg-indigo-600' : 'border-slate-200'}`} />
                         </div>
                       </div>
                     </div>

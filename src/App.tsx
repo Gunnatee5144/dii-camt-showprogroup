@@ -49,6 +49,8 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Training from "./pages/Training";
 import SkillsRequirement from "./pages/SkillsRequirement";
+import { GlobalPreloader } from "@/components/common/GlobalPreloader";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -60,6 +62,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <GlobalPreloader />
               <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/register" element={<RegisterPage />} />

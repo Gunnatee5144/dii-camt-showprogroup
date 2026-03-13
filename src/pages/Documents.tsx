@@ -17,6 +17,22 @@ const itemVariants = {
 
 export default function Documents() {
     const { t } = useLanguage();
+    const [searchQuery, setSearchQuery] = React.useState('');
+
+    const pendingRequests = [
+        { id: 1, name: 'นายทดสอบ นักศึกษา', studentId: '642110001', type: 'ใบรับรองสถานภาพ', time: '2 ชั่วโมงที่แล้ว' },
+        { id: 2, name: 'นายทดสอบ นักศึกษา', studentId: '642110002', type: 'Transcript', time: '3 ชั่วโมงที่แล้ว' },
+        { id: 3, name: 'นายทดสอบ นักศึกษา', studentId: '642110003', type: 'หนังสือขอฝึกงาน', time: '5 ชั่วโมงที่แล้ว' },
+    ];
+
+    const filteredRequests = searchQuery.trim()
+        ? pendingRequests.filter(r =>
+            r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            r.studentId.includes(searchQuery) ||
+            r.type.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        : pendingRequests;
+
     const docTemplates = [
         { title: t.documentsPage.statusCert, desc: t.documentsPage.statusCertDesc, icon: FileText, color: 'from-blue-500 to-indigo-500' },
         { title: 'Transcript', desc: t.documentsPage.transcript, icon: FileText, color: 'from-emerald-500 to-teal-500' },
@@ -64,19 +80,26 @@ export default function Documents() {
                         </div>
                         <div className="relative w-56">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                            <Input placeholder={t.documentsPage.searchRequests} className="pl-9 rounded-xl bg-white/80" />
+                            <Input
+                                placeholder={t.documentsPage.searchRequests}
+                                className="pl-9 rounded-xl bg-white/80"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
                         </div>
                     </div>
                     <div className="space-y-2">
-                        {[1, 2, 3].map((i) => (
-                            <motion.div key={i} whileHover={{ x: 4 }} className="flex items-center justify-between p-4 rounded-2xl hover:bg-white border border-transparent hover:border-slate-100 hover:shadow-sm transition-all">
+                        {filteredRequests.length === 0 ? (
+                            <div className="text-center py-8 text-slate-400">{t.documentsPage.searchRequests}</div>
+                        ) : filteredRequests.map((req) => (
+                            <motion.div key={req.id} whileHover={{ x: 4 }} className="flex items-center justify-between p-4 rounded-2xl hover:bg-white border border-transparent hover:border-slate-100 hover:shadow-sm transition-all">
                                 <div className="flex items-center gap-4">
                                     <div className="w-11 h-11 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500">
                                         <Clock className="w-5 h-5" />
                                     </div>
                                     <div>
-                                        <p className="font-semibold text-slate-800">นายทดสอบ นักศึกษา ({642110000 + i})</p>
-                                        <p className="text-sm text-slate-400">ขอใบรับรองสถานภาพ • 2 ชั่วโมงที่แล้ว</p>
+                                        <p className="font-semibold text-slate-800">{req.name} ({req.studentId})</p>
+                                        <p className="text-sm text-slate-400">ขอ{req.type} • {req.time}</p>
                                     </div>
                                 </div>
                                 <div className="flex gap-2">

@@ -47,6 +47,7 @@ export default function TeacherDashboard() {
   const totalStudents = teacherCourses.reduce((sum, course) => sum + (course.enrolled || 0), 0);
   const teacherAppointments = mockAppointments.filter(apt => apt.lecturerId === teacher.id);
   const pendingAppointments = teacherAppointments.filter(apt => apt.status === 'pending').length;
+  const advisees = totalStudents;
 
   return (
     <motion.div

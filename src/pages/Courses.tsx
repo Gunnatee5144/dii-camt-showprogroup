@@ -29,7 +29,7 @@ const itemVariants = {
 
 export default function Courses() {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [searchQuery, setSearchQuery] = React.useState('');
 
   const filteredCourses = searchQuery
@@ -325,10 +325,140 @@ export default function Courses() {
     );
   }
 
-  // Fallback / Admin
+  // Staff/Admin View (Course administration)
+  if (user?.role === 'staff' || user?.role === 'admin') {
+    return (
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="space-y-8 pb-10"
+      >
+        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-4">
+          <div>
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
+              <BookOpen className="w-4 h-4 text-purple-500" />
+              <span>{t.coursesPage.semesterLabel}</span>
+            </motion.div>
+            <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              {t.coursesPage.manageCourses}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-fuchsia-600">
+                {t.coursesPage.manageCoursesHighlight}
+              </span>
+            </motion.h1>
+            <p className="text-slate-500 mt-2 text-sm">
+              {language === 'th'
+                ? 'จัดการรายวิชา (ตัวอย่างข้อมูล) — เพิ่ม/แก้ไข/ปิดรายวิชาผ่าน UI ได้'
+                : 'Course administration (mock data) — add/edit/disable courses via UI'}
+            </p>
+          </div>
+
+          <div className="flex gap-2">
+            <Button
+              className="h-11 px-5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white"
+              onClick={() => toast.info(language === 'th' ? 'โหมดสาธิต: ยังไม่เชื่อมต่อ Backend' : 'Demo mode: backend not connected yet')}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              {language === 'th' ? 'เพิ่มรายวิชา' : 'Add course'}
+            </Button>
+          </div>
+        </div>
+
+        <motion.div variants={itemVariants} className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Input
+              placeholder={t.coursesPage.searchCourses}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-12 h-12 rounded-2xl border-slate-200 bg-white/80 focus:bg-white transition-all shadow-sm focus:ring-2 focus:ring-purple-100"
+            />
+          </div>
+          <Button
+            variant="outline"
+            className="h-12 px-6 rounded-2xl border-slate-200 bg-white/80 hover:bg-white text-slate-700"
+            onClick={() => toast.info(language === 'th' ? 'ตัวกรองขั้นสูงจะเพิ่มในภายหลัง' : 'Advanced filters will be added later')}
+          >
+            <Filter className="w-4 h-4 mr-2" />
+            {t.coursesPage.filter}
+          </Button>
+        </motion.div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {filteredCourses.map((course) => (
+            <motion.div
+              variants={itemVariants}
+              key={course.id}
+              className="group bg-white/70 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm hover:shadow-xl hover:shadow-purple-500/10 transition-all overflow-hidden"
+            >
+              <div className="p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200 border-0">{course.code}</Badge>
+                      <Badge variant="outline" className="border-slate-200 text-slate-600 bg-white/60">
+                        {language === 'th' ? `${course.credits} หน่วยกิต` : `${course.credits} credits`}
+                      </Badge>
+                    </div>
+                    <div className="font-bold text-lg text-slate-900 truncate">{course.name}</div>
+                    <div className="text-sm text-slate-500 truncate">{course.nameThai}</div>
+                  </div>
+
+                  <div className="flex gap-2 shrink-0">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="rounded-xl"
+                      onClick={() => toast.info(language === 'th' ? `ดูรายละเอียด ${course.code}` : `View details ${course.code}`)}
+                    >
+                      {t.common.viewAll}
+                      <ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-xl"
+                      onClick={() => toast.info(language === 'th' ? 'แก้ไขรายวิชา (โหมดสาธิต)' : 'Edit course (demo)')}
+                    >
+                      <MoreHorizontal className="w-5 h-5 text-slate-500" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
+                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                    <div className="text-xs text-slate-500">{language === 'th' ? 'ผู้สอน' : 'Instructor'}</div>
+                    <div className="font-semibold text-slate-800 truncate">{course.lecturerName || t.coursesPage.instructorTBA}</div>
+                  </div>
+                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                    <div className="text-xs text-slate-500">{language === 'th' ? 'สถานะ' : 'Status'}</div>
+                    <div className="font-semibold text-emerald-700">{language === 'th' ? 'เปิดใช้งาน' : 'Active'}</div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Company/Other roles: show a friendly "not applicable" screen
   return (
-    <div className="p-8 text-center text-slate-500">
-      Coming soon for role: {user?.role}
-    </div>
+    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
+      <motion.div variants={itemVariants} className="bg-white/70 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm p-10 text-center">
+        <div className="mx-auto w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+          <AlertCircle className="w-7 h-7 text-slate-500" />
+        </div>
+        <div className="text-xl font-bold text-slate-900">
+          {language === 'th' ? 'หน้านี้ไม่รองรับสำหรับบทบาทของคุณ' : 'This page is not available for your role'}
+        </div>
+        <div className="text-slate-500 mt-2">
+          {language === 'th'
+            ? 'ระบบรายวิชาจะแสดงเฉพาะบทบาทที่เกี่ยวข้อง (นักศึกษา/อาจารย์/เจ้าหน้าที่/ผู้ดูแลระบบ)'
+            : 'Courses are shown only for relevant roles (student/lecturer/staff/admin).'}
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }

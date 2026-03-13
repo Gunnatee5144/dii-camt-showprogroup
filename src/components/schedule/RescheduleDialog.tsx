@@ -4,12 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Calendar, Repeat, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
+import type { ScheduleItem } from './DraggableSchedule';
 
 interface RescheduleDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onConfirm: (mode: 'permanent' | 'one-time') => void;
-    item?: any;
+    item?: ScheduleItem;
     targetTime?: string;
 }
 

@@ -30,8 +30,18 @@ export default function Schedule() {
   const [currentWeek, setCurrentWeek] = React.useState(0);
   const [isEditMode, setIsEditMode] = React.useState(false);
 
+  type ScheduleItem = {
+    id: string;
+    courseCode: string;
+    courseName: string;
+    day: number;
+    startTime: string;
+    endTime: string;
+    room: string;
+  };
+
   // Transform courses to schedule items
-  const scheduleItems: any[] = React.useMemo(() => {
+  const scheduleItems: ScheduleItem[] = React.useMemo(() => {
     return mockCourses.flatMap(course =>
       (course.schedule || []).map((slot, idx) => ({
         id: `${course.id}-${idx}`,
@@ -45,7 +55,7 @@ export default function Schedule() {
     ).filter(item => item.day > 0);
   }, []);
 
-  const handleRequestMove = (item: any, targetDay: number, targetTime: string, mode: string) => {
+  const handleRequestMove = (item: ScheduleItem, targetDay: number, targetTime: string, mode: 'permanent' | 'todayOnly') => {
     toast.success(t.schedulePage.editSuccess, {
       description: `${t.schedulePage.editSuccessDesc} (${mode === 'permanent' ? t.schedulePage.permanent : t.schedulePage.todayOnly})`
     });

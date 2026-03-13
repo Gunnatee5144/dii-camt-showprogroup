@@ -27,7 +27,7 @@ export default function Appointments() {
     const { user } = useAuth();
     const pendingCount = mockAppointments.filter(a => a.status === 'pending').length;
     const confirmedCount = mockAppointments.filter(a => a.status === 'confirmed').length;
-    const isTeacher = user?.role === 'teacher' || user?.role === 'lecturer';
+    const isTeacher = user?.role === 'lecturer';
 
     const getStatusBadge = (status: string) => {
         switch (status) {

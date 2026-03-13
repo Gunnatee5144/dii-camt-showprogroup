@@ -344,7 +344,8 @@ export default function Training() {
                           <Badge variant="outline" className={diff.color}>{diff.label}</Badge>
                           {quest.type === 'group' && (
                             <Badge variant="outline" className="text-purple-600 border-purple-200">
-                              <Users className="w-3 h-3 mr-1" />{(quest as any).groupSize}
+                              <Users className="w-3 h-3 mr-1" />
+                              {'groupSize' in quest ? quest.groupSize : ''}
                             </Badge>
                           )}
                         </div>

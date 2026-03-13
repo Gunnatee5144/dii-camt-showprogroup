@@ -30,6 +30,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { mockNotifications } from '@/lib/mockData';
+import type { UserRole } from '@/types';
 
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -52,7 +53,6 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
   const getRoleBadgeClass = (role: string) => {
     switch (role) {
       case 'student': return 'bg-role-student';
-      case 'teacher': return 'bg-role-teacher';
       case 'staff': return 'bg-role-staff';
       case 'company': return 'bg-role-company';
       default: return 'bg-primary';
@@ -173,13 +173,21 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
                   </DropdownMenuSubTrigger>
                   <DropdownMenuPortal>
                     <DropdownMenuSubContent className="p-1 rounded-xl shadow-xl border-slate-200">
-                      {['Student', 'Lecturer', 'Staff', 'Company', 'Admin'].map(role => (
+                      {(
+                        [
+                          { label: 'Student', value: 'student' },
+                          { label: 'Lecturer', value: 'lecturer' },
+                          { label: 'Staff', value: 'staff' },
+                          { label: 'Company', value: 'company' },
+                          { label: 'Admin', value: 'admin' },
+                        ] as const satisfies ReadonlyArray<{ label: string; value: UserRole }>
+                      ).map(({ label, value }) => (
                         <DropdownMenuItem
-                          key={role}
-                          onClick={() => switchRole(role.toLowerCase())}
+                          key={value}
+                          onClick={() => switchRole(value)}
                           className="rounded-lg cursor-pointer font-medium"
                         >
-                          {role}
+                          {label}
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuSubContent>

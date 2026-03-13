@@ -33,7 +33,7 @@ export function ActionCard({
 }: { 
   title: string; 
   description?: string; 
-  icon?: any; 
+  icon?: React.ElementType; 
   onClick?: () => void;
   variant?: 'default' | 'primary' | 'success' | 'warning';
 }) {

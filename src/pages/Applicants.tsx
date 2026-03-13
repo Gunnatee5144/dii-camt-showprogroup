@@ -11,6 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { mockJobPostings, mockStudents, mockCompany } from '@/lib/mockData';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import type { Application } from '@/types';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -51,8 +52,8 @@ export default function Applicants() {
     const pendingCount = visibleApplicants.filter(a => a.status === 'pending').length;
     const shortlistedCount = visibleApplicants.filter(a => a.status === 'shortlisted').length;
 
-    const handleStatusChange = (id: string, newStatus: string) => {
-        setApplicants(applicants.map(app => app.id === id ? { ...app, status: newStatus as any } : app));
+    const handleStatusChange = (id: string, newStatus: Application['status']) => {
+        setApplicants(applicants.map(app => app.id === id ? { ...app, status: newStatus } : app));
 
         const statusMap: Record<string, string> = {
             'shortlisted': t.applicants.shortlistAction,

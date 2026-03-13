@@ -18,7 +18,8 @@ const itemVariants = {
 
 export default function Personnel() {
     const { t } = useLanguage();
-    const allPersonnel = [...mockLecturers, ...mockStaffUsers];
+    type PersonnelRow = (typeof mockLecturers)[number] | (typeof mockStaffUsers)[number];
+    const allPersonnel: PersonnelRow[] = [...mockLecturers, ...mockStaffUsers];
 
     return (
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8 pb-10">
@@ -88,7 +89,7 @@ export default function Personnel() {
                             <div className="flex-1 min-w-0">
                                 <h3 className="font-bold text-slate-800 text-lg truncate">{person.nameThai}</h3>
                                 <p className="text-sm text-slate-500 mt-0.5">
-                                    {person.role === 'lecturer' ? t.personnelPage.lecturers : t.personnelPage.staffLabel} • {person.department || (person as any).position || 'CAMT'}
+                                    {person.role === 'lecturer' ? t.personnelPage.lecturers : t.personnelPage.staffLabel} • {('department' in person && person.department) ? person.department : ('position' in person ? person.position : 'CAMT')}
                                 </p>
                             </div>
                         </div>

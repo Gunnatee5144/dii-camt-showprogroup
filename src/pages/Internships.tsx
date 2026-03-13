@@ -52,7 +52,14 @@ export default function Internships() {
 
   const isSaved = (jobId: string) => savedJobs.includes(jobId);
 
-  const StatCard = ({ icon: Icon, label, value, gradient }: any) => (
+  type StatCardProps = {
+    icon: React.ElementType;
+    label: string;
+    value: React.ReactNode;
+    gradient: string;
+  };
+
+  const StatCard = ({ icon: Icon, label, value, gradient }: StatCardProps) => (
     <motion.div
       variants={itemVariants}
       whileHover={{ y: -5, scale: 1.02 }}

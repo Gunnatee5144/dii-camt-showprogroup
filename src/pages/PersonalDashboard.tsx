@@ -68,7 +68,7 @@ const transformGradesForCard = () => {
             courseName: course?.nameThai || course?.name || '',
             credits: course?.credits || 0,
             letterGrade: grade.letterGrade || 'I',
-            semester: `${course?.semester}/${course?.academicYear}` || '1/2568',
+            semester: course ? `${course.semester}/${course.academicYear}` : '1/2568',
             total: grade.total,
         };
     });

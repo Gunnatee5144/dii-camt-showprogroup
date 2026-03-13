@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { mockJobPostings, mockCompany } from '@/lib/mockData';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import type { JobPosting } from '@/types';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -33,8 +34,15 @@ export default function JobPostings() {
 
     const [jobs, setJobs] = useState(mockJobPostings);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [editingJob, setEditingJob] = useState<any>(null);
-    const [formData, setFormData] = useState<any>({ title: '', type: 'full-time', location: '', salary: '', positions: 1, deadline: '' });
+    const [editingJob, setEditingJob] = useState<JobPosting | null>(null);
+    const [formData, setFormData] = useState<{
+        title: string;
+        type: JobPosting['type'];
+        location: string;
+        salary: string;
+        positions: number;
+        deadline: string; // yyyy-mm-dd
+    }>({ title: '', type: 'full-time', location: '', salary: '', positions: 1, deadline: '' });
 
     const companyJobPostings = isCompany ? jobs.filter(j => j.companyId === mockCompany.id) : jobs;
     const openJobs = companyJobPostings.filter(j => j.status === 'open').length;
@@ -46,13 +54,13 @@ export default function JobPostings() {
         setIsDialogOpen(true);
     };
 
-    const handleEdit = (job: any) => {
+    const handleEdit = (job: JobPosting) => {
         setEditingJob(job);
         setFormData({
             title: job.title,
             type: job.type,
             location: job.location,
-            salary: job.salary,
+            salary: job.salary || '',
             positions: job.positions,
             deadline: new Date(job.deadline).toISOString().split('T')[0]
         });

@@ -19,6 +19,7 @@ export interface ScheduleItem {
     endTime: string;   // "12:00"
     room: string;
     lecturer?: string;
+    isOneTime?: boolean;
 }
 
 interface DraggableScheduleProps {
@@ -179,13 +180,13 @@ export function DraggableSchedule({ initialSchedule, editable = false, onRequest
                                             <motion.div
                                                 layoutId={item.id}
                                                 draggable={editable}
-                                                onDragStart={(e: any) => handleDragStart(e, item)}
+                                                onDragStart={(e: React.DragEvent) => handleDragStart(e, item)}
                                                 className={cn(
                                                     "h-full p-3 rounded-xl shadow-sm border text-left cursor-grab active:cursor-grabbing",
                                                     // Dynamic colors based on ID or hash
                                                     "bg-white border-l-4 border-l-blue-500",
                                                     editable ? "hover:shadow-md hover:scale-[1.02]" : "",
-                                                    (item as any).isOneTime ? "border-l-orange-500 ring-2 ring-orange-200" : ""
+                                                    item.isOneTime ? "border-l-orange-500 ring-2 ring-orange-200" : ""
                                                 )}
                                                 initial={{ opacity: 0, scale: 0.9 }}
                                                 animate={{ opacity: 1, scale: 1 }}
@@ -198,7 +199,7 @@ export function DraggableSchedule({ initialSchedule, editable = false, onRequest
                                                 <div className="flex items-center gap-1 mt-2 text-[10px] text-gray-500">
                                                     <MapPin className="w-3 h-3" /> {item.room}
                                                 </div>
-                                                {(item as any).isOneTime && (
+                                                {item.isOneTime && (
                                                     <Badge variant="outline" className="mt-2 text-[10px] bg-orange-50 text-orange-600 border-orange-200">
                                                         เปลี่ยนเฉพาะวันนี้
                                                     </Badge>

@@ -630,7 +630,7 @@ export interface TimelineEvent {
   isImportant: boolean;
   tags: string[];
 
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // ================================
@@ -674,7 +674,7 @@ export interface ConsentHistory {
 export interface Permission {
   resource: string;
   actions: ('create' | 'read' | 'update' | 'delete')[];
-  conditions?: Record<string, any>;
+  conditions?: Record<string, unknown>;
 }
 
 export interface AuditLog {
@@ -684,7 +684,7 @@ export interface AuditLog {
   action: string;
   resource: string;
   resourceId?: string;
-  changes?: Record<string, any>;
+  changes?: Record<string, unknown>;
   ipAddress?: string;
   timestamp: Date;
   status: 'success' | 'failed';
@@ -712,7 +712,7 @@ export interface AutomationRule {
     type: 'notification' | 'email' | 'task' | 'api_call';
     target: string;
     template?: string;
-    data?: Record<string, any>;
+    data?: Record<string, unknown>;
   };
 
   // Status

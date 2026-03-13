@@ -134,7 +134,15 @@ export default function Requests() {
     }
   };
 
-  const StatCard = ({ icon: Icon, label, value, gradient, delay }: any) => (
+  type StatCardProps = {
+    icon: React.ElementType;
+    label: string;
+    value: React.ReactNode;
+    gradient: string;
+    delay?: number;
+  };
+
+  const StatCard = ({ icon: Icon, label, value, gradient }: StatCardProps) => (
     <motion.div
       variants={itemVariants}
       whileHover={{ y: -5, scale: 1.02 }}

@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mockNotifications } from '@/lib/mockData';
 import { toast } from 'sonner';
+import type { Notification } from '@/types';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -30,9 +31,14 @@ export default function Notifications() {
     const { user } = useAuth();
     const canManage = user?.role === 'admin' || user?.role === 'staff';
 
-    const [notifications, setNotifications] = useState(mockNotifications);
+    const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [formData, setFormData] = useState({ title: '', message: '', type: 'info', priority: 'normal' });
+    const [formData, setFormData] = useState<{
+        title: string;
+        message: string;
+        type: Notification['type'];
+        priority: Notification['priority'];
+    }>({ title: '', message: '', type: 'info', priority: 'medium' });
 
     const unreadCount = notifications.filter(n => !n.isRead).length;
 
@@ -44,24 +50,24 @@ export default function Notifications() {
     };
 
     const handleCreate = () => {
-        const newNotif = {
+        const newNotif: Notification = {
             id: Math.random().toString(36).substr(2, 9),
+            recipientId: 'STU001',
+            recipientRole: 'student',
+            title: formData.title,
             titleThai: formData.title,
+            message: formData.message,
             messageThai: formData.message,
-            titleEnglish: formData.title,
-            messageEnglish: formData.message,
-            type: formData.type as any,
-            priority: formData.priority as any,
+            type: formData.type,
+            priority: formData.priority,
             isRead: false,
-            createdAt: new Date().toISOString(),
-            recipientId: 'all',
-            recipientRole: 'all',
-            channels: ['in-app']
+            channels: ['in-app'],
+            createdAt: new Date(),
         };
-        setNotifications([newNotif as any, ...notifications]);
+        setNotifications([newNotif, ...notifications]);
         toast.success(t.notificationsPage.createSuccess);
         setIsDialogOpen(false);
-        setFormData({ title: '', message: '', type: 'info', priority: 'normal' });
+        setFormData({ title: '', message: '', type: 'info', priority: 'medium' });
     };
 
     const getTypeIcon = (type: string) => {

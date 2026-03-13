@@ -53,7 +53,15 @@ export default function Portfolio() {
     );
   }
 
-  const StatCard = ({ icon: Icon, label, value, gradient, delay }: any) => (
+  type StatCardProps = {
+    icon: React.ElementType;
+    label: string;
+    value: React.ReactNode;
+    gradient: string;
+    delay?: number;
+  };
+
+  const StatCard = ({ icon: Icon, label, value, gradient }: StatCardProps) => (
     <motion.div
       variants={itemVariants}
       whileHover={{ y: -5, scale: 1.02 }}
@@ -175,7 +183,7 @@ export default function Portfolio() {
                     <div className="h-48 overflow-hidden relative">
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
                       <img
-                        src={(project as any).images?.[0] || `https://placehold.co/600x400/indigo/white?text=${project.title}`}
+                        src={project.images?.[0] || `https://placehold.co/600x400/indigo/white?text=${project.title}`}
                         alt={project.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />

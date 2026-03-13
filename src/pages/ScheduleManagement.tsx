@@ -46,7 +46,7 @@ export default function ScheduleManagement() {
         { name: 'CAMT-411 (Auditorium)', capacity: 150, status: 'maintenance' },
     ];
 
-    const handleApprove = (req: any) => {
+    const handleApprove = (req: { id: number; lecturer: string }) => {
         toast.success(`${t.scheduleManagementPage.approveSuccess} - ${req.lecturer}`, {
             description: t.scheduleManagementPage.approveDesc
         });

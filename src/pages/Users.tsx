@@ -27,7 +27,18 @@ export default function UsersPage() {
     const { t } = useLanguage();
     const [searchQuery, setSearchQuery] = useState('');
     // Merge all mock users into one state for CRUD simulation
-    const [users, setUsers] = useState([
+    type UserType = 'student' | 'lecturer' | 'staff' | 'company';
+    type UserRow = {
+        id: string;
+        name: string;
+        email?: string;
+        type: UserType;
+        roleLabel: string;
+        image?: string;
+        [key: string]: unknown;
+    };
+
+    const [users, setUsers] = useState<UserRow[]>([
         ...mockStudents.map(u => ({ ...u, type: 'student', name: u.nameThai, roleLabel: t.roles.student })),
         ...mockLecturers.map(u => ({ ...u, type: 'lecturer', name: u.nameThai, roleLabel: t.roles.lecturer })),
         ...mockStaffUsers.map(u => ({ ...u, type: 'staff', name: u.nameThai, roleLabel: t.roles.staff })),
@@ -35,8 +46,8 @@ export default function UsersPage() {
     ]);
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [editingUser, setEditingUser] = useState<any>(null);
-    const [formData, setFormData] = useState<any>({ name: '', email: '', role: 'student', status: 'active' });
+    const [editingUser, setEditingUser] = useState<UserRow | null>(null);
+    const [formData, setFormData] = useState<{ name: string; email: string; role: UserType; status: 'active' | 'inactive' }>({ name: '', email: '', role: 'student', status: 'active' });
 
     const totalUsers = users.length;
 
@@ -46,7 +57,7 @@ export default function UsersPage() {
         setIsDialogOpen(true);
     };
 
-    const handleEdit = (user: any) => {
+    const handleEdit = (user: UserRow) => {
         setEditingUser(user);
         setFormData({ name: user.name, email: user.email || '', role: user.type, status: 'active' });
         setIsDialogOpen(true);

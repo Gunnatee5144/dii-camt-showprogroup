@@ -50,7 +50,17 @@ export default function Activities() {
     );
   }
 
-  const StatCard = ({ icon: Icon, label, value, subtext, gradient, delay, onClick }: any) => (
+  type StatCardProps = {
+    icon: React.ElementType;
+    label: string;
+    value: React.ReactNode;
+    subtext?: React.ReactNode;
+    gradient: string;
+    delay?: number;
+    onClick?: () => void;
+  };
+
+  const StatCard = ({ icon: Icon, label, value, subtext, gradient, onClick }: StatCardProps) => (
     <motion.div
       variants={itemVariants}
       whileHover={{ y: -5, scale: 1.02 }}

@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Timetable } from '@/components/common/Timetable';
 import { StudentTimeline } from '@/components/common/StudentTimeline';
 import { DegreeProgressCard } from '@/components/dashboard/DegreeProgressCard';
+import { CreditMatrixCard } from '@/components/dashboard/CreditMatrixCard';
 import { GPAHistoryCard } from '@/components/dashboard/GPAHistoryCard';
 import { TechnicalSkillsRubricCard } from '@/components/dashboard/TechnicalSkillsRubricCard';
 import { SoftSkillsRubricCard } from '@/components/dashboard/SoftSkillsRubricCard';
@@ -92,7 +93,7 @@ const transformGradesForCard = () => {
       courseName: course?.nameThai || course?.name || '',
       credits: course?.credits || 0,
       letterGrade: grade.letterGrade || 'I',
-      semester: `${course?.semester}/${course?.academicYear}` || '1/2568',
+      semester: course ? `${course.semester}/${course.academicYear}` : '1/2568',
       total: grade.total,
     };
   });
@@ -363,13 +364,21 @@ export default function StudentDashboard() {
           {/* Schedule Tab */}
           {activeTab === 'schedule' && (
             <TabsContent value="schedule" className="mt-0" key="schedule" forceMount>
-              <motion.div variants={itemVariants} className="bg-white/80 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">
-                <Timetable
-                  courses={studentCourses}
-                  semester={student.semester}
-                  academicYear={student.academicYear}
-                />
-              </motion.div>
+              <div className="space-y-6">
+                {/* Credit matrix table */}
+                <motion.div variants={itemVariants}>
+                  <CreditMatrixCard />
+                </motion.div>
+
+                {/* Weekly timetable */}
+                <motion.div variants={itemVariants} className="bg-white/80 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">
+                  <Timetable
+                    courses={studentCourses}
+                    semester={student.semester}
+                    academicYear={student.academicYear}
+                  />
+                </motion.div>
+              </div>
             </TabsContent>
           )}
 

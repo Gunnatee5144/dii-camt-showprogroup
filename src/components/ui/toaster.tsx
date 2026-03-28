@@ -19,8 +19,8 @@ export function Toaster() {
         const icon = variantIcons[variant as keyof typeof variantIcons] || null;
         return (
           <Toast key={id} variant={variant} {...props}>
-            {icon}
-            <div className="grid gap-1.5 flex-1">
+            {icon && <div className="mt-0.5">{icon}</div>}
+            <div className="grid gap-1 flex-1">
               {title && <ToastTitle>{title}</ToastTitle>}
               {description && <ToastDescription>{description}</ToastDescription>}
             </div>

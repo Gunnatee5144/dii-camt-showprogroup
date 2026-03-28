@@ -2,34 +2,24 @@ import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const loadingTexts = [
-  "Awakening the interface...",
-  "Polishing pixels ✨",
-  "Sprinkling some magic...",
-  "Almost ready for you."
-];
-
 export function GlobalPreloader() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
-  const [textIndex, setTextIndex] = useState(0);
 
   useEffect(() => {
-    setIsLoading(true);
-    const timeout = setTimeout(() => {
+    const isPublicRoute = ['/', '/login', '/register'].includes(location.pathname);
+    const duration = isPublicRoute ? 2400 : 0; 
+
+    if (duration > 0) {
+      setIsLoading(true);
+      const timeout = setTimeout(() => {
+        setIsLoading(false);
+      }, duration); 
+      return () => clearTimeout(timeout);
+    } else {
       setIsLoading(false);
-    }, 2800); 
-    return () => clearTimeout(timeout);
-  }, [location.pathname]);
-
-  useEffect(() => {
-    if (isLoading) {
-      const interval = setInterval(() => {
-        setTextIndex(prev => (prev + 1) % loadingTexts.length);
-      }, 600);
-      return () => clearInterval(interval);
     }
-  }, [isLoading]);
+  }, [location.pathname]);
 
   return (
     <AnimatePresence>
@@ -37,94 +27,77 @@ export function GlobalPreloader() {
         <motion.div
           key="preloader"
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0, filter: "blur(20px)", scale: 1.05, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }}
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white/60 backdrop-blur-3xl overflow-hidden font-sans selection:bg-none"
+          exit={{ opacity: 0, transition: { duration: 1.2, ease: [0.16, 1, 0.3, 1] } }}
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#ffffff] dark:bg-[#000000] font-sans selection:bg-none"
         >
-          {/* Ambient Pastel Glows for that elegant, "expensive" feel */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 flex items-center justify-center">
-             <motion.div 
-                animate={{ rotate: 360, scale: [1, 1.2, 1] }}
-                transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                className="w-[80vw] h-[80vw] max-w-[600px] max-h-[600px] bg-gradient-to-tr from-blue-100 via-indigo-50 to-purple-100 rounded-full blur-[80px] opacity-70"
-             />
-          </div>
+          {/* Subtle noise texture overlay for a premium film-like feel */}
+          <div className="absolute inset-0 opacity-[0.015] dark:opacity-[0.03] pointer-events-none mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}></div>
 
           <div className="relative z-10 flex flex-col items-center">
             
-            {/* Playful yet Professional Main Element: Floating Prism */}
-            <motion.div
-              animate={{ y: [-5, 5, -5] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="relative w-32 h-32 mb-10 flex items-center justify-center"
-            >
-               {/* Behind the glass glow */}
-               <motion.div 
-                 animate={{ rotate: -360 }}
-                 transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                 className="absolute inset-2 bg-gradient-to-r from-blue-400 via-indigo-500 to-cyan-400 rounded-full blur-xl opacity-50"
-               />
-               
-               {/* Glass morphed shape */}
-               <motion.div 
-                 animate={{
-                   borderRadius: [
-                     "40% 60% 70% 30% / 40% 50% 60% 50%", 
-                     "60% 40% 30% 70% / 60% 30% 70% 40%", 
-                     "40% 60% 70% 30% / 40% 50% 60% 50%"
-                   ]
-                 }}
-                 transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                 className="absolute inset-0 bg-white/70 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_rgba(59,130,246,0.1)] flex items-center justify-center overflow-hidden"
-               >
-                 {/* Internal sweeping sheen */}
-                 <motion.div 
-                   animate={{ x: ['-200%', '200%'] }}
-                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
-                   className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/60 to-transparent skew-x-12"
-                 />
-                 
-                 <span className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-slate-700 to-slate-900 drop-shadow-sm font-serif italic pr-1">
-                   D
-                 </span>
-               </motion.div>
-            </motion.div>
+            {/* Extremely precise geometric typography */}
+            <div className="flex items-center justify-center h-16 mb-8 overflow-hidden">
+              <motion.div 
+                initial={{ y: "100%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                className="flex items-center gap-6"
+              >
+                <div className="flex items-center">
+                  <span className="text-3xl md:text-4xl font-light text-black dark:text-white tracking-[0.4em] translate-x-[0.2em]">
+                    DII
+                  </span>
+                </div>
+                
+                {/* Micro-interaction element: expanding dash */}
+                <motion.div 
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: "24px", opacity: 1 }}
+                  transition={{ delay: 0.6, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                  className="h-[1px] bg-black/40 dark:bg-white/40" 
+                />
+                
+                <div className="flex items-center">
+                  <span className="text-3xl md:text-4xl font-semibold text-black dark:text-white tracking-[0.4em] translate-x-[0.2em]">
+                    CAMT
+                  </span>
+                </div>
+              </motion.div>
+            </div>
 
-            {/* Elegant Changing Text Pill */}
-            <motion.div 
-              layout
-              className="bg-white/80 backdrop-blur-md border border-slate-100/80 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.08)] rounded-full px-8 py-3.5 flex items-center gap-4 relative overflow-hidden"
-            >
-               {/* Minimal Loading Spinner inside the pill */}
-               <motion.div 
-                 animate={{ rotate: 360 }}
-                 transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                 className="w-4 h-4 rounded-full border-2 border-slate-200 border-t-blue-500 border-r-blue-500"
-               />
-               
-               <div className="h-5 flex items-center overflow-hidden min-w-[170px] relative pointer-events-none">
-                 <AnimatePresence mode="wait">
-                   <motion.div
-                     key={textIndex}
-                     initial={{ opacity: 0, y: 15, filter: "blur(4px)" }}
-                     animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                     exit={{ opacity: 0, y: -15, filter: "blur(4px)" }}
-                     transition={{ duration: 0.3 }}
-                     className="text-slate-600 font-medium text-sm tracking-wide absolute w-full font-sans"
-                   >
-                     {loadingTexts[textIndex]}
-                   </motion.div>
-                 </AnimatePresence>
-               </div>
-            </motion.div>
-
-            {/* Bottom Progress elegant mini-bar */}
-            <div className="mt-8 w-12 h-1 bg-slate-200/50 rounded-full overflow-hidden">
-               <motion.div 
-                 initial={{ x: "-100%" }}
-                 animate={{ x: "100%" }}
-                 transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                 className="w-full h-full bg-slate-400 rounded-full"
-               />
+            {/* Hyper-minimal loading indicator */}
+            <div className="flex flex-col items-center gap-5 mt-4">
+              {/* Expanding line that transforms into a progress bar */}
+              <motion.div 
+                initial={{ opacity: 0, scaleX: 0 }}
+                animate={{ opacity: 1, scaleX: 1 }}
+                transition={{ delay: 0.4, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                className="w-48 md:w-64 h-[1px] bg-black/10 dark:bg-white/10 overflow-hidden relative origin-center"
+              >
+                <motion.div 
+                  className="absolute top-0 left-0 h-full bg-black dark:bg-white origin-left"
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ delay: 0.8, duration: 1.5, ease: [0.65, 0, 0.35, 1] }}
+                />
+              </motion.div>
+              
+              <motion.div 
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.2, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="flex items-center gap-2"
+              >
+                {/* Blinking status dot */}
+                <motion.div 
+                  animate={{ opacity: [1, 0.3, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                  className="w-1.5 h-1.5 rounded-full bg-black dark:bg-white"
+                />
+                <span className="text-[10px] uppercase tracking-[0.3em] text-black/50 dark:text-white/50 font-medium">
+                  Initializing
+                </span>
+              </motion.div>
             </div>
 
           </div>

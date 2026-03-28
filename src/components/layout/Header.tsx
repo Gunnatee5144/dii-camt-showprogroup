@@ -76,9 +76,9 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
         ? 'py-2 bg-white/70 backdrop-blur-2xl border-b border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.03)]' 
         : 'py-0 bg-transparent border-b border-transparent'
     }`}>
-      <div className={`mx-auto px-4 md:px-8 transition-all duration-500 ${scrolled ? 'h-16' : 'h-24'} flex items-center justify-between`}>
+      <div className={`mx-auto px-4 md:px-8 transition-all duration-500 ${scrolled ? 'h-16' : 'h-24'} flex items-center justify-between gap-4`}>
         
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 md:gap-6 shrink-0">
           {/* Mobile Menu Toggle */}
           <Button
             variant="ghost"
@@ -96,8 +96,8 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
              </div>
              <div className="flex flex-col justify-center">
                <div className="flex items-center gap-2">
-                 <h1 className="text-[15px] font-bold text-slate-800 tracking-tight leading-none">{getPageTitle()}</h1>
-                 <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-widest">{user?.role || 'Guest'}</span>
+                 <h1 className="text-[15px] font-bold text-slate-800 tracking-tight leading-none min-w-max">{getPageTitle()}</h1>
+                 <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-widest min-w-max">{user?.role || 'Guest'}</span>
                </div>
                <p className="text-[11px] text-slate-400 font-medium mt-1 leading-none">{t.header?.overview || 'System Overview'}</p>
              </div>
@@ -105,15 +105,15 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
         </div>
 
         {/* Global Search Bar (Mac Spotlight Style) */}
-        <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 w-full max-w-md">
+        <div className="hidden lg:flex flex-1 max-w-[400px] justify-center ml-auto mr-4 md:mr-8 transition-all">
           <div className={`w-full flex items-center gap-3 px-4 rounded-full border bg-white/40 backdrop-blur-xl transition-all duration-300 ${scrolled ? 'h-10 border-slate-200/60 shadow-sm' : 'h-12 border-slate-200/40 shadow-[inset_0_2px_10px_rgba(255,255,255,1),0_2px_15px_rgba(0,0,0,0.02)]'}`}>
-             <Search className="w-4 h-4 text-slate-400" />
+             <Search className="w-4 h-4 text-slate-400 shrink-0" />
              <input 
                type="text" 
                placeholder="Search anywhere..." 
                className="bg-transparent border-none outline-none w-full text-sm text-slate-700 placeholder:text-slate-400 font-medium"
              />
-             <div className="flex items-center gap-1">
+             <div className="flex items-center gap-1 shrink-0">
                <kbd className="hidden sm:inline-flex items-center justify-center h-5 px-1.5 rounded border border-slate-200 bg-slate-100/50 text-[10px] font-sans font-medium text-slate-400">⌘</kbd>
                <kbd className="hidden sm:inline-flex items-center justify-center h-5 px-1.5 rounded border border-slate-200 bg-slate-100/50 text-[10px] font-sans font-medium text-slate-400">K</kbd>
              </div>
@@ -121,7 +121,7 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
         </div>
 
         {/* Right Side Actions */}
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-2 md:gap-3 shrink-0">
           {/* Glassy Language Toggle */}
           <Button
             variant="ghost"

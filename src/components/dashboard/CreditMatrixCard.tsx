@@ -190,14 +190,24 @@ export function CreditMatrixCard() {
 
     const sheetCredits = sheetCourses.reduce((s, c) => s + c.credits, 0);
 
-    const coursesByYear = useMemo(() => {
-        const map: Record<number, typeof sheetCourses> = {};
+    const coursesByYearAndSemester = useMemo(() => {
+        const map: Record<number, Record<number, typeof sheetCourses>> = {};
         sheetCourses.forEach(c => {
-            (map[c.year] ??= []).push(c);
+            if (!map[c.year]) map[c.year] = {};
+            if (!map[c.year][c.semester]) map[c.year][c.semester] = [];
+            map[c.year][c.semester].push(c);
         });
         return Object.entries(map)
             .sort(([a], [b]) => Number(a) - Number(b))
-            .map(([year, courses]) => ({ year: Number(year), courses }));
+            .map(([year, semestersMap]) => ({
+                year: Number(year),
+                semesters: Object.entries(semestersMap)
+                    .sort(([a], [b]) => Number(a) - Number(b))
+                    .map(([semester, courses]) => ({
+                        semester: Number(semester),
+                        courses
+                    }))
+            }));
     }, [sheetCourses]);
 
     const openCategory = useCallback((category: RowKey) => {
@@ -484,94 +494,111 @@ export function CreditMatrixCard() {
                             </div>
                         ) : (
                             <div className="p-6 space-y-6">
-                                {coursesByYear.map(({ year, courses }) => {
-                                    const yearCompleted = courses.filter(c => c.status === 'completed').reduce((s, c) => s + c.credits, 0);
-                                    const yearTotal = courses.reduce((s, c) => s + c.credits, 0);
+                                {coursesByYearAndSemester.map(({ year, semesters }) => {
+                                    const yearCompleted = semesters.flatMap(s => s.courses).filter(c => c.status === 'completed').reduce((s, c) => s + c.credits, 0);
+                                    const yearTotal = semesters.flatMap(s => s.courses).reduce((s, c) => s + c.credits, 0);
 
                                     return (
-                                        <div key={year}>
+                                        <div key={year} className="mb-6 bg-slate-100/30 dark:bg-slate-800/20 rounded-xl p-4 sm:p-5 border border-slate-200/60 dark:border-slate-800/60 backdrop-blur-sm shadow-sm relative">
                                             {/* Year Header */}
-                                            <div className="flex items-center justify-between gap-3 mb-4 sticky top-0 bg-slate-50 dark:bg-slate-950 dark:bg-slate-900/50 py-2 -mx-6 px-6 pb-3 border-b border-slate-200 dark:border-slate-700 dark:border-slate-800">
+                                            <div className="flex items-center justify-between gap-3 mb-5 border-b border-slate-200/80 dark:border-slate-700/50 pb-3">
                                                 <div className="flex items-center gap-3">
-                                                    <Badge className="bg-blue-600 dark:bg-blue-700 text-white text-xs font-semibold">
+                                                    <Badge className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold shadow-sm px-3 py-1">
                                                         {isTH ? `ปีที่ ${year}` : `Year ${year}`}
                                                     </Badge>
-                                                    <span className="text-xs text-slate-500 dark:text-slate-400">
-                                                        {yearCompleted}/{yearTotal} {isTH ? 'หน่วยกิต' : 'cr.'}
+                                                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400 bg-white/50 dark:bg-slate-900/50 px-2 py-0.5 rounded-md">
+                                                        {yearCompleted} / {yearTotal} {isTH ? 'หน่วยกิต' : 'cr.'}
                                                     </span>
                                                 </div>
-                                                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
-                                                    {courses.length} {isTH ? 'วิชา' : 'courses'}
+                                                <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">
+                                                    {semesters.flatMap(s => s.courses).length} {isTH ? 'วิชา' : 'courses'}
                                                 </span>
                                             </div>
 
-                                            {/* Courses */}
-                                            <div className="space-y-2">
-                                                {courses.map((course, idx) => {
-                                                    const statusConfig = STATUS_CONFIG[course.status];
+                                            {/* Semesters */}
+                                            <div className="space-y-6">
+                                                {semesters.map(({ semester, courses }) => (
+                                                    <div key={semester} className="space-y-3 pl-1 sm:pl-2">
+                                                        {/* Semester Header */}
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <div className="h-4 w-1 bg-indigo-500/70 dark:bg-indigo-400/70 rounded-full" />
+                                                            <h5 className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                                                                {isTH ? `ภาคการศึกษาที่ ${semester}` : `Semester ${semester}`}
+                                                            </h5>
+                                                        </div>
 
-                                                    return (
-                                                        <motion.div
-                                                            key={course.id}
-                                                            initial={{ opacity: 0, y: 10 }}
-                                                            animate={{ opacity: 1, y: 0 }}
-                                                            transition={{ delay: idx * 0.05 }}
-                                                            className={`bg-white dark:bg-slate-800 border-l-4 border-slate-200 dark:border-slate-700 rounded-lg p-4 transition-all hover:shadow-md cursor-pointer`}
-                                                            style={{
-                                                                borderLeftColor:
-                                                                    course.status === 'completed'
-                                                                        ? '#10b981'
-                                                                        : course.status === 'inProgress'
-                                                                            ? '#3b82f6'
-                                                                            : '#cbd5e1',
-                                                            }}
-                                                        >
-                                                            <div className="flex items-start justify-between gap-3 mb-3">
-                                                                <div className="flex-1">
-                                                                    <div className="flex items-center gap-2 mb-1">
-                                                                        <span className="font-mono text-xs font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 dark:bg-slate-900 px-2.5 py-1 rounded">
-                                                                            {course.code}
-                                                                        </span>
-                                                                        {course.grade && (
-                                                                            <Badge className={`text-xs font-bold ${course.grade.startsWith('A') ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' : 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'}`}>
-                                                                                {course.grade}
+                                                        {/* Courses */}
+                                                        <div className="grid gap-3 pl-3 border-l-2 border-indigo-500/10 dark:border-indigo-400/10">
+                                                            {courses.map((course, idx) => {
+                                                                const statusConfig = STATUS_CONFIG[course.status];
+
+                                                                return (
+                                                                    <motion.div
+                                                                        key={course.id}
+                                                                        initial={{ opacity: 0, x: -10 }}
+                                                                        animate={{ opacity: 1, x: 0 }}
+                                                                        transition={{ delay: idx * 0.05 }}
+                                                                        className={`bg-white dark:bg-slate-900 border-l-4 border border-slate-100 dark:border-slate-800 rounded-xl p-4 transition-all hover:shadow-md cursor-pointer group`}
+                                                                        style={{
+                                                                            borderLeftColor:
+                                                                                course.status === 'completed'
+                                                                                    ? '#10b981'
+                                                                                    : course.status === 'inProgress'
+                                                                                        ? '#3b82f6'
+                                                                                        : '#cbd5e1',
+                                                                        }}
+                                                                    >
+                                                                        <div className="flex items-start justify-between gap-3 mb-3">
+                                                                            <div className="flex-1">
+                                                                                <div className="flex items-center gap-2 mb-1.5">
+                                                                                    <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded border border-indigo-100 dark:border-indigo-900/50">
+                                                                                        {course.code}
+                                                                                    </span>
+                                                                                    {course.grade && (
+                                                                                        <Badge className={`text-xs font-bold ${course.grade.startsWith('A') ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' : 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'}`}>
+                                                                                            {course.grade}
+                                                                                        </Badge>
+                                                                                    )}
+                                                                                </div>
+                                                                                <h4 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                                                                    {isTH ? course.nameTH : course.nameEN}
+                                                                                </h4>
+                                                                            </div>
+                                                                            <div className="text-right shrink-0 bg-slate-50 dark:bg-slate-800 rounded-lg p-2 border border-slate-100 dark:border-slate-700/50">
+                                                                                <div className="text-sm font-bold text-slate-900 dark:text-white leading-none mb-1">
+                                                                                    {course.credits}
+                                                                                </div>
+                                                                                <div className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 leading-none">
+                                                                                    {isTH ? 'หน่วยกิต' : 'CR.'}
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        {/* Status and Category Badges */}
+                                                                        <div className="flex flex-wrap items-center gap-2 mt-2">
+                                                                            <Badge className={`text-[10px] px-1.5 py-0 ${statusConfig.color.includes('emerald') ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50' : statusConfig.color.includes('blue') ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800/50' : 'bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'} font-medium`}>
+                                                                                {statusConfig.icon}
+                                                                                <span className="ml-1">{isTH ? statusConfig.labelTH : statusConfig.labelEN}</span>
                                                                             </Badge>
+                                                                            {selectedCategory || (
+                                                                                <Badge className="text-[10px] px-1.5 py-0 bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-medium">
+                                                                                    {isTH ? CATEGORY_CONFIG[course.category].labelTH : CATEGORY_CONFIG[course.category].labelEN}
+                                                                                </Badge>
+                                                                            )}
+                                                                        </div>
+
+                                                                        {/* Description */}
+                                                                        {course.description && (
+                                                                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-3 line-clamp-1 border-t border-slate-100 dark:border-slate-800 pt-2">
+                                                                                {course.description}
+                                                                            </p>
                                                                         )}
-                                                                    </div>
-                                                                    <h4 className="font-semibold text-slate-900 dark:text-white text-sm">
-                                                                        {isTH ? course.nameTH : course.nameEN}
-                                                                    </h4>
-                                                                </div>
-                                                                <div className="text-right shrink-0">
-                                                                    <div className="text-sm font-bold text-slate-900 dark:text-white dark:text-white">
-                                                                        {course.credits}
-                                                                    </div>
-                                                                    <div className="text-xs text-slate-500 dark:text-slate-400">
-                                                                        {isTH ? 'หน่วยกิต' : 'cr.'}
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Status and Category Badges */}
-                                                            <div className="flex flex-wrap items-center gap-2 mb-3">
-                                                                <Badge className={`text-[11px] ${statusConfig.color.includes('emerald') ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' : statusConfig.color.includes('blue') ? 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800' : 'bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 dark:border-slate-700'} font-medium`}>
-                                                                    {statusConfig.icon}
-                                                                    <span className="ml-1">{isTH ? statusConfig.labelTH : statusConfig.labelEN}</span>
-                                                                </Badge>
-                                                                {selectedCategory || (
-                                                                    <Badge className="text-[11px] bg-slate-100 dark:bg-slate-800 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 font-medium">
-                                                                        {isTH ? CATEGORY_CONFIG[course.category].labelTH : CATEGORY_CONFIG[course.category].labelEN}
-                                                                    </Badge>
-                                                                )}
-                                                            </div>
-
-                                                            {/* Description */}
-                                                            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
-                                                                {course.description}
-                                                            </p>
-                                                        </motion.div>
-                                                    );
-                                                })}
+                                                                    </motion.div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                ))}
                                             </div>
                                         </div>
                                     );

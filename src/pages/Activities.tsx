@@ -24,9 +24,93 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
+function CalendarView({ activities, isTH }: { activities: any[], isTH: boolean }) {
+  const [currentDate, setCurrentDate] = React.useState(() => {
+    const upcoming = activities.find((a: any) => a.status === 'upcoming');
+    return upcoming ? new Date(upcoming.startDate) : new Date();
+  });
+
+  const getDaysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  const getFirstDayOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+
+  const daysInMonth = getDaysInMonth(currentDate);
+  const firstDay = getFirstDayOfMonth(currentDate);
+
+  const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+  const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+
+  const monthNamesTH = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+  const monthNamesEN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const dayNamesTH = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+  const dayNamesEN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  const emptyDays = Array.from({ length: firstDay }, (_, i) => i);
+  const daysLabels = isTH ? dayNamesTH : dayNamesEN;
+  
+  const currentMonthName = isTH ? monthNamesTH[currentDate.getMonth()] : monthNamesEN[currentDate.getMonth()];
+  const currentYear = currentDate.getFullYear() + (isTH ? 543 : 0);
+
+  return (
+    <div className="w-full flex flex-col pt-2 pb-6 px-1">
+      <div className="flex justify-between items-center w-full mb-6 max-w-5xl mx-auto">
+        <h3 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
+          {currentMonthName} {currentYear}
+        </h3>
+        <div className="flex gap-2">
+          <Button variant="outline" size="icon" onClick={prevMonth} className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 dark:bg-slate-900/50">
+             &lt;
+          </Button>
+          <Button variant="outline" size="icon" onClick={nextMonth} className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 dark:bg-slate-900/50">
+             &gt;
+          </Button>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-7 gap-2 sm:gap-3 lg:gap-4 w-full max-w-5xl mx-auto">
+        {daysLabels.map(day => (
+          <div key={day} className="text-center text-sm font-bold text-slate-400 uppercase tracking-wider pb-2">
+            {day}
+          </div>
+        ))}
+        {emptyDays.map(i => <div key={`empty-${i}`} />)}
+        {days.map(day => {
+          const cellDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+          const dateStr = cellDate.toDateString();
+          const dayActivities = activities.filter((a: any) => new Date(a.startDate).toDateString() === dateStr);
+          const isToday = cellDate.toDateString() === new Date().toDateString();
+          
+          return (
+             <div
+              key={day} 
+              className={`min-h-[100px] flex flex-col border ${isToday ? 'border-blue-400 bg-blue-50/50 dark:bg-blue-900/20' : 'border-slate-200/60 dark:border-slate-700/50 bg-white/40 dark:bg-slate-900/40'} backdrop-blur-xl rounded-2xl p-2 sm:p-3 overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300`}
+            >
+              <div className={`text-sm font-bold w-6 h-6 flex items-center justify-center rounded-full mb-1 ${isToday ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30' : 'text-slate-700 dark:text-slate-300'}`}>
+                {day}
+              </div>
+              <div className="space-y-1.5 flex-1 w-full hide-scrollbar overflow-y-auto">
+                {dayActivities.map((a: any, idx: number) => (
+                  <div 
+                    key={idx} 
+                    className="text-[10px] sm:text-xs font-medium bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-950/60 dark:to-blue-900/50 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800/60 px-1.5 py-1 rounded-md line-clamp-2 leading-tight shadow-sm hover:shadow-md transition-all cursor-pointer"
+                    title={isTH ? a.titleThai || a.title : a.title}
+                  >
+                    {isTH ? a.titleThai || a.title : a.title}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function Activities() {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isTH = language !== 'en';
   const [activeTab, setActiveTab] = React.useState('upcoming');
 
   const upcomingActivities = mockActivities.filter(a => a.status === 'upcoming');
@@ -174,6 +258,12 @@ export default function Activities() {
                   {t.activitiesPage.upcomingTab}
                 </TabsTrigger>
                 <TabsTrigger
+                  value="calendar"
+                  className="rounded-xl px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-lg shadow-blue-500/10 transition-all duration-300 font-medium text-slate-600 dark:text-slate-300 dark:bg-slate-900/50"
+                >
+                  {isTH ? 'ปฏิทินกิจกรรม' : 'Calendar'}
+                </TabsTrigger>
+                <TabsTrigger
                   value="history"
                   className="rounded-xl px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-lg shadow-blue-500/10 transition-all duration-300 font-medium text-slate-600 dark:text-slate-300 dark:bg-slate-900/50"
                 >
@@ -251,6 +341,19 @@ export default function Activities() {
                     <p className="text-lg font-medium">{t.activitiesPage.noHistory}</p>
                     <p className="text-sm">{t.activitiesPage.startCollecting}</p>
                   </div>
+                </TabsContent>
+              )}
+
+              {activeTab === 'calendar' && (
+                <TabsContent value="calendar" className="mt-0" key="calendar" forceMount>
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-[2rem] p-4 sm:p-6 shadow-sm dark:bg-slate-900/50"
+                  >
+                    <CalendarView activities={mockActivities} isTH={isTH} />
+                  </motion.div>
                 </TabsContent>
               )}
             </AnimatePresence>

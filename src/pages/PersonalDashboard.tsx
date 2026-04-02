@@ -165,7 +165,7 @@ export default function PersonalDashboard() {
                     <div className="flex flex-col gap-3">
                         <Button
                             onClick={() => navigate('/portfolio')}
-                            className="bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl"
+                            className="bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl dark:bg-slate-900/50"
                         >
                             <User className="w-4 h-4 mr-2" />
                             {t.common.details} Portfolio
@@ -173,7 +173,7 @@ export default function PersonalDashboard() {
                         <Button
                             onClick={() => navigate('/settings')}
                             variant="ghost"
-                            className="text-slate-300 hover:text-white hover:bg-white/10 rounded-xl"
+                            className="text-slate-300 hover:text-white hover:bg-white/10 rounded-xl dark:bg-slate-900/50"
                         >
                             {t.personalDashboard.editProfile}
                         </Button>
@@ -188,19 +188,19 @@ export default function PersonalDashboard() {
                     {/* Class Schedule */}
                     <motion.div variants={itemVariants}>
                         <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                <Calendar className="w-5 h-5 text-purple-500" />
+                            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                                <Calendar className="w-5 h-5 text-purple-500 dark:text-slate-400" />
                                 {t.personalDashboard.schedule}
                             </h2>
                             <Button
                                 variant="ghost"
                                 onClick={() => navigate('/schedule')}
-                                className="text-slate-500 hover:text-purple-600"
+                                className="text-slate-500 hover:text-purple-600 dark:text-slate-300"
                             >
                                 {t.personalDashboard.fullscreen} <ChevronRight className="w-4 h-4 ml-1" />
                             </Button>
                         </div>
-                        <div className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">
+                        <div className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-6 shadow-sm dark:bg-slate-900/50">
                             <Timetable
                                 courses={studentCourses}
                                 semester={student.semester}

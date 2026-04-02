@@ -138,9 +138,9 @@ export function DraggableSchedule({ initialSchedule, editable = false, onRequest
             <div className="overflow-x-auto pb-4">
                 <div className="min-w-[800px] grid grid-cols-[100px_repeat(5,1fr)] gap-2">
                     {/* Header Row */}
-                    <div className="font-semibold text-gray-500 text-center py-2 bg-gray-50 rounded-lg">เวลา</div>
+                    <div className="font-semibold text-gray-500 dark:text-slate-400 text-center py-2 bg-gray-50 rounded-lg dark:bg-slate-800">เวลา</div>
                     {DAYS.map((day, i) => (
-                        <div key={day} className="font-semibold text-gray-700 text-center py-2 bg-blue-50/50 rounded-lg border border-blue-100">
+                        <div key={day} className="font-semibold text-gray-700 dark:text-slate-300 text-center py-2 bg-blue-50/50 rounded-lg border border-blue-100">
                             {day}
                         </div>
                     ))}
@@ -148,7 +148,7 @@ export function DraggableSchedule({ initialSchedule, editable = false, onRequest
                     {/* Time Slots */}
                     {TIME_SLOTS.map((time) => (
                         <React.Fragment key={time}>
-                            <div className="text-sm text-gray-500 font-medium py-4 text-center border-t relative">
+                            <div className="text-sm text-gray-500 dark:text-slate-400 font-medium py-4 text-center border-t relative">
                                 <span className="-top-3 relative bg-background px-1">{time}</span>
                             </div>
 
@@ -192,15 +192,15 @@ export function DraggableSchedule({ initialSchedule, editable = false, onRequest
                                                 animate={{ opacity: 1, scale: 1 }}
                                             >
                                                 <div className="flex justify-between items-start mb-1">
-                                                    <span className="font-bold text-sm text-gray-800">{item.courseCode}</span>
+                                                    <span className="font-bold text-sm text-gray-800 dark:text-slate-200">{item.courseCode}</span>
                                                     {editable && <GripVertical className="w-4 h-4 text-gray-400" />}
                                                 </div>
-                                                <div className="text-xs text-gray-600 line-clamp-1">{item.courseName}</div>
-                                                <div className="flex items-center gap-1 mt-2 text-[10px] text-gray-500">
+                                                <div className="text-xs text-gray-600 dark:text-slate-400 line-clamp-1">{item.courseName}</div>
+                                                <div className="flex items-center gap-1 mt-2 text-[10px] text-gray-500 dark:text-slate-400">
                                                     <MapPin className="w-3 h-3" /> {item.room}
                                                 </div>
                                                 {item.isOneTime && (
-                                                    <Badge variant="outline" className="mt-2 text-[10px] bg-orange-50 text-orange-600 border-orange-200">
+                                                    <Badge variant="outline" className="mt-2 text-[10px] bg-orange-50 text-orange-600 border-orange-200 dark:text-slate-300">
                                                         เปลี่ยนเฉพาะวันนี้
                                                     </Badge>
                                                 )}

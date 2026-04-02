@@ -124,7 +124,7 @@ export default function InternTracking() {
         <motion.div variants={itemVariants} className="p-6 rounded-3xl bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 text-white relative overflow-hidden">
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:20px_20px]" />
           <div className="relative z-10 flex items-center gap-6">
-            <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-3xl font-bold border border-white/20">
+            <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-3xl font-bold border border-white/20 dark:bg-slate-900/50">
               {selectedIntern.avatar}
             </div>
             <div className="flex-1">
@@ -138,7 +138,7 @@ export default function InternTracking() {
             <div className="text-right">
               <div className="text-sm text-white/70">{tr.overallScore}</div>
               <div className="text-4xl font-bold">{avgScore}</div>
-              <Badge className="bg-white/20 text-white border-white/20 mt-1">{getScoreLabel(avgScore)}</Badge>
+              <Badge className="bg-white/20 text-white border-white/20 mt-1 dark:bg-slate-900/50">{getScoreLabel(avgScore)}</Badge>
             </div>
           </div>
         </motion.div>
@@ -155,7 +155,7 @@ export default function InternTracking() {
               <CardContent className="p-4 text-center">
                 <metric.icon className={`w-5 h-5 mx-auto mb-2 ${getScoreColor(metric.value)}`} />
                 <div className={`text-2xl font-bold ${getScoreColor(metric.value)}`}>{metric.value}%</div>
-                <div className="text-xs text-slate-500 mt-1">{metric.label}</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{metric.label}</div>
               </CardContent>
             </Card>
           ))}
@@ -165,18 +165,18 @@ export default function InternTracking() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-orange-500" /> {tr.weeklyReport}
+                <FileText className="w-5 h-5 text-orange-500 dark:text-slate-400" /> {tr.weeklyReport}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {perf.weeklyReports.map((report) => (
-                <div key={report.week} className={`flex items-center gap-4 p-4 rounded-xl border transition-colors ${report.submitted ? 'bg-white border-slate-100' : 'bg-slate-50 border-slate-100 opacity-60'}`}>
-                  <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center font-bold text-orange-600">
+                <div key={report.week} className={`flex items-center gap-4 p-4 rounded-xl border transition-colors ${report.submitted ? 'bg-white border-slate-100' : 'bg-slate-50 border-slate-100 dark:border-slate-800 opacity-60'} dark:bg-slate-900/50`}>
+                  <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center font-bold text-orange-600 dark:text-slate-300">
                     W{report.week}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-sm">{tr.weekLabel} {report.week}</div>
-                    <div className="text-xs text-slate-500 truncate">
+                    <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
                       {language === 'th' ? report.summary : report.summaryEn}
                     </div>
                   </div>
@@ -184,10 +184,10 @@ export default function InternTracking() {
                     {report.submitted ? (
                       <>
                         <div className={`text-lg font-bold ${getScoreColor(report.score)}`}>{report.score}</div>
-                        <Badge variant="outline" className="text-emerald-600 border-emerald-200 text-xs">{tr.submitted}</Badge>
+                        <Badge variant="outline" className="text-emerald-600 border-emerald-200 text-xs dark:text-slate-300">{tr.submitted}</Badge>
                       </>
                     ) : (
-                      <Badge variant="outline" className="text-slate-400 border-slate-200 text-xs">{tr.pending}</Badge>
+                      <Badge variant="outline" className="text-slate-400 border-slate-200 dark:border-slate-700 text-xs">{tr.pending}</Badge>
                     )}
                   </div>
                 </div>
@@ -203,11 +203,11 @@ export default function InternTracking() {
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8 pb-10">
       <div>
-        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
-          <Briefcase className="w-4 h-4 text-orange-500" />
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2">
+          <Briefcase className="w-4 h-4 text-orange-500 dark:text-slate-400" />
           <span>{tr.subtitle}</span>
         </motion.div>
-        <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           {tr.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">{tr.titleHighlight}</span>
         </motion.h1>
       </div>
@@ -220,10 +220,10 @@ export default function InternTracking() {
           { icon: Star, label: tr.avgRating, value: '4.5', gradient: 'from-emerald-500 to-teal-500', shadow: 'shadow-emerald-200' },
         ].map((stat, i) => (
           <motion.div key={i} whileHover={{ scale: 1.02 }} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradient} p-5 text-white shadow-xl ${stat.shadow}`}>
-            <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+            <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
             <div className="relative z-10">
               <div className="flex items-center gap-2 mb-2">
-                <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm"><stat.icon className="w-4 h-4" /></div>
+                <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50"><stat.icon className="w-4 h-4" /></div>
                 <span className="text-sm font-medium text-white/90">{stat.label}</span>
               </div>
               <div className="text-3xl font-bold">{stat.value}</div>
@@ -235,14 +235,14 @@ export default function InternTracking() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {internsData.map((intern, idx) => (
           <motion.div key={idx} variants={itemVariants} whileHover={{ y: -4 }}
-            className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all">
+            className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all dark:bg-slate-900/50">
             <div className="flex items-start gap-4 mb-5">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-orange-200">
                 {intern.avatar}
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-lg text-slate-800">{language === 'th' ? intern.name : intern.nameEn}</h3>
-                <p className="text-sm text-slate-500">{intern.position}</p>
+                <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200">{language === 'th' ? intern.name : intern.nameEn}</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{intern.position}</p>
                 <div className="flex items-center gap-1 mt-1 text-xs text-slate-400">
                   <MapPin className="w-3 h-3" /> {language === 'th' ? intern.company : intern.companyEn}
                 </div>
@@ -251,10 +251,10 @@ export default function InternTracking() {
 
             <div className="mb-5">
               <div className="flex justify-between text-sm mb-2">
-                <span className="text-slate-500">{tr.progressLabel}</span>
-                <span className="font-bold text-slate-800">{tr.weekLabel} {intern.weeks}/{intern.totalWeeks}</span>
+                <span className="text-slate-500 dark:text-slate-400">{tr.progressLabel}</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">{tr.weekLabel} {intern.weeks}/{intern.totalWeeks}</span>
               </div>
-              <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                 <motion.div initial={{ width: 0 }} animate={{ width: `${intern.progress}%` }} transition={{ delay: 0.5 + idx * 0.1, duration: 0.6 }}
                   className="h-full bg-gradient-to-r from-orange-400 to-amber-500 rounded-full" />
               </div>
@@ -275,7 +275,7 @@ export default function InternTracking() {
               <Button className="w-full rounded-xl bg-orange-500 hover:bg-orange-600 text-xs shadow-lg shadow-orange-200" size="sm">
                 <CheckSquare className="w-3.5 h-3.5 mr-1" /> {tr.evaluate}
               </Button>
-              <Button variant="outline" className="w-full rounded-xl text-xs border-blue-200 text-blue-600 hover:bg-blue-50" size="sm"
+              <Button variant="outline" className="w-full rounded-xl text-xs border-blue-200 text-blue-600 hover:bg-blue-50 dark:text-slate-300 dark:bg-slate-800" size="sm"
                 onClick={() => setSelectedIntern(intern)}>
                 <Eye className="w-3.5 h-3.5 mr-1" /> {tr.viewPerformance}
               </Button>

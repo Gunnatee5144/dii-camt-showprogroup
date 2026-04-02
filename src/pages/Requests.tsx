@@ -148,9 +148,9 @@ export default function Requests() {
       whileHover={{ y: -5, scale: 1.02 }}
       className={`relative overflow-hidden rounded-3xl p-6 shadow-lg border border-white/20 ${gradient}`}
     >
-      <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 dark:bg-slate-900/50" />
       <div className="relative z-10 flex items-center gap-4">
-        <div className="p-3 rounded-2xl bg-white/20 backdrop-blur-md border border-white/10">
+        <div className="p-3 rounded-2xl bg-white/20 backdrop-blur-md border border-white/10 dark:bg-slate-900/50">
           <Icon className="w-5 h-5 text-white" />
         </div>
         <div>
@@ -174,13 +174,13 @@ export default function Requests() {
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2 text-slate-500 font-medium mb-2"
+            className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2"
           >
-            <FileBox className="w-4 h-4 text-indigo-500" />
+            <FileBox className="w-4 h-4 text-indigo-500 dark:text-slate-400" />
             <span>{t.requestsPage.subtitle}</span>
           </motion.div>
           <motion.h1
-            className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight"
+            className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
@@ -194,7 +194,7 @@ export default function Requests() {
               <Plus className="w-5 h-5 mr-2" /> {t.requestsPage.newRequest}
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px] bg-white/90 backdrop-blur-2xl p-0 overflow-hidden gap-0 rounded-[2.5rem] border-white/50 shadow-2xl">
+          <DialogContent className="sm:max-w-[600px] bg-white/90 backdrop-blur-2xl p-0 overflow-hidden gap-0 rounded-[2.5rem] border-white/50 shadow-2xl dark:bg-slate-900/50">
             <div className="p-8 bg-slate-900 text-white relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
               <DialogTitle className="text-2xl font-bold tracking-tight">{t.requestsPage.newRequest}</DialogTitle>
@@ -203,16 +203,16 @@ export default function Requests() {
 
             <div className="p-8 space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="type" className="text-slate-700 font-bold ml-1">{t.requestsPage.requestType}</Label>
+                <Label htmlFor="type" className="text-slate-700 font-bold ml-1 dark:text-slate-300">{t.requestsPage.requestType}</Label>
                 <Select onValueChange={(val) => setFormData({ ...formData, type: val })}>
-                  <SelectTrigger className="rounded-2xl h-14 bg-slate-50/50 border-slate-100 focus:ring-indigo-500 text-base">
+                  <SelectTrigger className="rounded-2xl h-14 bg-slate-50/50 border-slate-100 dark:border-slate-800 focus:ring-indigo-500 text-base dark:bg-slate-900/50">
                     <SelectValue placeholder={t.requestsPage.selectTopic} />
                   </SelectTrigger>
-                  <SelectContent className="rounded-2xl border-slate-100 shadow-2xl p-2">
+                  <SelectContent className="rounded-2xl border-slate-100 dark:border-slate-800 shadow-2xl p-2">
                     {requestTypes.map(t => (
-                      <SelectItem key={t.id} value={t.name} className="rounded-xl py-3 focus:bg-indigo-50 focus:text-indigo-600 font-medium">
+                      <SelectItem key={t.id} value={t.name} className="rounded-xl py-3 focus:bg-indigo-50 focus:text-indigo-600 font-medium dark:text-slate-300">
                         <div className="flex items-center gap-3">
-                          <span className="p-1.5 rounded-lg bg-slate-100">{t.icon}</span>
+                          <span className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800">{t.icon}</span>
                           {t.name}
                         </div>
                       </SelectItem>
@@ -222,32 +222,32 @@ export default function Requests() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="title" className="text-slate-700 font-bold ml-1">{t.requestsPage.requestTitle}</Label>
+                <Label htmlFor="title" className="text-slate-700 font-bold ml-1 dark:text-slate-300">{t.requestsPage.requestTitle}</Label>
                 <Input
                   id="title"
                   placeholder={t.requestsPage.titlePlaceholder}
-                  className="rounded-2xl h-14 bg-slate-50/50 border-slate-100 focus-visible:ring-indigo-500 text-base"
+                  className="rounded-2xl h-14 bg-slate-50/50 border-slate-100 dark:border-slate-800 focus-visible:ring-indigo-500 text-base dark:bg-slate-900/50"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="desc" className="text-slate-700 font-bold ml-1">{t.requestsPage.requestDetails}</Label>
+                <Label htmlFor="desc" className="text-slate-700 font-bold ml-1 dark:text-slate-300">{t.requestsPage.requestDetails}</Label>
                 <Textarea
                   id="desc"
                   placeholder={t.requestsPage.detailsPlaceholder}
-                  className="rounded-2xl min-h-[140px] bg-slate-50/50 border-slate-100 focus-visible:ring-indigo-500 resize-none text-base p-4"
+                  className="rounded-2xl min-h-[140px] bg-slate-50/50 border-slate-100 dark:border-slate-800 focus-visible:ring-indigo-500 resize-none text-base p-4 dark:bg-slate-900/50"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-700 font-bold ml-1">{t.requestsPage.attachments}</Label>
-                <div className="border-2 border-dashed border-slate-200 rounded-[2rem] p-10 flex flex-col items-center justify-center text-slate-400 hover:bg-slate-50 hover:border-indigo-200 hover:text-indigo-400 transition-all cursor-pointer group">
-                  <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-indigo-50 transition-all">
-                    <Upload className="w-8 h-8 opacity-50 text-slate-400 group-hover:text-indigo-500" />
+                <Label className="text-slate-700 font-bold ml-1 dark:text-slate-300">{t.requestsPage.attachments}</Label>
+                <div className="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-[2rem] p-10 flex flex-col items-center justify-center text-slate-400 hover:bg-slate-50 hover:border-indigo-200 hover:text-indigo-400 transition-all cursor-pointer group dark:bg-slate-800">
+                  <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-950 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-indigo-50 transition-all">
+                    <Upload className="w-8 h-8 opacity-50 text-slate-400 group-hover:text-indigo-500 dark:text-slate-400" />
                   </div>
                   <p className="font-bold">{t.requestsPage.uploadClick}</p>
                   <p className="text-xs mt-1 opacity-60">{t.requestsPage.fileSupport}</p>
@@ -255,8 +255,8 @@ export default function Requests() {
               </div>
             </div>
 
-            <DialogFooter className="p-8 bg-slate-50/50 border-t border-slate-100 gap-3 sm:gap-0">
-              <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="rounded-2xl h-14 px-8 font-bold text-slate-500 hover:bg-white">{t.common.cancel}</Button>
+            <DialogFooter className="p-8 bg-slate-50/50 border-t border-slate-100 dark:border-slate-800 gap-3 sm:gap-0 dark:bg-slate-900/50">
+              <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="rounded-2xl h-14 px-8 font-bold text-slate-500 dark:text-slate-400 hover:bg-white dark:bg-slate-900">{t.common.cancel}</Button>
               <Button onClick={handleSubmit} className="rounded-2xl h-14 px-12 bg-slate-900 text-white hover:bg-slate-800 font-bold shadow-xl shadow-slate-900/20 transform active:scale-95 transition-all">{t.requestsPage.submitNow}</Button>
             </DialogFooter>
           </DialogContent>
@@ -274,8 +274,8 @@ export default function Requests() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-4">
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between px-2">
-            <h3 className="text-2xl font-bold text-slate-900 tracking-tight">{t.requestsPage.trackStatus}</h3>
-            <Button variant="ghost" className="text-slate-500 hover:text-indigo-600 font-bold">{t.requestsPage.viewHistory} <ArrowRight className="w-4 h-4 ml-2" /></Button>
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{t.requestsPage.trackStatus}</h3>
+            <Button variant="ghost" className="text-slate-500 hover:text-indigo-600 font-bold dark:text-slate-300">{t.requestsPage.viewHistory} <ArrowRight className="w-4 h-4 ml-2" /></Button>
           </div>
 
           <div className="space-y-5">
@@ -283,29 +283,29 @@ export default function Requests() {
               <motion.div
                 key={req.id}
                 variants={itemVariants}
-                className="group bg-white/60 backdrop-blur-xl rounded-[2.5rem] p-8 border border-white/60 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden relative"
+                className="group bg-white/60 backdrop-blur-xl rounded-[2.5rem] p-8 border border-white/60 dark:border-slate-800/60 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden relative dark:bg-slate-900/50"
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
 
                 <div className="flex flex-col md:flex-row gap-8 relative z-10">
                   <div className="flex-1">
                     <div className="flex flex-wrap items-center gap-3 mb-4">
-                      <Badge variant="secondary" className="rounded-xl bg-indigo-50 text-indigo-600 font-bold border-0 px-3 py-1 text-[10px] uppercase tracking-wide">
+                      <Badge variant="secondary" className="rounded-xl bg-indigo-50 text-indigo-600 font-bold border-0 px-3 py-1 text-[10px] uppercase tracking-wide dark:text-slate-300">
                         {req.type}
                       </Badge>
                       <Badge variant="outline" className={`rounded-xl font-black flex items-center border-0 px-4 py-1 text-xs ${getStatusColor(req.status)}`}>
                         {getStatusIcon(req.status)} {getStatusText(req.status)}
                       </Badge>
-                      <span className="text-xs font-bold text-slate-400 ml-auto flex items-center gap-1.5 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
+                      <span className="text-xs font-bold text-slate-400 ml-auto flex items-center gap-1.5 bg-slate-50 dark:bg-slate-950 px-3 py-1 rounded-full border border-slate-100 dark:border-slate-700">
                         <Calendar className="w-3.5 h-3.5" /> {new Date(req.createdAt).toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' })}
                       </span>
                     </div>
 
-                    <h4 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-indigo-600 transition-colors tracking-tight">{req.title}</h4>
-                    <p className="text-slate-500 leading-relaxed mb-8 text-base font-medium">{req.description}</p>
+                    <h4 className="text-2xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-indigo-600 transition-colors tracking-tight">{req.title}</h4>
+                    <p className="text-slate-500 leading-relaxed mb-8 text-base font-medium dark:text-slate-400">{req.description}</p>
 
                     {/* Premium Step Visualizer */}
-                    <div className="bg-slate-50/80 p-6 rounded-[2rem] border border-slate-100 mb-6">
+                    <div className="bg-slate-50/80 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 mb-6 dark:bg-slate-900/50">
                       <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 px-2">
                         <span className={req.step >= 1 ? 'text-indigo-600' : ''}>{t.requestsPage.step1}</span>
                         <span className={req.step >= 2 ? 'text-indigo-600' : ''}>{t.requestsPage.step2}</span>
@@ -327,20 +327,20 @@ export default function Requests() {
                     {req.documents.length > 0 && (
                       <div className="flex flex-wrap gap-2">
                         {req.documents.map((doc, i) => (
-                          <div key={i} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-100 text-xs font-bold text-slate-600 cursor-pointer hover:bg-slate-50 shadow-sm transition-all hover:scale-105">
-                            <FileText className="w-3.5 h-3.5 text-indigo-500" /> {doc}
+                          <div key={i} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs font-bold text-slate-600 dark:text-slate-400 cursor-pointer hover:bg-slate-50 shadow-sm transition-all hover:scale-105">
+                            <FileText className="w-3.5 h-3.5 text-indigo-500 dark:text-slate-400" /> {doc}
                           </div>
                         ))}
                       </div>
                     )}
                   </div>
 
-                  <div className="flex md:flex-col gap-3 justify-center border-t md:border-t-0 md:border-l border-slate-100 pt-6 md:pt-0 md:pl-8 md:w-40 shrink-0">
-                    <Button variant="outline" className="flex-1 rounded-2xl h-12 text-sm font-bold border-slate-200 hover:text-indigo-600 hover:border-indigo-200 hover:bg-slate-50 transition-all shadow-sm">
+                  <div className="flex md:flex-col gap-3 justify-center border-t md:border-t-0 md:border-l border-slate-100 dark:border-slate-800 pt-6 md:pt-0 md:pl-8 md:w-40 shrink-0">
+                    <Button variant="outline" className="flex-1 rounded-2xl h-12 text-sm font-bold border-slate-200 dark:border-slate-700 hover:text-indigo-600 hover:border-indigo-200 hover:bg-slate-50 transition-all shadow-sm dark:text-slate-300 dark:bg-slate-800">
                       {t.common.details}
                     </Button>
                     {req.status === 'pending' && (
-                      <Button variant="ghost" className="flex-1 rounded-2xl h-12 text-sm font-bold text-slate-400 hover:text-red-500 hover:bg-red-50">
+                      <Button variant="ghost" className="flex-1 rounded-2xl h-12 text-sm font-bold text-slate-400 hover:text-red-500 hover:bg-red-50 dark:text-slate-400 dark:bg-slate-800">
                         {t.common.cancel}
                       </Button>
                     )}
@@ -359,12 +359,12 @@ export default function Requests() {
                 key={type.id}
                 variants={itemVariants}
                 whileHover={{ y: -5, scale: 1.05 }}
-                className="bg-white/60 backdrop-blur-xl p-5 rounded-3xl shadow-sm border border-white/60 flex flex-col items-center text-center gap-3 hover:shadow-xl transition-all cursor-pointer group"
+                className="bg-white/60 backdrop-blur-xl p-5 rounded-3xl shadow-sm border border-white/60 dark:border-slate-800/60 flex flex-col items-center text-center gap-3 hover:shadow-xl transition-all cursor-pointer group dark:bg-slate-900/50"
               >
                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 ${type.color} bg-opacity-40 group-hover:scale-110 shadow-sm group-hover:shadow-md`}>
                   {type.icon}
                 </div>
-                <span className="font-bold text-slate-700 text-xs tracking-tight">{type.name}</span>
+                <span className="font-bold text-slate-700 dark:text-slate-300 text-xs tracking-tight">{type.name}</span>
               </motion.div>
             ))}
           </div>
@@ -374,7 +374,7 @@ export default function Requests() {
             <div className="absolute bottom-10 left-0 w-32 h-32 bg-purple-500/10 rounded-full blur-[60px]" />
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center dark:bg-slate-900/50">
                   <Info className="w-6 h-6 text-indigo-300" />
                 </div>
                 <h3 className="font-bold text-xl tracking-tight">{t.requestsPage.helpCenter}</h3>
@@ -382,8 +382,8 @@ export default function Requests() {
               <p className="text-slate-400 text-sm mb-8 leading-relaxed font-medium">{t.requestsPage.helpDesc}</p>
 
               <div className="space-y-4">
-                <div className="flex items-center gap-4 p-4 rounded-3xl bg-white/5 backdrop-blur-sm border border-white/5 hover:bg-white/10 transition-colors cursor-pointer group">
-                  <div className="w-12 h-12 rounded-2xl bg-white/10 text-indigo-300 flex items-center justify-center font-black shadow-lg group-hover:scale-110 transition-transform">
+                <div className="flex items-center gap-4 p-4 rounded-3xl bg-white/5 backdrop-blur-sm border border-white/5 hover:bg-white/10 transition-colors cursor-pointer group dark:bg-slate-900/50">
+                  <div className="w-12 h-12 rounded-2xl bg-white/10 text-indigo-300 flex items-center justify-center font-black shadow-lg group-hover:scale-110 transition-transform dark:bg-slate-900/50">
                     CS
                   </div>
                   <div>
@@ -391,7 +391,7 @@ export default function Requests() {
                     <div className="font-bold text-base">053-942123</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 p-4 rounded-3xl bg-white/5 backdrop-blur-sm border border-white/5 hover:bg-white/10 transition-colors cursor-pointer group">
+                <div className="flex items-center gap-4 p-4 rounded-3xl bg-white/5 backdrop-blur-sm border border-white/5 hover:bg-white/10 transition-colors cursor-pointer group dark:bg-slate-900/50">
                   <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-black shadow-lg group-hover:scale-110 transition-transform">
                     Li
                   </div>
@@ -402,20 +402,20 @@ export default function Requests() {
                 </div>
               </div>
 
-              <Button className="w-full mt-8 rounded-2xl h-14 bg-white text-slate-900 hover:bg-slate-100 font-bold transform active:scale-95 transition-all">{t.requestsPage.chatStaff}</Button>
+              <Button className="w-full mt-8 rounded-2xl h-14 bg-white dark:bg-slate-900 text-slate-900 dark:text-white hover:bg-slate-100 font-bold transform active:scale-95 transition-all">{t.requestsPage.chatStaff}</Button>
             </div>
           </div>
 
-          <div className="bg-white/40 backdrop-blur-xl rounded-[2.5rem] border border-white/60 shadow-sm p-8">
-            <h3 className="font-black text-slate-900 mb-6 text-sm uppercase tracking-[0.15em] flex items-center gap-2">
+          <div className="bg-white/40 backdrop-blur-xl rounded-[2.5rem] border border-white/60 dark:border-slate-800/60 shadow-sm p-8 dark:bg-slate-900/50">
+            <h3 className="font-black text-slate-900 dark:text-white mb-6 text-sm uppercase tracking-[0.15em] flex items-center gap-2">
               <div className="w-1 h-4 bg-indigo-500 rounded-full" />
               {t.requestsPage.faq}
             </h3>
             <div className="space-y-2">
               {(language === 'en' ? ['How many days does a certificate request take?', 'Steps for leave of absence', 'How to reset password?', 'Download form G.01'] : ['การขอใบรับรองใช้เวลากี่วัน?', 'ขั้นตอนการลาพักการศึกษา', 'ลืมรหัสผ่านทำอย่างไร?', 'ดาวน์โหลดแบบฟอร์ม ก.01']).map((q, i) => (
-                <div key={i} className="flex items-center justify-between p-4 hover:bg-white rounded-2xl cursor-pointer group transition-all shadow-none hover:shadow-md border border-transparent hover:border-slate-100">
-                  <span className="text-sm text-slate-600 group-hover:text-slate-900 font-medium">{q}</span>
-                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-500 transition-all group-hover:translate-x-1" />
+                <div key={i} className="flex items-center justify-between p-4 hover:bg-white rounded-2xl cursor-pointer group transition-all shadow-none hover:shadow-md border border-transparent hover:border-slate-100 dark:bg-slate-900 dark:border-slate-700">
+                  <span className="text-sm text-slate-600 dark:text-slate-400 group-hover:text-slate-900 font-medium">{q}</span>
+                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-500 transition-all group-hover:translate-x-1 dark:text-slate-400" />
                 </div>
               ))}
             </div>

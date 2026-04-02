@@ -30,11 +30,11 @@ export default function Attendance() {
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8 pb-10">
             {/* Header */}
             <div>
-                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
-                    <CalendarCheck className="w-4 h-4 text-emerald-500" />
+                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2">
+                    <CalendarCheck className="w-4 h-4 text-emerald-500 dark:text-slate-400" />
                     <span>{t.attendancePage.subtitle}</span>
                 </motion.div>
-                <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                     {t.attendancePage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">{t.attendancePage.titleHighlight}</span>
                 </motion.h1>
             </div>
@@ -48,10 +48,10 @@ export default function Attendance() {
                     { icon: XCircle, label: t.attendancePage.absent, value: '1', gradient: 'from-red-500 to-rose-500', shadow: 'shadow-red-200' },
                 ].map((stat, i) => (
                     <motion.div key={i} whileHover={{ scale: 1.02 }} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradient} p-6 text-white shadow-xl ${stat.shadow}`}>
-                        <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+                        <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
                         <div className="relative z-10">
                             <div className="flex items-center gap-2 mb-3">
-                                <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm"><stat.icon className="w-5 h-5" /></div>
+                                <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50"><stat.icon className="w-5 h-5" /></div>
                                 <span className="font-medium text-white/90">{stat.label}</span>
                             </div>
                             <div className="text-4xl font-bold">{stat.value}</div>
@@ -63,24 +63,24 @@ export default function Attendance() {
             {/* Bento Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 {/* Settings Panel */}
-                <motion.div variants={itemVariants} className="lg:col-span-1 bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm h-fit">
-                    <h3 className="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
-                        <CalendarCheck className="w-5 h-5 text-emerald-500" /> {t.attendancePage.settingsLabel}
+                <motion.div variants={itemVariants} className="lg:col-span-1 bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-6 shadow-sm h-fit dark:bg-slate-900/50">
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-5 flex items-center gap-2">
+                        <CalendarCheck className="w-5 h-5 text-emerald-500 dark:text-slate-400" /> {t.attendancePage.settingsLabel}
                     </h3>
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700">{t.attendancePage.courseLabel}</label>
+                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t.attendancePage.courseLabel}</label>
                             <Select value={selectedCourse} onValueChange={setSelectedCourse}>
                                 <SelectTrigger className="rounded-xl"><SelectValue placeholder={t.attendancePage.selectCourse} /></SelectTrigger>
                                 <SelectContent>{mockCourses.slice(0, 3).map(c => (<SelectItem key={c.id} value={c.id}>{c.code} {c.name}</SelectItem>))}</SelectContent>
                             </Select>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700">{t.attendancePage.dateLabel}</label>
+                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t.attendancePage.dateLabel}</label>
                             <Input type="date" value={date} onChange={e => setDate(e.target.value)} className="rounded-xl" />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700">{t.attendancePage.periodLabel}</label>
+                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t.attendancePage.periodLabel}</label>
                             <Select defaultValue="1">
                                 <SelectTrigger className="rounded-xl"><SelectValue placeholder={t.attendancePage.selectPeriod} /></SelectTrigger>
                                 <SelectContent>
@@ -99,39 +99,39 @@ export default function Attendance() {
                 </motion.div>
 
                 {/* Student List */}
-                <motion.div variants={itemVariants} className="lg:col-span-3 bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">
+                <motion.div variants={itemVariants} className="lg:col-span-3 bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-6 shadow-sm dark:bg-slate-900/50">
                     <div className="flex justify-between items-center mb-5">
                         <div>
-                            <h3 className="text-lg font-bold text-slate-800">{t.attendancePage.studentList}</h3>
-                            <p className="text-sm text-slate-500">วิชา Advanced AI • Sec 001</p>
+                            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">{t.attendancePage.studentList}</h3>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">วิชา Advanced AI • Sec 001</p>
                         </div>
                         <div className="flex gap-3 text-sm">
-                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 rounded-xl"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> {t.attendancePage.presentShort} 42</div>
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 rounded-xl dark:bg-slate-800"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> {t.attendancePage.presentShort} 42</div>
                             <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 rounded-xl"><div className="w-2.5 h-2.5 rounded-full bg-amber-500" /> {t.attendancePage.lateShort} 2</div>
-                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 rounded-xl"><div className="w-2.5 h-2.5 rounded-full bg-red-500" /> {t.attendancePage.absentShort} 1</div>
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 rounded-xl dark:bg-slate-800"><div className="w-2.5 h-2.5 rounded-full bg-red-500" /> {t.attendancePage.absentShort} 1</div>
                         </div>
                     </div>
                     <div className="space-y-2">
                         {Array.from({ length: 10 }).map((_, i) => (
                             <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.03 }}
-                                className="flex items-center justify-between p-3 rounded-2xl hover:bg-white border border-transparent hover:border-slate-100 hover:shadow-sm transition-all">
+                                className="flex items-center justify-between p-3 rounded-2xl hover:bg-white border border-transparent hover:border-slate-100 hover:shadow-sm transition-all dark:bg-slate-900 dark:border-slate-700">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm">{String.fromCharCode(65 + i)}</div>
                                     <div>
-                                        <div className="font-medium text-slate-800">{t.attendancePage.student} {i + 1}</div>
+                                        <div className="font-medium text-slate-800 dark:text-slate-200">{t.attendancePage.student} {i + 1}</div>
                                         <div className="text-xs text-slate-400">642110{100 + i}</div>
                                     </div>
                                 </div>
                                 <div className="flex gap-1.5">
                                     <Button size="sm" className={i !== 5 ? "bg-emerald-500 hover:bg-emerald-600 h-8 px-3 rounded-xl text-xs" : "bg-transparent text-slate-400 h-8 px-3 rounded-xl text-xs hover:bg-slate-50"}>{t.attendancePage.presentShort}</Button>
                                     <Button size="sm" className={i === 5 ? "bg-amber-500 hover:bg-amber-600 h-8 px-3 rounded-xl text-xs" : "bg-transparent text-slate-400 h-8 px-3 rounded-xl text-xs hover:bg-slate-50"}>{t.attendancePage.lateShort}</Button>
-                                    <Button size="sm" className="bg-transparent text-slate-400 h-8 px-3 rounded-xl text-xs hover:bg-slate-50">{t.attendancePage.absentShort}</Button>
-                                    <Button size="sm" className="bg-transparent text-slate-400 h-8 px-3 rounded-xl text-xs hover:bg-slate-50">{t.attendancePage.leaveShort}</Button>
+                                    <Button size="sm" className="bg-transparent text-slate-400 h-8 px-3 rounded-xl text-xs hover:bg-slate-50 dark:bg-slate-800">{t.attendancePage.absentShort}</Button>
+                                    <Button size="sm" className="bg-transparent text-slate-400 h-8 px-3 rounded-xl text-xs hover:bg-slate-50 dark:bg-slate-800">{t.attendancePage.leaveShort}</Button>
                                 </div>
                             </motion.div>
                         ))}
                     </div>
-                    <div className="flex justify-between items-center mt-6 pt-4 border-t border-slate-100">
+                    <div className="flex justify-between items-center mt-6 pt-4 border-t border-slate-100 dark:border-slate-700">
                         <span className="text-sm text-slate-400">{t.attendancePage.lastSaved}</span>
                         <Button className="rounded-xl bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200">
                             <Save className="w-4 h-4 mr-2" /> {t.attendancePage.saveData}

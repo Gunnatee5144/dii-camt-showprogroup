@@ -46,10 +46,10 @@ export default function Students() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'normal': return <Badge className="bg-emerald-100 text-emerald-700">{t.studentsPage.normal}</Badge>;
-      case 'probation': return <Badge className="bg-orange-100 text-orange-700">{t.studentsPage.probation}</Badge>;
-      case 'risk': return <Badge className="bg-red-100 text-red-700">{t.studentsPage.risk}</Badge>;
-      case 'dropped': return <Badge className="bg-gray-100 text-gray-700">{t.studentsPage.dismissed}</Badge>;
+      case 'normal': return <Badge className="bg-emerald-100 text-emerald-700 dark:text-slate-300 dark:bg-slate-800">{t.studentsPage.normal}</Badge>;
+      case 'probation': return <Badge className="bg-orange-100 text-orange-700 dark:text-slate-300">{t.studentsPage.probation}</Badge>;
+      case 'risk': return <Badge className="bg-red-100 text-red-700 dark:text-slate-300 dark:bg-slate-800">{t.studentsPage.risk}</Badge>;
+      case 'dropped': return <Badge className="bg-gray-100 text-gray-700 dark:text-slate-300 dark:bg-slate-800">{t.studentsPage.dismissed}</Badge>;
       default: return <Badge>{status}</Badge>;
     }
   };
@@ -62,11 +62,11 @@ export default function Students() {
       className="space-y-6"
     >
       <div>
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
-              <Users className="w-4 h-4 text-blue-500" />
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2">
+              <Users className="w-4 h-4 text-blue-500 dark:text-slate-400" />
               <span>{`${t.studentsPage.totalStudents} ${mockStudents.length} • ${t.studentsPage.atRisk} ${atRiskCount}`}</span>
           </motion.div>
-          <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               {t.studentsPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">{t.studentsPage.titleHighlight}</span>
           </motion.h1>
       </div>
@@ -77,10 +77,10 @@ export default function Students() {
           whileHover={{ scale: 1.02 }}
           className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 p-6 text-white shadow-xl shadow-blue-200"
         >
-          <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+          <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-3">
-              <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
+              <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50">
                 <Users className="w-5 h-5" />
               </div>
               <span className="font-medium text-white/90">{t.studentsPage.totalStudents}</span>
@@ -93,10 +93,10 @@ export default function Students() {
           whileHover={{ scale: 1.02 }}
           className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 p-6 text-white shadow-xl shadow-emerald-200"
         >
-          <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+          <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-3">
-              <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
+              <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50">
                 <TrendingUp className="w-5 h-5" />
               </div>
               <span className="font-medium text-white/90">{t.studentsPage.avgGPA}</span>
@@ -109,10 +109,10 @@ export default function Students() {
           whileHover={{ scale: 1.02 }}
           className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 p-6 text-white shadow-xl shadow-orange-200"
         >
-          <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+          <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-3">
-              <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
+              <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50">
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <span className="font-medium text-white/90">{t.studentsPage.atRisk}</span>
@@ -125,10 +125,10 @@ export default function Students() {
           whileHover={{ scale: 1.02 }}
           className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 p-6 text-white shadow-xl shadow-purple-200"
         >
-          <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+          <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-3">
-              <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
+              <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50">
                 <Award className="w-5 h-5" />
               </div>
               <span className="font-medium text-white/90">{t.studentsPage.normalStatus}</span>
@@ -176,7 +176,7 @@ export default function Students() {
 
       {/* Student List */}
       <motion.div variants={itemVariants}>
-        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
+        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl shadow-sm dark:bg-slate-900/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <GraduationCap className="w-5 h-5" />
@@ -193,27 +193,27 @@ export default function Students() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
                   whileHover={{ scale: 1.01, x: 4 }}
-                  className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 hover:border-primary/30 hover:shadow-md transition-all cursor-pointer group"
+                  className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 hover:border-primary/30 hover:shadow-md transition-all cursor-pointer group dark:border-slate-700"
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-lg">
                       {student.nameThai.charAt(0)}
                     </div>
                     <div>
-                      <div className="font-semibold text-gray-900 group-hover:text-primary transition-colors">
+                      <div className="font-semibold text-gray-900 dark:text-white group-hover:text-primary transition-colors">
                         {student.nameThai}
                       </div>
-                      <div className="text-sm text-gray-600">{student.studentId}</div>
+                      <div className="text-sm text-gray-600 dark:text-slate-300">{student.studentId}</div>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="outline" className="text-xs">{t.studentsPage.year} {student.year}</Badge>
-                        <span className="text-xs text-gray-500">{student.major}</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">{student.major}</span>
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right hidden sm:block">
                       <div className="text-sm font-semibold">GPA {student.gpa.toFixed(2)}</div>
-                      <div className="text-xs text-gray-500">{student.earnedCredits}/{student.totalCredits} {t.studentsPage.credits}</div>
+                      <div className="text-xs text-gray-500 dark:text-slate-400">{student.earnedCredits}/{student.totalCredits} {t.studentsPage.credits}</div>
                     </div>
                     {getStatusBadge(student.academicStatus)}
                     <div className="flex gap-1">

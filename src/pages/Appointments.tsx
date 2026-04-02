@@ -31,9 +31,9 @@ export default function Appointments() {
 
     const getStatusBadge = (status: string) => {
         switch (status) {
-            case 'pending': return <Badge className="bg-orange-100 text-orange-700">{t.appointmentsPage.pendingTab}</Badge>;
-            case 'confirmed': return <Badge className="bg-blue-100 text-blue-700">{t.appointmentsPage.confirmedTab}</Badge>;
-            case 'completed': return <Badge className="bg-emerald-100 text-emerald-700">{t.appointmentsPage.completedTab}</Badge>;
+            case 'pending': return <Badge className="bg-orange-100 text-orange-700 dark:text-slate-300">{t.appointmentsPage.pendingTab}</Badge>;
+            case 'confirmed': return <Badge className="bg-blue-100 text-blue-700 dark:text-slate-300 dark:bg-slate-800">{t.appointmentsPage.confirmedTab}</Badge>;
+            case 'completed': return <Badge className="bg-emerald-100 text-emerald-700 dark:text-slate-300 dark:bg-slate-800">{t.appointmentsPage.completedTab}</Badge>;
             default: return <Badge>{status}</Badge>;
         }
     };
@@ -43,11 +43,11 @@ export default function Appointments() {
             {/* Header */}
             <div className="flex items-end justify-between">
                 <div>
-                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
-                        <Calendar className="w-4 h-4 text-blue-500" />
+                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2">
+                        <Calendar className="w-4 h-4 text-blue-500 dark:text-slate-400" />
                         <span>{`${mockAppointments.length} ${t.appointmentsPage.titleHighlight} • ${pendingCount} ${t.appointmentsPage.subtitle}`}</span>
                     </motion.div>
-                    <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                    <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                         {t.appointmentsPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">{t.appointmentsPage.titleHighlight}</span>
                     </motion.h1>
                 </div>
@@ -66,10 +66,10 @@ export default function Appointments() {
                     { label: t.appointmentsPage.allTab, value: mockAppointments.length, gradient: 'from-purple-500 to-pink-500', icon: Calendar },
                 ].map((stat, i) => (
                     <motion.div key={i} whileHover={{ scale: 1.02 }} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradient} p-6 text-white shadow-xl`}>
-                        <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+                        <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
                         <div className="relative z-10">
                             <div className="flex items-center gap-2 mb-3">
-                                <div className="p-2 rounded-xl bg-white/20"><stat.icon className="w-5 h-5" /></div>
+                                <div className="p-2 rounded-xl bg-white/20 dark:bg-slate-900/50"><stat.icon className="w-5 h-5" /></div>
                                 <span className="font-medium text-white/90">{stat.label}</span>
                             </div>
                             <div className="text-4xl font-bold">{stat.value}</div>
@@ -80,7 +80,7 @@ export default function Appointments() {
 
             {!isTeacher && (
                 <motion.div variants={itemVariants}>
-                    <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
+                    <Card className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl shadow-sm dark:bg-slate-900/50">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2"><User className="w-5 h-5" />{t.appointmentsPage.availableLecturers}</CardTitle>
                         </CardHeader>
@@ -92,7 +92,7 @@ export default function Appointments() {
                                             <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-bold text-lg">{lecturer.nameThai.charAt(0)}</div>
                                             <div className="flex-1">
                                                 <h3 className="font-semibold">{lecturer.nameThai}</h3>
-                                                <p className="text-sm text-gray-600">{lecturer.department}</p>
+                                                <p className="text-sm text-gray-600 dark:text-slate-300">{lecturer.department}</p>
                                                 <div className="flex flex-wrap gap-1 mt-2">
                                                     {lecturer.officeHours.slice(0, 2).map((hour) => (
                                                         <Badge key={hour.id} variant="outline" className="text-xs">{hour.day} {hour.startTime}-{hour.endTime}</Badge>
@@ -111,14 +111,14 @@ export default function Appointments() {
 
             <motion.div variants={itemVariants}>
                 <Tabs defaultValue="upcoming" className="space-y-4">
-                    <TabsList className="bg-white/80 backdrop-blur-sm border shadow-sm">
+                    <TabsList className="bg-white/80 backdrop-blur-sm border shadow-sm dark:bg-slate-900/50">
                         <TabsTrigger value="upcoming">{t.appointmentsPage.upcomingTab}</TabsTrigger>
                         <TabsTrigger value="pending">{t.appointmentsPage.pendingConfirm}</TabsTrigger>
                         <TabsTrigger value="completed">{t.appointmentsPage.historyTab}</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="upcoming">
-                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm"><CardContent className="pt-6">
+                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl shadow-sm dark:bg-slate-900/50"><CardContent className="pt-6">
                             <div className="space-y-4">
                                 {mockAppointments.filter(a => a.status === 'confirmed').map((apt) => (
                                     <div key={apt.id} className="flex items-start gap-4 p-4 border rounded-xl bg-gradient-to-r from-blue-50 to-white">
@@ -128,8 +128,8 @@ export default function Appointments() {
                                         </div>
                                         <div className="flex-1">
                                             <h3 className="font-semibold">{isTeacher ? apt.studentName : apt.lecturerName}</h3>
-                                            <p className="text-sm text-gray-600">{apt.purpose}</p>
-                                            <div className="flex items-center gap-4 text-sm text-gray-500 mt-2">
+                                            <p className="text-sm text-gray-600 dark:text-slate-300">{apt.purpose}</p>
+                                            <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-slate-400 mt-2">
                                                 <span><Clock className="w-4 h-4 inline mr-1" />{apt.startTime}-{apt.endTime}</span>
                                                 <span><MapPin className="w-4 h-4 inline mr-1" />{apt.location}</span>
                                             </div>
@@ -142,7 +142,7 @@ export default function Appointments() {
                     </TabsContent>
 
                     <TabsContent value="pending">
-                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm"><CardContent className="pt-6">
+                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl shadow-sm dark:bg-slate-900/50"><CardContent className="pt-6">
                             <div className="space-y-4">
                                 {mockAppointments.filter(a => a.status === 'pending').map((apt) => (
                                     <div key={apt.id} className="flex items-start gap-4 p-4 border rounded-xl bg-orange-50">
@@ -151,12 +151,12 @@ export default function Appointments() {
                                         </div>
                                         <div className="flex-1">
                                             <h3 className="font-semibold">{isTeacher ? apt.studentName : apt.lecturerName}</h3>
-                                            <p className="text-sm text-gray-600">{apt.purpose}</p>
+                                            <p className="text-sm text-gray-600 dark:text-slate-300">{apt.purpose}</p>
                                         </div>
                                         {isTeacher ? (
                                             <div className="flex gap-2">
                                                 <Button size="sm" className="bg-emerald-500"><CheckCircle className="w-4 h-4 mr-1" />{t.appointmentsPage.confirm}</Button>
-                                                <Button size="sm" variant="outline" className="text-red-600"><XCircle className="w-4 h-4" /></Button>
+                                                <Button size="sm" variant="outline" className="text-red-600 dark:text-slate-300"><XCircle className="w-4 h-4" /></Button>
                                             </div>
                                         ) : getStatusBadge(apt.status)}
                                     </div>
@@ -166,12 +166,12 @@ export default function Appointments() {
                     </TabsContent>
 
                     <TabsContent value="completed">
-                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm"><CardContent className="pt-6">
+                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl shadow-sm dark:bg-slate-900/50"><CardContent className="pt-6">
                             <div className="space-y-3">
                                 {mockAppointments.filter(a => a.status === 'completed').map((apt) => (
-                                    <div key={apt.id} className="flex items-center justify-between p-4 border rounded-xl bg-gray-50">
+                                    <div key={apt.id} className="flex items-center justify-between p-4 border rounded-xl bg-gray-50 dark:bg-slate-800">
                                         <div className="flex items-center gap-4">
-                                            <CheckCircle className="w-6 h-6 text-emerald-600" />
+                                            <CheckCircle className="w-6 h-6 text-emerald-600 dark:text-slate-300" />
                                             <div>
                                                 <h3 className="font-semibold">{isTeacher ? apt.studentName : apt.lecturerName}</h3>
                                                 <p className="text-xs text-gray-400">{new Date(apt.date).toLocaleDateString('th-TH')}</p>

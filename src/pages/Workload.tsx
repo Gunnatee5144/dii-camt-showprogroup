@@ -41,11 +41,11 @@ export default function Workload() {
             className="space-y-6"
         >
             <div>
-                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
-                    <BarChart3 className="w-4 h-4 text-emerald-500" />
+                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2">
+                    <BarChart3 className="w-4 h-4 text-emerald-500 dark:text-slate-400" />
                     <span>{t.workloadPage.subtitle} 1/2568</span>
                 </motion.div>
-                <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                     {t.workloadPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">{t.workloadPage.titleHighlight}</span>
                 </motion.h1>
             </div>
@@ -56,10 +56,10 @@ export default function Workload() {
                     whileHover={{ scale: 1.02 }}
                     className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 p-6 text-white shadow-xl shadow-green-200"
                 >
-                    <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+                    <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
                     <div className="relative z-10">
                         <div className="flex items-center gap-2 mb-3">
-                            <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
+                            <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50">
                                 <Clock className="w-5 h-5" />
                             </div>
                             <span className="font-medium text-white/90">{t.workloadPage.teachingHours}</span>
@@ -71,7 +71,7 @@ export default function Workload() {
                                 <span>{t.workloadPage.target}</span>
                                 <span>80%</span>
                             </div>
-                            <Progress value={80} className="bg-white/20 h-1.5" />
+                            <Progress value={80} className="bg-white/20 h-1.5 dark:bg-slate-900/50" />
                         </div>
                     </div>
                 </motion.div>
@@ -80,10 +80,10 @@ export default function Workload() {
                     whileHover={{ scale: 1.02 }}
                     className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 p-6 text-white shadow-xl shadow-blue-200"
                 >
-                    <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+                    <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
                     <div className="relative z-10">
                         <div className="flex items-center gap-2 mb-3">
-                            <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
+                            <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50">
                                 <Users className="w-5 h-5" />
                             </div>
                             <span className="font-medium text-white/90">{t.workloadPage.advisees}</span>
@@ -97,10 +97,10 @@ export default function Workload() {
                     whileHover={{ scale: 1.02 }}
                     className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 p-6 text-white shadow-xl shadow-orange-200"
                 >
-                    <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+                    <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
                     <div className="relative z-10">
                         <div className="flex items-center gap-2 mb-3">
-                            <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
+                            <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50">
                                 <BookOpen className="w-5 h-5" />
                             </div>
                             <span className="font-medium text-white/90">{t.workloadPage.coursesLabel}</span>
@@ -114,10 +114,10 @@ export default function Workload() {
                     whileHover={{ scale: 1.02 }}
                     className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 p-6 text-white shadow-xl shadow-purple-200"
                 >
-                    <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+                    <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
                     <div className="relative z-10">
                         <div className="flex items-center gap-2 mb-3">
-                            <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
+                            <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50">
                                 <FlaskConical className="w-5 h-5" />
                             </div>
                             <span className="font-medium text-white/90">{t.workloadPage.research}</span>
@@ -134,15 +134,15 @@ export default function Workload() {
                 <motion.div
                     variants={itemVariants}
                     whileHover={{ y: -5 }}
-                    className="lg:col-span-3 rounded-3xl bg-white/60 backdrop-blur-xl border border-white/60 shadow-xl p-6 transition-all"
+                    className="lg:col-span-3 rounded-3xl bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 shadow-xl p-6 transition-all dark:bg-slate-900/50"
                 >
                     <div className="flex items-center gap-3 mb-6">
                         <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 text-white shadow-lg">
                             <CalendarDays className="w-5 h-5" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-gray-900">{t.workloadPage.weeklySchedule}</h3>
-                            <p className="text-sm text-gray-500">ภาคการศึกษา 1/2568</p>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-slate-200">{t.workloadPage.weeklySchedule}</h3>
+                            <p className="text-sm text-gray-500 dark:text-slate-400">ภาคการศึกษา 1/2568</p>
                         </div>
                     </div>
                     <div className="space-y-3">
@@ -153,21 +153,21 @@ export default function Workload() {
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: idx * 0.1 }}
                                 whileHover={{ scale: 1.01, x: 4 }}
-                                className="flex justify-between items-center p-4 bg-gradient-to-r from-gray-50 to-white rounded-2xl border border-gray-100 hover:border-green-200 hover:shadow-md transition-all cursor-pointer group"
+                                className="flex justify-between items-center p-4 bg-gradient-to-r from-gray-50 to-white rounded-2xl border border-gray-100 hover:border-green-200 hover:shadow-md transition-all cursor-pointer group dark:border-slate-700"
                             >
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white font-bold text-sm shadow-lg">
                                         {slot.day.slice(3, 5)}
                                     </div>
                                     <div>
-                                        <div className="font-semibold text-gray-900 group-hover:text-green-700 transition-colors">{slot.day}</div>
-                                        <div className="text-sm text-gray-500">{slot.time}</div>
+                                        <div className="font-semibold text-gray-900 dark:text-white group-hover:text-green-700 transition-colors">{slot.day}</div>
+                                        <div className="text-sm text-gray-500 dark:text-slate-400">{slot.time}</div>
                                     </div>
                                 </div>
                                 <div className="text-right flex items-center gap-3">
                                     <div>
                                         <div className="font-bold text-green-700">{slot.code}</div>
-                                        <div className="text-xs text-gray-500">{slot.name}</div>
+                                        <div className="text-xs text-gray-500 dark:text-slate-400">{slot.name}</div>
                                     </div>
                                     <Badge className={slot.type === 'Lecture'
                                         ? 'bg-blue-100 text-blue-700 hover:bg-blue-100'
@@ -185,15 +185,15 @@ export default function Workload() {
                 <motion.div
                     variants={itemVariants}
                     whileHover={{ y: -5 }}
-                    className="lg:col-span-2 rounded-3xl bg-white/60 backdrop-blur-xl border border-white/60 shadow-xl p-6 transition-all"
+                    className="lg:col-span-2 rounded-3xl bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 shadow-xl p-6 transition-all dark:bg-slate-900/50"
                 >
                     <div className="flex items-center gap-3 mb-6">
                         <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-white shadow-lg">
                             <Briefcase className="w-5 h-5" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-gray-900">{t.workloadPage.otherWork}</h3>
-                            <p className="text-sm text-gray-500">{t.workloadPage.otherWorkDesc}</p>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-slate-200">{t.workloadPage.otherWork}</h3>
+                            <p className="text-sm text-gray-500 dark:text-slate-400">{t.workloadPage.otherWorkDesc}</p>
                         </div>
                     </div>
                     <div className="space-y-3">
@@ -204,12 +204,12 @@ export default function Workload() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: idx * 0.1 }}
                                 whileHover={{ scale: 1.02 }}
-                                className="flex items-start gap-3 p-4 bg-gradient-to-r from-gray-50 to-white rounded-2xl border border-gray-100 hover:shadow-md transition-all cursor-pointer"
+                                className="flex items-start gap-3 p-4 bg-gradient-to-r from-gray-50 to-white rounded-2xl border border-gray-100 hover:shadow-md transition-all cursor-pointer dark:border-slate-700"
                             >
                                 <div className={`w-2 h-full min-h-[40px] rounded-full bg-gradient-to-b ${task.color}`} />
                                 <div>
-                                    <p className="font-semibold text-gray-900">{task.title}</p>
-                                    <p className="text-sm text-gray-500 mt-0.5">{task.desc}</p>
+                                    <p className="font-semibold text-gray-900 dark:text-slate-200">{task.title}</p>
+                                    <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">{task.desc}</p>
                                 </div>
                             </motion.div>
                         ))}

@@ -30,14 +30,14 @@ export default function Network() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
                 <div>
-                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
-                        <Globe className="w-4 h-4 text-orange-500" />
+                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2">
+                        <Globe className="w-4 h-4 text-orange-500 dark:text-slate-400" />
                         <span>{t.networkPage.subtitle}</span>
                     </motion.div>
-                    <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                    <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                         {t.networkPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">{t.networkPage.titleHighlight}</span>
                     </motion.h1>
-                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-slate-500 mt-2">
+                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-slate-500 mt-2 dark:text-slate-400">
                         {t.networkPage.totalPartners} {mockCompanies.length} {t.networkPage.locations}
                     </motion.p>
                 </div>
@@ -49,10 +49,10 @@ export default function Network() {
             </div>
 
             {/* Search Bar */}
-            <motion.div variants={itemVariants} className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row gap-3">
+            <motion.div variants={itemVariants} className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row gap-3 dark:bg-slate-900/50">
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <Input placeholder={t.networkPage.searchPlaceholder} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 rounded-xl bg-white/80 border-slate-200" />
+                    <Input placeholder={t.networkPage.searchPlaceholder} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 rounded-xl bg-white/80 border-slate-200 dark:border-slate-700 dark:bg-slate-900/50" />
                 </div>
                 <Button variant="outline" className="rounded-xl">{t.networkPage.industryFilter}</Button>
             </motion.div>
@@ -61,19 +61,19 @@ export default function Network() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 {filteredCompanies.map((company, index) => (
                     <motion.div key={company.id} variants={itemVariants} whileHover={{ y: -4 }}
-                        className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all group">
+                        className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all group dark:bg-slate-900/50">
                         <div className="flex justify-between items-start mb-4">
                             <div className="flex gap-4">
                                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-orange-200">
                                     {company.companyName.charAt(0)}
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-bold text-slate-800">{company.companyName}</h3>
-                                    <p className="text-sm text-slate-500 mt-0.5">{company.companyNameThai}</p>
+                                    <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200">{company.companyName}</h3>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{company.companyNameThai}</p>
                                     <Badge variant="outline" className="mt-2 rounded-lg text-xs">{company.industry}</Badge>
                                 </div>
                             </div>
-                            <Button variant="ghost" size="icon" className="text-slate-300 hover:text-orange-500 rounded-xl">
+                            <Button variant="ghost" size="icon" className="text-slate-300 hover:text-orange-500 rounded-xl dark:text-slate-400">
                                 <ExternalLink className="w-4 h-4" />
                             </Button>
                         </div>
@@ -84,13 +84,13 @@ export default function Network() {
                                 { icon: Handshake, text: 'MOU: Active' },
                                 { icon: Globe, text: company.website },
                             ].map((item, i) => (
-                                <div key={i} className="flex items-center gap-2 text-slate-500">
+                                <div key={i} className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                                     <item.icon className="w-4 h-4 flex-shrink-0" />
                                     <span className="truncate">{item.text}</span>
                                 </div>
                             ))}
                         </div>
-                        <div className="flex gap-2 pt-4 border-t border-slate-100">
+                        <div className="flex gap-2 pt-4 border-t border-slate-100 dark:border-slate-700">
                             <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs">{t.networkPage.sendIntern}</Button>
                             <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs">{t.networkPage.editData}</Button>
                         </div>

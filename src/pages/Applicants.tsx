@@ -67,12 +67,12 @@ export default function Applicants() {
 
     const getStatusBadge = (status: string) => {
         switch (status) {
-            case 'pending': return <Badge className="bg-orange-100 text-orange-700">{t.applicants.statusPending}</Badge>;
-            case 'reviewed': return <Badge className="bg-blue-100 text-blue-700">{t.applicants.statusReviewed}</Badge>;
-            case 'shortlisted': return <Badge className="bg-purple-100 text-purple-700">{t.applicants.statusShortlisted}</Badge>;
+            case 'pending': return <Badge className="bg-orange-100 text-orange-700 dark:text-slate-300">{t.applicants.statusPending}</Badge>;
+            case 'reviewed': return <Badge className="bg-blue-100 text-blue-700 dark:text-slate-300 dark:bg-slate-800">{t.applicants.statusReviewed}</Badge>;
+            case 'shortlisted': return <Badge className="bg-purple-100 text-purple-700 dark:text-slate-300 dark:bg-slate-800">{t.applicants.statusShortlisted}</Badge>;
             case 'interviewed': return <Badge className="bg-cyan-100 text-cyan-700">{t.applicants.statusInterviewed}</Badge>;
-            case 'accepted': return <Badge className="bg-emerald-100 text-emerald-700">{t.applicants.statusAccepted}</Badge>;
-            case 'rejected': return <Badge className="bg-red-100 text-red-700">{t.applicants.statusRejected}</Badge>;
+            case 'accepted': return <Badge className="bg-emerald-100 text-emerald-700 dark:text-slate-300 dark:bg-slate-800">{t.applicants.statusAccepted}</Badge>;
+            case 'rejected': return <Badge className="bg-red-100 text-red-700 dark:text-slate-300 dark:bg-slate-800">{t.applicants.statusRejected}</Badge>;
             default: return <Badge>{status}</Badge>;
         }
     };
@@ -91,13 +91,13 @@ export default function Applicants() {
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="flex items-center gap-2 text-slate-500 font-medium mb-2"
+                        className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2"
                     >
-                        <Users className="w-4 h-4 text-blue-500" />
+                        <Users className="w-4 h-4 text-blue-500 dark:text-slate-400" />
                         <span>{visibleApplicants.length} {t.common.person} • {pendingCount} {t.applicants.pending}</span>
                     </motion.div>
                     <motion.h1
-                        className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight"
+                        className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
@@ -114,10 +114,10 @@ export default function Applicants() {
                     whileHover={{ y: -5 }}
                     className="p-6 rounded-3xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden"
                 >
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 dark:bg-slate-900/50" />
                     <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2.5 rounded-xl bg-white/20 backdrop-blur-sm">
+                            <div className="p-2.5 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50">
                                 <Users className="w-6 h-6" />
                             </div>
                             <span className="font-medium text-white/90">{t.applicants.totalLabel}</span>
@@ -133,54 +133,51 @@ export default function Applicants() {
                 <motion.div
                     variants={itemVariants}
                     whileHover={{ y: -5 }}
-                    className="p-6 rounded-3xl bg-white border border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden group"
+                    className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-100/50 relative overflow-hidden group"
                 >
                     <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2.5 rounded-xl bg-slate-100 text-slate-600 group-hover:bg-orange-50 group-hover:text-orange-600 transition-colors">
+                            <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-orange-50 group-hover:text-orange-600 transition-colors">
                                 <Clock className="w-6 h-6" />
                             </div>
-                            <span className="font-medium text-slate-600">{t.applicants.pending}</span>
+                            <span className="font-medium text-slate-600 dark:text-slate-300">{t.applicants.pending}</span>
                         </div>
-                        <div className="text-4xl font-bold text-slate-900 group-hover:text-orange-600 transition-colors">{pendingCount}</div>
+                        <div className="text-4xl font-bold text-slate-900 dark:text-white group-hover:text-orange-600 transition-colors">{pendingCount}</div>
                         <div className="mt-3 text-sm text-slate-400">{t.applicants.pendingDesc}</div>
-                        <div className="absolute bottom-0 right-0 w-24 h-12 bg-gradient-to-t from-orange-50 to-transparent" />
                     </div>
                 </motion.div>
 
                 <motion.div
                     variants={itemVariants}
                     whileHover={{ y: -5 }}
-                    className="p-6 rounded-3xl bg-white border border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden group"
+                    className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-100/50 relative overflow-hidden group"
                 >
                     <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2.5 rounded-xl bg-slate-100 text-slate-600 group-hover:bg-purple-50 group-hover:text-purple-600 transition-colors">
+                            <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-purple-50 group-hover:text-purple-600 transition-colors">
                                 <Star className="w-6 h-6" />
                             </div>
-                            <span className="font-medium text-slate-600">{t.applicants.shortlisted}</span>
+                            <span className="font-medium text-slate-600 dark:text-slate-300">{t.applicants.shortlisted}</span>
                         </div>
-                        <div className="text-4xl font-bold text-slate-900 group-hover:text-purple-600 transition-colors">{shortlistedCount}</div>
+                        <div className="text-4xl font-bold text-slate-900 dark:text-white group-hover:text-purple-600 transition-colors">{shortlistedCount}</div>
                         <div className="mt-3 text-sm text-slate-400">{t.applicants.shortlistedDesc}</div>
-                        <div className="absolute bottom-0 right-0 w-24 h-12 bg-gradient-to-t from-purple-50 to-transparent" />
                     </div>
                 </motion.div>
 
                 <motion.div
                     variants={itemVariants}
                     whileHover={{ y: -5 }}
-                    className="p-6 rounded-3xl bg-white border border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden group"
+                    className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-100/50 relative overflow-hidden group"
                 >
                     <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2.5 rounded-xl bg-slate-100 text-slate-600 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                            <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
                                 <CheckCircle className="w-6 h-6" />
                             </div>
-                            <span className="font-medium text-slate-600">{t.applicants.accepted}</span>
+                            <span className="font-medium text-slate-600 dark:text-slate-300">{t.applicants.accepted}</span>
                         </div>
-                        <div className="text-4xl font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">{visibleApplicants.filter(a => a.status === 'accepted').length}</div>
+                        <div className="text-4xl font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 transition-colors">{visibleApplicants.filter(a => a.status === 'accepted').length}</div>
                         <div className="mt-3 text-sm text-slate-400">{t.applicants.acceptedDesc}</div>
-                        <div className="absolute bottom-0 right-0 w-24 h-12 bg-gradient-to-t from-emerald-50 to-transparent" />
                     </div>
                 </motion.div>
             </div>
@@ -203,7 +200,7 @@ export default function Applicants() {
                     </Select>
                 </div>
 
-                <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
+                <Card className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl shadow-sm dark:bg-slate-900/50">
                     <CardContent className="pt-6">
                         <div className="space-y-3">
                             <AnimatePresence>
@@ -215,7 +212,7 @@ export default function Applicants() {
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0 }}
                                         transition={{ delay: index * 0.03 }}
-                                        className="flex items-center justify-between p-4 border rounded-xl hover:shadow-md transition-all bg-white"
+                                        className="flex items-center justify-between p-4 border rounded-xl hover:shadow-md transition-all bg-white dark:bg-slate-900"
                                     >
                                         <div className="flex items-center gap-4">
                                             <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
@@ -223,7 +220,7 @@ export default function Applicants() {
                                             </div>
                                             <div>
                                                 <div className="font-semibold">{applicant.student?.nameThai || 'Unknown'}</div>
-                                                <div className="text-sm text-gray-600">{applicant.jobTitle}</div>
+                                                <div className="text-sm text-gray-600 dark:text-slate-300">{applicant.jobTitle}</div>
                                                 <div className="text-xs text-gray-400 mt-1">
                                                     {t.applicants.appliedOn} {new Date(applicant.appliedAt).toLocaleDateString('th-TH')}
                                                 </div>
@@ -232,7 +229,7 @@ export default function Applicants() {
                                         <div className="flex items-center gap-3">
                                             <div className="text-right hidden sm:block">
                                                 <div className="text-sm font-semibold">GPA {applicant.student?.gpa.toFixed(2)}</div>
-                                                <div className="text-xs text-gray-500">{t.studentProfiles.yearPrefix} {applicant.student?.year}</div>
+                                                <div className="text-xs text-gray-500 dark:text-slate-400">{t.studentProfiles.yearPrefix} {applicant.student?.year}</div>
                                             </div>
                                             {getStatusBadge(applicant.status)}
 
@@ -258,7 +255,7 @@ export default function Applicants() {
                                                         <DropdownMenuItem onClick={() => handleStatusChange(applicant.id, 'accepted')} className="text-green-600">
                                                             <CheckCircle className="w-4 h-4 mr-2" /> {t.applicants.acceptAction}
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem onClick={() => handleStatusChange(applicant.id, 'rejected')} className="text-red-600">
+                                                        <DropdownMenuItem onClick={() => handleStatusChange(applicant.id, 'rejected')} className="text-red-600 dark:text-slate-300">
                                                             <XCircle className="w-4 h-4 mr-2" /> {t.applicants.rejectAction}
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>
@@ -269,7 +266,7 @@ export default function Applicants() {
                                 ))}
                             </AnimatePresence>
                             {filteredApplicants.length === 0 && (
-                                <div className="text-center py-8 text-gray-500">
+                                <div className="text-center py-8 text-gray-500 dark:text-slate-400">
                                     {t.common.noData}
                                 </div>
                             )}

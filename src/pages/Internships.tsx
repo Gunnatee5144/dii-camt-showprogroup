@@ -65,9 +65,9 @@ export default function Internships() {
       whileHover={{ y: -5, scale: 1.02 }}
       className={`relative overflow-hidden rounded-3xl p-6 shadow-lg border border-white/20 ${gradient}`}
     >
-      <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 dark:bg-slate-900/50" />
       <div className="relative z-10 flex items-center gap-4">
-        <div className="p-3 rounded-2xl bg-white/20 backdrop-blur-md border border-white/10">
+        <div className="p-3 rounded-2xl bg-white/20 backdrop-blur-md border border-white/10 dark:bg-slate-900/50">
           <Icon className="w-5 h-5 text-white" />
         </div>
         <div>
@@ -92,13 +92,13 @@ export default function Internships() {
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-2 text-slate-500 font-medium mb-2"
+              className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2"
             >
-              <Briefcase className="w-4 h-4 text-blue-500" />
+              <Briefcase className="w-4 h-4 text-blue-500 dark:text-slate-400" />
               <span>{t.internshipsPage.subtitle}</span>
             </motion.div>
             <motion.h1
-              className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight"
+              className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
@@ -117,12 +117,12 @@ export default function Internships() {
         </div>
       </div>
 
-      <div className="flex-shrink-0 flex flex-col sm:flex-row gap-4 items-center bg-white/60 backdrop-blur-xl p-4 rounded-[2rem] shadow-sm border border-white/60 mt-2">
+      <div className="flex-shrink-0 flex flex-col sm:flex-row gap-4 items-center bg-white/60 backdrop-blur-xl p-4 rounded-[2rem] shadow-sm border border-white/60 dark:border-slate-800/60 mt-2 dark:bg-slate-900/50">
         <div className="relative flex-1 w-full">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <Input
             placeholder={t.internshipsPage.searchPlaceholder}
-            className="pl-11 h-12 text-base border-none bg-slate-50/50 focus-visible:ring-0 rounded-2xl font-medium"
+            className="pl-11 h-12 text-base border-none bg-slate-50/50 focus-visible:ring-0 rounded-2xl font-medium dark:bg-slate-900/50"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -137,7 +137,7 @@ export default function Internships() {
               key={opt.id}
               variant="ghost"
               onClick={() => setFilterType(opt.id)}
-              className={`rounded-xl h-10 px-6 flex-1 sm:flex-none font-bold transition-all ${filterType === opt.id ? 'bg-white text-indigo-600 shadow-md' : 'text-slate-500'}`}
+              className={`rounded-xl h-10 px-6 flex-1 sm:flex-none font-bold transition-all ${filterType === opt.id ? 'bg-white text-indigo-600 shadow-md' : 'text-slate-500'} dark:text-slate-400 dark:bg-slate-900/50`}
             >
               {opt.label}
             </Button>
@@ -155,26 +155,26 @@ export default function Internships() {
               whileHover={{ scale: 1.01, y: -2 }}
               className={`p-5 rounded-[2rem] border transition-all duration-300 relative overflow-hidden group ${selectedJob?.id === job.id
                 ? 'bg-slate-900 border-slate-900 text-white shadow-2xl scale-[1.02] z-10'
-                : 'bg-white/70 backdrop-blur-sm border-white/60 hover:border-indigo-200 hover:shadow-xl'
-                }`}
+                : 'bg-white/70 backdrop-blur-sm border-white/60 dark:border-slate-800/60 hover:border-indigo-200 hover:shadow-xl'
+                } dark:bg-slate-900/50`}
             >
               {selectedJob?.id === job.id && (
                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
               )}
               <div className="flex justify-between items-start mb-4 relative z-10">
-                <div className={`p-3 rounded-2xl transition-colors ${selectedJob?.id === job.id ? 'bg-white/10 shadow-inner' : 'bg-indigo-50'}`}>
+                <div className={`p-3 rounded-2xl transition-colors ${selectedJob?.id === job.id ? 'bg-white/10 shadow-inner' : 'bg-indigo-50'} dark:bg-slate-900/50`}>
                   <Building className={`w-8 h-8 ${selectedJob?.id === job.id ? 'text-white' : 'text-indigo-600'}`} />
                 </div>
-                <Button variant="ghost" size="icon" onClick={(e) => toggleSaveJob(e, job.id)} className={`rounded-xl transition-colors ${selectedJob?.id === job.id ? 'hover:bg-white/20' : 'hover:bg-slate-100'}`}>
+                <Button variant="ghost" size="icon" onClick={(e) => toggleSaveJob(e, job.id)} className={`rounded-xl transition-colors ${selectedJob?.id === job.id ? 'hover:bg-white/20' : 'hover:bg-slate-100'} dark:bg-slate-900/50`}>
                   <Bookmark className={`w-5 h-5 ${isSaved(job.id) ? 'fill-yellow-400 text-yellow-400' : selectedJob?.id === job.id ? 'text-white/50' : 'text-slate-300'}`} />
                 </Button>
               </div>
 
               <h3 className={`text-xl font-bold mb-1 tracking-tight relative z-10 ${selectedJob?.id === job.id ? 'text-white' : 'text-slate-900'}`}>{job.title}</h3>
-              <p className={`text-sm mb-5 font-medium relative z-10 ${selectedJob?.id === job.id ? 'text-white/70' : 'text-slate-500'}`}>{job.companyName}</p>
+              <p className={`text-sm mb-5 font-medium relative z-10 ${selectedJob?.id === job.id ? 'text-white/70' : 'text-slate-500'} dark:text-slate-400`}>{job.companyName}</p>
 
               <div className="flex flex-wrap gap-2 relative z-10">
-                <Badge variant="secondary" className={`rounded-lg px-2.5 py-0.5 border-0 ${selectedJob?.id === job.id ? 'bg-white/10 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                <Badge variant="secondary" className={`rounded-lg px-2.5 py-0.5 border-0 ${selectedJob?.id === job.id ? 'bg-white/10 text-white' : 'bg-slate-100 text-slate-600'} dark:text-slate-400 dark:bg-slate-900/50`}>
                   {job.type === 'internship' ? t.internshipsPage.internshipTab : t.internshipsPage.coopTab}
                 </Badge>
                 <div className={`ml-auto text-lg font-black tracking-tight ${selectedJob?.id === job.id ? 'text-emerald-400' : 'text-emerald-600'}`}>
@@ -186,7 +186,7 @@ export default function Internships() {
         </div>
 
         {/* Job Details Panel */}
-        <div className="hidden lg:col-span-7 lg:block bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/80 shadow-sm overflow-hidden flex flex-col h-full relative">
+        <div className="hidden lg:col-span-7 lg:block bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/80 shadow-sm overflow-hidden flex flex-col h-full relative dark:bg-slate-900/50">
           <AnimatePresence mode="wait">
             {selectedJob ? (
               <motion.div
@@ -201,25 +201,25 @@ export default function Internships() {
                     <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80')] bg-cover bg-center opacity-40" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                     <div className="absolute top-6 right-6 flex gap-3">
-                      <Button variant="secondary" size="icon" className="rounded-xl bg-white/10 text-white hover:bg-white/20 border-0 backdrop-blur-md">
+                      <Button variant="secondary" size="icon" className="rounded-xl bg-white/10 text-white hover:bg-white/20 border-0 backdrop-blur-md dark:bg-slate-900/50">
                         <Share2 className="w-5 h-5" />
                       </Button>
-                      <Button variant="secondary" size="icon" onClick={(e) => toggleSaveJob(e, selectedJob.id)} className="rounded-xl bg-white/10 text-white hover:bg-white/20 border-0 backdrop-blur-md">
+                      <Button variant="secondary" size="icon" onClick={(e) => toggleSaveJob(e, selectedJob.id)} className="rounded-xl bg-white/10 text-white hover:bg-white/20 border-0 backdrop-blur-md dark:bg-slate-900/50">
                         <Bookmark className={`w-5 h-5 ${isSaved(selectedJob.id) ? 'fill-yellow-400 text-yellow-400' : ''}`} />
                       </Button>
                     </div>
                   </div>
 
                   <div className="px-10 -mt-20 pb-10 relative">
-                    <div className="w-36 h-36 bg-white rounded-[2rem] p-8 shadow-2xl mb-8 flex items-center justify-center border border-slate-100">
-                      <Building className="w-16 h-16 text-slate-800" />
+                    <div className="w-36 h-36 bg-white dark:bg-slate-900 rounded-[2rem] p-8 shadow-2xl mb-8 flex items-center justify-center border border-slate-100 dark:border-slate-700">
+                      <Building className="w-16 h-16 text-slate-800 dark:text-slate-200" />
                     </div>
 
-                    <h1 className="text-4xl font-bold text-slate-900 mb-2 tracking-tight">{selectedJob.title}</h1>
-                    <div className="flex items-center gap-2 text-xl text-slate-600 mb-10 font-bold">
+                    <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">{selectedJob.title}</h1>
+                    <div className="flex items-center gap-2 text-xl text-slate-600 dark:text-slate-400 mb-10 font-bold">
                       {selectedJob.companyName}
-                      <span className="w-2 h-2 rounded-full bg-slate-200" />
-                      <span className="text-indigo-600">{selectedJob.location}</span>
+                      <span className="w-2 h-2 rounded-full bg-slate-200 dark:bg-slate-800" />
+                      <span className="text-indigo-600 dark:text-slate-300">{selectedJob.location}</span>
                     </div>
 
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
@@ -229,37 +229,37 @@ export default function Internships() {
                         { label: t.internshipsPage.salary, value: selectedJob.salary || 'N/A', icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
                         { label: t.internshipsPage.duration, value: t.internshipsPage.durationValue, icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50' }
                       ].map((stat, i) => (
-                        <div key={i} className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm">
+                        <div key={i} className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm">
                           <div className={`w-8 h-8 rounded-lg ${stat.bg} ${stat.color} flex items-center justify-center mb-2`}>
                             <stat.icon className="w-4 h-4" />
                           </div>
                           <div className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">{stat.label}</div>
-                          <div className="font-bold text-slate-900 text-sm">{stat.value}</div>
+                          <div className="font-bold text-slate-900 dark:text-white text-sm">{stat.value}</div>
                         </div>
                       ))}
                     </div>
 
                     <div className="space-y-12">
                       <section>
-                        <h3 className="text-2xl font-bold text-slate-900 mb-5 tracking-tight flex items-center gap-3">
+                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-5 tracking-tight flex items-center gap-3">
                           <div className="w-1.5 h-6 bg-indigo-600 rounded-full" />
                           {t.internshipsPage.jobDescription}
                         </h3>
-                        <p className="text-slate-600 leading-relaxed whitespace-pre-line text-lg italic bg-slate-50/50 p-6 rounded-2xl border border-slate-100 font-medium">
+                        <p className="text-slate-600 leading-relaxed whitespace-pre-line text-lg italic bg-slate-50/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 font-medium dark:text-slate-200 dark:bg-slate-900/50">
                           "{selectedJob.description}"
                         </p>
                       </section>
 
                       <section>
-                        <h3 className="text-2xl font-bold text-slate-900 mb-6 tracking-tight flex items-center gap-3">
+                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight flex items-center gap-3">
                           <div className="w-1.5 h-6 bg-emerald-500 rounded-full" />
                           {t.internshipsPage.requirements}
                         </h3>
                         <div className="grid gap-3">
                           {selectedJob.requirements?.map((req, i) => (
-                            <div key={i} className="flex items-start gap-4 p-4 rounded-2xl bg-white border border-slate-100 hover:border-emerald-200 transition-colors shadow-sm">
-                              <CheckCircle className="w-6 h-6 text-emerald-500 shrink-0 mt-0.5" />
-                              <span className="text-slate-700 font-medium">{req}</span>
+                            <div key={i} className="flex items-start gap-4 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 hover:border-emerald-200 transition-colors shadow-sm">
+                              <CheckCircle className="w-6 h-6 text-emerald-500 shrink-0 mt-0.5 dark:text-slate-400" />
+                              <span className="text-slate-700 font-medium dark:text-slate-300">{req}</span>
                             </div>
                           ))}
                         </div>
@@ -271,8 +271,8 @@ export default function Internships() {
                 </ScrollArea>
 
                 {/* Sticky Footer Action */}
-                <div className="absolute bottom-0 left-0 right-0 p-8 bg-white/60 backdrop-blur-2xl border-t border-white/60 flex justify-between items-center z-20">
-                  <Button variant="outline" size="lg" className="rounded-2xl h-14 px-8 border-slate-200 font-bold hover:bg-slate-50">
+                <div className="absolute bottom-0 left-0 right-0 p-8 bg-white/60 backdrop-blur-2xl border-t border-white/60 dark:border-slate-800/60 flex justify-between items-center z-20 dark:bg-slate-900/50">
+                  <Button variant="outline" size="lg" className="rounded-2xl h-14 px-8 border-slate-200 dark:border-slate-700 font-bold hover:bg-slate-50 dark:bg-slate-800">
                     <Globe className="w-5 h-5 mr-3" /> {t.internshipsPage.website}
                   </Button>
                   <Button size="lg" className="rounded-2xl h-14 px-16 bg-slate-900 text-lg hover:bg-slate-800 shadow-2xl shadow-slate-900/40 font-bold tracking-tight transform active:scale-95 transition-all">
@@ -283,7 +283,7 @@ export default function Internships() {
               </motion.div>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-slate-400">
-                <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6 border-2 border-dashed border-slate-200 shadow-inner">
+                <div className="w-24 h-24 bg-slate-50 dark:bg-slate-950 rounded-full flex items-center justify-center mb-6 border-2 border-dashed border-slate-200 dark:border-slate-700 shadow-inner">
                   <Briefcase className="w-12 h-12 opacity-20" />
                 </div>
                 <p className="font-bold text-lg">{t.internshipsPage.selectToView}</p>

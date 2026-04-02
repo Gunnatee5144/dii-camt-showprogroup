@@ -4,10 +4,10 @@ import { CheckCircle2, AlertCircle, Info, AlertTriangle } from "lucide-react";
 
 const variantIcons = {
   default: null,
-  destructive: <AlertCircle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />,
-  success: <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />,
+  destructive: <AlertCircle className="h-5 w-5 text-red-500 shrink-0 mt-0.5 dark:text-slate-400" />,
+  success: <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5 dark:text-slate-400" />,
   warning: <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />,
-  info: <Info className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />,
+  info: <Info className="h-5 w-5 text-blue-500 shrink-0 mt-0.5 dark:text-slate-400" />,
 };
 
 export function Toaster() {

@@ -103,7 +103,7 @@ export function StudentTimeline({ events, showFilters = false }: StudentTimeline
               <h3 className="text-lg font-semibold mb-4 text-primary">
                 ปีการศึกษา {year}
               </h3>
-              <div className="relative border-l-2 border-gray-200 pl-6 ml-2 space-y-6">
+              <div className="relative border-l-2 border-gray-200 pl-6 ml-2 space-y-6 dark:border-slate-700">
                 {yearEvents.map((event, index) => (
                   <div key={event.id} className="relative">
                     {/* Timeline dot */}
@@ -115,12 +115,12 @@ export function StudentTimeline({ events, showFilters = false }: StudentTimeline
                     <div
                       className={`bg-white rounded-lg border p-4 hover:shadow-md transition-shadow ${
                         event.isImportant ? 'border-yellow-400 border-2' : 'border-gray-200'
-                      }`}
+                      } dark:bg-slate-900/50`}
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
                           {getEventIcon(event.type)}
-                          <h4 className="font-semibold text-gray-900">
+                          <h4 className="font-semibold text-gray-900 dark:text-slate-200">
                             {event.titleThai || event.title}
                           </h4>
                         </div>
@@ -129,12 +129,12 @@ export function StudentTimeline({ events, showFilters = false }: StudentTimeline
                         </Badge>
                       </div>
                       
-                      <p className="text-sm text-gray-600 mb-2">
+                      <p className="text-sm text-gray-600 dark:text-slate-400 mb-2">
                         {event.description}
                       </p>
                       
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500 dark:text-slate-400">
                           {new Date(event.date).toLocaleDateString('th-TH', {
                             year: 'numeric',
                             month: 'long',
@@ -160,7 +160,7 @@ export function StudentTimeline({ events, showFilters = false }: StudentTimeline
           ))}
           
           {filteredEvents.length === 0 && (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-gray-500 dark:text-slate-400">
               <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p>ยังไม่มีเหตุการณ์ในช่วงเวลานี้</p>
             </div>

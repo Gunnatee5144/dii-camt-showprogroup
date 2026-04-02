@@ -15,10 +15,11 @@ export default function RegisterPage() {
     const navigate = useNavigate();
     const { login } = useAuth(); // Assuming we auto-login or just use this for potential future direct register hook
     const [step, setStep] = useState(1);
-    const [role, setRole] = useState<'student' | 'company' | 'lecturer' | 'staff' | null>(null);
+    const [role, setRole] = useState<'student' | 'company' | 'lecturer' | 'staff' | 'enterprise' | null>(null);
     const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
+    const [enterpriseData, setEnterpriseData] = useState({ taxId: '', website: '', industry: '', regBlock: '' });
 
-    const handleRoleSelect = (selectedRole: 'student' | 'company' | 'lecturer' | 'staff') => {
+    const handleRoleSelect = (selectedRole: 'student' | 'company' | 'lecturer' | 'staff' | 'enterprise') => {
         setRole(selectedRole);
         setStep(2);
     };
@@ -30,6 +31,13 @@ export default function RegisterPage() {
             return;
         }
 
+        if (role === 'enterprise') {
+            if (!enterpriseData.taxId || !enterpriseData.website || !enterpriseData.industry || !enterpriseData.regBlock) {
+                toast.error("Please fill all enterprise validation fields.");
+                return;
+            }
+        }
+
         // Mock registration
         toast.success(t.register.registerSuccess, { description: t.register.pleaseLogin });
         navigate('/login');
@@ -37,7 +45,7 @@ export default function RegisterPage() {
 
     return (
 
-        <div className="min-h-screen flex font-sans bg-white selection:bg-blue-100 selection:text-blue-900 overflow-hidden">
+        <div className="min-h-screen flex font-sans bg-white dark:bg-slate-900 selection:bg-blue-100 selection:text-blue-900 overflow-hidden dark:text-slate-200">
             {/* Left Side: Information - Premium Dark */}
             <div className="hidden lg:flex w-1/2 bg-slate-900 relative overflow-hidden flex-col justify-between p-12">
                 <div className="absolute inset-0 z-0">
@@ -52,7 +60,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="relative z-10 w-full max-w-lg mx-auto">
-                    <Link to="/" className="inline-block p-3 bg-white/10 rounded-2xl mb-8 backdrop-blur-sm border border-white/10 hover:bg-white/20 transition-colors">
+                    <Link to="/" className="inline-block p-3 bg-white dark:bg-slate-900/10 rounded-2xl mb-8 backdrop-blur-sm border border-white/10 hover:bg-white dark:bg-slate-900/20 transition-colors">
                         <ArrowLeft className="w-6 h-6 text-white" />
                     </Link>
                     <motion.h1
@@ -83,7 +91,7 @@ export default function RegisterPage() {
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.2 + (i * 0.1) }}
-                                className="flex items-center gap-4 text-slate-300 bg-white/5 p-4 rounded-xl border border-white/5"
+                                className="flex items-center gap-4 text-slate-300 bg-white dark:bg-slate-900/5 p-4 rounded-xl border border-white/5"
                             >
                                 <CheckCircle className={`w-6 h-6 ${item.color}`} />
                                 <span className="font-medium">{item.text}</span>
@@ -92,29 +100,29 @@ export default function RegisterPage() {
                     </div>
                 </div>
 
-                <div className="relative z-10 text-center text-slate-500 text-sm mt-12">
+                <div className="relative z-10 text-center text-slate-500 dark:text-slate-400 text-sm mt-12">
                     © 2026 DII CAMT. All rights reserved.
                 </div>
             </div>
 
             {/* Right Side: Form */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 relative bg-slate-50">
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 relative bg-slate-50 dark:bg-slate-900">
                 {/* Language Toggle */}
                 <Button
                     variant="ghost"
                     size="sm"
                     onClick={toggleLanguage}
-                    className="absolute top-6 right-6 z-20 font-medium text-slate-500 hover:text-blue-600 hover:bg-blue-50 gap-1.5 rounded-full"
+                    className="absolute top-6 right-6 z-20 font-medium text-slate-500 dark:text-slate-400 hover:text-blue-600 hover:bg-blue-50 gap-1.5 rounded-full dark:bg-slate-800"
                 >
                     <Globe className="h-4 w-4" />
                     {language === 'th' ? 'EN' : 'TH'}
                 </Button>
-                <div className="absolute inset-0 bg-white/40 backdrop-blur-3xl z-0"></div>
+                <div className="absolute inset-0 bg-white dark:bg-slate-900/40 backdrop-blur-3xl z-0"></div>
                 {/* Background blobs */}
                 <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-emerald-100 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
                 <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
-                <div className="w-full max-w-md relative z-10 bg-white/80 p-6 md:p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-white min-h-[600px] flex flex-col justify-center">
+                <div className="w-full max-w-md relative z-10 bg-white dark:bg-slate-900/80 p-6 md:p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-white min-h-[600px] flex flex-col justify-center">
                     <AnimatePresence mode="wait">
                         {step === 1 ? (
                             <motion.div
@@ -125,78 +133,94 @@ export default function RegisterPage() {
                                 className="space-y-8"
                             >
                                 <div className="text-center">
-                                    <h2 className="text-3xl font-bold text-slate-900 mb-2">{t.register.chooseAccountType}</h2>
-                                    <p className="text-slate-500">{t.register.whatRoleQuestion}</p>
+                                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">{t.register.chooseAccountType}</h2>
+                                    <p className="text-slate-500 dark:text-slate-400">{t.register.whatRoleQuestion}</p>
                                 </div>
 
                                 <div className="grid gap-4">
                                     <Card
-                                        className="p-5 cursor-pointer hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/10 transition-all group border-2 border-slate-100 hover:scale-[1.02] bg-white"
+                                        className="p-5 cursor-pointer hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/10 transition-all group border-2 border-slate-100 dark:border-slate-800 hover:scale-[1.02] bg-white dark:bg-slate-900"
                                         onClick={() => handleRoleSelect('student')}
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
-                                                <GraduationCap className="w-6 h-6 text-blue-600 group-hover:text-white" />
+                                            <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 dark:bg-slate-800">
+                                                <GraduationCap className="w-6 h-6 text-blue-600 group-hover:text-white dark:text-slate-300" />
                                             </div>
                                             <div className="flex-1">
-                                                <h3 className="font-bold text-slate-900 text-lg group-hover:text-blue-600 transition-colors">{t.roles.student}</h3>
-                                                <p className="text-slate-500 text-sm">{t.register.studentDesc}</p>
+                                                <h3 className="font-bold text-slate-900 dark:text-white text-lg group-hover:text-blue-600 transition-colors">{t.roles.student}</h3>
+                                                <p className="text-slate-500 dark:text-slate-400 text-sm">{t.register.studentDesc}</p>
                                             </div>
-                                            <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                                            <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all dark:text-slate-400" />
                                         </div>
                                     </Card>
 
                                     <Card
-                                        className="p-5 cursor-pointer hover:border-orange-500 hover:shadow-xl hover:shadow-orange-500/10 transition-all group border-2 border-slate-100 hover:scale-[1.02] bg-white"
+                                        className="p-5 cursor-pointer hover:border-orange-500 hover:shadow-xl hover:shadow-orange-500/10 transition-all group border-2 border-slate-100 dark:border-slate-800 hover:scale-[1.02] bg-white dark:bg-slate-900"
                                         onClick={() => handleRoleSelect('company')}
                                     >
                                         <div className="flex items-center gap-4">
                                             <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-all duration-300">
-                                                <Building2 className="w-6 h-6 text-orange-600 group-hover:text-white" />
+                                                <Building2 className="w-6 h-6 text-orange-600 group-hover:text-white dark:text-slate-300" />
                                             </div>
                                             <div className="flex-1">
-                                                <h3 className="font-bold text-slate-900 text-lg group-hover:text-orange-600 transition-colors">{t.register.companyOrg}</h3>
-                                                <p className="text-slate-500 text-sm">{t.register.companyDesc}</p>
+                                                <h3 className="font-bold text-slate-900 dark:text-white text-lg group-hover:text-orange-600 transition-colors">{t.register.companyOrg}</h3>
+                                                <p className="text-slate-500 dark:text-slate-400 text-sm">{t.register.companyDesc}</p>
                                             </div>
-                                            <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all" />
+                                            <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all dark:text-slate-400" />
                                         </div>
                                     </Card>
 
                                     <Card
-                                        className="p-5 cursor-pointer hover:border-emerald-500 hover:shadow-xl hover:shadow-emerald-500/10 transition-all group border-2 border-slate-100 hover:scale-[1.02] bg-white"
+                                        className="p-5 cursor-pointer hover:border-emerald-500 hover:shadow-xl hover:shadow-emerald-500/10 transition-all group border-2 border-slate-100 dark:border-slate-800 hover:scale-[1.02] bg-white dark:bg-slate-900"
                                         onClick={() => handleRoleSelect('lecturer')}
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
-                                                <BookOpen className="w-6 h-6 text-emerald-600 group-hover:text-white" />
+                                            <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 dark:bg-slate-800">
+                                                <BookOpen className="w-6 h-6 text-emerald-600 group-hover:text-white dark:text-slate-300" />
                                             </div>
                                             <div className="flex-1">
-                                                <h3 className="font-bold text-slate-900 text-lg group-hover:text-emerald-600 transition-colors">{t.roles.lecturer}</h3>
-                                                <p className="text-slate-500 text-sm">{t.register.lecturerDesc}</p>
+                                                <h3 className="font-bold text-slate-900 dark:text-white text-lg group-hover:text-emerald-600 transition-colors">{t.roles.lecturer}</h3>
+                                                <p className="text-slate-500 dark:text-slate-400 text-sm">{t.register.lecturerDesc}</p>
                                             </div>
-                                            <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
+                                            <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all dark:text-slate-400" />
                                         </div>
                                     </Card>
 
                                     <Card
-                                        className="p-5 cursor-pointer hover:border-purple-500 hover:shadow-xl hover:shadow-purple-500/10 transition-all group border-2 border-slate-100 hover:scale-[1.02] bg-white"
+                                        className="p-5 cursor-pointer hover:border-purple-500 hover:shadow-xl hover:shadow-purple-500/10 transition-all group border-2 border-slate-100 dark:border-slate-800 hover:scale-[1.02] bg-white dark:bg-slate-900"
                                         onClick={() => handleRoleSelect('staff')}
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-all duration-300">
-                                                <UserCog className="w-6 h-6 text-purple-600 group-hover:text-white" />
+                                            <div className="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-all duration-300 dark:bg-slate-800">
+                                                <UserCog className="w-6 h-6 text-purple-600 group-hover:text-white dark:text-slate-300" />
                                             </div>
                                             <div className="flex-1">
-                                                <h3 className="font-bold text-slate-900 text-lg group-hover:text-purple-600 transition-colors">{t.roles.staff}</h3>
-                                                <p className="text-slate-500 text-sm">{t.register.staffDesc}</p>
+                                                <h3 className="font-bold text-slate-900 dark:text-white text-lg group-hover:text-purple-600 transition-colors">{t.roles.staff}</h3>
+                                                <p className="text-slate-500 dark:text-slate-400 text-sm">{t.register.staffDesc}</p>
                                             </div>
-                                            <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-purple-500 group-hover:translate-x-1 transition-all" />
+                                            <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-purple-500 group-hover:translate-x-1 transition-all dark:text-slate-400" />
+                                        </div>
+                                    </Card>
+
+                                    <Card
+                                        className="p-5 cursor-pointer hover:border-indigo-500 hover:shadow-xl hover:shadow-indigo-500/10 transition-all group border-2 border-indigo-100 dark:border-indigo-900 hover:scale-[1.02] bg-gradient-to-br from-indigo-50 to-white dark:from-slate-900 dark:to-slate-900"
+                                        onClick={() => handleRoleSelect('enterprise')}
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
+                                                <Building2 className="w-6 h-6 text-indigo-600 group-hover:text-white dark:text-slate-300" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className="font-bold text-indigo-900 dark:text-indigo-300 text-lg group-hover:text-indigo-600 transition-colors">Enterprise Entity</h3>
+                                                <p className="text-slate-500 dark:text-slate-400 text-sm">Exclusive registration for VIP / Enterprise partners.</p>
+                                            </div>
+                                            <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all dark:text-slate-400" />
                                         </div>
                                     </Card>
                                 </div>
 
                                 <div className="text-center pt-4">
-                                    <Link to="/login" className="text-sm font-medium text-slate-500 hover:text-blue-600 transition-colors">{t.register.hasAccount} {t.register.loginNow}</Link>
+                                    <Link to="/login" className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-colors">{t.register.hasAccount} {t.register.loginNow}</Link>
                                 </div>
                             </motion.div>
                         ) : (
@@ -208,15 +232,16 @@ export default function RegisterPage() {
                                 className="space-y-6"
                             >
                                 <div>
-                                    <Button variant="ghost" className="pl-0 hover:bg-transparent text-slate-500 hover:text-slate-900 mb-2 group" onClick={() => setStep(1)}>
+                                    <Button variant="ghost" className="pl-0 hover:bg-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-slate-100 mb-2 group" onClick={() => setStep(1)}>
                                         <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" /> {t.common.back}
                                     </Button>
-                                    <h2 className="text-3xl font-bold text-slate-900 mb-2 tracking-tight">{t.register.personalInfo}</h2>
-                                    <p className="text-slate-500">
-                                        {t.register.registerAs} <span className="font-bold text-blue-600 px-2 py-1 bg-blue-50 rounded-lg">
+                                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">{t.register.personalInfo}</h2>
+                                    <p className="text-slate-500 dark:text-slate-400">
+                                        {t.register.registerAs} <span className="font-bold text-blue-600 px-2 py-1 bg-blue-50 rounded-lg dark:text-slate-300 dark:bg-slate-800">
                                             {role === 'student' ? t.roles.student :
                                                 role === 'company' ? t.roles.company :
-                                                    role === 'lecturer' ? t.roles.lecturer : t.roles.staff}
+                                                    role === 'lecturer' ? t.roles.lecturer : 
+                                                        role === 'enterprise' ? 'Enterprise Entity' : t.roles.staff}
                                         </span>
                                     </p>
                                 </div>
@@ -225,29 +250,52 @@ export default function RegisterPage() {
                                     <div className="space-y-2">
                                         <Label>{t.register.fullNameOrCompany}</Label>
                                         <div className="relative group">
-                                            <User className="absolute left-3 top-3 h-5 w-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
-                                            <Input className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all" required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+                                            <User className="absolute left-3 top-3 h-5 w-5 text-slate-400 group-hover:text-blue-500 transition-colors dark:text-slate-400" />
+                                            <Input className="pl-10 h-12 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all" required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
                                         </div>
                                     </div>
                                     <div className="space-y-2">
                                         <Label>{t.register.email}</Label>
                                         <div className="relative group">
-                                            <Mail className="absolute left-3 top-3 h-5 w-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
-                                            <Input type="email" className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all" required value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+                                            <Mail className="absolute left-3 top-3 h-5 w-5 text-slate-400 group-hover:text-blue-500 transition-colors dark:text-slate-400" />
+                                            <Input type="email" className="pl-10 h-12 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all" required value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
                                         </div>
                                     </div>
+
+                                    {role === 'enterprise' && (
+                                        <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+                                            <h3 className="font-semibold text-indigo-900 dark:text-indigo-300">Enterprise Entity Details</h3>
+                                            <div className="space-y-2">
+                                                <Label>Company Registration Block</Label>
+                                                <Input className="h-12 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-700 focus:border-indigo-500 focus:ring-indigo-500/20 rounded-xl transition-all" required placeholder="e.g. Block A, 12th Floor..." value={enterpriseData.regBlock} onChange={e => setEnterpriseData({ ...enterpriseData, regBlock: e.target.value })} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Tax ID</Label>
+                                                <Input className="h-12 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-700 focus:border-indigo-500 focus:ring-indigo-500/20 rounded-xl transition-all" required placeholder="13-digit Tax ID" value={enterpriseData.taxId} onChange={e => setEnterpriseData({ ...enterpriseData, taxId: e.target.value })} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Company Website Link</Label>
+                                                <Input type="url" className="h-12 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-700 focus:border-indigo-500 focus:ring-indigo-500/20 rounded-xl transition-all" required placeholder="https://www.example.com" value={enterpriseData.website} onChange={e => setEnterpriseData({ ...enterpriseData, website: e.target.value })} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Industry</Label>
+                                                <Input className="h-12 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-700 focus:border-indigo-500 focus:ring-indigo-500/20 rounded-xl transition-all" required placeholder="e.g. Technology, Finance, Education..." value={enterpriseData.industry} onChange={e => setEnterpriseData({ ...enterpriseData, industry: e.target.value })} />
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <div className="space-y-2">
                                         <Label>{t.register.password}</Label>
                                         <div className="relative group">
-                                            <Lock className="absolute left-3 top-3 h-5 w-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
-                                            <Input type="password" className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all" required value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
+                                            <Lock className="absolute left-3 top-3 h-5 w-5 text-slate-400 group-hover:text-blue-500 transition-colors dark:text-slate-400" />
+                                            <Input type="password" className="pl-10 h-12 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all" required value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
                                         </div>
                                     </div>
                                     <div className="space-y-2">
                                         <Label>{t.register.confirmPassword}</Label>
                                         <div className="relative group">
-                                            <Lock className="absolute left-3 top-3 h-5 w-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
-                                            <Input type="password" className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all" required value={formData.confirmPassword} onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })} />
+                                            <Lock className="absolute left-3 top-3 h-5 w-5 text-slate-400 group-hover:text-blue-500 transition-colors dark:text-slate-400" />
+                                            <Input type="password" className="pl-10 h-12 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl transition-all" required value={formData.confirmPassword} onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })} />
                                         </div>
                                     </div>
 

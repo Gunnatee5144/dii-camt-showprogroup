@@ -95,13 +95,13 @@ export default function Schedule() {
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-2 text-slate-500 font-medium mb-2"
+              className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2"
             >
-              <Calendar className="w-4 h-4 text-purple-500" />
+              <Calendar className="w-4 h-4 text-purple-500 dark:text-slate-400" />
               <span>{t.schedulePage.semester}</span>
             </motion.div>
             <motion.h1
-              className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight"
+              className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
@@ -111,17 +111,17 @@ export default function Schedule() {
           </div>
 
           <motion.div
-            className="flex items-center gap-2 bg-white rounded-2xl p-1.5 shadow-sm border border-slate-200"
+            className="flex items-center gap-2 bg-white dark:bg-slate-900 rounded-2xl p-1.5 shadow-sm border border-slate-200 dark:border-slate-700"
             whileHover={{ scale: 1.02 }}
           >
-            <Button variant="ghost" size="icon" onClick={() => setCurrentWeek(currentWeek - 1)} className="rounded-xl hover:bg-slate-100">
-              <ChevronLeft className="w-5 h-5 text-slate-600" />
+            <Button variant="ghost" size="icon" onClick={() => setCurrentWeek(currentWeek - 1)} className="rounded-xl hover:bg-slate-100 dark:bg-slate-800">
+              <ChevronLeft className="w-5 h-5 text-slate-600 dark:text-slate-300" />
             </Button>
-            <div className="px-4 text-sm font-bold text-slate-700">
+            <div className="px-4 text-sm font-bold text-slate-700 dark:text-slate-300">
               {startOfWeek.getDate()} {startOfWeek.toLocaleDateString('th-TH', { month: 'short' })} - {endOfWeek.getDate()} {endOfWeek.toLocaleDateString('th-TH', { month: 'short' })}
             </div>
-            <Button variant="ghost" size="icon" onClick={() => setCurrentWeek(currentWeek + 1)} className="rounded-xl hover:bg-slate-100">
-              <ChevronRight className="w-5 h-5 text-slate-600" />
+            <Button variant="ghost" size="icon" onClick={() => setCurrentWeek(currentWeek + 1)} className="rounded-xl hover:bg-slate-100 dark:bg-slate-800">
+              <ChevronRight className="w-5 h-5 text-slate-600 dark:text-slate-300" />
             </Button>
           </motion.div>
         </div>
@@ -134,7 +134,7 @@ export default function Schedule() {
             className="p-5 rounded-3xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/20"
           >
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
+              <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50">
                 <BookOpen className="w-5 h-5" />
               </div>
               <span className="font-medium text-white/90 text-sm">{t.schedulePage.totalCourses}</span>
@@ -148,7 +148,7 @@ export default function Schedule() {
             className="p-5 rounded-3xl bg-gradient-to-br from-purple-500 to-pink-600 text-white shadow-lg shadow-purple-500/20"
           >
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
+              <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50">
                 <GraduationCap className="w-5 h-5" />
               </div>
               <span className="font-medium text-white/90 text-sm">{t.schedulePage.totalCredits}</span>
@@ -162,7 +162,7 @@ export default function Schedule() {
             className="p-5 rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/20"
           >
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
+              <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50">
                 <Clock className="w-5 h-5" />
               </div>
               <span className="font-medium text-white/90 text-sm">{t.schedulePage.hoursPerWeek}</span>
@@ -173,20 +173,20 @@ export default function Schedule() {
           <motion.div
             variants={itemVariants}
             whileHover={{ y: -5 }}
-            className="p-5 rounded-3xl bg-white border border-slate-200 shadow-sm text-slate-700"
+            className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-700 dark:text-slate-200"
           >
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-xl bg-slate-100">
-                <Calendar className="w-5 h-5 text-slate-500" />
+              <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800">
+                <Calendar className="w-5 h-5 text-slate-500 dark:text-slate-400" />
               </div>
-              <span className="font-medium text-slate-500 text-sm">{t.schedulePage.studyDays}</span>
+              <span className="font-medium text-slate-500 dark:text-slate-400 text-sm">{t.schedulePage.studyDays}</span>
             </div>
             <div className="text-3xl font-bold">{t.schedulePage.monFri}</div>
           </motion.div>
         </div>
 
         {/* Timetable Card */}
-        <motion.div variants={itemVariants} className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">
+        <motion.div variants={itemVariants} className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-6 shadow-sm dark:bg-slate-900/50">
           <Timetable
             courses={studentCourses}
             semester={mockStudent.semester}
@@ -197,8 +197,8 @@ export default function Schedule() {
         {/* Today's Classes */}
         <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="space-y-4">
-            <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-purple-500" /> {t.schedulePage.todayClasses}
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-purple-500 dark:text-slate-400" /> {t.schedulePage.todayClasses}
             </h3>
             <div className="space-y-3">
               {studentCourses.slice(0, 3).map((course, index) => (
@@ -207,20 +207,20 @@ export default function Schedule() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all cursor-pointer group"
+                  className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all cursor-pointer group"
                 >
-                  <div className="flex flex-col items-center justify-center bg-purple-50 text-purple-700 rounded-xl px-4 py-2 min-w-[80px] group-hover:bg-purple-500 group-hover:text-white transition-colors">
+                  <div className="flex flex-col items-center justify-center bg-purple-50 text-purple-700 rounded-xl px-4 py-2 min-w-[80px] group-hover:bg-purple-500 group-hover:text-white transition-colors dark:text-slate-300 dark:bg-slate-800">
                     <div className="text-sm font-bold">09:00</div>
                     <div className="text-xs opacity-75">12:00</div>
                   </div>
                   <div className="flex-1">
-                    <div className="font-bold text-slate-800 group-hover:text-purple-600 transition-colors">{course.name}</div>
-                    <div className="text-xs text-slate-500 flex items-center gap-2 mt-1">
+                    <div className="font-bold text-slate-800 dark:text-slate-200 group-hover:text-purple-600 transition-colors">{course.name}</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-1">
                       <MapPin className="w-3 h-3" />
                       ห้อง 301 อาคาร DII
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-purple-100 text-purple-600 group-hover:bg-white group-hover:text-purple-600">
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-600 group-hover:bg-white group-hover:text-purple-600 dark:text-slate-300 dark:bg-slate-900 dark:bg-slate-800">
                     {t.schedulePage.inClass}
                   </Badge>
                 </motion.div>
@@ -268,11 +268,11 @@ export default function Schedule() {
     >
       <div className="flex items-end justify-between">
         <div>
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
-            <Calendar className="w-4 h-4 text-purple-500" />
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2">
+            <Calendar className="w-4 h-4 text-purple-500 dark:text-slate-400" />
             <span>{t.schedulePage.lecturerSubtitle}</span>
           </motion.div>
-          <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               {t.schedulePage.lecturerTitle}<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">{t.schedulePage.lecturerHighlight}</span>
           </motion.h1>
         </div>
@@ -289,14 +289,14 @@ export default function Schedule() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-orange-50 border border-orange-200 text-orange-800 p-4 rounded-xl flex items-center gap-3"
+          className="bg-orange-50 border border-orange-200 text-orange-800 p-4 rounded-xl flex items-center gap-3 dark:text-slate-200"
         >
           <Clock className="w-5 h-5" />
           <span className="font-medium">Complete editing mode enabled. Drag and drop slots to reschedule.</span>
         </motion.div>
       )}
 
-      <motion.div variants={itemVariants} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+      <motion.div variants={itemVariants} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 dark:bg-slate-900 dark:border-slate-700">
         {isEditMode ? (
           <DraggableSchedule
             initialSchedule={scheduleItems}

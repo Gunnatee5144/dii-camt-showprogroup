@@ -122,12 +122,12 @@ export function QuickStat({ label, value, icon: Icon, trend, color = 'blue' }: Q
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
-      className="relative overflow-hidden rounded-xl bg-gradient-to-br from-white to-gray-50 border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow"
+      className="relative overflow-hidden rounded-xl bg-gradient-to-br from-white to-gray-50 border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow dark:border-slate-700"
     >
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-500">{label}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-slate-400">{label}</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{value}</p>
           {trend && (
             <div className={cn(
               'flex items-center gap-1 mt-2 text-sm font-medium',

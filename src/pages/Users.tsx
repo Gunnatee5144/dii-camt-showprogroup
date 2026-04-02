@@ -89,10 +89,10 @@ export default function UsersPage() {
 
     const getRoleBadge = (role: string) => {
         switch (role) {
-            case 'student': return <Badge className="bg-blue-100 text-blue-700">{t.roles.student}</Badge>;
-            case 'lecturer': return <Badge className="bg-emerald-100 text-emerald-700">{t.roles.lecturer}</Badge>;
-            case 'staff': return <Badge className="bg-purple-100 text-purple-700">{t.roles.staff}</Badge>;
-            case 'company': return <Badge className="bg-orange-100 text-orange-700">{t.roles.company}</Badge>;
+            case 'student': return <Badge className="bg-blue-100 text-blue-700 dark:text-slate-300 dark:bg-slate-800">{t.roles.student}</Badge>;
+            case 'lecturer': return <Badge className="bg-emerald-100 text-emerald-700 dark:text-slate-300 dark:bg-slate-800">{t.roles.lecturer}</Badge>;
+            case 'staff': return <Badge className="bg-purple-100 text-purple-700 dark:text-slate-300 dark:bg-slate-800">{t.roles.staff}</Badge>;
+            case 'company': return <Badge className="bg-orange-100 text-orange-700 dark:text-slate-300">{t.roles.company}</Badge>;
             default: return <Badge>{role}</Badge>;
         }
     };
@@ -110,13 +110,13 @@ export default function UsersPage() {
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="flex items-center gap-2 text-slate-500 font-medium mb-2"
+                        className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2"
                     >
-                        <Users className="w-4 h-4 text-purple-500" />
+                        <Users className="w-4 h-4 text-purple-500 dark:text-slate-400" />
                         <span>{t.users.totalUsers} {totalUsers} {t.common.person}</span>
                     </motion.div>
                     <motion.h1
-                        className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight"
+                        className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
@@ -139,10 +139,10 @@ export default function UsersPage() {
                     whileHover={{ y: -5 }}
                     className="p-6 rounded-3xl bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-xl shadow-purple-500/20 relative overflow-hidden"
                 >
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 dark:bg-slate-900/50" />
                     <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2.5 rounded-xl bg-white/20 backdrop-blur-sm">
+                            <div className="p-2.5 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50">
                                 <GraduationCap className="w-6 h-6" />
                             </div>
                             <span className="font-medium text-white/90">{t.users.studentsLabel}</span>
@@ -158,54 +158,51 @@ export default function UsersPage() {
                 <motion.div
                     variants={itemVariants}
                     whileHover={{ y: -5 }}
-                    className="p-6 rounded-3xl bg-white border border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden group"
+                    className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-100/50 relative overflow-hidden group"
                 >
                     <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2.5 rounded-xl bg-slate-100 text-slate-600 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                            <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
                                 <Users className="w-6 h-6" />
                             </div>
-                            <span className="font-medium text-slate-600">{t.users.lecturersLabel}</span>
+                            <span className="font-medium text-slate-600 dark:text-slate-300">{t.users.lecturersLabel}</span>
                         </div>
-                        <div className="text-4xl font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">{users.filter(u => u.type === 'lecturer').length}</div>
+                        <div className="text-4xl font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 transition-colors">{users.filter(u => u.type === 'lecturer').length}</div>
                         <div className="mt-3 text-sm text-slate-400">{t.users.teachingStaff}</div>
-                        <div className="absolute bottom-0 right-0 w-24 h-12 bg-gradient-to-t from-emerald-50 to-transparent" />
                     </div>
                 </motion.div>
 
                 <motion.div
                     variants={itemVariants}
                     whileHover={{ y: -5 }}
-                    className="p-6 rounded-3xl bg-white border border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden group"
+                    className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-100/50 relative overflow-hidden group"
                 >
                     <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2.5 rounded-xl bg-slate-100 text-slate-600 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                            <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
                                 <UserCog className="w-6 h-6" />
                             </div>
-                            <span className="font-medium text-slate-600">{t.users.staffLabel}</span>
+                            <span className="font-medium text-slate-600 dark:text-slate-300">{t.users.staffLabel}</span>
                         </div>
-                        <div className="text-4xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{users.filter(u => u.type === 'staff').length}</div>
+                        <div className="text-4xl font-bold text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">{users.filter(u => u.type === 'staff').length}</div>
                         <div className="mt-3 text-sm text-slate-400">{t.users.supportStaff}</div>
-                        <div className="absolute bottom-0 right-0 w-24 h-12 bg-gradient-to-t from-blue-50 to-transparent" />
                     </div>
                 </motion.div>
 
                 <motion.div
                     variants={itemVariants}
                     whileHover={{ y: -5 }}
-                    className="p-6 rounded-3xl bg-white border border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden group"
+                    className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-100/50 relative overflow-hidden group"
                 >
                     <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2.5 rounded-xl bg-slate-100 text-slate-600 group-hover:bg-orange-50 group-hover:text-orange-600 transition-colors">
+                            <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-orange-50 group-hover:text-orange-600 transition-colors">
                                 <Building className="w-6 h-6" />
                             </div>
-                            <span className="font-medium text-slate-600">{t.users.companiesLabel}</span>
+                            <span className="font-medium text-slate-600 dark:text-slate-300">{t.users.companiesLabel}</span>
                         </div>
-                        <div className="text-4xl font-bold text-slate-900 group-hover:text-orange-600 transition-colors">{users.filter(u => u.type === 'company').length}</div>
+                        <div className="text-4xl font-bold text-slate-900 dark:text-white group-hover:text-orange-600 transition-colors">{users.filter(u => u.type === 'company').length}</div>
                         <div className="mt-3 text-sm text-slate-400">{t.users.businessPartners}</div>
-                        <div className="absolute bottom-0 right-0 w-24 h-12 bg-gradient-to-t from-orange-50 to-transparent" />
                     </div>
                 </motion.div>
             </div>
@@ -219,7 +216,7 @@ export default function UsersPage() {
                 </div>
 
                 <Tabs defaultValue="all" className="space-y-4">
-                    <TabsList className="bg-white/80 backdrop-blur-sm border shadow-sm">
+                    <TabsList className="bg-white/80 backdrop-blur-sm border shadow-sm dark:bg-slate-900/50">
                         <TabsTrigger value="all">{t.users.allTab}</TabsTrigger>
                         <TabsTrigger value="student">{t.roles.student}</TabsTrigger>
                         <TabsTrigger value="lecturer">{t.roles.lecturer}</TabsTrigger>
@@ -229,7 +226,7 @@ export default function UsersPage() {
 
                     {['all', 'student', 'lecturer', 'staff', 'company'].map(tab => (
                         <TabsContent key={tab} value={tab}>
-                            <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm"><CardContent className="pt-6">
+                            <Card className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl shadow-sm dark:bg-slate-900/50"><CardContent className="pt-6">
                                 <div className="space-y-3">
                                     <AnimatePresence>
                                         {filteredUsers.filter(u => tab === 'all' || u.type === tab).map((user) => (
@@ -239,7 +236,7 @@ export default function UsersPage() {
                                                 animate={{ opacity: 1 }}
                                                 exit={{ opacity: 0 }}
                                                 key={user.id}
-                                                className="flex items-center justify-between p-4 border rounded-xl hover:shadow-md transition-all bg-white"
+                                                className="flex items-center justify-between p-4 border rounded-xl hover:shadow-md transition-all bg-white dark:bg-slate-900"
                                             >
                                                 <div className="flex items-center gap-4">
                                                     <div className={`w-12 h-12 rounded-full bg-gradient-to-br flex items-center justify-center text-white font-bold text-lg
@@ -250,17 +247,17 @@ export default function UsersPage() {
                                                         {user.name.charAt(0)}
                                                     </div>
                                                     <div>
-                                                        <div className="font-semibold text-gray-900">{user.name}</div>
-                                                        <div className="text-sm text-gray-500">{user.email || 'No email'}</div>
+                                                        <div className="font-semibold text-gray-900 dark:text-slate-200">{user.name}</div>
+                                                        <div className="text-sm text-gray-500 dark:text-slate-400">{user.email || 'No email'}</div>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-3">
                                                     {getRoleBadge(user.type)}
                                                     <div className="flex gap-1">
                                                         <Button size="sm" variant="ghost" onClick={() => handleEdit(user)}>
-                                                            <Edit className="w-4 h-4 text-gray-500" />
+                                                            <Edit className="w-4 h-4 text-gray-500 dark:text-slate-400" />
                                                         </Button>
-                                                        <Button size="sm" variant="ghost" onClick={() => handleDelete(user.id)} className="text-red-500 hover:text-red-600 hover:bg-red-50">
+                                                        <Button size="sm" variant="ghost" onClick={() => handleDelete(user.id)} className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:text-slate-300 dark:bg-slate-800">
                                                             <Trash2 className="w-4 h-4" />
                                                         </Button>
                                                     </div>
@@ -269,7 +266,7 @@ export default function UsersPage() {
                                         ))}
                                     </AnimatePresence>
                                     {filteredUsers.filter(u => tab === 'all' || u.type === tab).length === 0 && (
-                                        <div className="text-center py-12 text-gray-500">
+                                        <div className="text-center py-12 text-gray-500 dark:text-slate-400">
                                             {t.users.noUsers}
                                         </div>
                                     )}

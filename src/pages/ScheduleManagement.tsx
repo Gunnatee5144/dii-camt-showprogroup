@@ -63,11 +63,11 @@ export default function ScheduleManagement() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
                 <div>
-                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
-                        <Calendar className="w-4 h-4 text-purple-500" />
+                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2">
+                        <Calendar className="w-4 h-4 text-purple-500 dark:text-slate-400" />
                         <span>{t.scheduleManagementPage.subtitle}</span>
                     </motion.div>
-                    <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                    <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                         {t.scheduleManagementPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-violet-600">{t.scheduleManagementPage.titleHighlight}</span>
                     </motion.h1>
                 </div>
@@ -88,22 +88,22 @@ export default function ScheduleManagement() {
                         </h3>
                         <div className="space-y-3">
                             {requests.map(req => (
-                                <motion.div key={req.id} whileHover={{ x: 4 }} className="bg-white p-5 rounded-2xl border border-amber-100 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                                <motion.div key={req.id} whileHover={{ x: 4 }} className="bg-white p-5 rounded-2xl border border-amber-100 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 dark:bg-slate-900">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                            <span className="font-bold text-slate-800">{req.lecturer}</span>
+                                            <span className="font-bold text-slate-800 dark:text-slate-200">{req.lecturer}</span>
                                             <Badge variant="outline" className="rounded-lg text-xs">{req.courseCode}</Badge>
                                             <Badge className={`rounded-lg text-xs ${req.type === 'permanent' ? 'bg-purple-100 text-purple-700 border-purple-200' : 'bg-blue-100 text-blue-700 border-blue-200'}`}>
                                                 {req.type === 'permanent' ? t.scheduleManagementPage.permanentChange : t.scheduleManagementPage.oneTime}
                                             </Badge>
                                         </div>
-                                        <p className="text-sm text-slate-600">
-                                            จาก <span className="text-red-500 font-medium">{req.oldTime}</span> เป็น <span className="text-emerald-600 font-medium">{req.newTime}</span>
+                                        <p className="text-sm text-slate-600 dark:text-slate-300">
+                                            จาก <span className="text-red-500 font-medium dark:text-slate-400">{req.oldTime}</span> เป็น <span className="text-emerald-600 font-medium dark:text-slate-300">{req.newTime}</span>
                                         </p>
                                         <p className="text-sm text-slate-400 mt-1">{t.scheduleManagementPage.reason} {req.reason}</p>
                                     </div>
                                     <div className="flex gap-2">
-                                        <Button size="sm" variant="outline" className="text-red-500 hover:bg-red-50 border-red-200 rounded-xl" onClick={() => handleReject(req.id)}>
+                                        <Button size="sm" variant="outline" className="text-red-500 hover:bg-red-50 border-red-200 rounded-xl dark:text-slate-400 dark:bg-slate-800" onClick={() => handleReject(req.id)}>
                                             <XCircle className="w-4 h-4 mr-1" /> {t.scheduleManagementPage.reject}
                                         </Button>
                                         <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600 rounded-xl shadow-lg shadow-emerald-200" onClick={() => handleApprove(req)}>
@@ -121,9 +121,9 @@ export default function ScheduleManagement() {
             <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {rooms.map((room, idx) => (
                     <motion.div key={idx} whileHover={{ scale: 1.02 }}
-                        className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
+                        className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all dark:bg-slate-900/50">
                         <div className="flex justify-between items-start mb-3">
-                            <h4 className="font-bold text-slate-800 text-sm">{room.name}</h4>
+                            <h4 className="font-bold text-slate-800 dark:text-slate-200 text-sm">{room.name}</h4>
                             <div className={`w-3 h-3 rounded-full ${room.status === 'available' ? 'bg-emerald-500' : room.status === 'occupied' ? 'bg-red-500' : 'bg-amber-500'}`} />
                         </div>
                         <p className="text-sm text-slate-400 flex items-center gap-2 mb-4">
@@ -138,14 +138,14 @@ export default function ScheduleManagement() {
             </motion.div>
 
             {/* Schedule */}
-            <motion.div variants={itemVariants} className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm min-h-[600px]">
+            <motion.div variants={itemVariants} className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-6 shadow-sm min-h-[600px] dark:bg-slate-900/50">
                 <div className="flex items-center justify-between mb-5">
                     <div>
-                        <h3 className="text-lg font-bold text-slate-800">{t.scheduleManagementPage.combinedSchedule}</h3>
-                        <p className="text-sm text-slate-500">{t.scheduleManagementPage.combinedDesc}</p>
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">{t.scheduleManagementPage.combinedSchedule}</h3>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">{t.scheduleManagementPage.combinedDesc}</p>
                     </div>
                     <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200">
+                        <div className="flex items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-900/50">
                             <Switch id="edit-mode" checked={isEditMode} onCheckedChange={setIsEditMode} />
                             <Label htmlFor="edit-mode" className="cursor-pointer flex items-center gap-2 text-sm">
                                 <Edit3 className="w-4 h-4" /> {t.scheduleManagementPage.editMode}
@@ -154,7 +154,7 @@ export default function ScheduleManagement() {
                     </div>
                 </div>
                 {isEditMode && (
-                    <div className="mb-4 p-3.5 bg-blue-50 border border-blue-100 rounded-2xl text-sm text-blue-700 flex items-center gap-2">
+                    <div className="mb-4 p-3.5 bg-blue-50 border border-blue-100 rounded-2xl text-sm text-blue-700 flex items-center gap-2 dark:text-slate-300 dark:bg-slate-800">
                         <Edit3 className="w-4 h-4" /> {t.scheduleManagementPage.editModeDesc}
                     </div>
                 )}

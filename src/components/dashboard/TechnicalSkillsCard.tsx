@@ -79,7 +79,7 @@ const getLevelColor = (level: string) => {
         case 'expert': return 'bg-violet-100 text-violet-700 border-violet-200';
         case 'advanced': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
         case 'intermediate': return 'bg-blue-100 text-blue-700 border-blue-200';
-        default: return 'bg-slate-100 text-slate-700 border-slate-200';
+        default: return 'bg-slate-100 text-slate-700 dark:text-slate-300 border-slate-200';
     }
 };
 
@@ -107,15 +107,15 @@ export function TechnicalSkillsCard({ skills, activities = [] }: TechnicalSkills
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm"
+            className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-6 shadow-sm dark:bg-slate-900/50"
         >
             <div className="flex items-center gap-3 mb-6">
                 <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg shadow-orange-500/20">
                     <Code2 className="w-5 h-5" />
                 </div>
                 <div>
-                    <h3 className="text-lg font-bold text-slate-800">Technical Skills</h3>
-                    <p className="text-sm text-slate-500">ทักษะตามสายงาน</p>
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">Technical Skills</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">ทักษะตามสายงาน</p>
                 </div>
             </div>
 
@@ -164,20 +164,20 @@ export function TechnicalSkillsCard({ skills, activities = [] }: TechnicalSkills
 
             {/* Experience & Activities */}
             {activities.length > 0 && (
-                <div className="mt-6 pt-6 border-t border-slate-100">
+                <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700">
                     <div className="flex items-center gap-2 mb-4">
                         <Sparkles className="w-4 h-4 text-amber-500" />
-                        <span className="font-semibold text-slate-700 text-sm">ประสบการณ์และกิจกรรม</span>
+                        <span className="font-semibold text-slate-700 dark:text-slate-300 text-sm">ประสบการณ์และกิจกรรม</span>
                     </div>
                     <div className="space-y-2">
                         {activities.slice(0, 3).map((activity, index) => (
                             <div
                                 key={index}
-                                className="flex items-center justify-between p-3 rounded-xl bg-slate-50"
+                                className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800"
                             >
                                 <div>
-                                    <div className="font-medium text-slate-800 text-sm">{activity.name}</div>
-                                    <div className="text-xs text-slate-500">{activity.type}</div>
+                                    <div className="font-medium text-slate-800 dark:text-slate-200 text-sm">{activity.name}</div>
+                                    <div className="text-xs text-slate-500 dark:text-slate-400">{activity.type}</div>
                                 </div>
                                 <span className="text-xs text-slate-400">{activity.date}</span>
                             </div>

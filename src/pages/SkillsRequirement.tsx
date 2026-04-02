@@ -149,12 +149,12 @@ export default function SkillsRequirement() {
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8 pb-10">
       {/* Header */}
       <div>
-        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
-          <Target className="w-4 h-4 text-indigo-500" />
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2">
+          <Target className="w-4 h-4 text-indigo-500 dark:text-slate-400" />
           <span>{tr.subtitle}</span>
         </motion.div>
         <div className="flex items-end justify-between">
-          <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             {tr.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">{tr.titleHighlight}</span>
           </motion.h1>
           <Button onClick={() => setShowForm(true)} className="bg-indigo-600 hover:bg-indigo-700 gap-2">
@@ -172,10 +172,10 @@ export default function SkillsRequirement() {
           { icon: Star, label: tr.avgMatch, value: `${Math.round(requirements.reduce((s, r) => s + r.avgMatch, 0) / requirements.length)}%`, gradient: 'from-amber-500 to-orange-500', shadow: 'shadow-amber-200' },
         ].map((stat, i) => (
           <motion.div key={i} whileHover={{ scale: 1.02 }} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradient} p-5 text-white shadow-xl ${stat.shadow}`}>
-            <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+            <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
             <div className="relative z-10">
               <div className="flex items-center gap-2 mb-2">
-                <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm"><stat.icon className="w-4 h-4" /></div>
+                <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50"><stat.icon className="w-4 h-4" /></div>
                 <span className="text-sm font-medium text-white/90">{stat.label}</span>
               </div>
               <div className="text-3xl font-bold">{stat.value}</div>
@@ -190,13 +190,13 @@ export default function SkillsRequirement() {
           const priority = getPriorityConfig(req.priority);
           return (
             <motion.div key={req.id} variants={itemVariants} whileHover={{ y: -4 }}
-              className="bg-white border border-slate-100 rounded-2xl p-6 shadow-lg shadow-slate-100/50 hover:shadow-xl transition-all">
+              className="bg-white border border-slate-100 dark:border-slate-800 rounded-2xl p-6 shadow-lg shadow-slate-100/50 hover:shadow-xl transition-all dark:bg-slate-900/50">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-slate-200">
                     {language === 'th' ? req.name : req.nameEn}
                   </h3>
-                  <p className="text-sm text-slate-500 mt-1">
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                     {language === 'th' ? req.description : req.descriptionEn}
                   </p>
                 </div>
@@ -208,13 +208,13 @@ export default function SkillsRequirement() {
 
               {/* Skills */}
               <div className="mb-4">
-                <div className="text-sm font-medium text-slate-600 mb-2">{tr.requiredSkills}</div>
+                <div className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">{tr.requiredSkills}</div>
                 <div className="flex flex-wrap gap-2">
                   {req.skills.map((skill, si) => {
                     const SkillIcon = skillIcons[skill.name] || Code;
                     return (
-                      <div key={si} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-100">
-                        <SkillIcon className="w-3.5 h-3.5 text-slate-500" />
+                      <div key={si} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-700">
+                        <SkillIcon className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                         <span className="text-sm font-medium">{skill.name}</span>
                         <Badge className={`text-[10px] px-1.5 py-0 h-5 ${getLevelColor(skill.level)}`}>{getLevelLabel(skill.level)}</Badge>
                       </div>
@@ -226,12 +226,12 @@ export default function SkillsRequirement() {
               {/* Match stats */}
               <div className="flex items-center gap-4 p-3 rounded-xl bg-indigo-50 border border-indigo-100 mb-4">
                 <div className="flex-1">
-                  <div className="text-xs text-slate-500 mb-1">{tr.matchScore}</div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">{tr.matchScore}</div>
                   <Progress value={req.avgMatch} className="h-2" />
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-bold text-indigo-600">{req.avgMatch}%</div>
-                  <div className="text-xs text-slate-500">{req.matchedStudents} {t.common.person}</div>
+                  <div className="text-lg font-bold text-indigo-600 dark:text-slate-300">{req.avgMatch}%</div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400">{req.matchedStudents} {t.common.person}</div>
                 </div>
               </div>
 
@@ -243,7 +243,7 @@ export default function SkillsRequirement() {
                 <Button variant="outline" size="sm" className="rounded-xl">
                   <Edit2 className="w-3.5 h-3.5" />
                 </Button>
-                <Button variant="outline" size="sm" className="rounded-xl text-red-500 hover:text-red-700 hover:bg-red-50">
+                <Button variant="outline" size="sm" className="rounded-xl text-red-500 hover:text-red-700 hover:bg-red-50 dark:text-slate-300 dark:bg-slate-800">
                   <Trash2 className="w-3.5 h-3.5" />
                 </Button>
               </div>
@@ -257,7 +257,7 @@ export default function SkillsRequirement() {
         <DialogContent className="sm:max-w-[550px] max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Target className="w-5 h-5 text-indigo-500" /> {tr.createNew}
+              <Target className="w-5 h-5 text-indigo-500 dark:text-slate-400" /> {tr.createNew}
             </DialogTitle>
             <DialogDescription>{tr.description}</DialogDescription>
           </DialogHeader>
@@ -313,7 +313,7 @@ export default function SkillsRequirement() {
                       </SelectContent>
                     </Select>
                     {formData.skills.length > 1 && (
-                      <Button type="button" variant="ghost" size="sm" className="text-red-500" onClick={() => handleRemoveSkill(i)}>
+                      <Button type="button" variant="ghost" size="sm" className="text-red-500 dark:text-slate-400" onClick={() => handleRemoveSkill(i)}>
                         <X className="w-4 h-4" />
                       </Button>
                     )}
@@ -337,7 +337,7 @@ export default function SkillsRequirement() {
         <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-indigo-500" /> {tr.matchResults}
+              <Sparkles className="w-5 h-5 text-indigo-500 dark:text-slate-400" /> {tr.matchResults}
             </DialogTitle>
             <DialogDescription>
               {selectedReq && (language === 'th' ? selectedReq.name : selectedReq.nameEn)}
@@ -346,13 +346,13 @@ export default function SkillsRequirement() {
 
           <div className="space-y-3 mt-4">
             {mockMatches.map((match, i) => (
-              <div key={i} className="flex items-center gap-4 p-4 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
+              <div key={i} className="flex items-center gap-4 p-4 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 transition-colors dark:bg-slate-800">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
                   {(language === 'th' ? match.name : match.nameEn).charAt(0)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-medium">{language === 'th' ? match.name : match.nameEn}</div>
-                  <div className="text-xs text-slate-500">GPA {match.gpa} • {t.studentsPage?.year || 'Year'} {match.year}</div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400">GPA {match.gpa} • {t.studentsPage?.year || 'Year'} {match.year}</div>
                   <div className="flex gap-1 mt-1">
                     {match.skills.map((s, si) => (
                       <Badge key={si} variant="outline" className="text-[10px] px-1.5 py-0">{s}</Badge>
@@ -360,7 +360,7 @@ export default function SkillsRequirement() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-bold text-indigo-600">{match.matchScore}%</div>
+                  <div className="text-lg font-bold text-indigo-600 dark:text-slate-300">{match.matchScore}%</div>
                   <div className="text-xs text-slate-400">{tr.matchScore}</div>
                 </div>
               </div>

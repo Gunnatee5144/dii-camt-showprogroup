@@ -22,15 +22,15 @@ const getNotificationIcon = (type: Notification['type']) => {
     case 'success':
       return <CheckCircle className="w-5 h-5 text-green-500" />;
     case 'error':
-      return <AlertCircle className="w-5 h-5 text-red-500" />;
+      return <AlertCircle className="w-5 h-5 text-red-500 dark:text-slate-400" />;
     case 'warning':
       return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
     case 'schedule_change':
-      return <Calendar className="w-5 h-5 text-orange-500" />;
+      return <Calendar className="w-5 h-5 text-orange-500 dark:text-slate-400" />;
     case 'grade':
-      return <CheckCircle className="w-5 h-5 text-blue-500" />;
+      return <CheckCircle className="w-5 h-5 text-blue-500 dark:text-slate-400" />;
     default:
-      return <Info className="w-5 h-5 text-gray-500" />;
+      return <Info className="w-5 h-5 text-gray-500 dark:text-slate-400" />;
   }
 };
 
@@ -96,7 +96,7 @@ export function NotificationCenter({
 
         <ScrollArea className="h-[400px]">
           {notifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+            <div className="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-slate-400">
               <Bell className="w-12 h-12 mb-2 opacity-50" />
               <p className="text-sm">ไม่มีการแจ้งเตือน</p>
             </div>
@@ -107,7 +107,7 @@ export function NotificationCenter({
                   key={notification.id}
                   className={`p-4 cursor-pointer hover:bg-gray-50 ${
                     !notification.isRead ? 'bg-blue-50/50' : ''
-                  }`}
+                  } dark:bg-slate-900/50`}
                   onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="flex gap-3 w-full">
@@ -116,7 +116,7 @@ export function NotificationCenter({
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between mb-1">
-                        <h4 className="font-semibold text-sm text-gray-900">
+                        <h4 className="font-semibold text-sm text-gray-900 dark:text-slate-200">
                           {notification.titleThai || notification.title}
                         </h4>
                         {notification.priority !== 'low' && (
@@ -125,11 +125,11 @@ export function NotificationCenter({
                           />
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 line-clamp-2">
+                      <p className="text-sm text-gray-600 dark:text-slate-400 line-clamp-2">
                         {notification.messageThai || notification.message}
                       </p>
                       <div className="flex items-center justify-between mt-2">
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500 dark:text-slate-400">
                           {new Date(notification.createdAt).toLocaleDateString('th-TH', {
                             month: 'short',
                             day: 'numeric',
@@ -138,7 +138,7 @@ export function NotificationCenter({
                           })}
                         </span>
                         {notification.actionLabel && (
-                          <span className="text-xs text-blue-600 font-medium">
+                          <span className="text-xs text-blue-600 font-medium dark:text-slate-300">
                             {notification.actionLabel} →
                           </span>
                         )}

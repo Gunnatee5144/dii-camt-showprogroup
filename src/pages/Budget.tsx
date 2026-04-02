@@ -29,11 +29,11 @@ export default function Budget() {
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8 pb-10">
             {/* Header */}
             <div>
-                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
-                    <Wallet className="w-4 h-4 text-purple-500" />
+                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2">
+                    <Wallet className="w-4 h-4 text-purple-500 dark:text-slate-400" />
                     <span>{t.budgetPage.subtitle}</span>
                 </motion.div>
-                <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                     {t.budgetPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-violet-600">{t.budgetPage.titleHighlight}</span>
                 </motion.h1>
             </div>
@@ -46,10 +46,10 @@ export default function Budget() {
                     { icon: Receipt, label: t.budgetPage.pendingApproval, value: '3', sub: t.budgetPage.disbursementReqs, gradient: 'from-amber-500 to-orange-500', shadow: 'shadow-amber-200' },
                 ].map((stat, i) => (
                     <motion.div key={i} whileHover={{ scale: 1.02 }} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradient} p-6 text-white shadow-xl ${stat.shadow}`}>
-                        <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+                        <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
                         <div className="relative z-10">
                             <div className="flex items-center gap-2 mb-3">
-                                <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm"><stat.icon className="w-5 h-5" /></div>
+                                <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50"><stat.icon className="w-5 h-5" /></div>
                                 <span className="font-medium text-white/90">{stat.label}</span>
                             </div>
                             <div className="text-3xl font-bold">{stat.value}</div>
@@ -62,9 +62,9 @@ export default function Budget() {
             {/* Bento Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                 {/* Budget Progress - 2 cols */}
-                <motion.div variants={itemVariants} className="lg:col-span-2 bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">
-                    <h3 className="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
-                        <PieChart className="w-5 h-5 text-purple-500" /> {t.budgetPage.expenseRatio}
+                <motion.div variants={itemVariants} className="lg:col-span-2 bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-6 shadow-sm dark:bg-slate-900/50">
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-5 flex items-center gap-2">
+                        <PieChart className="w-5 h-5 text-purple-500 dark:text-slate-400" /> {t.budgetPage.expenseRatio}
                     </h3>
                     <div className="space-y-4">
                         {[
@@ -75,32 +75,32 @@ export default function Budget() {
                         ].map((item, idx) => (
                             <div key={idx}>
                                 <div className="flex justify-between text-sm mb-1.5">
-                                    <span className="text-slate-600">{item.label}</span>
-                                    <span className="font-bold text-slate-800">{item.percent}%</span>
+                                    <span className="text-slate-600 dark:text-slate-300">{item.label}</span>
+                                    <span className="font-bold text-slate-800 dark:text-slate-200">{item.percent}%</span>
                                 </div>
-                                <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                                <div className="h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                                     <motion.div initial={{ width: 0 }} animate={{ width: `${item.percent}%` }} transition={{ delay: 0.5 + idx * 0.1, duration: 0.6 }} className={`h-full ${item.color} rounded-full`} />
                                 </div>
                             </div>
                         ))}
                     </div>
-                    <div className="mt-6 pt-4 border-t border-slate-100">
+                    <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700">
                         <div className="flex justify-between items-center text-sm">
-                            <span className="text-slate-500">{t.budgetPage.budgetUsed}</span>
-                            <span className="font-bold text-slate-800">54.33%</span>
+                            <span className="text-slate-500 dark:text-slate-400">{t.budgetPage.budgetUsed}</span>
+                            <span className="font-bold text-slate-800 dark:text-slate-200">54.33%</span>
                         </div>
-                        <div className="h-3 bg-slate-100 rounded-full overflow-hidden mt-2">
+                        <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mt-2">
                             <motion.div initial={{ width: 0 }} animate={{ width: '54.33%' }} transition={{ delay: 0.8, duration: 0.8 }} className="h-full bg-gradient-to-r from-purple-500 to-violet-500 rounded-full" />
                         </div>
                     </div>
                 </motion.div>
 
                 {/* Transactions - 3 cols */}
-                <motion.div variants={itemVariants} className="lg:col-span-3 bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm">
+                <motion.div variants={itemVariants} className="lg:col-span-3 bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-6 shadow-sm dark:bg-slate-900/50">
                     <div className="flex justify-between items-center mb-5">
                         <div>
-                            <h3 className="text-lg font-bold text-slate-800">{t.budgetPage.recentItems}</h3>
-                            <p className="text-sm text-slate-500">{t.budgetPage.recentDesc}</p>
+                            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">{t.budgetPage.recentItems}</h3>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">{t.budgetPage.recentDesc}</p>
                         </div>
                         <Button className="rounded-xl bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-200">
                             <Plus className="w-4 h-4 mr-2" /> {t.budgetPage.requestBudget}
@@ -108,13 +108,13 @@ export default function Budget() {
                     </div>
                     <div className="space-y-2">
                         {transactions.map((tx) => (
-                            <motion.div key={tx.id} whileHover={{ x: 4 }} className="flex items-center justify-between p-4 rounded-2xl hover:bg-white border border-transparent hover:border-slate-100 hover:shadow-sm transition-all">
+                            <motion.div key={tx.id} whileHover={{ x: 4 }} className="flex items-center justify-between p-4 rounded-2xl hover:bg-white border border-transparent hover:border-slate-100 hover:shadow-sm transition-all dark:bg-slate-900 dark:border-slate-700">
                                 <div className="flex items-center gap-4">
                                     <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${tx.type === 'expense' ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-500'}`}>
                                         {tx.type === 'expense' ? <TrendingDown className="w-5 h-5" /> : <TrendingUp className="w-5 h-5" />}
                                     </div>
                                     <div>
-                                        <h4 className="font-semibold text-slate-800">{tx.description}</h4>
+                                        <h4 className="font-semibold text-slate-800 dark:text-slate-200">{tx.description}</h4>
                                         <p className="text-sm text-slate-400">{tx.category} • {tx.date}</p>
                                     </div>
                                 </div>

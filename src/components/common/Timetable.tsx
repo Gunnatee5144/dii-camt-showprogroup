@@ -65,14 +65,14 @@ export function Timetable({ courses, semester, academicYear }: TimetableProps) {
         <div className="hidden lg:block overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-gray-50">
-                <th className="border border-gray-200 p-3 text-left font-semibold text-sm w-24">
+              <tr className="bg-gray-50 dark:bg-slate-800">
+                <th className="border border-gray-200 p-3 text-left font-semibold text-sm w-24 dark:border-slate-700">
                   {language === 'en' ? 'Time' : 'เวลา'}
                 </th>
                 {DAYS.map(day => (
-                  <th key={day.en} className="border border-gray-200 p-3 text-center font-semibold text-sm">
+                  <th key={day.en} className="border border-gray-200 p-3 text-center font-semibold text-sm dark:border-slate-700">
                     <div>{language === 'en' ? day.en.charAt(0).toUpperCase() + day.en.slice(1) : day.th}</div>
-                    <div className="text-xs text-gray-500 font-normal">{day.short}</div>
+                    <div className="text-xs text-gray-500 dark:text-slate-400 font-normal">{day.short}</div>
                   </th>
                 ))}
               </tr>
@@ -80,7 +80,7 @@ export function Timetable({ courses, semester, academicYear }: TimetableProps) {
             <tbody>
               {TIME_SLOTS.map((time, timeIndex) => (
                 <tr key={time}>
-                  <td className="border border-gray-200 p-2 text-sm text-gray-600 bg-gray-50">
+                  <td className="border border-gray-200 p-2 text-sm text-gray-600 dark:text-slate-400 bg-gray-50 dark:bg-slate-800 dark:border-slate-700">
                     {time}
                   </td>
                   {DAYS.map(day => {
@@ -104,20 +104,20 @@ export function Timetable({ courses, semester, academicYear }: TimetableProps) {
                           <td
                             key={day.en}
                             rowSpan={rowSpan}
-                            className="border border-gray-200 p-3 bg-blue-50 hover:bg-blue-100 transition-colors"
+                            className="border border-gray-200 p-3 bg-blue-50 hover:bg-blue-100 transition-colors dark:bg-slate-800 dark:border-slate-700"
                           >
                             <div className="space-y-1">
-                              <div className="font-semibold text-sm text-blue-900">
+                              <div className="font-semibold text-sm text-blue-900 dark:text-slate-200">
                                 {course.code}
                               </div>
-                              <div className="text-xs text-gray-700 line-clamp-2">
+                              <div className="text-xs text-gray-700 dark:text-slate-300 line-clamp-2">
                                 {language === 'en' ? course.name : course.nameThai}
                               </div>
-                              <div className="flex items-center gap-1 text-xs text-gray-600">
+                              <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-slate-300">
                                 <MapPin className="w-3 h-3" />
                                 {schedule.room}
                               </div>
-                              <div className="flex items-center gap-1 text-xs text-gray-600">
+                              <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-slate-300">
                                 <User className="w-3 h-3" />
                                 <span className="truncate">{course.lecturerName}</span>
                               </div>
@@ -129,7 +129,7 @@ export function Timetable({ courses, semester, academicYear }: TimetableProps) {
                     }
 
                     return (
-                      <td key={day.en} className="border border-gray-200 p-3 bg-white">
+                      <td key={day.en} className="border border-gray-200 p-3 bg-white dark:bg-slate-900 dark:border-slate-700">
                         {/* Empty cell */}
                       </td>
                     );
@@ -151,27 +151,27 @@ export function Timetable({ courses, semester, academicYear }: TimetableProps) {
                 <h3 className="font-semibold text-lg mb-3 text-primary">{language === 'en' ? day.en.charAt(0).toUpperCase() + day.en.slice(1) : day.th}</h3>
                 <div className="space-y-3">
                   {daySchedules.map(({ course, schedule }, index) => (
-                    <div key={index} className="bg-blue-50 rounded-lg p-3 space-y-2">
+                    <div key={index} className="bg-blue-50 rounded-lg p-3 space-y-2 dark:bg-slate-800">
                       <div className="flex items-start justify-between">
                         <div>
-                          <div className="font-semibold text-blue-900">
+                          <div className="font-semibold text-blue-900 dark:text-slate-200">
                             {course.code}
                           </div>
-                          <div className="text-sm text-gray-700">
+                          <div className="text-sm text-gray-700 dark:text-slate-300">
                             {language === 'en' ? course.name : course.nameThai}
                           </div>
                         </div>
                         <Badge variant="secondary">{course.credits} {language === 'en' ? 'Credits' : 'หน่วยกิต'}</Badge>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-300">
                         <Clock className="w-4 h-4" />
                         {schedule.startTime} - {schedule.endTime}
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-300">
                         <MapPin className="w-4 h-4" />
                         {schedule.room} {schedule.building}
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-300">
                         <User className="w-4 h-4" />
                         {course.lecturerName}
                       </div>
@@ -188,12 +188,12 @@ export function Timetable({ courses, semester, academicYear }: TimetableProps) {
           <h3 className="font-semibold text-lg">{language === 'en' ? 'All Courses' : 'รายวิชาทั้งหมด'}</h3>
           <div className="grid gap-2">
             {courses.map(course => (
-              <div key={course.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div key={course.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg dark:bg-slate-800">
                 <div>
                   <span className="font-semibold">{course.code}</span>
-                  <span className="ml-2 text-sm text-gray-600">{language === 'en' ? course.name : course.nameThai}</span>
+                  <span className="ml-2 text-sm text-gray-600 dark:text-slate-300">{language === 'en' ? course.name : course.nameThai}</span>
                 </div>
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-gray-600 dark:text-slate-300">
                   {course.credits} {language === 'en' ? 'Credits' : 'หน่วยกิต'}
                 </div>
               </div>

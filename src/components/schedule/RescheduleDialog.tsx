@@ -41,11 +41,11 @@ export function RescheduleDialog({ open, onOpenChange, onConfirm, item, targetTi
                         className={`cursor-pointer rounded-xl border-2 p-4 hover:border-blue-500 hover:bg-blue-50 transition-all ${selectedMode === 'one-time' ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' : 'border-gray-100'}`}
                         onClick={() => setSelectedMode('one-time')}
                     >
-                        <div className="mb-2 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                        <div className="mb-2 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 dark:text-slate-300 dark:bg-slate-800">
                             <Calendar className="w-5 h-5" />
                         </div>
-                        <div className="font-semibold text-gray-900">เปลี่ยนเฉพาะวันนี้</div>
-                        <div className="text-xs text-gray-500 mt-1">
+                        <div className="font-semibold text-gray-900 dark:text-slate-200">เปลี่ยนเฉพาะวันนี้</div>
+                        <div className="text-xs text-gray-500 dark:text-slate-400 mt-1">
                             มีผลเฉพาะวันที่ {format(new Date(), 'd MMM yyyy', { locale: th })} เท่านั้น สัปดาห์อื่นยังคงเดิม
                         </div>
                     </div>
@@ -54,11 +54,11 @@ export function RescheduleDialog({ open, onOpenChange, onConfirm, item, targetTi
                         className={`cursor-pointer rounded-xl border-2 p-4 hover:border-purple-500 hover:bg-purple-50 transition-all ${selectedMode === 'permanent' ? 'border-purple-500 bg-purple-50 ring-2 ring-purple-200' : 'border-gray-100'}`}
                         onClick={() => setSelectedMode('permanent')}
                     >
-                        <div className="mb-2 w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                        <div className="mb-2 w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 dark:text-slate-300 dark:bg-slate-800">
                             <Repeat className="w-5 h-5" />
                         </div>
-                        <div className="font-semibold text-gray-900">เปลี่ยนถาวร</div>
-                        <div className="text-xs text-gray-500 mt-1">
+                        <div className="font-semibold text-gray-900 dark:text-slate-200">เปลี่ยนถาวร</div>
+                        <div className="text-xs text-gray-500 dark:text-slate-400 mt-1">
                             มีผลตั้งแต่วันนี้เป็นต้นไป ทุกสัปดาห์ในภาคการศึกษานี้
                         </div>
                     </div>

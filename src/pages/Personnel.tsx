@@ -26,14 +26,14 @@ export default function Personnel() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
                 <div>
-                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
-                        <Users className="w-4 h-4 text-purple-500" />
+                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2">
+                        <Users className="w-4 h-4 text-purple-500 dark:text-slate-400" />
                         <span>{t.personnelPage.subtitle}</span>
                     </motion.div>
-                    <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                    <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                         {t.personnelPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-violet-600">{t.personnelPage.titleHighlight}</span>
                     </motion.h1>
-                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-slate-500 mt-2">
+                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-slate-500 mt-2 dark:text-slate-400">
                         {t.personnelPage.totalPersonnel} {allPersonnel.length} คน
                     </motion.p>
                 </div>
@@ -53,10 +53,10 @@ export default function Personnel() {
                     { icon: Mail, label: t.personnelPage.online, value: String(Math.floor(allPersonnel.length * 0.7)), gradient: 'from-amber-500 to-orange-500', shadow: 'shadow-amber-200' },
                 ].map((stat, i) => (
                     <motion.div key={i} whileHover={{ scale: 1.02 }} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradient} p-5 text-white shadow-xl ${stat.shadow}`}>
-                        <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+                        <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
                         <div className="relative z-10">
                             <div className="flex items-center gap-2 mb-2">
-                                <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm"><stat.icon className="w-4 h-4" /></div>
+                                <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50"><stat.icon className="w-4 h-4" /></div>
                                 <span className="text-sm font-medium text-white/90">{stat.label}</span>
                             </div>
                             <div className="text-3xl font-bold">{stat.value}</div>
@@ -66,10 +66,10 @@ export default function Personnel() {
             </motion.div>
 
             {/* Search bar */}
-            <motion.div variants={itemVariants} className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row gap-3">
+            <motion.div variants={itemVariants} className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row gap-3 dark:bg-slate-900/50">
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <Input placeholder={t.personnelPage.searchPlaceholder} className="pl-10 rounded-xl bg-white/80 border-slate-200" />
+                    <Input placeholder={t.personnelPage.searchPlaceholder} className="pl-10 rounded-xl bg-white/80 border-slate-200 dark:border-slate-700 dark:bg-slate-900/50" />
                 </div>
                 <div className="flex gap-2">
                     <Button variant="outline" className="rounded-xl">{t.personnelPage.exportExcel}</Button>
@@ -81,27 +81,27 @@ export default function Personnel() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {allPersonnel.map((person, idx) => (
                     <motion.div key={person.id} variants={itemVariants} whileHover={{ y: -4 }}
-                        className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all group">
+                        className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all group dark:bg-slate-900/50">
                         <div className="flex gap-4 mb-4">
                             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-400 to-violet-500 flex items-center justify-center text-xl font-bold text-white shadow-lg shadow-purple-200">
                                 {person.nameThai.charAt(0)}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <h3 className="font-bold text-slate-800 text-lg truncate">{person.nameThai}</h3>
-                                <p className="text-sm text-slate-500 mt-0.5">
+                                <h3 className="font-bold text-slate-800 dark:text-slate-200 text-lg truncate">{person.nameThai}</h3>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
                                     {person.role === 'lecturer' ? t.personnelPage.lecturers : t.personnelPage.staffLabel} • {('department' in person && person.department) ? person.department : ('position' in person ? person.position : 'CAMT')}
                                 </p>
                             </div>
                         </div>
                         <div className="space-y-2 text-sm mb-4">
-                            <div className="flex items-center gap-2 text-slate-500">
+                            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                                 <Mail className="w-4 h-4" /><span className="truncate">{person.email}</span>
                             </div>
-                            <div className="flex items-center gap-2 text-slate-500">
+                            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                                 <Phone className="w-4 h-4" /><span>053-942-xxx</span>
                             </div>
                         </div>
-                        <div className="flex gap-2 pt-4 border-t border-slate-100">
+                        <div className="flex gap-2 pt-4 border-t border-slate-100 dark:border-slate-700">
                             <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs">
                                 <FileText className="w-3.5 h-3.5 mr-1.5" /> {t.personnelPage.history}
                             </Button>

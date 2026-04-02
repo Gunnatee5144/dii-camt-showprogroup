@@ -103,9 +103,9 @@ export default function Assignments() {
 
     const getStatusBadge = (status: string) => {
         switch (status) {
-            case 'active': return <Badge className="bg-blue-100 text-blue-700">{t.assignmentsPage.inProgressTab}</Badge>;
-            case 'completed': return <Badge className="bg-emerald-100 text-emerald-700">{t.assignmentsPage.completedTab}</Badge>;
-            case 'draft': return <Badge className="bg-gray-100 text-gray-700">{t.assignmentsPage.draftTab}</Badge>;
+            case 'active': return <Badge className="bg-blue-100 text-blue-700 dark:text-slate-300 dark:bg-slate-800">{t.assignmentsPage.inProgressTab}</Badge>;
+            case 'completed': return <Badge className="bg-emerald-100 text-emerald-700 dark:text-slate-300 dark:bg-slate-800">{t.assignmentsPage.completedTab}</Badge>;
+            case 'draft': return <Badge className="bg-gray-100 text-gray-700 dark:text-slate-300 dark:bg-slate-800">{t.assignmentsPage.draftTab}</Badge>;
             default: return <Badge>{status}</Badge>;
         }
     };
@@ -135,8 +135,8 @@ export default function Assignments() {
                             <h1 className="text-2xl font-bold mb-1">{selectedAssignment.title}</h1>
                             <p className="text-white/80">{selectedAssignment.courseCode} • {selectedAssignment.courseName}</p>
                             <div className="flex gap-3 mt-3">
-                                <Badge className="bg-white/20 text-white border-white/20">{selectedAssignment.type === 'group' ? t.assignmentsPage.group : t.assignmentsPage.individual}</Badge>
-                                <Badge className="bg-white/20 text-white border-white/20">{t.assignmentsPage.deadline} {selectedAssignment.dueDate.toLocaleDateString('th-TH')}</Badge>
+                                <Badge className="bg-white/20 text-white border-white/20 dark:bg-slate-900/50">{selectedAssignment.type === 'group' ? t.assignmentsPage.group : t.assignmentsPage.individual}</Badge>
+                                <Badge className="bg-white/20 text-white border-white/20 dark:bg-slate-900/50">{t.assignmentsPage.deadline} {selectedAssignment.dueDate.toLocaleDateString('th-TH')}</Badge>
                             </div>
                         </div>
                         <div className="text-right">
@@ -152,25 +152,25 @@ export default function Assignments() {
                 </motion.div>
 
                 <motion.div variants={itemVariants}>
-                    <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
+                    <Card className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl shadow-sm dark:bg-slate-900/50">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
-                                <FileText className="w-5 h-5 text-blue-500" />
+                                <FileText className="w-5 h-5 text-blue-500 dark:text-slate-400" />
                                 {viewMode === 'grade' ? t.assignmentsPage.gradeAssignment : t.assignmentsPage.viewAssignment}
-                                <span className="ml-auto text-sm font-normal text-gray-500">{mockSubmissions.length} {t.assignmentsPage.people}</span>
+                                <span className="ml-auto text-sm font-normal text-gray-500 dark:text-slate-400">{mockSubmissions.length} {t.assignmentsPage.people}</span>
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3">
                             {mockSubmissions.length === 0 ? (
                                 <div className="text-center py-8 text-gray-400">ยังไม่มีนักศึกษาส่งงาน</div>
                             ) : mockSubmissions.map((sub) => (
-                                <div key={sub.id} className="flex items-center gap-4 p-4 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
-                                    <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center font-bold text-blue-600 text-sm">
+                                <div key={sub.id} className="flex items-center gap-4 p-4 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 transition-colors dark:bg-slate-800">
+                                    <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center font-bold text-blue-600 text-sm dark:text-slate-300 dark:bg-slate-800">
                                         {sub.studentId.slice(-2)}
                                     </div>
                                     <div className="flex-1">
                                         <div className="font-medium text-sm">{sub.name}</div>
-                                        <div className="text-xs text-gray-500">{sub.studentId} • ส่งเมื่อ {sub.submittedAt.toLocaleDateString('th-TH')}</div>
+                                        <div className="text-xs text-gray-500 dark:text-slate-400">{sub.studentId} • ส่งเมื่อ {sub.submittedAt.toLocaleDateString('th-TH')}</div>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         {viewMode === 'grade' ? (
@@ -187,12 +187,12 @@ export default function Assignments() {
                                             </div>
                                         ) : (
                                             sub.score !== null ? (
-                                                <Badge className="bg-emerald-100 text-emerald-700">{sub.score}/{selectedAssignment.maxScore}</Badge>
+                                                <Badge className="bg-emerald-100 text-emerald-700 dark:text-slate-300 dark:bg-slate-800">{sub.score}/{selectedAssignment.maxScore}</Badge>
                                             ) : (
-                                                <Badge variant="outline" className="text-gray-500">รอตรวจ</Badge>
+                                                <Badge variant="outline" className="text-gray-500 dark:text-slate-400">รอตรวจ</Badge>
                                             )
                                         )}
-                                        <Button size="sm" variant="ghost" className="text-xs text-blue-500 hover:bg-blue-50">
+                                        <Button size="sm" variant="ghost" className="text-xs text-blue-500 hover:bg-blue-50 dark:text-slate-400 dark:bg-slate-800">
                                             <Upload className="w-3.5 h-3.5 mr-1" /> ดูไฟล์
                                         </Button>
                                     </div>
@@ -223,11 +223,11 @@ export default function Assignments() {
             {/* Header */}
             <div className="flex items-end justify-between">
                 <div>
-                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
-                        <ClipboardList className="w-4 h-4 text-blue-500" />
+                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2">
+                        <ClipboardList className="w-4 h-4 text-blue-500 dark:text-slate-400" />
                         <span>{`${mockAssignments.length} ${t.assignmentsPage.titleHighlight} • ${activeAssignments} ${t.assignmentsPage.subtitle}`}</span>
                     </motion.div>
-                    <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                    <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                         {t.assignmentsPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">{t.assignmentsPage.titleHighlight}</span>
                     </motion.h1>
                 </div>
@@ -243,10 +243,10 @@ export default function Assignments() {
                     whileHover={{ scale: 1.02 }}
                     className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 p-6 text-white shadow-xl shadow-blue-200"
                 >
-                    <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+                    <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
                     <div className="relative z-10">
                         <div className="flex items-center gap-2 mb-3">
-                            <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
+                            <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50">
                                 <Clock className="w-5 h-5" />
                             </div>
                             <span className="font-medium text-white/90">{t.assignmentsPage.inProgressTab}</span>
@@ -259,10 +259,10 @@ export default function Assignments() {
                     whileHover={{ scale: 1.02 }}
                     className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 p-6 text-white shadow-xl shadow-emerald-200"
                 >
-                    <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+                    <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
                     <div className="relative z-10">
                         <div className="flex items-center gap-2 mb-3">
-                            <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
+                            <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50">
                                 <CheckCircle className="w-5 h-5" />
                             </div>
                             <span className="font-medium text-white/90">{t.assignmentsPage.completedTab}</span>
@@ -275,10 +275,10 @@ export default function Assignments() {
                     whileHover={{ scale: 1.02 }}
                     className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 p-6 text-white shadow-xl shadow-orange-200"
                 >
-                    <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+                    <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
                     <div className="relative z-10">
                         <div className="flex items-center gap-2 mb-3">
-                            <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
+                            <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50">
                                 <FileText className="w-5 h-5" />
                             </div>
                             <span className="font-medium text-white/90">{t.assignmentsPage.draftTab}</span>
@@ -291,10 +291,10 @@ export default function Assignments() {
                     whileHover={{ scale: 1.02 }}
                     className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 p-6 text-white shadow-xl shadow-purple-200"
                 >
-                    <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+                    <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
                     <div className="relative z-10">
                         <div className="flex items-center gap-2 mb-3">
-                            <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm">
+                            <div className="p-2 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50">
                                 <ClipboardList className="w-5 h-5" />
                             </div>
                             <span className="font-medium text-white/90">{t.assignmentsPage.allTab}</span>
@@ -307,7 +307,7 @@ export default function Assignments() {
             {/* Tabs */}
             <motion.div variants={itemVariants}>
                 <Tabs defaultValue="all" className="space-y-4">
-                    <TabsList className="bg-white/80 backdrop-blur-sm border shadow-sm">
+                    <TabsList className="bg-white/80 backdrop-blur-sm border shadow-sm dark:bg-slate-900/50">
                         <TabsTrigger value="all">{t.assignmentsPage.allTab}</TabsTrigger>
                         <TabsTrigger value="active">{t.assignmentsPage.inProgressTab}</TabsTrigger>
                         <TabsTrigger value="completed">{t.assignmentsPage.completedTab}</TabsTrigger>
@@ -327,7 +327,7 @@ export default function Assignments() {
                             </div>
                         </div>
 
-                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
+                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl shadow-sm dark:bg-slate-900/50">
                             <CardContent className="pt-6">
                                 <div className="space-y-4">
                                     {filterAssignments(mockAssignments).length === 0 ? (
@@ -354,15 +354,15 @@ export default function Assignments() {
                                                             {assignment.type === 'group' ? t.assignmentsPage.group : t.assignmentsPage.individual}
                                                         </Badge>
                                                     </div>
-                                                    <p className="text-sm text-gray-600">
+                                                    <p className="text-sm text-gray-600 dark:text-slate-300">
                                                         {assignment.courseCode} • {assignment.courseName}
                                                     </p>
                                                 </div>
                                                 <div className="text-right">
-                                                    <div className="text-sm font-semibold text-gray-700">
+                                                    <div className="text-sm font-semibold text-gray-700 dark:text-slate-300">
                                                         {assignment.maxScore} {t.assignmentsPage.score}
                                                     </div>
-                                                    <div className="text-xs text-gray-500 flex items-center justify-end gap-1">
+                                                    <div className="text-xs text-gray-500 dark:text-slate-400 flex items-center justify-end gap-1">
                                                         <Calendar className="w-3 h-3" />
                                                         {t.assignmentsPage.deadline} {assignment.dueDate.toLocaleDateString('th-TH')}
                                                     </div>
@@ -372,7 +372,7 @@ export default function Assignments() {
                                             <div className="flex items-center justify-between">
                                                 <div className="flex-1 mr-6">
                                                     <div className="flex items-center justify-between text-sm mb-2">
-                                                        <span className="text-gray-600">{t.assignmentsPage.submitted}</span>
+                                                        <span className="text-gray-600 dark:text-slate-300">{t.assignmentsPage.submitted}</span>
                                                         <span className="font-semibold">{assignment.submissionCount}/{assignment.totalStudents} {t.assignmentsPage.people}</span>
                                                     </div>
                                                     <Progress
@@ -393,7 +393,7 @@ export default function Assignments() {
                     </TabsContent>
 
                     <TabsContent value="active">
-                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
+                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl shadow-sm dark:bg-slate-900/50">
                             <CardContent className="pt-6">
                                 <div className="space-y-4">
                                     {filterAssignments(mockAssignments, 'active').map((assignment, index) => (
@@ -408,14 +408,14 @@ export default function Assignments() {
                                             <div className="flex items-start justify-between mb-4">
                                                 <div>
                                                     <h3 className="font-semibold text-lg">{assignment.title}</h3>
-                                                    <p className="text-sm text-gray-600">{assignment.courseCode} • {assignment.courseName}</p>
+                                                    <p className="text-sm text-gray-600 dark:text-slate-300">{assignment.courseCode} • {assignment.courseName}</p>
                                                 </div>
                                                 {getStatusBadge(assignment.status)}
                                             </div>
                                             <div className="flex items-center justify-between">
                                                 <div className="flex-1 mr-6">
                                                     <Progress value={(assignment.submissionCount / assignment.totalStudents) * 100} className="h-2" />
-                                                    <div className="text-sm text-gray-600 mt-1">{assignment.submissionCount}/{assignment.totalStudents} {t.assignmentsPage.submitted}</div>
+                                                    <div className="text-sm text-gray-600 dark:text-slate-400 mt-1">{assignment.submissionCount}/{assignment.totalStudents} {t.assignmentsPage.submitted}</div>
                                                 </div>
                                                 <Button size="sm" onClick={(e) => { e.stopPropagation(); setSelectedAssignment(assignment); setViewMode('grade'); }}>{t.assignmentsPage.gradeAssignment}</Button>
                                             </div>
@@ -427,7 +427,7 @@ export default function Assignments() {
                     </TabsContent>
 
                     <TabsContent value="completed">
-                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
+                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl shadow-sm dark:bg-slate-900/50">
                             <CardContent className="pt-6">
                                 <div className="space-y-4">
                                     {filterAssignments(mockAssignments, 'completed').map((assignment) => (
@@ -436,11 +436,11 @@ export default function Assignments() {
                                             <div className="flex items-center justify-between">
                                                 <div>
                                                     <h3 className="font-semibold text-lg">{assignment.title}</h3>
-                                                    <p className="text-sm text-gray-600">{assignment.courseCode}</p>
+                                                    <p className="text-sm text-gray-600 dark:text-slate-300">{assignment.courseCode}</p>
                                                 </div>
                                                 <div className="flex items-center gap-3">
-                                                    <CheckCircle className="w-5 h-5 text-emerald-600" />
-                                                    <span className="text-sm text-emerald-700">{t.assignmentsPage.gradedDone} {assignment.submissionCount} {t.assignmentsPage.people}</span>
+                                                    <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-slate-300" />
+                                                    <span className="text-sm text-emerald-700 dark:text-slate-300">{t.assignmentsPage.gradedDone} {assignment.submissionCount} {t.assignmentsPage.people}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -451,15 +451,15 @@ export default function Assignments() {
                     </TabsContent>
 
                     <TabsContent value="draft">
-                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
+                        <Card className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl shadow-sm dark:bg-slate-900/50">
                             <CardContent className="pt-6">
                                 <div className="space-y-4">
                                     {filterAssignments(mockAssignments, 'draft').map((assignment) => (
-                                        <div key={assignment.id} className="p-5 border rounded-xl bg-gray-50/50">
+                                        <div key={assignment.id} className="p-5 border rounded-xl bg-gray-50/50 dark:bg-slate-900/50">
                                             <div className="flex items-center justify-between">
                                                 <div>
                                                     <h3 className="font-semibold text-lg">{assignment.title}</h3>
-                                                    <p className="text-sm text-gray-600">{assignment.courseCode}</p>
+                                                    <p className="text-sm text-gray-600 dark:text-slate-300">{assignment.courseCode}</p>
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <Button size="sm" variant="outline" onClick={() => { setSelectedAssignment(assignment); setViewMode('view'); }}>{t.assignmentsPage.edit}</Button>

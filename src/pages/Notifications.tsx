@@ -72,20 +72,20 @@ export default function Notifications() {
 
     const getTypeIcon = (type: string) => {
         switch (type) {
-            case 'success': return <CheckCircle className="w-5 h-5 text-emerald-600" />;
-            case 'warning': return <AlertTriangle className="w-5 h-5 text-orange-600" />;
-            case 'error': return <AlertTriangle className="w-5 h-5 text-red-600" />;
-            case 'schedule_change': return <Calendar className="w-5 h-5 text-blue-600" />;
-            default: return <Info className="w-5 h-5 text-blue-600" />;
+            case 'success': return <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-slate-300" />;
+            case 'warning': return <AlertTriangle className="w-5 h-5 text-orange-600 dark:text-slate-300" />;
+            case 'error': return <AlertTriangle className="w-5 h-5 text-red-600 dark:text-slate-300" />;
+            case 'schedule_change': return <Calendar className="w-5 h-5 text-blue-600 dark:text-slate-300" />;
+            default: return <Info className="w-5 h-5 text-blue-600 dark:text-slate-300" />;
         }
     };
 
     const getPriorityBadge = (priority: string) => {
         switch (priority) {
-            case 'urgent': return <Badge className="bg-red-100 text-red-700">{t.notificationsPage.urgentHigh}</Badge>;
-            case 'high': return <Badge className="bg-orange-100 text-orange-700">{t.notificationsPage.urgent}</Badge>;
-            case 'medium': return <Badge className="bg-blue-100 text-blue-700">{t.notificationsPage.mediumPriority}</Badge>;
-            default: return <Badge className="bg-gray-100 text-gray-700">{t.notificationsPage.general}</Badge>;
+            case 'urgent': return <Badge className="bg-red-100 text-red-700 dark:text-slate-300 dark:bg-slate-800">{t.notificationsPage.urgentHigh}</Badge>;
+            case 'high': return <Badge className="bg-orange-100 text-orange-700 dark:text-slate-300">{t.notificationsPage.urgent}</Badge>;
+            case 'medium': return <Badge className="bg-blue-100 text-blue-700 dark:text-slate-300 dark:bg-slate-800">{t.notificationsPage.mediumPriority}</Badge>;
+            default: return <Badge className="bg-gray-100 text-gray-700 dark:text-slate-300 dark:bg-slate-800">{t.notificationsPage.general}</Badge>;
         }
     };
 
@@ -94,14 +94,14 @@ export default function Notifications() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
                 <div>
-                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 font-medium mb-2">
-                        <Bell className="w-4 h-4 text-blue-500" />
+                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2">
+                        <Bell className="w-4 h-4 text-blue-500 dark:text-slate-400" />
                         <span>{t.notificationsPage.subtitle}</span>
                     </motion.div>
-                    <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                    <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                         {t.notificationsPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">{t.notificationsPage.titleHighlight}</span>
                     </motion.h1>
-                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-slate-500 mt-2">
+                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-slate-500 mt-2 dark:text-slate-400">
                         {notifications.length} {t.notificationsPage.subtitle} • {unreadCount} {t.notificationsPage.unread}
                     </motion.p>
                 </div>
@@ -123,10 +123,10 @@ export default function Notifications() {
                     { label: t.notificationsPage.readTab, value: notifications.filter(n => n.isRead).length, gradient: 'from-emerald-500 to-teal-500', icon: CheckCircle },
                 ].map((stat, i) => (
                     <motion.div key={i} whileHover={{ scale: 1.02 }} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradient} p-6 text-white shadow-xl`}>
-                        <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+                        <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
                         <div className="relative z-10">
                             <div className="flex items-center gap-2 mb-3">
-                                <div className="p-2 rounded-xl bg-white/20"><stat.icon className="w-5 h-5" /></div>
+                                <div className="p-2 rounded-xl bg-white/20 dark:bg-slate-900/50"><stat.icon className="w-5 h-5" /></div>
                                 <span className="font-medium text-white/90">{stat.label}</span>
                             </div>
                             <div className="text-4xl font-bold">{stat.value}</div>
@@ -137,7 +137,7 @@ export default function Notifications() {
 
             <motion.div variants={itemVariants}>
                 <Tabs defaultValue="all" className="space-y-4">
-                    <TabsList className="bg-white/80 backdrop-blur-sm border shadow-sm">
+                    <TabsList className="bg-white/80 backdrop-blur-sm border shadow-sm dark:bg-slate-900/50">
                         <TabsTrigger value="all">{t.notificationsPage.allTab}</TabsTrigger>
                         <TabsTrigger value="unread">{t.notificationsPage.unreadTab}</TabsTrigger>
                         <TabsTrigger value="urgent">{t.notificationsPage.urgentTab}</TabsTrigger>
@@ -156,15 +156,15 @@ export default function Notifications() {
                                             exit={{ opacity: 0 }}
                                             transition={{ delay: index * 0.03 }}
                                             className={`flex items-start gap-4 p-4 border rounded-xl transition-all hover:shadow-md ${!notification.isRead ? 'bg-blue-50/50 border-blue-200' : 'bg-white'
-                                                }`}
+                                                } dark:bg-slate-900/50`}
                                         >
                                             <div className="mt-1">{getTypeIcon(notification.type)}</div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1">
-                                                    <h3 className="font-semibold text-gray-900">{notification.titleThai}</h3>
+                                                    <h3 className="font-semibold text-gray-900 dark:text-slate-200">{notification.titleThai}</h3>
                                                     {!notification.isRead && <div className="w-2 h-2 bg-blue-500 rounded-full" />}
                                                 </div>
-                                                <p className="text-sm text-gray-600 line-clamp-2">{notification.messageThai}</p>
+                                                <p className="text-sm text-gray-600 dark:text-slate-400 line-clamp-2">{notification.messageThai}</p>
                                                 <div className="flex items-center gap-2 mt-2">
                                                     <span className="text-xs text-gray-400">
                                                         {new Date(notification.createdAt).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
@@ -175,7 +175,7 @@ export default function Notifications() {
                                             <div className="flex gap-1">
                                                 {!notification.isRead && <Button size="sm" variant="ghost"><Check className="w-4 h-4" /></Button>}
                                                 {canManage && (
-                                                    <Button size="sm" variant="ghost" className="text-gray-400 hover:text-red-600" onClick={() => handleDelete(notification.id)}>
+                                                    <Button size="sm" variant="ghost" className="text-gray-400 hover:text-red-600 dark:text-slate-300" onClick={() => handleDelete(notification.id)}>
                                                         <Trash2 className="w-4 h-4" />
                                                     </Button>
                                                 )}
@@ -189,10 +189,10 @@ export default function Notifications() {
 
                     {/* Other tabs reusing similar structure or simplifying for brevity */}
                     <TabsContent value="unread">
-                        <div className="p-4 text-center text-gray-500">{t.notificationsPage.showUnread}</div>
+                        <div className="p-4 text-center text-gray-500 dark:text-slate-400">{t.notificationsPage.showUnread}</div>
                     </TabsContent>
                     <TabsContent value="urgent">
-                        <div className="p-4 text-center text-gray-500">{t.notificationsPage.showUrgent}</div>
+                        <div className="p-4 text-center text-gray-500 dark:text-slate-400">{t.notificationsPage.showUrgent}</div>
                     </TabsContent>
                 </Tabs>
             </motion.div>

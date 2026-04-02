@@ -111,7 +111,7 @@ export function SoftSkillsRubricCard({
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm"
+            className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-6 shadow-sm dark:bg-slate-900/50"
         >
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -119,8 +119,8 @@ export function SoftSkillsRubricCard({
                         <Users className="w-5 h-5" />
                     </div>
                     <div>
-                        <h3 className="text-lg font-bold text-slate-800">Soft Skills</h3>
-                        <p className="text-sm text-slate-500">ตาม AAC&U Value Rubrics</p>
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">Soft Skills</h3>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">ตาม AAC&U Value Rubrics</p>
                     </div>
                 </div>
                 <TooltipProvider>
@@ -130,7 +130,7 @@ export function SoftSkillsRubricCard({
                                 <span className={`text-xl font-bold ${getScoreLevel(weightedScore).color}`}>
                                     {weightedScore.toFixed(1)}
                                 </span>
-                                <span className="text-xs text-slate-500 ml-1">/ 5</span>
+                                <span className="text-xs text-slate-500 dark:text-slate-400 ml-1">/ 5</span>
                             </div>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -156,15 +156,15 @@ export function SoftSkillsRubricCard({
                                 <span className={`font-semibold text-sm ${criteria.color}`}>
                                     {criteria.name}
                                 </span>
-                                <span className="text-xs text-slate-500">({criteria.nameThai})</span>
+                                <span className="text-xs text-slate-500 dark:text-slate-400">({criteria.nameThai})</span>
                             </div>
                             <div className="flex items-center gap-1">
                                 <span className={`text-lg font-bold ${criteria.color}`}>{criteria.score}</span>
                                 <span className="text-xs text-slate-400">/ {criteria.maxScore}</span>
                             </div>
                         </div>
-                        <p className="text-xs text-slate-600 mb-2">{criteria.description}</p>
-                        <div className="h-2 bg-white/60 rounded-full overflow-hidden mb-3">
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mb-2">{criteria.description}</p>
+                        <div className="h-2 bg-white/60 rounded-full overflow-hidden mb-3 dark:bg-slate-900/50">
                             <motion.div
                                 initial={{ width: 0 }}
                                 animate={{ width: `${(criteria.score / criteria.maxScore) * 100}%` }}
@@ -179,13 +179,13 @@ export function SoftSkillsRubricCard({
                         </div>
 
                         {/* Current Level Description */}
-                        <div className="p-2 rounded-lg bg-white/60 border border-white/50">
+                        <div className="p-2 rounded-lg bg-white/60 border border-white/50 dark:bg-slate-900/50">
                             <div className="flex items-center gap-1 mb-1">
-                                <Badge variant="outline" className={`${criteria.color} bg-white font-bold text-xs`}>
+                                <Badge variant="outline" className={`${criteria.color} bg-white dark:bg-slate-900 font-bold text-xs`}>
                                     Level {Math.round(criteria.score)}
                                 </Badge>
                             </div>
-                            <p className="text-xs text-slate-600">
+                            <p className="text-xs text-slate-600 dark:text-slate-300">
                                 {getCurrentLevel(criteria.score, criteria.rubricLevels).description}
                             </p>
                         </div>
@@ -194,9 +194,9 @@ export function SoftSkillsRubricCard({
             </div>
 
             {/* Reference */}
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 mb-4">
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-950 mb-4">
                 <BookOpen className="w-4 h-4 text-slate-400" />
-                <span className="text-xs text-slate-500">
+                <span className="text-xs text-slate-500 dark:text-slate-400">
                     อ้างอิง: AAC&U Valid Assessment of Learning in Undergraduate Education (VALUE) Rubrics
                 </span>
             </div>
@@ -204,20 +204,20 @@ export function SoftSkillsRubricCard({
             {/* Weight Info */}
             <div className="flex items-center justify-center gap-6 p-3 rounded-xl bg-gradient-to-r from-indigo-50 to-pink-50">
                 <div className="text-center">
-                    <div className="text-lg font-bold text-indigo-600">{professorWeight}%</div>
-                    <div className="text-xs text-slate-500">อาจารย์</div>
+                    <div className="text-lg font-bold text-indigo-600 dark:text-slate-300">{professorWeight}%</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">อาจารย์</div>
                 </div>
-                <div className="w-px h-8 bg-slate-200" />
+                <div className="w-px h-8 bg-slate-200 dark:bg-slate-800" />
                 <div className="text-center">
                     <div className="text-lg font-bold text-pink-600">{peerWeight}%</div>
-                    <div className="text-xs text-slate-500">เพื่อนร่วมทีม</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">เพื่อนร่วมทีม</div>
                 </div>
             </div>
 
             {/* Feedback History */}
             {feedbackHistory.length > 0 && (
-                <div className="pt-4 mt-4 border-t border-slate-100">
-                    <h4 className="text-sm font-semibold text-slate-700 mb-3">ประวัติ Feedback</h4>
+                <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-700">
+                    <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">ประวัติ Feedback</h4>
                     <div className="space-y-2">
                         {feedbackHistory.slice(0, 3).map((feedback, index) => (
                             <motion.div
@@ -225,19 +225,19 @@ export function SoftSkillsRubricCard({
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.5 + index * 0.1 }}
-                                className="flex items-center justify-between p-3 rounded-xl bg-slate-50"
+                                className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800"
                             >
                                 <div>
-                                    <div className="font-medium text-slate-800 text-sm">{feedback.projectName}</div>
-                                    <div className="text-xs text-slate-500">{feedback.date}</div>
+                                    <div className="font-medium text-slate-800 dark:text-slate-200 text-sm">{feedback.projectName}</div>
+                                    <div className="text-xs text-slate-500 dark:text-slate-400">{feedback.date}</div>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <div className="text-center">
-                                        <div className="text-sm font-bold text-blue-600">{feedback.communicationScore}</div>
+                                        <div className="text-sm font-bold text-blue-600 dark:text-slate-300">{feedback.communicationScore}</div>
                                         <div className="text-[10px] text-slate-400">Com.</div>
                                     </div>
                                     <div className="text-center">
-                                        <div className="text-sm font-bold text-emerald-600">{feedback.opennessScore}</div>
+                                        <div className="text-sm font-bold text-emerald-600 dark:text-slate-300">{feedback.opennessScore}</div>
                                         <div className="text-[10px] text-slate-400">Open.</div>
                                     </div>
                                     <Badge variant="secondary" className="text-xs">

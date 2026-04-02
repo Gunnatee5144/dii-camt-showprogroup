@@ -75,7 +75,7 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
       scrolled 
         ? 'py-2 bg-white/70 backdrop-blur-2xl border-b border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.03)]' 
         : 'py-0 bg-transparent border-b border-transparent'
-    }`}>
+    } dark:bg-slate-900/50`}>
       <div className={`mx-auto px-4 md:px-8 transition-all duration-500 ${scrolled ? 'h-16' : 'h-24'} flex items-center justify-between gap-4`}>
         
         <div className="flex items-center gap-4 md:gap-6 shrink-0">
@@ -83,7 +83,7 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden text-slate-500 hover:text-slate-900 bg-white/50 border border-slate-200/50 backdrop-blur-md rounded-2xl"
+            className="md:hidden text-slate-500 dark:text-slate-400 hover:text-slate-900 bg-white/50 border border-slate-200/50 backdrop-blur-md rounded-2xl dark:border-slate-700 dark:bg-slate-900/50"
             onClick={onMenuToggle}
           >
             {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -92,12 +92,12 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
           {/* Dynamic Breadcrumb / Title with macOS feel */}
           <div className="hidden md:flex items-center gap-3">
              <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100/50 flex items-center justify-center shadow-inner">
-               <Sparkles className="w-4 h-4 text-blue-600" />
+               <Sparkles className="w-4 h-4 text-blue-600 dark:text-slate-300" />
              </div>
              <div className="flex flex-col justify-center">
                <div className="flex items-center gap-2">
-                 <h1 className="text-[15px] font-bold text-slate-800 tracking-tight leading-none min-w-max">{getPageTitle()}</h1>
-                 <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-widest min-w-max">{user?.role || 'Guest'}</span>
+                 <h1 className="text-[15px] font-bold text-slate-800 dark:text-slate-200 tracking-tight leading-none min-w-max">{getPageTitle()}</h1>
+                 <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-widest min-w-max">{user?.role || 'Guest'}</span>
                </div>
                <p className="text-[11px] text-slate-400 font-medium mt-1 leading-none">{t.header?.overview || 'System Overview'}</p>
              </div>
@@ -106,16 +106,16 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
 
         {/* Global Search Bar (Mac Spotlight Style) */}
         <div className="hidden lg:flex flex-1 max-w-[400px] justify-center ml-auto mr-4 md:mr-8 transition-all">
-          <div className={`w-full flex items-center gap-3 px-4 rounded-full border bg-white/40 backdrop-blur-xl transition-all duration-300 ${scrolled ? 'h-10 border-slate-200/60 shadow-sm' : 'h-12 border-slate-200/40 shadow-[inset_0_2px_10px_rgba(255,255,255,1),0_2px_15px_rgba(0,0,0,0.02)]'}`}>
+          <div className={`w-full flex items-center gap-3 px-4 rounded-full border bg-white/40 backdrop-blur-xl transition-all duration-300 ${scrolled ? 'h-10 border-slate-200/60 shadow-sm' : 'h-12 border-slate-200/40 shadow-[inset_0_2px_10px_rgba(255,255,255,1),0_2px_15px_rgba(0,0,0,0.02)]'} dark:bg-slate-900/50`}>
              <Search className="w-4 h-4 text-slate-400 shrink-0" />
              <input 
                type="text" 
                placeholder="Search anywhere..." 
-               className="bg-transparent border-none outline-none w-full text-sm text-slate-700 placeholder:text-slate-400 font-medium"
+               className="bg-transparent border-none outline-none w-full text-sm text-slate-700 dark:text-slate-300 placeholder:text-slate-400 font-medium"
              />
              <div className="flex items-center gap-1 shrink-0">
-               <kbd className="hidden sm:inline-flex items-center justify-center h-5 px-1.5 rounded border border-slate-200 bg-slate-100/50 text-[10px] font-sans font-medium text-slate-400">⌘</kbd>
-               <kbd className="hidden sm:inline-flex items-center justify-center h-5 px-1.5 rounded border border-slate-200 bg-slate-100/50 text-[10px] font-sans font-medium text-slate-400">K</kbd>
+               <kbd className="hidden sm:inline-flex items-center justify-center h-5 px-1.5 rounded border border-slate-200 dark:border-slate-700 bg-slate-100/50 text-[10px] font-sans font-medium text-slate-400">⌘</kbd>
+               <kbd className="hidden sm:inline-flex items-center justify-center h-5 px-1.5 rounded border border-slate-200 dark:border-slate-700 bg-slate-100/50 text-[10px] font-sans font-medium text-slate-400">K</kbd>
              </div>
           </div>
         </div>
@@ -127,7 +127,7 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
             variant="ghost"
             size="sm"
             onClick={toggleLanguage}
-            className="h-10 px-4 rounded-2xl bg-white/30 hover:bg-white/60 border border-white/40 shadow-sm backdrop-blur-md text-slate-600 gap-2 font-bold transition-all"
+            className="h-10 px-4 rounded-2xl bg-white/30 hover:bg-white/60 border border-white/40 shadow-sm backdrop-blur-md text-slate-600 dark:text-slate-400 gap-2 font-bold transition-all dark:bg-slate-900/50"
           >
             <Globe className="h-4 w-4" />
             <span className="text-xs uppercase tracking-wider">{language === 'th' ? 'EN' : 'TH'}</span>
@@ -136,7 +136,7 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
           {/* Premium Notifications */}
           <DropdownMenu open={showNotifications} onOpenChange={setShowNotifications}>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative h-10 w-10 rounded-2xl bg-white/30 hover:bg-white/60 border border-white/40 shadow-sm backdrop-blur-md text-slate-600 transition-all data-[state=open]:bg-white/80">
+              <Button variant="ghost" size="icon" className="relative h-10 w-10 rounded-2xl bg-white/30 hover:bg-white/60 border border-white/40 shadow-sm backdrop-blur-md text-slate-600 dark:text-slate-400 transition-all data-[state=open]:bg-white/80 dark:bg-slate-900/50">
                 <Bell className="h-5 w-5" />
                 {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 flex h-3 w-3">
@@ -146,31 +146,31 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
                 )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[340px] p-0 rounded-3xl shadow-2xl border-white/60 bg-white/80 backdrop-blur-2xl overflow-hidden mt-2">
-              <div className="px-5 py-4 border-b border-slate-100/50 bg-gradient-to-b from-slate-50/50 to-transparent">
+            <DropdownMenuContent align="end" className="w-[340px] p-0 rounded-3xl shadow-2xl border-white/60 dark:border-slate-800/60 bg-white/80 backdrop-blur-2xl overflow-hidden mt-2 dark:bg-slate-900/50">
+              <div className="px-5 py-4 border-b border-slate-100/50 bg-gradient-to-b from-slate-50/50 to-transparent dark:border-slate-700">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-slate-900 tracking-tight">{t.header?.notifications || 'Notifications'}</h3>
-                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-none font-bold">{unreadCount} New</Badge>
+                  <h3 className="font-bold text-slate-900 dark:text-white tracking-tight">{t.header?.notifications || 'Notifications'}</h3>
+                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-none font-bold dark:text-slate-300 dark:bg-slate-800">{unreadCount} New</Badge>
                 </div>
               </div>
               <div className="max-h-[320px] overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-slate-200">
                 {mockNotifications.map((notification) => (
-                  <DropdownMenuItem key={notification.id} className="flex flex-col items-start p-3.5 cursor-pointer rounded-2xl focus:bg-slate-50/80 mb-1 transition-colors">
+                  <DropdownMenuItem key={notification.id} className="flex flex-col items-start p-3.5 cursor-pointer rounded-2xl focus:bg-slate-50/80 mb-1 transition-colors dark:bg-slate-900/50">
                     <div className="flex items-start gap-3 w-full">
                       <div className={`mt-1 shrink-0 w-2 h-2 rounded-full ${notification.isRead ? 'bg-slate-200' : 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]'}`} />
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className={`font-bold text-sm leading-none ${notification.isRead ? 'text-slate-600' : 'text-slate-900'}`}>{notification.title}</span>
+                          <span className={`font-bold text-sm leading-none ${notification.isRead ? 'text-slate-600' : 'text-slate-900'} dark:text-slate-200`}>{notification.title}</span>
                           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">2m ago</span>
                         </div>
-                        <p className="text-xs text-slate-500 leading-relaxed line-clamp-2 pr-4">{notification.message}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 pr-4">{notification.message}</p>
                       </div>
                     </div>
                   </DropdownMenuItem>
                 ))}
               </div>
-              <div className="p-3 border-t border-slate-100/50 bg-slate-50/30">
-                <Button variant="ghost" className="w-full text-blue-600 font-bold hover:bg-white hover:text-blue-700 rounded-xl h-10 shadow-sm border border-slate-200/50 transition-all">
+              <div className="p-3 border-t border-slate-100/50 bg-slate-50/30 dark:border-slate-700 dark:bg-slate-900/50">
+                <Button variant="ghost" className="w-full text-blue-600 font-bold hover:bg-white hover:text-blue-700 rounded-xl h-10 shadow-sm border border-slate-200/50 transition-all dark:text-slate-300 dark:border-slate-700 dark:bg-slate-900/50">
                   {t.common?.viewAll || 'View All Activity'}
                 </Button>
               </div>
@@ -183,7 +183,7 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
               <DropdownMenuTrigger asChild>
                 <div className="relative group cursor-pointer">
                   <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <Button variant="ghost" className="relative flex items-center gap-3 pl-1.5 pr-3 h-11 rounded-full bg-white/40 hover:bg-white/80 border border-white/60 shadow-sm backdrop-blur-md transition-all">
+                  <Button variant="ghost" className="relative flex items-center gap-3 pl-1.5 pr-3 h-11 rounded-full bg-white/40 hover:bg-white/80 border border-white/60 dark:border-slate-800/60 shadow-sm backdrop-blur-md transition-all dark:bg-slate-900/50">
                     <Avatar className="h-8 w-8 border-2 border-white shadow-sm ring-1 ring-slate-100">
                       <AvatarImage src={user.avatar} />
                       <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-xs font-bold">
@@ -191,51 +191,51 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
                       </AvatarFallback>
                     </Avatar>
                     <div className="hidden md:flex flex-col items-start pr-1">
-                      <span className="text-sm font-bold text-slate-800 leading-none">{user.name}</span>
+                      <span className="text-sm font-bold text-slate-800 dark:text-slate-200 leading-none">{user.name}</span>
                     </div>
                     <ChevronDown className="h-4 w-4 text-slate-400" />
                   </Button>
                 </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-72 p-2 rounded-3xl shadow-2xl border-white/60 bg-white/90 backdrop-blur-2xl mt-2">
-                <div className="p-4 bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-2xl mb-2 border border-slate-200/50">
+              <DropdownMenuContent align="end" className="w-72 p-2 rounded-3xl shadow-2xl border-white/60 dark:border-slate-800/60 bg-white/90 backdrop-blur-2xl mt-2 dark:bg-slate-900/50">
+                <div className="p-4 bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-2xl mb-2 border border-slate-200/50 dark:border-slate-700">
                    <div className="flex items-center gap-3">
                      <Avatar className="h-12 w-12 border-2 border-white shadow-sm ring-1 ring-slate-200">
                         <AvatarImage src={user.avatar} />
                         <AvatarFallback className="bg-blue-600 text-white font-bold">{user.name.charAt(0)}</AvatarFallback>
                      </Avatar>
                      <div className="flex flex-col">
-                        <span className="text-base font-bold text-slate-900 tracking-tight">{user.name}</span>
-                        <span className="text-xs font-medium text-slate-500">{user.email}</span>
+                        <span className="text-base font-bold text-slate-900 dark:text-white tracking-tight">{user.name}</span>
+                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">{user.email}</span>
                      </div>
                    </div>
                 </div>
                 
                 <DropdownMenuItem className="rounded-xl cursor-pointer py-3 focus:bg-slate-100/80 transition-colors" onClick={() => navigate('/personal-dashboard')}>
-                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-3">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-3 dark:text-slate-300 dark:bg-slate-800">
                     <User className="h-4 w-4" />
                   </div>
-                  <span className="font-bold text-slate-700">{t.header?.profile || 'My Profile'}</span>
+                  <span className="font-bold text-slate-700 dark:text-slate-300">{t.header?.profile || 'My Profile'}</span>
                 </DropdownMenuItem>
                 
                 <DropdownMenuItem className="rounded-xl cursor-pointer py-3 focus:bg-slate-100/80 transition-colors" onClick={() => navigate('/settings')}>
-                  <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center mr-3">
+                  <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 flex items-center justify-center mr-3">
                     <Settings className="h-4 w-4" />
                   </div>
-                  <span className="font-bold text-slate-700">{t.header?.systemSettings || 'Preferences'}</span>
+                  <span className="font-bold text-slate-700 dark:text-slate-300">{t.header?.systemSettings || 'Preferences'}</span>
                 </DropdownMenuItem>
                 
-                <DropdownMenuSeparator className="my-2 bg-slate-100" />
+                <DropdownMenuSeparator className="my-2 bg-slate-100 dark:bg-slate-800" />
                 
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger className="rounded-xl cursor-pointer py-3 focus:bg-slate-100/80 transition-colors">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mr-3">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mr-3 dark:text-slate-300">
                       <Users className="h-4 w-4" />
                     </div>
-                    <span className="font-bold text-slate-700">{t.header?.switchRole || 'Switch Account'}</span>
+                    <span className="font-bold text-slate-700 dark:text-slate-300">{t.header?.switchRole || 'Switch Account'}</span>
                   </DropdownMenuSubTrigger>
                   <DropdownMenuPortal>
-                    <DropdownMenuSubContent className="p-2 rounded-2xl shadow-xl border-white/60 bg-white/90 backdrop-blur-2xl">
+                    <DropdownMenuSubContent className="p-2 rounded-2xl shadow-xl border-white/60 dark:border-slate-800/60 bg-white/90 backdrop-blur-2xl dark:bg-slate-900/50">
                       {(
                         [
                           { label: 'Student Portal', value: 'student' },
@@ -248,7 +248,7 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
                         <DropdownMenuItem
                           key={value}
                           onClick={() => switchRole(value)}
-                          className="rounded-xl cursor-pointer py-2.5 font-bold text-slate-600 focus:bg-indigo-50 focus:text-indigo-700 transition-colors"
+                          className="rounded-xl cursor-pointer py-2.5 font-bold text-slate-600 dark:text-slate-400 focus:bg-indigo-50 focus:text-indigo-700 transition-colors"
                         >
                           {label}
                         </DropdownMenuItem>
@@ -257,13 +257,13 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
                   </DropdownMenuPortal>
                 </DropdownMenuSub>
                 
-                <DropdownMenuSeparator className="my-2 bg-slate-100" />
+                <DropdownMenuSeparator className="my-2 bg-slate-100 dark:bg-slate-800" />
                 
                 <DropdownMenuItem
                   onClick={handleLogout}
-                  className="rounded-xl cursor-pointer py-3 text-red-600 focus:text-red-700 focus:bg-red-50 transition-colors mt-1"
+                  className="rounded-xl cursor-pointer py-3 text-red-600 focus:text-red-700 focus:bg-red-50 transition-colors mt-1 dark:text-slate-300 dark:bg-slate-800"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center mr-3">
+                  <div className="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center mr-3 dark:text-slate-300 dark:bg-slate-800">
                     <LogOut className="h-4 w-4" />
                   </div>
                   <span className="font-bold">{t.header?.logout || 'Log Out'}</span>

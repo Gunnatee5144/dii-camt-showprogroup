@@ -55,14 +55,14 @@ const getNavItems = (role: UserRole, nav: Record<string, string>): NavItem[] => 
     case 'student':
       return [
         ...commonItems,
-        { icon: BookOpen, label: nav.courses, href: '/courses' },
-        { icon: Calendar, label: nav.schedule, href: '/schedule' },
+        // { icon: BookOpen, label: nav.courses, href: '/courses' }, // ถูกตัดออกตาม Request
+        // { icon: Calendar, label: nav.schedule, href: '/schedule' }, // ถูกตัดออกตาม Request
         { icon: GraduationCap, label: nav.grades, href: '/grades' },
         { icon: Trophy, label: nav.activities, href: '/activities' },
         { icon: FileText, label: nav.portfolio, href: '/portfolio' },
         { icon: Briefcase, label: nav.internships, href: '/internships' },
         { icon: ClipboardList, label: nav.requests, href: '/requests' },
-        { icon: Swords, label: nav.training, href: '/training' },
+        // { icon: Swords, label: nav.training, href: '/training' }, // ปิดชั่วคราว
         { icon: MessageSquare, label: nav.messages, href: '/messages' },
         { icon: Settings, label: nav.settings, href: '/settings' },
       ];
@@ -219,15 +219,15 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       >
         {/* Background Effects */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2 opacity-20" />
-          <div className="absolute bottom-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-[100px] translate-x-1/2 translate-y-1/2 opacity-20" />
+          <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2 opacity-20 dark:bg-slate-900/50" />
+          <div className="absolute bottom-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-[100px] translate-x-1/2 translate-y-1/2 opacity-20 dark:bg-slate-900/50" />
         </div>
 
         {/* Header */}
         <div className="relative z-10 flex items-center justify-between p-6 border-b border-white/5 shrink-0">
           <Link to="/dashboard" className="flex items-center gap-4 group">
             <div className={cn("w-12 h-12 rounded-2xl bg-gradient-to-br flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300 relative overflow-hidden", getRoleGradient(user.role))}>
-              <div className="absolute inset-0 bg-white/10 blur-xl"></div>
+              <div className="absolute inset-0 bg-white/10 blur-xl dark:bg-slate-900/50"></div>
               <Command className="w-6 h-6 text-white relative z-10" />
             </div>
             <div>
@@ -289,7 +289,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
         {/* User Profile Mini - Fixed at Bottom */}
         <div className="relative z-10 p-4 border-t border-white/5 bg-slate-900/50 backdrop-blur-md shrink-0 mt-auto">
-          <div className="p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-pointer group">
+          <div className="p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-pointer group dark:bg-slate-900/50">
             <div className="flex items-center gap-3">
               <div className={cn("w-10 h-10 rounded-full bg-gradient-to-tr border-2 border-slate-700 shadow-md", getRoleGradient(user.role))} />
               <div className="flex-1 min-w-0">

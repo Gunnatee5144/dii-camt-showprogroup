@@ -93,21 +93,21 @@ export default function PrivacyPolicy() {
     },
   ];
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-900">
+    <div className="min-h-screen bg-white dark:bg-slate-900 font-sans text-slate-900 dark:text-slate-200">
       {/* Navbar */}
-      <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+      <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-700 dark:bg-slate-900/50">
         <div className="container mx-auto px-6 h-20 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-blue-200">
               DII
             </div>
             <div>
-              <div className="font-bold text-xl tracking-tight text-slate-900">DII CAMT</div>
-              <div className="text-xs text-slate-500 font-medium tracking-wide">Digital Industry Integration</div>
+              <div className="font-bold text-xl tracking-tight text-slate-900 dark:text-slate-200">DII CAMT</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-wide">Digital Industry Integration</div>
             </div>
           </Link>
           <Link to="/">
-            <Button variant="ghost" className="font-medium hover:text-blue-600 hover:bg-blue-50">
+            <Button variant="ghost" className="font-medium hover:text-blue-600 hover:bg-blue-50 dark:text-slate-300 dark:bg-slate-800">
               <ArrowLeft className="w-4 h-4 mr-2" /> {t.privacyPolicyPage.backToHome}
             </Button>
           </Link>
@@ -139,7 +139,7 @@ export default function PrivacyPolicy() {
             </p>
           </FadeIn>
           <FadeIn delay={0.3}>
-            <div className="flex items-center justify-center gap-6 text-sm text-slate-500">
+            <div className="flex items-center justify-center gap-6 text-sm text-slate-500 dark:text-slate-400">
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4" />
                 <span>{t.privacyPolicyPage.lastUpdated}</span>
@@ -155,12 +155,12 @@ export default function PrivacyPolicy() {
       </section>
 
       {/* Quick Summary */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white dark:bg-slate-900">
         <div className="container mx-auto px-6">
           <FadeIn>
             <div className="max-w-4xl mx-auto bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl p-8 lg:p-12 border border-purple-100">
-              <h2 className="text-2xl font-bold text-slate-900 mb-4">{t.privacyPolicyPage.summaryTitle}</h2>
-              <p className="text-slate-600 leading-relaxed mb-6">
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">{t.privacyPolicyPage.summaryTitle}</h2>
+              <p className="text-slate-600 leading-relaxed mb-6 dark:text-slate-300">
                 {t.privacyPolicyPage.summaryDesc}
               </p>
               <div className="grid sm:grid-cols-3 gap-4">
@@ -169,11 +169,11 @@ export default function PrivacyPolicy() {
                   { icon: UserCheck, label: 'PDPA Compliant', color: 'text-pink-600 bg-pink-100' },
                   { icon: Shield, label: 'ISO 27001', color: 'text-indigo-600 bg-indigo-100' },
                 ].map((badge, i) => (
-                  <div key={i} className="flex items-center gap-3 bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+                  <div key={i} className="flex items-center gap-3 bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-100 dark:border-slate-800 shadow-sm">
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${badge.color}`}>
                       <badge.icon className="w-5 h-5" />
                     </div>
-                    <span className="text-sm font-semibold text-slate-700">{badge.label}</span>
+                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{badge.label}</span>
                   </div>
                 ))}
               </div>
@@ -183,11 +183,11 @@ export default function PrivacyPolicy() {
       </section>
 
       {/* Content Sections */}
-      <section className="py-16 bg-slate-50">
+      <section className="py-16 bg-slate-50 dark:bg-slate-800">
         <div className="container mx-auto px-6 max-w-4xl space-y-8">
           {sections.map((section, sIdx) => (
             <FadeIn key={sIdx} delay={sIdx * 0.05}>
-              <div className="group bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500 overflow-hidden">
+              <div className="group bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500 overflow-hidden">
                 <div className="p-8 lg:p-10">
                   <div className="flex items-center gap-5 mb-8">
                     <div className={`w-14 h-14 ${section.bg} rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
@@ -197,15 +197,15 @@ export default function PrivacyPolicy() {
                       <span className={`text-xs font-bold uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r ${section.color}`}>
                         Section {sIdx + 1}
                       </span>
-                      <h3 className="text-xl font-bold text-slate-900">{section.title}</h3>
+                      <h3 className="text-xl font-bold text-slate-900 dark:text-slate-200">{section.title}</h3>
                     </div>
                   </div>
                   <div className="space-y-6 pl-0 lg:pl-[4.75rem]">
                     {section.items.map((item, iIdx) => (
                       <div key={iIdx} className="relative pl-6 before:absolute before:left-0 before:top-2 before:w-2 before:h-2 before:rounded-full before:bg-gradient-to-br before:opacity-60" style={{ ['--tw-gradient-from' as string]: '', ['--tw-gradient-to' as string]: '' }}>
                         <div className={`absolute left-0 top-2 w-2 h-2 rounded-full bg-gradient-to-br ${section.color}`} />
-                        <h4 className="text-base font-semibold text-slate-800 mb-1">{item.subtitle}</h4>
-                        <p className="text-sm text-slate-500 leading-relaxed">{item.desc}</p>
+                        <h4 className="text-base font-semibold text-slate-800 dark:text-slate-200 mb-1">{item.subtitle}</h4>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{item.desc}</p>
                       </div>
                     ))}
                   </div>
@@ -217,7 +217,7 @@ export default function PrivacyPolicy() {
       </section>
 
       {/* Contact for Privacy */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-white dark:bg-slate-900">
         <div className="container mx-auto px-6">
           <FadeIn>
             <div className="max-w-4xl mx-auto text-center">
@@ -232,7 +232,7 @@ export default function PrivacyPolicy() {
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
                     <a href="mailto:dpo@camt.cmu.ac.th">
-                      <Button size="lg" className="h-14 px-8 bg-white text-purple-700 hover:bg-purple-50 rounded-full text-lg font-semibold shadow-lg">
+                      <Button size="lg" className="h-14 px-8 bg-white dark:bg-slate-900 text-purple-700 hover:bg-purple-50 rounded-full text-lg font-semibold shadow-lg dark:text-slate-200">
                         <Mail className="w-5 h-5 mr-2" /> dpo@camt.cmu.ac.th
                       </Button>
                     </a>
@@ -245,12 +245,12 @@ export default function PrivacyPolicy() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-50 py-10 border-t border-slate-200">
+      <footer className="bg-slate-50 py-10 border-t border-slate-200 dark:bg-slate-800 dark:border-slate-700">
         <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-400">
           <div>© 2026 DII CAMT. All rights reserved.</div>
           <div className="flex gap-6">
-            <Link to="/privacy-policy" className="text-slate-600 font-medium">Privacy Policy</Link>
-            <Link to="/terms-of-service" className="hover:text-slate-600">Terms of Service</Link>
+            <Link to="/privacy-policy" className="text-slate-600 font-medium dark:text-slate-300">Privacy Policy</Link>
+            <Link to="/terms-of-service" className="hover:text-slate-600 dark:text-slate-300">Terms of Service</Link>
           </div>
         </div>
       </footer>

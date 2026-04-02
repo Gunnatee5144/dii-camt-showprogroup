@@ -96,18 +96,18 @@ export default function JobPostings() {
 
     const getStatusBadge = (status: string) => {
         switch (status) {
-            case 'open': return <Badge className="bg-emerald-100 text-emerald-700">{t.jobPostings.statusOpen}</Badge>;
-            case 'closed': return <Badge className="bg-gray-100 text-gray-700">{t.jobPostings.statusClosed}</Badge>;
-            case 'filled': return <Badge className="bg-blue-100 text-blue-700">{t.jobPostings.statusFilled}</Badge>;
+            case 'open': return <Badge className="bg-emerald-100 text-emerald-700 dark:text-slate-300 dark:bg-slate-800">{t.jobPostings.statusOpen}</Badge>;
+            case 'closed': return <Badge className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">{t.jobPostings.statusClosed}</Badge>;
+            case 'filled': return <Badge className="bg-blue-100 text-blue-700 dark:text-slate-300 dark:bg-slate-800">{t.jobPostings.statusFilled}</Badge>;
             default: return <Badge>{status}</Badge>;
         }
     };
 
     const getTypeBadge = (type: string) => {
         switch (type) {
-            case 'internship': return <Badge variant="outline" className="text-purple-700 border-purple-300">{t.jobPostings.internship}</Badge>;
-            case 'full-time': return <Badge variant="outline" className="text-blue-700 border-blue-300">{t.jobPostings.fullTimeType}</Badge>;
-            case 'part-time': return <Badge variant="outline" className="text-orange-700 border-orange-300">{t.jobPostings.partTime}</Badge>;
+            case 'internship': return <Badge variant="outline" className="text-purple-700 border-purple-300 dark:text-slate-300">{t.jobPostings.internship}</Badge>;
+            case 'full-time': return <Badge variant="outline" className="text-blue-700 border-blue-300 dark:text-slate-300">{t.jobPostings.fullTimeType}</Badge>;
+            case 'part-time': return <Badge variant="outline" className="text-orange-700 border-orange-300 dark:text-slate-300">{t.jobPostings.partTime}</Badge>;
             default: return <Badge variant="outline">{type}</Badge>;
         }
     };
@@ -120,13 +120,13 @@ export default function JobPostings() {
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="flex items-center gap-2 text-slate-500 font-medium mb-2"
+                        className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2"
                     >
-                        <Briefcase className="w-4 h-4 text-orange-500" />
+                        <Briefcase className="w-4 h-4 text-orange-500 dark:text-slate-400" />
                         <span>{companyJobPostings.length} {t.jobPostings.positionsCount} • {openJobs} {t.jobPostings.statusOpen}</span>
                     </motion.div>
                     <motion.h1
-                        className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight"
+                        className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
@@ -151,10 +151,10 @@ export default function JobPostings() {
                     whileHover={{ y: -5 }}
                     className="p-6 rounded-3xl bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-xl shadow-orange-500/20 relative overflow-hidden"
                 >
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white dark:bg-slate-900/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                     <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2.5 rounded-xl bg-white/20 backdrop-blur-sm">
+                            <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900/20 backdrop-blur-sm">
                                 <Briefcase className="w-6 h-6" />
                             </div>
                             <span className="font-medium text-white/90">{t.jobPostings.allPositions}</span>
@@ -170,60 +170,57 @@ export default function JobPostings() {
                 <motion.div
                     variants={itemVariants}
                     whileHover={{ y: -5 }}
-                    className="p-6 rounded-3xl bg-white border border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden group"
+                    className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-100/50 relative overflow-hidden group"
                 >
                     <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2.5 rounded-xl bg-slate-100 text-slate-600 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                            <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
                                 <Users className="w-6 h-6" />
                             </div>
-                            <span className="font-medium text-slate-600">{t.jobPostings.openLabel}</span>
+                            <span className="font-medium text-slate-600 dark:text-slate-400">{t.jobPostings.openLabel}</span>
                         </div>
-                        <div className="text-4xl font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">{openJobs}</div>
+                        <div className="text-4xl font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 transition-colors">{openJobs}</div>
                         <div className="mt-3 text-sm text-slate-400">{t.jobPostings.openDesc}</div>
-                        <div className="absolute bottom-0 right-0 w-24 h-12 bg-gradient-to-t from-emerald-50 to-transparent" />
                     </div>
                 </motion.div>
 
                 <motion.div
                     variants={itemVariants}
                     whileHover={{ y: -5 }}
-                    className="p-6 rounded-3xl bg-white border border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden group"
+                    className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-100/50 relative overflow-hidden group"
                 >
                     <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2.5 rounded-xl bg-slate-100 text-slate-600 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                            <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
                                 <Users className="w-6 h-6" />
                             </div>
-                            <span className="font-medium text-slate-600">{t.jobPostings.totalApplicants}</span>
+                            <span className="font-medium text-slate-600 dark:text-slate-400">{t.jobPostings.totalApplicants}</span>
                         </div>
-                        <div className="text-4xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{totalApplicants}</div>
+                        <div className="text-4xl font-bold text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">{totalApplicants}</div>
                         <div className="mt-3 text-sm text-slate-400">{t.jobPostings.applicantsDesc}</div>
-                        <div className="absolute bottom-0 right-0 w-24 h-12 bg-gradient-to-t from-blue-50 to-transparent" />
                     </div>
                 </motion.div>
 
                 <motion.div
                     variants={itemVariants}
                     whileHover={{ y: -5 }}
-                    className="p-6 rounded-3xl bg-white border border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden group"
+                    className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-100/50 relative overflow-hidden group"
                 >
                     <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2.5 rounded-xl bg-slate-100 text-slate-600 group-hover:bg-red-50 group-hover:text-red-600 transition-colors">
+                            <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-red-50 group-hover:text-red-600 transition-colors">
                                 <Clock className="w-6 h-6" />
                             </div>
-                            <span className="font-medium text-slate-600">{t.jobPostings.closingSoon}</span>
+                            <span className="font-medium text-slate-600 dark:text-slate-400">{t.jobPostings.closingSoon}</span>
                         </div>
-                        <div className="text-4xl font-bold text-slate-900 group-hover:text-red-600 transition-colors">{companyJobPostings.filter(j => new Date(j.deadline) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)).length}</div>
+                        <div className="text-4xl font-bold text-slate-900 dark:text-white group-hover:text-red-600 transition-colors">{companyJobPostings.filter(j => new Date(j.deadline) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)).length}</div>
                         <div className="mt-3 text-sm text-slate-400">{t.jobPostings.within7Days}</div>
-                        <div className="absolute bottom-0 right-0 w-24 h-12 bg-gradient-to-t from-red-50 to-transparent" />
                     </div>
                 </motion.div>
             </div>
 
             <motion.div variants={itemVariants}>
-                <Card className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl shadow-sm">
+                <Card className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl shadow-sm dark:bg-slate-900/50">
                     <CardHeader><CardTitle>{t.jobPostings.jobList}</CardTitle></CardHeader>
                     <CardContent>
                         <div className="space-y-4">
@@ -245,15 +242,15 @@ export default function JobPostings() {
                                                     {getStatusBadge(job.status)}
                                                     {getTypeBadge(job.type)}
                                                 </div>
-                                                <p className="text-sm text-gray-600 mb-2">{job.companyName}</p>
-                                                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                                                <p className="text-sm text-gray-600 dark:text-slate-400 mb-2">{job.companyName}</p>
+                                                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                                                     <span className="flex items-center gap-1"><MapPin className="w-4 h-4" />{job.location}</span>
                                                     <span className="flex items-center gap-1"><DollarSign className="w-4 h-4" />{job.salary}</span>
                                                     <span className="flex items-center gap-1"><Users className="w-4 h-4" />{job.positions} {t.jobPostings.positionsUnit}</span>
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <div className="text-sm text-gray-600 mb-1">{t.jobPostings.closeDateLabel}</div>
+                                                <div className="text-sm text-gray-600 dark:text-slate-400 mb-1">{t.jobPostings.closeDateLabel}</div>
                                                 <div className="font-semibold">{new Date(job.deadline).toLocaleDateString(language === 'th' ? 'th-TH' : 'en-US', { day: 'numeric', month: 'short' })}</div>
                                             </div>
                                         </div>
@@ -261,7 +258,7 @@ export default function JobPostings() {
                                         <div className="flex items-center justify-between pt-4 border-t">
                                             <div className="flex-1 mr-6">
                                                 <div className="flex items-center justify-between text-sm mb-2">
-                                                    <span className="text-gray-600">{t.jobPostings.applicantsCount}</span>
+                                                    <span className="text-gray-600 dark:text-gray-400">{t.jobPostings.applicantsCount}</span>
                                                     <span className="font-semibold">{job.applicants.length} {t.common.person}</span>
                                                 </div>
                                                 <Progress value={job.maxApplicants ? (job.applicants.length / job.maxApplicants) * 100 : 50} className="h-2" />
@@ -271,7 +268,7 @@ export default function JobPostings() {
                                                 {canManage && (
                                                     <>
                                                         <Button size="sm" variant="ghost" onClick={() => handleEdit(job)}><Edit className="w-4 h-4" /></Button>
-                                                        <Button size="sm" variant="ghost" className="text-red-600" onClick={() => handleDelete(job.id)}><Trash2 className="w-4 h-4" /></Button>
+                                                        <Button size="sm" variant="ghost" className="text-red-600 dark:text-slate-300" onClick={() => handleDelete(job.id)}><Trash2 className="w-4 h-4" /></Button>
                                                     </>
                                                 )}
                                             </div>

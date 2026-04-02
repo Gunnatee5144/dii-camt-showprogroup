@@ -108,21 +108,21 @@ export default function TermsOfService() {
   ];
 
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-900">
+    <div className="min-h-screen bg-white dark:bg-slate-900 font-sans text-slate-900 dark:text-slate-200">
       {/* Navbar */}
-      <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+      <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-700 dark:bg-slate-900/50">
         <div className="container mx-auto px-6 h-20 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-blue-200">
               DII
             </div>
             <div>
-              <div className="font-bold text-xl tracking-tight text-slate-900">DII CAMT</div>
-              <div className="text-xs text-slate-500 font-medium tracking-wide">Digital Industry Integration</div>
+              <div className="font-bold text-xl tracking-tight text-slate-900 dark:text-slate-200">DII CAMT</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-wide">Digital Industry Integration</div>
             </div>
           </Link>
           <Link to="/">
-            <Button variant="ghost" className="font-medium hover:text-blue-600 hover:bg-blue-50">
+            <Button variant="ghost" className="font-medium hover:text-blue-600 hover:bg-blue-50 dark:text-slate-300 dark:bg-slate-800">
               <ArrowLeft className="w-4 h-4 mr-2" /> {t.termsOfServicePage.backToHome}
             </Button>
           </Link>
@@ -154,7 +154,7 @@ export default function TermsOfService() {
             </p>
           </FadeIn>
           <FadeIn delay={0.3}>
-            <div className="flex items-center justify-center gap-6 text-sm text-slate-500">
+            <div className="flex items-center justify-center gap-6 text-sm text-slate-500 dark:text-slate-400">
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4" />
                 <span>{t.termsOfServicePage.lastUpdated}</span>
@@ -170,17 +170,17 @@ export default function TermsOfService() {
       </section>
 
       {/* Quick Summary */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white dark:bg-slate-900">
         <div className="container mx-auto px-6">
           <FadeIn>
             <div className="max-w-4xl mx-auto bg-gradient-to-br from-blue-50 to-cyan-50 rounded-3xl p-8 lg:p-12 border border-blue-100">
               <div className="flex items-start gap-4 mb-6">
-                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <AlertCircle className="w-6 h-6 text-blue-600" />
+                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0 dark:bg-slate-800">
+                  <AlertCircle className="w-6 h-6 text-blue-600 dark:text-slate-300" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-slate-900 mb-2">{t.termsOfServicePage.summaryTitle}</h2>
-                  <p className="text-slate-600 leading-relaxed">
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{t.termsOfServicePage.summaryTitle}</h2>
+                  <p className="text-slate-600 leading-relaxed dark:text-slate-300">
                     {t.termsOfServicePage.summaryDesc}
                   </p>
                 </div>
@@ -192,9 +192,9 @@ export default function TermsOfService() {
                   { label: t.termsOfServicePage.roleStaff, icon: '🏢' },
                   { label: t.termsOfServicePage.roleIndustry, icon: '🏭' },
                 ].map((role, i) => (
-                  <div key={i} className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm text-center">
+                  <div key={i} className="bg-white rounded-xl p-4 border border-slate-100 dark:border-slate-800 shadow-sm text-center dark:bg-slate-900">
                     <div className="text-2xl mb-2">{role.icon}</div>
-                    <span className="text-xs font-semibold text-slate-600">{role.label}</span>
+                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">{role.label}</span>
                   </div>
                 ))}
               </div>
@@ -204,11 +204,11 @@ export default function TermsOfService() {
       </section>
 
       {/* Content Sections */}
-      <section className="py-16 bg-slate-50">
+      <section className="py-16 bg-slate-50 dark:bg-slate-800">
         <div className="container mx-auto px-6 max-w-4xl space-y-8">
           {sections.map((section, sIdx) => (
             <FadeIn key={sIdx} delay={sIdx * 0.05}>
-              <div className="group bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500 overflow-hidden">
+              <div className="group bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500 overflow-hidden">
                 <div className="p-8 lg:p-10">
                   <div className="flex items-center gap-5 mb-8">
                     <div className={`w-14 h-14 ${section.bg} rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
@@ -218,15 +218,15 @@ export default function TermsOfService() {
                       <span className={`text-xs font-bold uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r ${section.color}`}>
                         Section {sIdx + 1}
                       </span>
-                      <h3 className="text-xl font-bold text-slate-900">{section.title}</h3>
+                      <h3 className="text-xl font-bold text-slate-900 dark:text-slate-200">{section.title}</h3>
                     </div>
                   </div>
                   <div className="space-y-6 pl-0 lg:pl-[4.75rem]">
                     {section.items.map((item, iIdx) => (
                       <div key={iIdx} className="relative pl-6">
                         <div className={`absolute left-0 top-2 w-2 h-2 rounded-full bg-gradient-to-br ${section.color}`} />
-                        <h4 className="text-base font-semibold text-slate-800 mb-1">{item.subtitle}</h4>
-                        <p className="text-sm text-slate-500 leading-relaxed">{item.desc}</p>
+                        <h4 className="text-base font-semibold text-slate-800 dark:text-slate-200 mb-1">{item.subtitle}</h4>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{item.desc}</p>
                       </div>
                     ))}
                   </div>
@@ -238,7 +238,7 @@ export default function TermsOfService() {
       </section>
 
       {/* Questions CTA */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-white dark:bg-slate-900">
         <div className="container mx-auto px-6">
           <FadeIn>
             <div className="max-w-4xl mx-auto text-center">
@@ -253,7 +253,7 @@ export default function TermsOfService() {
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
                     <a href="mailto:legal@camt.cmu.ac.th">
-                      <Button size="lg" className="h-14 px-8 bg-white text-blue-700 hover:bg-blue-50 rounded-full text-lg font-semibold shadow-lg">
+                      <Button size="lg" className="h-14 px-8 bg-white dark:bg-slate-900 text-blue-700 hover:bg-blue-50 rounded-full text-lg font-semibold shadow-lg dark:text-slate-200">
                         <Mail className="w-5 h-5 mr-2" /> legal@camt.cmu.ac.th
                       </Button>
                     </a>
@@ -266,12 +266,12 @@ export default function TermsOfService() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-50 py-10 border-t border-slate-200">
+      <footer className="bg-slate-50 py-10 border-t border-slate-200 dark:bg-slate-800 dark:border-slate-700">
         <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-400">
           <div>© 2026 DII CAMT. All rights reserved.</div>
           <div className="flex gap-6">
-            <Link to="/privacy-policy" className="hover:text-slate-600">Privacy Policy</Link>
-            <Link to="/terms-of-service" className="text-slate-600 font-medium">Terms of Service</Link>
+            <Link to="/privacy-policy" className="hover:text-slate-600 dark:text-slate-300">Privacy Policy</Link>
+            <Link to="/terms-of-service" className="text-slate-600 font-medium dark:text-slate-300">Terms of Service</Link>
           </div>
         </div>
       </footer>

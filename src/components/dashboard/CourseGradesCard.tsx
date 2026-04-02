@@ -51,7 +51,7 @@ export function CourseGradesCard({ grades, currentSemester }: CourseGradesProps)
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm"
+            className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-6 shadow-sm dark:bg-slate-900/50"
         >
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -59,11 +59,11 @@ export function CourseGradesCard({ grades, currentSemester }: CourseGradesProps)
                         <BookOpen className="w-5 h-5" />
                     </div>
                     <div>
-                        <h3 className="text-lg font-bold text-slate-800">เกรดรายวิชา</h3>
-                        <p className="text-sm text-slate-500">Course Grades</p>
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">เกรดรายวิชา</h3>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">Course Grades</p>
                     </div>
                 </div>
-                <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">
+                <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:text-slate-300 dark:bg-slate-800">
                     <Award className="w-3 h-3 mr-1" />
                     {totalAGrades} เกรด A
                 </Badge>
@@ -71,7 +71,7 @@ export function CourseGradesCard({ grades, currentSemester }: CourseGradesProps)
 
             {/* Current Semester */}
             <div className="mb-6">
-                <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
                     ภาคเรียนปัจจุบัน ({currentSemester})
                 </h4>
@@ -85,18 +85,18 @@ export function CourseGradesCard({ grades, currentSemester }: CourseGradesProps)
                             className={`flex items-center justify-between p-4 rounded-2xl border ${getGradeBgColor(grade.letterGrade)}`}
                         >
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center font-bold text-slate-600 text-xs border border-slate-100">
+                                <div className="w-12 h-12 rounded-xl bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center font-bold text-slate-600 dark:text-slate-400 text-xs border border-slate-100 dark:border-slate-700">
                                     {grade.courseCode.slice(-3)}
                                 </div>
                                 <div>
-                                    <h5 className="font-semibold text-slate-800">{grade.courseCode}</h5>
-                                    <p className="text-sm text-slate-500 line-clamp-1">{grade.courseName}</p>
+                                    <h5 className="font-semibold text-slate-800 dark:text-slate-200">{grade.courseCode}</h5>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-1">{grade.courseName}</p>
                                     <span className="text-xs text-slate-400">{grade.credits} หน่วยกิต</span>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
                                 {grade.total && (
-                                    <span className="text-sm text-slate-500">{grade.total} คะแนน</span>
+                                    <span className="text-sm text-slate-500 dark:text-slate-400">{grade.total} คะแนน</span>
                                 )}
                                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold shadow-sm ${getGradeColor(grade.letterGrade)}`}>
                                     {grade.letterGrade}
@@ -110,7 +110,7 @@ export function CourseGradesCard({ grades, currentSemester }: CourseGradesProps)
             {/* Previous Semesters */}
             {previousSemesterGrades.length > 0 && (
                 <div>
-                    <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                    <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-slate-400" />
                         ภาคเรียนก่อนหน้า
                     </h4>
@@ -123,15 +123,15 @@ export function CourseGradesCard({ grades, currentSemester }: CourseGradesProps)
                                     initial={{ opacity: 0, height: 0 }}
                                     animate={{ opacity: 1, height: 'auto' }}
                                     exit={{ opacity: 0, height: 0 }}
-                                    className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors"
+                                    className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 transition-colors"
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center font-bold text-slate-500 text-xs">
+                                        <div className="w-10 h-10 rounded-lg bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center font-bold text-slate-500 dark:text-slate-400 text-xs">
                                             {grade.courseCode.slice(-3)}
                                         </div>
                                         <div>
-                                            <h5 className="font-medium text-slate-700 text-sm">{grade.courseCode}</h5>
-                                            <p className="text-xs text-slate-500">{grade.semester} • {grade.credits} หน่วยกิต</p>
+                                            <h5 className="font-medium text-slate-700 dark:text-slate-300 text-sm">{grade.courseCode}</h5>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">{grade.semester} • {grade.credits} หน่วยกิต</p>
                                         </div>
                                     </div>
                                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold shadow-sm ${getGradeColor(grade.letterGrade)}`}>
@@ -146,7 +146,7 @@ export function CourseGradesCard({ grades, currentSemester }: CourseGradesProps)
                         <Button
                             variant="ghost"
                             onClick={() => setShowAll(!showAll)}
-                            className="w-full mt-3 text-slate-500 hover:text-slate-700"
+                            className="w-full mt-3 text-slate-500 dark:text-slate-400 hover:text-slate-700"
                         >
                             {showAll ? (
                                 <>

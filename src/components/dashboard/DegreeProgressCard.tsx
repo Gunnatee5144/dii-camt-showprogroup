@@ -33,7 +33,7 @@ export function DegreeProgressCard({
             color: 'text-violet-700',
         },
         {
-            icon: <Clock className="w-4 h-4 text-blue-500" />,
+            icon: <Clock className="w-4 h-4 text-blue-500 dark:text-slate-400" />,
             label: isTH ? 'ลงทะเบียน' : 'Registered',
             value: registeredCredits,
             color: 'text-blue-700',
@@ -50,7 +50,7 @@ export function DegreeProgressCard({
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-5 shadow-sm"
+            className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-5 shadow-sm dark:bg-slate-900/50"
         >
             {/* Header */}
             <div className="flex items-center gap-3 mb-5">
@@ -58,10 +58,10 @@ export function DegreeProgressCard({
                     <GraduationCap className="w-5 h-5" />
                 </div>
                 <div>
-                    <h3 className="text-base font-bold text-slate-800">
+                    <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
                         {isTH ? 'ความก้าวหน้าของหลักสูตร' : 'Degree Progress'}
                     </h3>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                         {isTH ? `รวม ${requiredCredits} หน่วยกิต` : `${requiredCredits} credits total`}
                     </p>
                 </div>
@@ -97,10 +97,10 @@ export function DegreeProgressCard({
                         </defs>
                     </svg>
                     <div className="absolute flex flex-col items-center">
-                        <span className="text-2xl font-black text-slate-800">
+                        <span className="text-2xl font-black text-slate-800 dark:text-slate-200">
                             {Math.round(progressPercent)}%
                         </span>
-                        <span className="text-[11px] text-slate-500 font-medium">
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                             {earnedCredits}/{requiredCredits}
                         </span>
                         <span className="text-[10px] text-slate-400">
@@ -112,10 +112,10 @@ export function DegreeProgressCard({
                 {/* Stat pills */}
                 <div className="grid grid-cols-3 gap-2 w-full">
                     {stats.map((s, i) => (
-                        <div key={i} className="flex flex-col items-center gap-1 bg-slate-50 rounded-2xl p-3">
+                        <div key={i} className="flex flex-col items-center gap-1 bg-slate-50 dark:bg-slate-950 rounded-2xl p-3">
                             {s.icon}
                             <span className={`text-lg font-black ${s.color}`}>{s.value}</span>
-                            <span className="text-[10px] text-slate-500 text-center leading-tight">{s.label}</span>
+                            <span className="text-[10px] text-slate-500 dark:text-slate-400 text-center leading-tight">{s.label}</span>
                         </div>
                     ))}
                 </div>

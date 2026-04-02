@@ -37,7 +37,7 @@ export function ThemedPageHeader({ title, subtitle, icon, actions }: ThemedPageH
           {[...Array(5)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute w-2 h-2 bg-white/20 rounded-full"
+              className="absolute w-2 h-2 bg-white/20 rounded-full dark:bg-slate-900/50"
               initial={{
                 x: Math.random() * 100 + '%',
                 y: Math.random() * 100 + '%'
@@ -63,8 +63,8 @@ export function ThemedPageHeader({ title, subtitle, icon, actions }: ThemedPageH
           ))}
 
           {/* Gradient Orbs */}
-          <div className="absolute -top-24 -right-24 w-48 h-48 bg-white/10 rounded-full blur-3xl" />
-          <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-white/10 rounded-full blur-3xl" />
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-white/10 rounded-full blur-3xl dark:bg-slate-900/50" />
+          <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-white/10 rounded-full blur-3xl dark:bg-slate-900/50" />
         </div>
 
         {/* Content */}
@@ -74,7 +74,7 @@ export function ThemedPageHeader({ title, subtitle, icon, actions }: ThemedPageH
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-              className="p-3 rounded-2xl bg-white/20 backdrop-blur-sm shadow-lg"
+              className="p-3 rounded-2xl bg-white/20 backdrop-blur-sm shadow-lg dark:bg-slate-900/50"
             >
               {icon}
             </motion.div>

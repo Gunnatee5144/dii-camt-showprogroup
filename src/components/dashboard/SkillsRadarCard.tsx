@@ -91,15 +91,15 @@ export function SkillsRadarCard({ technicalSkills, softSkills }: SkillsRadarProp
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/60 backdrop-blur-xl border border-white/60 rounded-3xl p-6 shadow-sm"
+            className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-6 shadow-sm dark:bg-slate-900/50"
         >
             <div className="flex items-center gap-3 mb-6">
                 <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/20">
                     <Target className="w-5 h-5" />
                 </div>
                 <div>
-                    <h3 className="text-lg font-bold text-slate-800">Skills Radar</h3>
-                    <p className="text-sm text-slate-500">เปรียบเทียบ Tech vs Soft Skills</p>
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">Skills Radar</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">เปรียบเทียบ Tech vs Soft Skills</p>
                 </div>
             </div>
 
@@ -201,11 +201,11 @@ export function SkillsRadarCard({ technicalSkills, softSkills }: SkillsRadarProp
             <div className="flex justify-center gap-6 mb-4">
                 <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-violet-500" />
-                    <span className="text-sm font-medium text-slate-700">Technical Skills</span>
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Technical Skills</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-pink-500" />
-                    <span className="text-sm font-medium text-slate-700">Soft Skills</span>
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Soft Skills</span>
                 </div>
             </div>
 
@@ -220,20 +220,20 @@ export function SkillsRadarCard({ technicalSkills, softSkills }: SkillsRadarProp
                             >
                                 <div className="text-center">
                                     <div className="text-3xl font-bold text-violet-600">{techAvg.toFixed(1)}</div>
-                                    <div className="text-xs text-slate-500 mt-1">Technical Average</div>
+                                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">Technical Average</div>
                                 </div>
                                 <div className="mt-3 space-y-1">
                                     <div className="flex justify-between text-xs">
-                                        <span className="text-slate-500">Functionality</span>
-                                        <span className="font-medium text-slate-700">{technicalSkills.functionality}</span>
+                                        <span className="text-slate-500 dark:text-slate-400">Functionality</span>
+                                        <span className="font-medium text-slate-700 dark:text-slate-300">{technicalSkills.functionality}</span>
                                     </div>
                                     <div className="flex justify-between text-xs">
-                                        <span className="text-slate-500">Readability</span>
-                                        <span className="font-medium text-slate-700">{technicalSkills.readability}</span>
+                                        <span className="text-slate-500 dark:text-slate-400">Readability</span>
+                                        <span className="font-medium text-slate-700 dark:text-slate-300">{technicalSkills.readability}</span>
                                     </div>
                                     <div className="flex justify-between text-xs">
-                                        <span className="text-slate-500">Best Practice</span>
-                                        <span className="font-medium text-slate-700">{technicalSkills.bestPractice}</span>
+                                        <span className="text-slate-500 dark:text-slate-400">Best Practice</span>
+                                        <span className="font-medium text-slate-700 dark:text-slate-300">{technicalSkills.bestPractice}</span>
                                     </div>
                                 </div>
                             </motion.div>
@@ -253,16 +253,16 @@ export function SkillsRadarCard({ technicalSkills, softSkills }: SkillsRadarProp
                             >
                                 <div className="text-center">
                                     <div className="text-3xl font-bold text-pink-600">{softAvg.toFixed(1)}</div>
-                                    <div className="text-xs text-slate-500 mt-1">Soft Skills Average</div>
+                                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">Soft Skills Average</div>
                                 </div>
                                 <div className="mt-3 space-y-1">
                                     <div className="flex justify-between text-xs">
-                                        <span className="text-slate-500">Communication</span>
-                                        <span className="font-medium text-slate-700">{softSkills.communication}</span>
+                                        <span className="text-slate-500 dark:text-slate-400">Communication</span>
+                                        <span className="font-medium text-slate-700 dark:text-slate-300">{softSkills.communication}</span>
                                     </div>
                                     <div className="flex justify-between text-xs">
-                                        <span className="text-slate-500">Openness</span>
-                                        <span className="font-medium text-slate-700">{softSkills.openness}</span>
+                                        <span className="text-slate-500 dark:text-slate-400">Openness</span>
+                                        <span className="font-medium text-slate-700 dark:text-slate-300">{softSkills.openness}</span>
                                     </div>
                                 </div>
                             </motion.div>
@@ -276,8 +276,8 @@ export function SkillsRadarCard({ technicalSkills, softSkills }: SkillsRadarProp
 
             {/* Strength/Weakness Insights */}
             <div className="mt-4 p-4 rounded-2xl bg-gradient-to-r from-indigo-50/50 to-pink-50/50 border border-white/50">
-                <h4 className="text-sm font-semibold text-slate-700 mb-2">📊 วิเคราะห์จุดแข็ง-จุดอ่อน</h4>
-                <div className="space-y-2 text-xs text-slate-600">
+                <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">📊 วิเคราะห์จุดแข็ง-จุดอ่อน</h4>
+                <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
                     {techAvg > softAvg ? (
                         <>
                             <p>✅ <span className="font-medium text-violet-600">จุดแข็ง:</span> Technical Skills โดดเด่น เหมาะกับงาน Development</p>
@@ -289,7 +289,7 @@ export function SkillsRadarCard({ technicalSkills, softSkills }: SkillsRadarProp
                             <p>📈 <span className="font-medium text-violet-600">ควรพัฒนา:</span> เพิ่มความแข็งแกร่งด้าน Technical</p>
                         </>
                     ) : (
-                        <p>⚖️ <span className="font-medium text-indigo-600">สมดุล:</span> ทักษะทั้งสองด้านมีความสมดุลกัน</p>
+                        <p>⚖️ <span className="font-medium text-indigo-600 dark:text-slate-300">สมดุล:</span> ทักษะทั้งสองด้านมีความสมดุลกัน</p>
                     )}
                 </div>
             </div>

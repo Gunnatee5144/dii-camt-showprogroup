@@ -42,7 +42,7 @@ export function SoftSkillsCard({
             maxScore: 5,
             icon: Users,
             color: 'text-violet-600',
-            bgColor: 'bg-violet-50',
+            bgColor: 'bg-violet-50 dark:bg-violet-950/40',
         },
         {
             category: 'Discipline',
@@ -51,7 +51,7 @@ export function SoftSkillsCard({
             maxScore: 5,
             icon: Shield,
             color: 'text-blue-600',
-            bgColor: 'bg-blue-50',
+            bgColor: 'bg-blue-50 dark:bg-blue-950/40',
         },
         {
             category: 'Responsibility',
@@ -60,7 +60,7 @@ export function SoftSkillsCard({
             maxScore: 5,
             icon: Target,
             color: 'text-emerald-600',
-            bgColor: 'bg-emerald-50',
+            bgColor: 'bg-emerald-50 dark:bg-emerald-950/40',
         },
         {
             category: 'Communication',
@@ -69,7 +69,7 @@ export function SoftSkillsCard({
             maxScore: 5,
             icon: MessageSquare,
             color: 'text-orange-600',
-            bgColor: 'bg-orange-50',
+            bgColor: 'bg-orange-50 dark:bg-orange-950/40',
         },
     ];
 

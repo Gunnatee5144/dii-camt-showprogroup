@@ -4,7 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import {
   Briefcase, Award, Code, Download, Share2, Edit, Plus,
-  Github, Linkedin, Globe, Mail, Phone, MapPin, Calendar,
+  Github, Linkedin, Globe, Mail, Phone, MapPin, Calendar, Clock,
   Trophy, GraduationCap, Target, Zap, ArrowUpRight, Layers
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -35,15 +35,16 @@ export default function Portfolio() {
 
   const projects = getProjectsByStudentId(mockStudent.id);
   const achievements = getAchievementsByStudentId(mockStudent.id);
+  const certificates = getCertificatesByStudentId(mockStudent.id);
 
-  // Mock skills
-  const skills = [
-    { name: 'React', level: 85, icon: <Code className="w-4 h-4" /> },
-    { name: 'TypeScript', level: 80, icon: <Code className="w-4 h-4" /> },
-    { name: 'UI/UX Design', level: 75, icon: <Layers className="w-4 h-4" /> },
-    { name: 'Python', level: 60, icon: <Code className="w-4 h-4" /> },
-    { name: 'Data Analysis', level: 65, icon: <Zap className="w-4 h-4" /> },
-  ];
+  // Use real student skills from mockData
+  const skills = mockStudent.skills.map(s => ({
+    name: s.name,
+    level: s.level === 'advanced' ? 85 : s.level === 'intermediate' ? 65 : 40,
+    icon: <Code className="w-4 h-4" />,
+    category: s.category,
+    verifiedBy: s.verifiedBy,
+  }));
 
   if (user?.role !== 'student') {
     return (
@@ -143,9 +144,9 @@ export default function Portfolio() {
           gradient="bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-600"
         />
         <StatCard
-          icon={Target}
-          label={t.portfolioPage.completeness}
-          value="95%"
+          icon={GraduationCap}
+          label="Certificates"
+          value={certificates.length}
           gradient="bg-gradient-to-br from-blue-500 via-blue-600 to-cyan-600"
         />
       </div>
@@ -165,6 +166,12 @@ export default function Portfolio() {
                 className="rounded-xl px-6 py-3 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-lg shadow-blue-500/10 transition-all duration-300 font-medium text-slate-600 dark:text-slate-300 dark:bg-slate-900/50"
               >
                 {t.portfolioPage.awards}
+              </TabsTrigger>
+              <TabsTrigger
+                value="certificates"
+                className="rounded-xl px-6 py-3 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-lg shadow-blue-500/10 transition-all duration-300 font-medium text-slate-600 dark:text-slate-300 dark:bg-slate-900/50"
+              >
+                Certificates ({certificates.length})
               </TabsTrigger>
             </TabsList>
 
@@ -252,6 +259,66 @@ export default function Portfolio() {
                 ))}
               </div>
             </TabsContent>
+
+            <TabsContent value="certificates" className="mt-0">
+              <div className="space-y-4">
+                {certificates.map((cert, index) => {
+                  const isExpired = cert.expiryDate && new Date(cert.expiryDate) < new Date();
+                  const isExpiringSoon = cert.expiryDate && !isExpired &&
+                    new Date(cert.expiryDate).getTime() - Date.now() < 90 * 24 * 60 * 60 * 1000;
+                  return (
+                    <motion.div
+                      key={cert.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="group bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shrink-0 shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
+                          <Award className="w-7 h-7" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-start gap-2 mb-1">
+                            <h3 className="font-bold text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">{cert.title}</h3>
+                            {isExpired && <Badge className="bg-red-100 text-red-600 border-0 text-[10px]">Expired</Badge>}
+                            {isExpiringSoon && <Badge className="bg-orange-100 text-orange-600 border-0 text-[10px]">Expiring Soon</Badge>}
+                          </div>
+                          <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">{cert.issuer}</p>
+                          <div className="flex flex-wrap gap-3 text-xs text-slate-400">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              Issued: {new Date(cert.issueDate).toLocaleDateString('th-TH', { month: 'short', year: 'numeric' })}
+                            </span>
+                            {cert.expiryDate && (
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                Expires: {new Date(cert.expiryDate).toLocaleDateString('th-TH', { month: 'short', year: 'numeric' })}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex flex-wrap gap-1.5 mt-3">
+                            {cert.skills.map(skill => (
+                              <Badge key={skill} variant="secondary" className="text-[10px] bg-blue-50 text-blue-700 border border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">{skill}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <a
+                          href={cert.credentialUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-shrink-0"
+                        >
+                          <Button variant="outline" size="sm" className="rounded-xl border-blue-200 text-blue-600 hover:bg-blue-50 text-xs">
+                            <ArrowUpRight className="w-3.5 h-3.5 mr-1" />Verify
+                          </Button>
+                        </a>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </TabsContent>
           </Tabs>
         </div>
 
@@ -320,6 +387,9 @@ export default function Portfolio() {
                   <div className="flex justify-between text-sm mb-2">
                     <span className="font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
                       {skill.icon} {skill.name}
+                      {skill.verifiedBy && (
+                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-1.5 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">✓ Verified</span>
+                      )}
                     </span>
                     <span className="text-slate-500 dark:text-slate-400">{skill.level}%</span>
                   </div>
@@ -328,7 +398,11 @@ export default function Portfolio() {
                       initial={{ width: 0 }}
                       animate={{ width: `${skill.level}%` }}
                       transition={{ delay: 0.5 + (idx * 0.1), duration: 1 }}
-                      className="h-full bg-slate-900 rounded-full"
+                      className={`h-full rounded-full ${
+                        skill.level >= 80 ? 'bg-gradient-to-r from-emerald-500 to-teal-500' :
+                        skill.level >= 60 ? 'bg-gradient-to-r from-blue-500 to-indigo-500' :
+                        'bg-gradient-to-r from-slate-400 to-slate-500'
+                      }`}
                     />
                   </div>
                 </div>

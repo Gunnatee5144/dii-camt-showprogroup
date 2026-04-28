@@ -85,6 +85,31 @@ export default function Requests() {
     description: ''
   });
 
+  // Role guard — only students
+  if (user?.role !== 'student') {
+    return (
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="flex flex-col items-center justify-center min-h-[60vh] space-y-4"
+      >
+        <div className="w-20 h-20 rounded-3xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+          <FileBox className="w-10 h-10 text-slate-400" />
+        </div>
+        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">
+          {language === 'th' ? 'ระบบคำร้องสำหรับนักศึกษาเท่านั้น' : 'Student Requests Only'}
+        </h2>
+        <p className="text-slate-500 dark:text-slate-400 text-center max-w-sm">
+          {language === 'th'
+            ? 'หน้านี้แสดงเฉพาะบัญชีนักศึกษา กรุณาเข้าสู่ระบบในฐานะนักศึกษา'
+            : 'This page is only available for student accounts.'}
+        </p>
+      </motion.div>
+    );
+  }
+
+
   const handleSubmit = () => {
     if (!formData.type || !formData.title || !formData.description) {
       toast.error(t.requestsPage.fillComplete);

@@ -13,7 +13,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar as CalendarUI } from '@/components/ui/calendar';
 import { Timetable } from '@/components/common/Timetable';
 import { StudentTimeline } from '@/components/common/StudentTimeline';
 import { DegreeProgressCard } from '@/components/dashboard/DegreeProgressCard';
@@ -31,6 +30,7 @@ import {
   mockGrades,
   getStudentTimeline,
   getStudentGrades,
+  getStudentAppointments,
 } from '@/lib/mockData';
 
 const containerVariants = {
@@ -132,6 +132,7 @@ export default function StudentDashboard() {
   const timeline = getStudentTimeline(student.id);
   const grades = getStudentGrades(student.id);
   const [activeTab, setActiveTab] = React.useState('overview');
+  const appointments = getStudentAppointments(student.id);
 
   const currentCourses = mockCourses.filter(
     course => course.semester === student.semester &&
@@ -300,7 +301,7 @@ export default function StudentDashboard() {
                         {t.studentDashboard.fullscreen} <ChevronRight className="w-4 h-4 ml-1" />
                       </Button>
                     </div>
-                    <div className="bg-white/6 dark:bg-slate-900/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-6 shadow-sm">
+                    <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-6 shadow-sm">
                       <Timetable
                         courses={studentCourses}
                         semester={student.semester}
@@ -318,35 +319,28 @@ export default function StudentDashboard() {
                       <Button variant="ghost" className="text-slate-500 dark:text-slate-400 hover:text-purple-600" onClick={() => navigate('/courses')}>{t.studentDashboard.viewAll}</Button>
                     </div>
 
-                    <div className="grid gap-4">
+                    <div className="grid gap-3">
                       {currentCourses.slice(0, 3).map((course, index) => (
                         <motion.div
                           key={course.id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.1 }}
-                          className="group relative bg-white/6 dark:bg-slate-900/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 p-5 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden"
+                          className="group relative bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 p-4 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden"
                         >
                           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          <div className="relative flex items-center justify-between">
-                            <div className="flex items-center gap-5">
-                              <div className="w-14 h-14 rounded-2xl bg-white dark:bg-slate-900 shadow-md flex items-center justify-center text-lg font-bold text-slate-700 dark:text-slate-300 border border-slate-100 dark:border-slate-800 group-hover:scale-110 transition-transform">
-                                {course.code?.substring(0, 3)}
-                              </div>
-                              <div>
-                                <h4 className="text-lg font-bold text-slate-800 dark:text-slate-200 group-hover:text-purple-600 transition-colors">{course.nameThai}</h4>
-                                <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400 mt-1">
-                                  <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-800">{course.code}</span>
-                                  <span>•</span>
-                                  <span>{course.credits} {t.studentDashboard.credits}</span>
-                                  <span>•</span>
-                                  <span className="flex items-center gap-1"><GraduationCap className="w-3 h-3" /> {course.lecturerName}</span>
-                                </div>
+                          <div className="relative flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-900 shadow-md flex items-center justify-center text-sm font-bold text-slate-700 dark:text-slate-300 border border-slate-100 dark:border-slate-800 group-hover:scale-110 transition-transform flex-shrink-0">
+                              {course.code?.substring(0, 3)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover:text-purple-600 transition-colors truncate">{course.nameThai}</h4>
+                              <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                <span className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded-md">{course.code}</span>
+                                <span>{course.credits} หน่วย</span>
                               </div>
                             </div>
-                            <div className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-950 flex items-center justify-center group-hover:bg-purple-100 group-hover:text-purple-600 transition-colors dark:text-slate-300">
-                              <ChevronRight className="w-5 h-5" />
-                            </div>
+                            <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-purple-500 transition-colors flex-shrink-0" />
                           </div>
                         </motion.div>
                       ))}
@@ -366,53 +360,97 @@ export default function StudentDashboard() {
                     />
                   </motion.div>
 
-                  {/* Upcoming Events */}
-                  <motion.div variants={itemVariants} className="bg-white/6 dark:bg-slate-900/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-6 shadow-sm">
+                  {/* Upcoming Activities - Clean List */}
+                  <motion.div variants={itemVariants} className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-5">
                       <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
                         <Calendar className="w-5 h-5 text-orange-500 dark:text-slate-400" /> {t.studentDashboard.upcomingActivities}
                       </h3>
-                      <Badge variant="secondary" className="bg-orange-100 text-orange-700 hover:bg-orange-100 shadow-sm border-orange-200 dark:text-slate-300">ใน 1 เดือน</Badge>
+                      <Badge variant="secondary" className="bg-orange-100 text-orange-700 hover:bg-orange-100 shadow-sm border-orange-200 dark:bg-orange-500/10 dark:text-orange-300 dark:border-orange-500/20">ใน 1 เดือน</Badge>
                     </div>
 
-                                          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] p-0 sm:p-2 flex justify-center mb-6 overflow-hidden">
-                         <CalendarUI 
-                            mode="single"
-                            selected={new Date()}
-                            className="bg-transparent border-0 scale-90 sm:scale-100 origin-top text-slate-800 dark:text-slate-100"
-                         />
-                      </div>
-  
-                      <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-2 px-2 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
-                        {upcomingActivities.map((activity, i) => (
-                          <div key={i} className="min-w-[240px] snap-center flex-shrink-0 bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] hover:shadow-md transition-shadow cursor-pointer flex flex-col justify-between">
-                            <div>
-                              <div className="flex items-center gap-2 mb-2">
-                                <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-500/10 flex items-center justify-center text-orange-500 dark:text-slate-400">
-                                  <Calendar className="w-4 h-4" />
-                                </div>
-                                <div className="text-xs font-bold text-orange-500 dark:text-slate-400">{new Date(activity.startDate).toLocaleDateString("th-TH", { day: "numeric", month: "short" })}</div>
-                              </div>
-                              <h4 className="font-bold text-slate-800 dark:text-slate-200 text-sm mb-1 leading-tight line-clamp-2">{activity.titleThai}</h4>
-                            </div>
-                            <div className="flex flex-wrap gap-2 mt-3">
-                              <Badge variant="secondary" className="text-[10px] bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300">+{activity.gamificationPoints} XP</Badge>
-                              <Badge variant="outline" className="text-[10px] border-slate-200 dark:border-slate-700">{activity.activityHours} ชม.</Badge>
+                    <div className="space-y-3">
+                      {upcomingActivities.length > 0 ? upcomingActivities.map((activity, i) => (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, x: 10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.08 }}
+                          className="flex items-start gap-3 p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 hover:border-orange-200 dark:hover:border-orange-500/30 hover:shadow-md transition-all cursor-pointer group"
+                        >
+                          <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-500/10 flex flex-col items-center justify-center">
+                            <span className="text-xs font-bold text-orange-600 dark:text-orange-400 leading-none">
+                              {new Date(activity.startDate).toLocaleDateString('th-TH', { day: 'numeric' })}
+                            </span>
+                            <span className="text-[9px] text-orange-400 leading-none">
+                              {new Date(activity.startDate).toLocaleDateString('th-TH', { month: 'short' })}
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 group-hover:text-orange-600 transition-colors line-clamp-2 leading-tight">{activity.titleThai}</h4>
+                            <div className="flex gap-1.5 mt-1.5">
+                              <Badge variant="secondary" className="text-[10px] bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5">+{activity.gamificationPoints} XP</Badge>
+                              <Badge variant="outline" className="text-[10px] border-slate-200 dark:border-slate-700 px-1.5">{activity.activityHours} ชม.</Badge>
                             </div>
                           </div>
-                        ))}
-                        {upcomingActivities.length === 0 && (
-                          <div className="text-center w-full py-4 text-sm text-slate-500 dark:text-slate-400">ไม่มีกิจกรรมเร็วๆนี้</div>
-                        )}
+                        </motion.div>
+                      )) : (
+                        <div className="text-center py-8">
+                          <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-3">
+                            <Calendar className="w-6 h-6 text-slate-400" />
+                          </div>
+                          <p className="text-sm text-slate-500 dark:text-slate-400">ไม่มีกิจกรรมเร็วๆนี้</p>
+                        </div>
+                      )}
+                    </div>
+
+                    <Button variant="outline" className="w-full mt-4 rounded-xl border-dashed border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-orange-600 hover:border-orange-300" onClick={() => navigate('/activities')}>
+                      {t.studentDashboard.viewCalendar}
+                    </Button>
+                  </motion.div>
+
+                  {/* Advisor Appointments */}
+                  {appointments.length > 0 && (
+                    <motion.div variants={itemVariants} className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-6 shadow-sm">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                          <Clock className="w-5 h-5 text-indigo-500 dark:text-slate-400" /> นัดหมายอาจารย์
+                        </h3>
+                        <Badge variant="secondary" className="bg-indigo-100 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300 border-indigo-200 dark:border-indigo-500/20">
+                          {appointments.length} รายการ
+                        </Badge>
                       </div>
-                      <Button variant="outline" className="w-full mt-2 rounded-xl border-dashed border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-orange-600 hover:border-orange-300" onClick={() => navigate("/activities")}>
-                        {t.studentDashboard.viewCalendar}
-                      </Button>
+                      <div className="space-y-3">
+                        {appointments.slice(0, 2).map((apt, i) => (
+                          <div key={apt.id} className="flex items-start gap-3 p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 hover:border-indigo-200 dark:hover:border-indigo-500/30 transition-all cursor-pointer group">
+                            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex flex-col items-center justify-center">
+                              <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 leading-none">
+                                {new Date(apt.date).toLocaleDateString('th-TH', { day: 'numeric' })}
+                              </span>
+                              <span className="text-[9px] text-indigo-400 leading-none">
+                                {new Date(apt.date).toLocaleDateString('th-TH', { month: 'short' })}
+                              </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 transition-colors truncate">{apt.purpose}</h4>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{apt.lecturerName} • {apt.startTime}–{apt.endTime}</p>
+                              <p className="text-xs text-slate-400 truncate mt-0.5">{apt.location}</p>
+                            </div>
+                            <Badge className={`flex-shrink-0 text-[10px] border-0 ${
+                              apt.status === 'confirmed' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300' : 'bg-amber-100 text-amber-700'
+                            }`}>
+                              {apt.status === 'confirmed' ? 'ยืนยัน' : 'รอยืนยัน'}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
                     </motion.div>
+                  )}
                 </div>
               </div>
             </TabsContent>
           )}
+
 
           {/* Schedule Tab */}
           {activeTab === 'schedule' && (

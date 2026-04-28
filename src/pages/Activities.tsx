@@ -112,10 +112,20 @@ export default function Activities() {
   const { t, language } = useLanguage();
   const isTH = language !== 'en';
   const [activeTab, setActiveTab] = React.useState('upcoming');
+  const [joinedIds, setJoinedIds] = React.useState<string[]>([]);
 
   const upcomingActivities = mockActivities.filter(a => a.status === 'upcoming');
+  const historyActivities = mockActivities.filter(
+    a => a.status === 'completed' && a.enrolledStudents.includes(mockStudent.id)
+  );
   const studentPoints = mockStudent.gamificationPoints;
   const studentHours = mockStudent.totalActivityHours;
+
+  const handleJoin = (activityId: string, title: string) => {
+    setJoinedIds(prev =>
+      prev.includes(activityId) ? prev.filter(id => id !== activityId) : [...prev, activityId]
+    );
+  };
 
   // Fake leaderboard data
   const leaderboard = [
@@ -318,8 +328,19 @@ export default function Activities() {
                             </div>
                           </div>
                           <div className="mt-6 flex gap-3">
-                            <Button className="rounded-xl h-11 bg-slate-900 hover:bg-slate-800 text-white shadow-xl shadow-slate-900/20 px-8 font-bold border border-slate-700">
-                              {t.activitiesPage.joinActivity}
+                            <Button
+                              className={`rounded-xl h-11 px-8 font-bold shadow-xl transition-all ${
+                                joinedIds.includes(activity.id)
+                                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20'
+                                  : 'bg-slate-900 hover:bg-slate-800 text-white shadow-slate-900/20 border border-slate-700'
+                              }`}
+                              onClick={() => handleJoin(activity.id, activity.title)}
+                            >
+                              {joinedIds.includes(activity.id) ? (
+                                <><CheckCircle className="w-4 h-4 mr-2" /> ลงทะเบียนแล้ว</>
+                              ) : (
+                                t.activitiesPage.joinActivity
+                              )}
                             </Button>
                             <Button variant="ghost" className="rounded-xl h-11 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 font-medium px-6 dark:bg-slate-800">
                               {t.activitiesPage.details}
@@ -334,13 +355,64 @@ export default function Activities() {
 
               {activeTab === 'history' && (
                 <TabsContent value="history" className="mt-0" key="history" forceMount>
-                  <div className="bg-white/40 backdrop-blur-xl rounded-[2rem] p-12 text-center text-slate-400 border border-dashed border-slate-300 dark:bg-slate-900/50">
-                    <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-200 dark:border-slate-700">
-                      <Hourglass className="w-10 h-10 opacity-30" />
+                  {historyActivities.length === 0 ? (
+                    <div className="bg-white/40 backdrop-blur-xl rounded-[2rem] p-12 text-center text-slate-400 border border-dashed border-slate-300 dark:bg-slate-900/50">
+                      <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Hourglass className="w-10 h-10 opacity-30" />
+                      </div>
+                      <p className="text-lg font-medium">{t.activitiesPage.noHistory}</p>
+                      <p className="text-sm">{t.activitiesPage.startCollecting}</p>
                     </div>
-                    <p className="text-lg font-medium">{t.activitiesPage.noHistory}</p>
-                    <p className="text-sm">{t.activitiesPage.startCollecting}</p>
-                  </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {historyActivities.map((activity, index) => {
+                        const attended = activity.attendedStudents.includes(mockStudent.id);
+                        return (
+                          <motion.div
+                            key={activity.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.08 }}
+                            className="group bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-[2rem] p-5 shadow-sm hover:shadow-xl transition-all dark:bg-slate-900/50"
+                          >
+                            <div className="flex items-start gap-4">
+                              <div className={`flex-shrink-0 w-14 h-14 rounded-2xl flex flex-col items-center justify-center shadow-md ${
+                                attended ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                              }`}>
+                                {attended ? <CheckCircle className="w-6 h-6" /> : <Hourglass className="w-6 h-6" />}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex flex-wrap items-center gap-2 mb-1">
+                                  <h3 className="font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 transition-colors">
+                                    {isTH ? activity.titleThai : activity.title}
+                                  </h3>
+                                  <Badge className={`text-[10px] px-2 py-0.5 border-0 ${
+                                    attended ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-slate-100 text-slate-500 dark:bg-slate-800'
+                                  }`}>
+                                    {attended ? (isTH ? 'เข้าร่วมแล้ว' : 'Attended') : (isTH ? 'ไม่ได้เข้าร่วม' : 'Missed')}
+                                  </Badge>
+                                </div>
+                                <div className="flex flex-wrap gap-3 text-sm text-slate-500 dark:text-slate-400">
+                                  <span className="flex items-center gap-1">
+                                    <Calendar className="w-3.5 h-3.5" />
+                                    {new Date(activity.startDate).toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="w-3.5 h-3.5" />
+                                    {activity.activityHours} ชม.
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex-shrink-0 text-right">
+                                <div className="text-lg font-bold text-amber-500">+{activity.gamificationPoints}</div>
+                                <div className="text-xs text-slate-400">XP</div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </TabsContent>
               )}
 

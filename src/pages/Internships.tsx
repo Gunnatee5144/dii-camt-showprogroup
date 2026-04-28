@@ -83,7 +83,7 @@ export default function Internships() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="space-y-6 flex flex-col h-[calc(100vh-6rem)]"
+      className="space-y-6 flex flex-col lg:h-[calc(100vh-6rem)]"
     >
       <div className="flex-shrink-0">
         {/* Header Section - Matching Dashboard/Courses/Schedule Style */}
@@ -109,7 +109,7 @@ export default function Internships() {
         </div>
 
         {/* Bento Stats for Internships */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
           <StatCard icon={TrendingUp} label={t.internshipsPage.totalPositions} value={mockJobPostings.length} gradient="bg-gradient-to-br from-blue-500 to-indigo-600" />
           <StatCard icon={Building} label={t.internshipsPage.partnerCompanies} value="48" gradient="bg-gradient-to-br from-violet-500 to-purple-600" />
           <StatCard icon={Users} label={t.internshipsPage.studentsPlaced} value="124" gradient="bg-gradient-to-br from-emerald-400 to-teal-600" />
@@ -145,9 +145,9 @@ export default function Internships() {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 grid grid-cols-12 gap-6 pb-2 overflow-hidden">
+      <div className="flex-1 min-h-0 grid grid-cols-12 gap-6 pb-2 lg:overflow-hidden">
         {/* Job List */}
-        <div className="col-span-12 lg:col-span-5 flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar">
+        <div className="col-span-12 lg:col-span-5 flex flex-col gap-4 lg:overflow-y-auto pr-2 custom-scrollbar">
           {filteredJobs.map((job) => (
             <motion.div
               key={job.id}

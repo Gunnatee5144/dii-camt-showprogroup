@@ -1,0 +1,557 @@
+# Master Backend Specification: DII-CAMT ShowPro (Final Version)
+
+This is the ultimate backend specification covering 100% of the features identified in the frontend. It includes the complete Prisma Schema, exhaustive API Endpoints, and precise Business Logic for every module.
+
+---
+
+## 1. Ultimate Database Schema (Prisma)
+
+```prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ================================
+// 1. IDENTITY & ACCESS (IAM)
+// ================================
+
+enum Role {
+  STUDENT
+  LECTURER
+  STAFF
+  COMPANY
+  ADMIN
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String
+  name          String
+  nameThai      String
+  role          Role
+  avatar        String?
+  phone         String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  lastLogin     DateTime?
+
+  studentProfile  StudentProfile?
+  lecturerProfile LecturerProfile?
+  staffProfile    StaffProfile?
+  companyProfile  CompanyProfile?
+  
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+  notifications    Notification[]
+  auditLogs        AuditLog[]
+}
+
+model StudentProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+  studentId       String   @unique
+  major           String
+  program         String   // bachelor, master, doctoral
+  year            Int
+  semester        Int
+  academicYear    String
+  
+  gpax            Float    @default(0.0)
+  earnedCredits   Int      @default(0)
+  totalCredits    Int      @default(120)
+  academicStatus  String   @default("normal")
+
+  advisorId       String?
+  advisor         LecturerProfile? @relation(fields: [advisorId], references: [id])
+  
+  enrollments     Enrollment[]
+  activityEnrolls ActivityEnrollment[]
+  questEnrolls    QuestEnrollment[]
+  portfolio       Portfolio?
+  internship      InternshipRecord?
+  requests        Request[]
+  timeline        TimelineEvent[]
+  consent         DataConsent?
+  
+  xp              Int      @default(0)
+  coins           Int      @default(0)
+  badges          Badge[]
+}
+
+model LecturerProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+  lecturerId      String   @unique
+  department      String
+  position        String   
+  
+  advisees        StudentProfile[]
+  courses         Course[]
+  officeHours     OfficeHour[]
+  appointments    Appointment[]
+  workload        WorkloadRecord[]
+}
+
+model StaffProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+  staffId         String   @unique
+  department      String
+  position        String
+}
+
+model CompanyProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+  companyId       String   @unique
+  companyName     String
+  industry        String
+  size            String
+  website         String?
+  
+  jobPostings     JobPosting[]
+  cooperation     CooperationRecord[]
+  payments        PaymentHistory[]
+  subscription    String   @default("free") // basic, pro, enterprise
+}
+
+// ================================
+// 2. ACADEMIC & GRADING
+// ================================
+
+model Course {
+  id            String   @id @default(uuid())
+  code          String   @unique
+  name          String
+  nameThai      String
+  credits       Int
+  semester      Int
+  academicYear  String
+  lecturerId    String
+  lecturer      LecturerProfile @relation(fields: [lecturerId], references: [id])
+  
+  sections      Section[]
+  assignments   Assignment[]
+  enrollments   Enrollment[]
+}
+
+model Section {
+  id            String   @id @default(uuid())
+  courseId      String
+  course        Course   @relation(fields: [courseId], references: [id])
+  number        String
+  room          String?
+  schedule      Json     // Array of {day, startTime, endTime}
+}
+
+model Enrollment {
+  id            String   @id @default(uuid())
+  studentId     String
+  student       StudentProfile @relation(fields: [studentId], references: [id])
+  courseId      String
+  course        Course   @relation(fields: [courseId], references: [id])
+  
+  midterm       Float?
+  final         Float?
+  total         Float?
+  letterGrade   String?
+  status        String   @default("enrolled")
+  attendance    AttendanceRecord[]
+}
+
+model AttendanceRecord {
+  id            String   @id @default(uuid())
+  enrollmentId  String
+  enrollment    Enrollment @relation(fields: [enrollmentId], references: [id])
+  date          DateTime
+  status        String   // present, absent, late, sick
+}
+
+model Assignment {
+  id            String   @id @default(uuid())
+  courseId      String
+  course        Course   @relation(fields: [courseId], references: [id])
+  title         String
+  dueDate       DateTime
+  maxScore      Int
+  submissions   Submission[]
+}
+
+model Submission {
+  id            String   @id @default(uuid())
+  assignmentId  String
+  assignment    Assignment @relation(fields: [assignmentId], references: [id])
+  studentId     String
+  submittedAt   DateTime @default(now())
+  fileUrl       String
+  score         Float?
+  feedback      String?
+}
+
+// ================================
+// 3. TRAINING & QUEST SYSTEM
+// ================================
+
+model Quest {
+  id            String   @id @default(uuid())
+  title         String
+  titleEn       String
+  description   String
+  descriptionEn String
+  type          String   // solo, group, event, challenge
+  difficulty    String   // easy, normal, hard, legendary
+  category      String
+  xp            Int
+  coins         Int
+  deadline      DateTime
+  assignerId    String   // Lecturer or Company User ID
+  assignerType  String   // lecturer, company
+  tasks         QuestTask[]
+  enrollments   QuestEnrollment[]
+}
+
+model QuestTask {
+  id            String   @id @default(uuid())
+  questId       String
+  quest         Quest    @relation(fields: [questId], references: [id])
+  title         String
+  titleEn       String
+}
+
+model QuestEnrollment {
+  id            String   @id @default(uuid())
+  questId       String
+  quest         Quest    @relation(fields: [questId], references: [id])
+  studentId     String
+  student       StudentProfile @relation(fields: [studentId], references: [id])
+  status        String   @default("in-progress") // in-progress, completed
+  progress      Int      @default(0)
+  completedTasks String[] // Array of QuestTask IDs
+}
+
+// ================================
+// 4. PORTFOLIO & SKILLS
+// ================================
+
+model Portfolio {
+  id            String   @id @default(uuid())
+  studentId     String   @unique
+  student       StudentProfile @relation(fields: [studentId], references: [id])
+  summary       String
+  summaryThai   String
+  githubUrl     String?
+  linkedinUrl   String?
+  projects      Project[]
+  isPublic      Boolean  @default(true)
+}
+
+model Project {
+  id            String   @id @default(uuid())
+  portfolioId   String
+  portfolio     Portfolio @relation(fields: [portfolioId], references: [id])
+  title         String
+  description   String
+  techStack     String[]
+  url           String?
+  images        String[]
+}
+
+model SkillRubric {
+  id            String   @id @default(uuid())
+  studentId     String
+  category      String   // technical, soft
+  skillName     String
+  professorScore Float
+  peerScore      Float
+  totalScore     Float
+  updatedAt      DateTime @updatedAt
+}
+
+// ================================
+// 5. INTERNSHIP & CAREER
+// ================================
+
+model InternshipRecord {
+  id            String   @id @default(uuid())
+  studentId     String   @unique
+  student       StudentProfile @relation(fields: [studentId], references: [id])
+  companyName   String?
+  position      String?
+  status        String   @default("not_started")
+  logs          InternshipLog[]
+  documents     InternshipDocument[]
+}
+
+model InternshipLog {
+  id            String   @id @default(uuid())
+  recordId      String
+  record        InternshipRecord @relation(fields: [recordId], references: [id])
+  date          DateTime
+  activities    String
+  hours         Int
+}
+
+model InternshipDocument {
+  id            String   @id @default(uuid())
+  recordId      String
+  record        InternshipRecord @relation(fields: [recordId], references: [id])
+  type          String   // application, agreement, report, evaluation
+  url           String
+  status        String   @default("pending") // pending, approved, rejected
+}
+
+model JobPosting {
+  id            String   @id @default(uuid())
+  companyId     String
+  company       CompanyProfile @relation(fields: [companyId], references: [id])
+  title         String
+  type          String   // internship, full-time
+  description   String
+  requirements  Json
+  status        String   @default("open")
+  postedAt      DateTime @default(now())
+  applications  Application[]
+}
+
+model Application {
+  id            String   @id @default(uuid())
+  jobId         String
+  job           JobPosting @relation(fields: [jobId], references: [id])
+  studentId     String
+  status        String   @default("pending") // pending, reviewed, accepted, rejected
+  appliedAt     DateTime @default(now())
+}
+
+// ================================
+// 6. ADMIN, FINANCE & OPS
+// ================================
+
+model BudgetRecord {
+  id            String   @id @default(uuid())
+  title         String
+  amount        Float
+  type          String   // income, expense
+  category      String
+  date          DateTime
+  status        String   @default("pending")
+}
+
+model CooperationRecord {
+  id            String   @id @default(uuid())
+  companyId     String
+  company       CompanyProfile @relation(fields: [companyId], references: [id])
+  title         String
+  type          String   // MOU, Partnership, Scholarship
+  expiryDate    DateTime?
+  status        String   @default("active")
+}
+
+model WorkloadRecord {
+  id            String   @id @default(uuid())
+  lecturerId    String
+  lecturer      LecturerProfile @relation(fields: [lecturerId], references: [id])
+  academicYear  String
+  semester      Int
+  teachingHours Int
+  researchHours Int
+  advisingHours Int
+}
+
+model PaymentHistory {
+  id            String   @id @default(uuid())
+  companyId     String
+  company       CompanyProfile @relation(fields: [companyId], references: [id])
+  amount        Float
+  planName      String
+  date          DateTime @default(now())
+  status        String   @default("paid")
+  receiptUrl    String?
+}
+
+// ================================
+// 7. UTILS & WORKFLOW
+// ================================
+
+model Request {
+  id            String   @id @default(uuid())
+  studentId     String
+  student       StudentProfile @relation(fields: [studentId], references: [id])
+  type          String   // override, certificate, appeal, withdrawal
+  title         String
+  description   String
+  status        String   @default("pending")
+  comments      RequestComment[]
+  createdAt     DateTime @default(now())
+}
+
+model RequestComment {
+  id            String   @id @default(uuid())
+  requestId     String
+  request       Request  @relation(fields: [requestId], references: [id])
+  authorId      String
+  text          String
+  createdAt     DateTime @default(now())
+}
+
+model Appointment {
+  id            String   @id @default(uuid())
+  lecturerId    String
+  lecturer      LecturerProfile @relation(fields: [lecturerId], references: [id])
+  studentId     String
+  date          DateTime
+  startTime     String
+  endTime       String
+  purpose       String
+  status        String   @default("pending")
+}
+
+model Message {
+  id            String   @id @default(uuid())
+  fromId        String
+  from          User     @relation("SentMessages", fields: [fromId], references: [id])
+  toId          String
+  to            User     @relation("ReceivedMessages", fields: [toId], references: [id])
+  subject       String
+  body          String
+  isRead        Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}
+
+model Notification {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  title         String
+  message       String
+  type          String
+  isRead        Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}
+
+model AuditLog {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  action        String
+  resource      String
+  details       Json?
+  timestamp     DateTime @default(now())
+}
+
+model TimelineEvent {
+  id            String   @id @default(uuid())
+  studentId     String
+  student       StudentProfile @relation(fields: [studentId], references: [id])
+  type          String   // enrollment, grade, activity, achievement
+  title         String
+  date          DateTime @default(now())
+}
+
+model Activity {
+  id            String   @id @default(uuid())
+  title         String
+  type          String
+  startDate     DateTime
+  endDate       DateTime
+  points        Int
+  hours         Int
+  enrollments   ActivityEnrollment[]
+}
+
+model ActivityEnrollment {
+  id            String   @id @default(uuid())
+  activityId    String
+  activity      Activity @relation(fields: [activityId], references: [id])
+  studentId     String
+  student       StudentProfile @relation(fields: [studentId], references: [id])
+  status        String   @default("attended")
+}
+
+model Badge {
+  id            String   @id @default(uuid())
+  name          String
+  icon          String
+  studentId     String
+  student       StudentProfile @relation(fields: [studentId], references: [id])
+}
+
+model OfficeHour {
+  id            String   @id @default(uuid())
+  lecturerId    String
+  lecturer      LecturerProfile @relation(fields: [lecturerId], references: [id])
+  day           String
+  startTime     String
+  endTime       String
+}
+
+model DataConsent {
+  id            String   @id @default(uuid())
+  studentId     String   @unique
+  student       StudentProfile @relation(fields: [studentId], references: [id])
+  allowSharing  Boolean  @default(false)
+  updatedAt     DateTime @updatedAt
+}
+```
+
+---
+
+## 2. Exhaustive API Endpoint Roadmap
+
+### IAM (Authentication)
+- `POST /auth/login`, `POST /auth/register`, `GET /auth/me`
+- `PATCH /users/profile`, `POST /auth/logout`
+
+### Academic (Courses & Grades)
+- `GET /courses`, `GET /courses/:id`, `POST /courses` (Staff)
+- `GET /enrollments`, `POST /enrollments` (Enroll Student)
+- `PATCH /grades/bulk` (Lecturer), `GET /grades/history/:studentId`
+- `GET /attendance/report`, `POST /attendance/check-in`
+
+### Training (Quests & Tasks)
+- `GET /quests`, `GET /quests/:id`, `POST /quests/accept`
+- `PATCH /quests/task/complete` (Updates progress and checks for quest completion)
+- `GET /player/stats` (XP, Coins, Level, Badges)
+
+### Career (Jobs & Internships)
+- `GET /jobs`, `POST /jobs`, `POST /applications`
+- `GET /internship/logs`, `POST /internship/logs`
+- `PATCH /internship/documents/:id/status` (Staff Approval)
+- `GET /talent/search` (Company Filtering with Skill Gap)
+
+### Operations (Finance & Personnel)
+- `GET /budget`, `POST /budget` (Staff)
+- `GET /personnel`, `GET /cooperation`, `POST /cooperation`
+- `GET /workload`, `POST /workload` (Lecturer/Staff)
+- `GET /subscription/plans`, `POST /subscription/payment` (Company)
+
+### Student Support (Requests & Appointments)
+- `GET /requests`, `POST /requests`, `POST /requests/:id/comment`
+- `GET /appointments`, `POST /appointments`, `PATCH /appointments/:id/status`
+- `GET /office-hours/:lecturerId`
+
+### System (Audit & Notifications)
+- `GET /notifications`, `PATCH /notifications/:id/read`
+- `GET /audit-logs` (Admin Only), `GET /reports/system-usage`
+
+---
+
+## 3. Critical Business Workflows
+
+1.  **Quest Completion Logic:** When a user completes all `QuestTask` entries in a `QuestEnrollment`, the system must:
+    - Set status to 'completed'.
+    - Credit `Quest.xp` and `Quest.coins` to `StudentProfile`.
+    - Check for `Badge` award criteria.
+    - Create a `TimelineEvent`.
+2.  **Payment Lifecycle:** When a `PaymentHistory` is created with 'paid' status, update `CompanyProfile.subscription` to the purchased plan.
+3.  **PDPA & Data Sharing:** The `GET /talent/search` and `GET /student-profiles` endpoints MUST check `DataConsent.allowSharing` before returning data to companies.
+4.  **Automatic Grading History:** Any update to `Enrollment.total` or `letterGrade` must trigger an `AuditLog` entry specifically for grade tracking.

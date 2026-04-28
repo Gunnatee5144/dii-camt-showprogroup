@@ -47,7 +47,7 @@ export default function RegisterPage() {
 
         <div className="min-h-screen flex font-sans bg-white dark:bg-slate-900 selection:bg-blue-100 selection:text-blue-900 overflow-hidden dark:text-slate-200">
             {/* Left Side: Information - Premium Dark */}
-            <div className="hidden lg:flex w-1/2 bg-slate-900 relative overflow-hidden flex-col justify-between p-12">
+            <div className="hidden lg:flex w-1/2 h-screen sticky top-0 bg-slate-900 relative overflow-hidden flex-col justify-between p-12">
                 <div className="absolute inset-0 z-0">
                     <img
                         src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop"
@@ -106,7 +106,7 @@ export default function RegisterPage() {
             </div>
 
             {/* Right Side: Form */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 relative bg-slate-50 dark:bg-slate-900">
+            <div className="w-full lg:w-1/2 h-screen overflow-y-auto flex items-start justify-center p-6 lg:p-12 py-16 lg:py-20 relative bg-slate-50 dark:bg-slate-900">
                 {/* Language Toggle */}
                 <Button
                     variant="ghost"
@@ -122,7 +122,7 @@ export default function RegisterPage() {
                 <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-emerald-100 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
                 <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
-                <div className="w-full max-w-md relative z-10 bg-white dark:bg-slate-900/80 p-6 md:p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-white min-h-[600px] flex flex-col justify-center">
+                <div className="w-full max-w-md relative z-10 bg-white dark:bg-slate-900/80 p-6 md:p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-white flex flex-col">
                     <AnimatePresence mode="wait">
                         {step === 1 ? (
                             <motion.div
@@ -159,7 +159,7 @@ export default function RegisterPage() {
                                         onClick={() => handleRoleSelect('company')}
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-all duration-300">
+                                            <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-all duration-300 dark:bg-slate-800">
                                                 <Building2 className="w-6 h-6 text-orange-600 group-hover:text-white dark:text-slate-300" />
                                             </div>
                                             <div className="flex-1">
@@ -207,7 +207,7 @@ export default function RegisterPage() {
                                         onClick={() => handleRoleSelect('enterprise')}
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
+                                            <div className="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 dark:bg-slate-800">
                                                 <Building2 className="w-6 h-6 text-indigo-600 group-hover:text-white dark:text-slate-300" />
                                             </div>
                                             <div className="flex-1">

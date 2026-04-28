@@ -201,30 +201,33 @@ export default function Schedule() {
               <Calendar className="w-5 h-5 text-purple-500 dark:text-slate-400" /> {t.schedulePage.todayClasses}
             </h3>
             <div className="space-y-3">
-              {studentCourses.slice(0, 3).map((course, index) => (
-                <motion.div
-                  key={course.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all cursor-pointer group"
-                >
-                  <div className="flex flex-col items-center justify-center bg-purple-50 text-purple-700 rounded-xl px-4 py-2 min-w-[80px] group-hover:bg-purple-500 group-hover:text-white transition-colors dark:text-slate-300 dark:bg-slate-800">
-                    <div className="text-sm font-bold">09:00</div>
-                    <div className="text-xs opacity-75">12:00</div>
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-bold text-slate-800 dark:text-slate-200 group-hover:text-purple-600 transition-colors">{course.name}</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-1">
-                      <MapPin className="w-3 h-3" />
-                      ห้อง 301 อาคาร DII
+              {studentCourses.slice(0, 3).map((course, index) => {
+                const slot = course.schedule?.[0];
+                return (
+                  <motion.div
+                    key={course.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all cursor-pointer group"
+                  >
+                    <div className="flex flex-col items-center justify-center bg-purple-50 text-purple-700 rounded-xl px-4 py-2 min-w-[80px] group-hover:bg-purple-500 group-hover:text-white transition-colors dark:text-slate-300 dark:bg-slate-800">
+                      <div className="text-sm font-bold">{slot?.startTime || '09:00'}</div>
+                      <div className="text-xs opacity-75">{slot?.endTime || '12:00'}</div>
                     </div>
-                  </div>
-                  <Badge variant="secondary" className="bg-purple-100 text-purple-600 group-hover:bg-white group-hover:text-purple-600 dark:text-slate-300 dark:bg-slate-900 dark:bg-slate-800">
-                    {t.schedulePage.inClass}
-                  </Badge>
-                </motion.div>
-              ))}
+                    <div className="flex-1">
+                      <div className="font-bold text-slate-800 dark:text-slate-200 group-hover:text-purple-600 transition-colors truncate">{course.name}</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-1">
+                        <MapPin className="w-3 h-3" />
+                        {slot ? `ห้อง ${slot.room} ${slot.building}` : 'ห้อง 301 อาคาร DII'}
+                      </div>
+                    </div>
+                    <Badge variant="secondary" className="bg-purple-100 text-purple-600 group-hover:bg-white group-hover:text-purple-600 dark:text-slate-300 dark:bg-slate-800 flex-shrink-0">
+                      {t.schedulePage.inClass}
+                    </Badge>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
 

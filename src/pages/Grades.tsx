@@ -328,14 +328,47 @@ export default function Grades() {
                 </div>
               </motion.div>
 
-              <motion.div variants={itemVariants} className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col justify-center items-center text-center dark:bg-slate-900">
-                <div className="w-32 h-32 rounded-full bg-emerald-50 flex items-center justify-center mb-6 dark:bg-slate-800">
-                  <TrendingUp className="w-12 h-12 text-emerald-600 dark:text-slate-300" />
+              <motion.div variants={itemVariants} className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-800 dark:bg-slate-900">
+                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-6 flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-blue-500 dark:text-slate-400" />
+                  GPA Trend
+                </h3>
+                <div className="flex items-end gap-2 h-40 mt-2">
+                  {Object.entries(semesterGrades).map(([semester, data], idx) => {
+                    const barHeight = (data.gpa / 4.0) * 100;
+                    const isLatest = idx === Object.keys(semesterGrades).length - 1;
+                    return (
+                      <div key={semester} className="flex-1 flex flex-col items-center gap-2">
+                        <div className="text-xs font-bold text-slate-600 dark:text-slate-300">{data.gpa.toFixed(2)}</div>
+                        <div className="w-full flex flex-col justify-end" style={{ height: '100px' }}>
+                          <motion.div
+                            initial={{ height: 0 }}
+                            animate={{ height: `${barHeight}%` }}
+                            transition={{ delay: idx * 0.1, duration: 0.8 }}
+                            className={`w-full rounded-t-xl ${
+                              isLatest
+                                ? 'bg-gradient-to-t from-emerald-500 to-teal-400'
+                                : 'bg-gradient-to-t from-blue-400 to-indigo-300'
+                            }`}
+                          />
+                        </div>
+                        <div className="text-[9px] text-slate-400 text-center leading-tight">{semester}</div>
+                      </div>
+                    );
+                  })}
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{t.grades.excellentTrend}</h3>
-                <p className="text-slate-500 max-w-xs mx-auto dark:text-slate-400">
-                  {t.grades.trendDescription}
-                </p>
+                <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between text-sm">
+                  <div>
+                    <div className="text-xs text-slate-400 mb-1">{t.grades.target}</div>
+                    <div className="font-bold text-slate-700 dark:text-slate-300">3.80</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs text-slate-400 mb-1">Trend</div>
+                    <div className="font-bold text-emerald-600 flex items-center gap-1">
+                      <TrendingUp className="w-4 h-4" /> Improving
+                    </div>
+                  </div>
+                </div>
               </motion.div>
             </div>
           </TabsContent>

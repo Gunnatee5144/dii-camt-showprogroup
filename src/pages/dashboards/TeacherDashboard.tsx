@@ -1,3 +1,4 @@
+import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   BookOpen, 
@@ -17,6 +18,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { StatsCard } from '@/components/common/StatsCard';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { mockLecturer, mockCourses, mockAppointments } from '@/lib/mockData';
+import { api } from '@/lib/api';
+import { mapAppointment, mapCourse, mapStudent } from '@/lib/live-mappers';
 import { Link } from 'react-router-dom';
 
 const containerVariants = {
@@ -33,7 +36,7 @@ const itemVariants = {
 };
 
 // Mock at-risk students
-const atRiskStudents = [
+const fallbackAtRiskStudents = [
   { id: '1', name: 'นายสมศักดิ์ มานะ', studentId: '650510005', gpa: 1.85, issue: 'GPA ต่ำกว่าเกณฑ์' },
   { id: '2', name: 'นางสาวสมหญิง ใจดี', studentId: '650510012', gpa: 2.15, issue: 'ขาดเรียนบ่อย' },
   { id: '3', name: 'นายชัยวุฒิ พยายาม', studentId: '650510008', gpa: 2.25, issue: 'ไม่ส่งงานหลายวิชา' },
@@ -42,12 +45,49 @@ const atRiskStudents = [
 export default function TeacherDashboard() {
   const { t, language } = useLanguage();
   const teacher = mockLecturer;
-  const teacherCourses = mockCourses.filter(c => c.instructorId === teacher.id);
+  const [teacherCourses, setTeacherCourses] = React.useState(mockCourses.filter(c => c.lecturerId === teacher.id || c.lecturerId === teacher.lecturerId));
+  const [teacherAppointments, setTeacherAppointments] = React.useState(mockAppointments.filter(apt => apt.lecturerId === teacher.id));
+  const [atRiskStudents, setAtRiskStudents] = React.useState(fallbackAtRiskStudents);
   const totalCourses = teacherCourses.length;
-  const totalStudents = teacherCourses.reduce((sum, course) => sum + (course.enrolled || 0), 0);
-  const teacherAppointments = mockAppointments.filter(apt => apt.lecturerId === teacher.id);
+  const totalStudents = teacherCourses.reduce((sum, course) => sum + (course.enrolledStudents?.length || 0), 0);
   const pendingAppointments = teacherAppointments.filter(apt => apt.status === 'pending').length;
   const advisees = totalStudents;
+
+  React.useEffect(() => {
+    let mounted = true;
+
+    Promise.allSettled([
+      api.courses.lecturerSchedule(),
+      api.appointments.list(),
+      api.students.list(),
+    ]).then(([scheduleResult, appointmentsResult, studentsResult]) => {
+      if (!mounted) return;
+      if (scheduleResult.status === 'fulfilled') {
+        setTeacherCourses(scheduleResult.value.schedule.map(mapCourse));
+      }
+      if (appointmentsResult.status === 'fulfilled') {
+        setTeacherAppointments(appointmentsResult.value.appointments.map(mapAppointment));
+      }
+      if (studentsResult.status === 'fulfilled') {
+        setAtRiskStudents(studentsResult.value.students
+          .map(mapStudent)
+          .filter(student => student.academicStatus === 'probation' || student.academicStatus === 'risk')
+          .map(student => ({
+            id: student.id,
+            name: student.nameThai,
+            studentId: student.studentId,
+            gpa: student.gpa,
+            issue: student.academicStatus,
+          })));
+      }
+    }).catch((error) => {
+      console.warn('Unable to load teacher dashboard data from API', error);
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <motion.div
@@ -126,7 +166,7 @@ export default function TeacherDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {mockCourses.slice(0, 3).map((course) => (
+                {teacherCourses.slice(0, 3).map((course) => (
                   <div
                     key={course.id}
                     className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors"
@@ -137,11 +177,11 @@ export default function TeacherDashboard() {
                       </div>
                       <div>
                         <p className="font-medium text-foreground">{course.name}</p>
-                        <p className="text-sm text-muted-foreground">{course.code} • {course.schedule}</p>
+                        <p className="text-sm text-muted-foreground">{course.code} • {course.schedule?.[0] ? `${course.schedule[0].day} ${course.schedule[0].startTime}` : '-'}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-semibold text-foreground">{course.students}</p>
+                      <p className="text-lg font-semibold text-foreground">{course.enrolledStudents?.length || 0}</p>
                       <p className="text-xs text-muted-foreground">{t.teacherDashboard.students}</p>
                     </div>
                   </div>
@@ -208,7 +248,7 @@ export default function TeacherDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {mockAppointments.map((appointment) => (
+                {teacherAppointments.map((appointment) => (
                   <div key={appointment.id} className="flex items-start gap-3 p-3 rounded-lg bg-secondary/50">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                       appointment.status === 'confirmed' ? 'bg-success/10' : 'bg-warning/10'
@@ -220,9 +260,9 @@ export default function TeacherDashboard() {
                       )}
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-sm text-foreground">{appointment.reason}</p>
+                      <p className="font-medium text-sm text-foreground">{appointment.purpose}</p>
                       <p className="text-xs text-muted-foreground">
-                        {appointment.date.toLocaleDateString('th-TH')} • {appointment.time} น.
+                        {appointment.date.toLocaleDateString('th-TH')} • {appointment.startTime} น.
                       </p>
                       <Badge 
                         variant={appointment.status === 'confirmed' ? 'default' : 'outline'}

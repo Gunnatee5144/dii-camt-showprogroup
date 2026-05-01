@@ -8,10 +8,12 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { mockJobPostings, mockStudents, mockCompany } from '@/lib/mockData';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { Application } from '@/types';
+import { api } from '@/lib/api';
+import { asDate, asNumber, asRecord, asString } from '@/lib/live-data';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -23,46 +25,108 @@ const itemVariants = {
     visible: { opacity: 1, y: 0 },
 };
 
-const initialApplicants = mockJobPostings.flatMap(job =>
-    job.applicants.map(app => ({
-        ...app,
-        jobTitle: job.title,
-        companyId: job.companyId,
-        student: mockStudents.find(s => s.id === app.studentId),
-    }))
-);
+type ApplicantRow = Application & {
+    jobTitle: string;
+    companyId: string;
+    student?: {
+        id: string;
+        studentId: string;
+        name: string;
+        nameThai: string;
+        email: string;
+        gpa: number;
+        gpax: number;
+        year: number;
+        skills: Array<{ name: string }>;
+    };
+};
 
 export default function Applicants() {
     const { user } = useAuth();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const isAdmin = user?.role === 'admin';
     const isCompany = user?.role === 'company';
     const canManage = isAdmin || isCompany;
 
-    const [applicants, setApplicants] = useState(initialApplicants);
+    const [applicants, setApplicants] = useState<ApplicantRow[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [selectedApplicant, setSelectedApplicant] = useState<ApplicantRow | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
 
-    // Filter logic: Admin sees all, Company sees only their jobs' applicants
+    React.useEffect(() => {
+        let isMounted = true;
+
+        api.applications.list()
+            .then((response) => {
+                if (!isMounted) return;
+                const mapped = response.applications.map((item, index) => {
+                    const application = asRecord(item);
+                    const student = asRecord(application.student);
+                    const studentUser = asRecord(student.user);
+                    const job = asRecord(application.jobPosting);
+                    const company = asRecord(job.company);
+                    return {
+                        id: asString(application.id, `APP${index + 1}`),
+                        jobPostingId: asString(application.jobPostingId, asString(job.id)),
+                        studentId: asString(application.studentId, asString(student.id)),
+                        status: asString(application.status, 'pending') as Application['status'],
+                        appliedAt: asDate(application.appliedAt),
+                        coverLetter: asString(application.coverLetter),
+                        resumeUrl: asString(application.resumeUrl),
+                        notes: asString(application.notes),
+                        jobTitle: asString(job.title, '-'),
+                        companyId: asString(job.companyId, asString(company.id)),
+                        student: {
+                            id: asString(student.id),
+                            studentId: asString(student.studentId),
+                            name: asString(studentUser.name),
+                            nameThai: asString(studentUser.nameThai, asString(studentUser.name, '-')),
+                            email: asString(studentUser.email),
+                            gpa: asNumber(student.gpa, 0),
+                            gpax: asNumber(student.gpax, 0),
+                            year: asNumber(student.year, 1),
+                            skills: [],
+                        },
+                    };
+                });
+                setApplicants(mapped);
+            })
+            .catch(() => undefined)
+            .finally(() => {
+                if (isMounted) setIsLoading(false);
+            });
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    // Backend already scopes company/student results by authenticated role.
     const visibleApplicants = applicants.filter(app => {
-        if (isCompany && app.companyId !== mockCompany.id) return false;
         return true;
     });
 
     const pendingCount = visibleApplicants.filter(a => a.status === 'pending').length;
     const shortlistedCount = visibleApplicants.filter(a => a.status === 'shortlisted').length;
 
-    const handleStatusChange = (id: string, newStatus: Application['status']) => {
-        setApplicants(applicants.map(app => app.id === id ? { ...app, status: newStatus } : app));
+    const handleStatusChange = async (id: string, newStatus: Application['status']) => {
+        try {
+            await api.applications.update(id, { status: newStatus });
+            setApplicants(current => current.map(app => app.id === id ? { ...app, status: newStatus } : app));
+            setSelectedApplicant(current => current?.id === id ? { ...current, status: newStatus } : current);
 
-        const statusMap: Record<string, string> = {
-            'shortlisted': t.applicants.shortlistAction,
-            'interviewed': t.applicants.interviewAction,
-            'accepted': t.applicants.acceptAction,
-            'rejected': t.applicants.rejectAction
-        };
+            const statusMap: Record<string, string> = {
+                'shortlisted': t.applicants.shortlistAction,
+                'interviewed': t.applicants.interviewAction,
+                'accepted': t.applicants.acceptAction,
+                'rejected': t.applicants.rejectAction
+            };
 
-        toast.success(`${t.applicants.updateSuccess}: "${statusMap[newStatus]}"`);
+            toast.success(`${t.applicants.updateSuccess}: "${statusMap[newStatus]}"`);
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : t.applicants.updateSuccess);
+        }
     };
 
     const getStatusBadge = (status: string) => {
@@ -234,8 +298,14 @@ export default function Applicants() {
                                             {getStatusBadge(applicant.status)}
 
                                             <div className="flex gap-1">
-                                                <Button size="sm" variant="ghost"><Eye className="w-4 h-4" /></Button>
-                                                <Button size="sm" variant="ghost"><FileText className="w-4 h-4" /></Button>
+                                                <Button size="sm" variant="ghost" onClick={() => setSelectedApplicant(applicant)}><Eye className="w-4 h-4" /></Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() => applicant.resumeUrl ? window.open(applicant.resumeUrl, '_blank', 'noopener,noreferrer') : toast.info(language === 'th' ? 'ยังไม่มีไฟล์ Resume' : 'No resume file')}
+                                                >
+                                                    <FileText className="w-4 h-4" />
+                                                </Button>
                                             </div>
 
                                             {canManage && (
@@ -265,7 +335,12 @@ export default function Applicants() {
                                     </motion.div>
                                 ))}
                             </AnimatePresence>
-                            {filteredApplicants.length === 0 && (
+                            {isLoading && (
+                                <div className="text-center py-8 text-gray-500 dark:text-slate-400">
+                                    {language === 'th' ? 'กำลังโหลดผู้สมัคร...' : 'Loading applicants...'}
+                                </div>
+                            )}
+                            {!isLoading && filteredApplicants.length === 0 && (
                                 <div className="text-center py-8 text-gray-500 dark:text-slate-400">
                                     {t.common.noData}
                                 </div>
@@ -274,6 +349,41 @@ export default function Applicants() {
                     </CardContent>
                 </Card>
             </motion.div>
+
+            <Dialog open={Boolean(selectedApplicant)} onOpenChange={(open) => !open && setSelectedApplicant(null)}>
+                <DialogContent className="sm:max-w-[640px]">
+                    {selectedApplicant && (
+                        <>
+                            <DialogHeader>
+                                <DialogTitle>{selectedApplicant.student?.nameThai || selectedApplicant.student?.name || '-'}</DialogTitle>
+                                <DialogDescription>{selectedApplicant.jobTitle} / {t.applicants.appliedOn} {new Date(selectedApplicant.appliedAt).toLocaleDateString(language === 'th' ? 'th-TH' : 'en-US')}</DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                                    <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3"><div className="text-slate-500">GPA</div><div className="font-bold">{selectedApplicant.student?.gpa.toFixed(2) ?? '-'}</div></div>
+                                    <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3"><div className="text-slate-500">{t.studentProfiles.yearPrefix}</div><div className="font-bold">{selectedApplicant.student?.year ?? '-'}</div></div>
+                                    <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3"><div className="text-slate-500">{t.common.status}</div><div className="font-bold">{getStatusBadge(selectedApplicant.status)}</div></div>
+                                    <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3"><div className="text-slate-500">Email</div><div className="font-bold truncate">{selectedApplicant.student?.email || '-'}</div></div>
+                                </div>
+                                <div>
+                                    <div className="font-semibold mb-1">{language === 'th' ? 'จดหมายสมัครงาน' : 'Cover letter'}</div>
+                                    <p className="text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap">{selectedApplicant.coverLetter || '-'}</p>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {(['reviewed', 'shortlisted', 'interviewed', 'accepted', 'rejected'] as Application['status'][]).map((status) => (
+                                        <Button key={status} size="sm" variant={selectedApplicant.status === status ? 'default' : 'outline'} onClick={() => handleStatusChange(selectedApplicant.id, status)}>
+                                            {status}
+                                        </Button>
+                                    ))}
+                                    <Button size="sm" variant="outline" onClick={() => selectedApplicant.resumeUrl ? window.open(selectedApplicant.resumeUrl, '_blank', 'noopener,noreferrer') : toast.info(language === 'th' ? 'ยังไม่มีไฟล์ Resume' : 'No resume file')}>
+                                        <FileText className="w-4 h-4 mr-1" /> Resume
+                                    </Button>
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </DialogContent>
+            </Dialog>
         </motion.div>
     );
 }

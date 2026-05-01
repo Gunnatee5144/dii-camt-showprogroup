@@ -12,7 +12,56 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { mockActivities, mockStudent } from '@/lib/mockData';
+import { api, ApiError } from '@/lib/api';
+import { asArray, asNumber, asRecord, asString } from '@/lib/live-data';
+import { mapActivity, mapStudentStatsToStudent } from '@/lib/live-mappers';
+import { toast } from 'sonner';
+
+type ActivityRow = (typeof mockActivities)[number];
+type LeaderboardRow = { rank: number; name: string; points: number; badge: string };
+
+const buildLeaderboard = (
+  rawActivities: unknown[],
+  currentUserName: string,
+  currentPoints: number,
+): LeaderboardRow[] => {
+  const totals = new Map<string, { name: string; points: number }>();
+
+  rawActivities.forEach((item) => {
+    const activity = asRecord(item);
+    const points = asNumber(activity.gamificationPoints, 0);
+
+    asArray(activity.enrollments).forEach((enrollmentItem) => {
+      const enrollment = asRecord(enrollmentItem);
+      const student = asRecord(enrollment.student);
+      const studentUser = asRecord(student.user);
+      const id = asString(enrollment.studentId, asString(student.id, asString(studentUser.id)));
+      const name = asString(studentUser.nameThai, asString(studentUser.name, "Student"));
+      const status = asString(enrollment.status).toLowerCase();
+      const earned = status === "completed" || status === "attended" ? points : Math.ceil(points / 2);
+
+      if (!id) return;
+      const current = totals.get(id) ?? { name, points: 0 };
+      totals.set(id, { name: current.name, points: current.points + earned });
+    });
+  });
+
+  if (currentUserName && !Array.from(totals.values()).some((item) => item.name === currentUserName)) {
+    totals.set("current-user", { name: currentUserName, points: currentPoints });
+  }
+
+  return Array.from(totals.values())
+    .sort((a, b) => b.points - a.points)
+    .slice(0, 5)
+    .map((item, index) => ({
+      rank: index + 1,
+      name: item.name,
+      points: item.points,
+      badge: index === 0 ? "Top" : "",
+    }));
+};
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -112,29 +161,77 @@ export default function Activities() {
   const { t, language } = useLanguage();
   const isTH = language !== 'en';
   const [activeTab, setActiveTab] = React.useState('upcoming');
-  const [joinedIds, setJoinedIds] = React.useState<string[]>([]);
+  const [activities, setActivities] = React.useState<ActivityRow[]>([]);
+  const [student, setStudent] = React.useState(mockStudent);
+  const [selectedActivity, setSelectedActivity] = React.useState<ActivityRow | null>(null);
+  const [leaderboard, setLeaderboard] = React.useState<LeaderboardRow[]>([
+    { rank: 1, name: mockStudent.nameThai, points: mockStudent.gamificationPoints, badge: "Top" },
+  ]);
 
-  const upcomingActivities = mockActivities.filter(a => a.status === 'upcoming');
-  const historyActivities = mockActivities.filter(
-    a => a.status === 'completed' && a.enrolledStudents.includes(mockStudent.id)
+  const upcomingActivities = activities.filter(a => a.status === 'upcoming');
+  const historyActivities = activities.filter(a =>
+    a.enrolledStudents.includes(student.id) ||
+    a.attendedStudents.includes(student.id) ||
+    new Date(a.endDate).getTime() < Date.now(),
   );
-  const studentPoints = mockStudent.gamificationPoints;
-  const studentHours = mockStudent.totalActivityHours;
+  const studentPoints = student.gamificationPoints;
+  const studentHours = student.totalActivityHours;
+  const badgesEarned = student.badges.length;
+  const enrolledCount = activities.filter(a => a.enrolledStudents.includes(student.id)).length;
 
-  const handleJoin = (activityId: string, title: string) => {
-    setJoinedIds(prev =>
-      prev.includes(activityId) ? prev.filter(id => id !== activityId) : [...prev, activityId]
-    );
+  React.useEffect(() => {
+    let mounted = true;
+
+    Promise.allSettled([
+      api.activities.list(),
+      api.player.stats(),
+    ]).then(([activitiesResult, statsResult]) => {
+      if (!mounted) return;
+
+      let nextStudent = mockStudent;
+      if (statsResult.status === 'fulfilled') {
+        nextStudent = mapStudentStatsToStudent(mockStudent, statsResult.value.stats);
+        setStudent(nextStudent);
+      }
+
+      if (activitiesResult.status === 'fulfilled') {
+        setActivities(activitiesResult.value.activities.map(mapActivity));
+        setLeaderboard(buildLeaderboard(
+          activitiesResult.value.activities,
+          user?.nameThai || user?.name || nextStudent.nameThai,
+          nextStudent.gamificationPoints,
+        ));
+      }
+    }).catch((error) => {
+      console.warn('Unable to load activities from API', error);
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, [user?.name, user?.nameThai]);
+
+  const refreshActivities = React.useCallback(async () => {
+    const response = await api.activities.list();
+    setActivities(response.activities.map(mapActivity));
+    setLeaderboard(buildLeaderboard(
+      response.activities,
+      user?.nameThai || user?.name || student.nameThai,
+      student.gamificationPoints,
+    ));
+  }, [student.gamificationPoints, student.nameThai, user?.name, user?.nameThai]);
+
+  const handleEnroll = async (activityId: string) => {
+    try {
+      await api.activities.enroll(activityId);
+      await refreshActivities();
+      toast.success(t.activitiesPage.joinActivity);
+    } catch (error) {
+      console.warn('Unable to enroll activity', error);
+      toast.error(error instanceof ApiError ? error.message : t.activitiesPage.details);
+    }
   };
 
-  // Fake leaderboard data
-  const leaderboard = [
-    { rank: 1, name: 'Gunna T.', points: 1250, badge: '🏆' },
-    { rank: 2, name: 'Sarah W.', points: 1180, badge: '🥈' },
-    { rank: 3, name: 'Mike R.', points: 1050, badge: '🥉' },
-    { rank: 4, name: 'Jenny K.', points: 980, badge: '' },
-    { rank: 5, name: 'Tom H.', points: 920, badge: '' },
-  ];
 
   if (user?.role !== 'student') {
     return (
@@ -241,16 +338,16 @@ export default function Activities() {
         <StatCard
           icon={Star}
           label={t.activitiesPage.badgesEarned}
-          value="8"
+          value={badgesEarned}
           gradient="bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600"
           subtext={<span className="text-blue-100 text-xs">{t.activitiesPage.unlockNext}</span>}
         />
         <StatCard
           icon={Target}
           label={t.activitiesPage.semesterGoal}
-          value="4/5"
+          value={`${Math.min(enrolledCount, 5)}/5`}
           gradient="bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500"
-          subtext={<span className="text-purple-100 text-xs text-right block">80% {t.activitiesPage.achieved}</span>}
+          subtext={<span className="text-purple-100 text-xs text-right block">{Math.min(enrolledCount * 20, 100)}% {t.activitiesPage.achieved}</span>}
         />
       </div>
 
@@ -292,6 +389,7 @@ export default function Activities() {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 20 }}
                       transition={{ delay: index * 0.1 }}
+                      onClick={() => setSelectedActivity(activity)}
                       className="group bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-[2rem] p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden dark:bg-slate-900/50"
                     >
                       <div className="flex flex-col md:flex-row gap-6">
@@ -329,20 +427,23 @@ export default function Activities() {
                           </div>
                           <div className="mt-6 flex gap-3">
                             <Button
-                              className={`rounded-xl h-11 px-8 font-bold shadow-xl transition-all ${
-                                joinedIds.includes(activity.id)
-                                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20'
-                                  : 'bg-slate-900 hover:bg-slate-800 text-white shadow-slate-900/20 border border-slate-700'
-                              }`}
-                              onClick={() => handleJoin(activity.id, activity.title)}
+                              className="rounded-xl h-11 bg-slate-900 hover:bg-slate-800 text-white shadow-xl shadow-slate-900/20 px-8 font-bold border border-slate-700"
+                              disabled={activity.enrolledStudents.includes(student.id)}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                void handleEnroll(activity.id);
+                              }}
                             >
-                              {joinedIds.includes(activity.id) ? (
-                                <><CheckCircle className="w-4 h-4 mr-2" /> ลงทะเบียนแล้ว</>
-                              ) : (
-                                t.activitiesPage.joinActivity
-                              )}
+                              {activity.enrolledStudents.includes(student.id) ? 'ลงทะเบียนแล้ว' : t.activitiesPage.joinActivity}
                             </Button>
-                            <Button variant="ghost" className="rounded-xl h-11 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 font-medium px-6 dark:bg-slate-800">
+                            <Button
+                              variant="ghost"
+                              className="rounded-xl h-11 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 font-medium px-6 dark:bg-slate-800"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                setSelectedActivity(activity);
+                              }}
+                            >
                               {t.activitiesPage.details}
                             </Button>
                           </div>
@@ -350,69 +451,47 @@ export default function Activities() {
                       </div>
                     </motion.div>
                   ))}
+                  {upcomingActivities.length === 0 && (
+                    <div className="rounded-[2rem] border border-dashed border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-900/60 p-10 text-center">
+                      <Calendar className="w-10 h-10 mx-auto text-slate-400 mb-3" />
+                      <h3 className="font-bold text-slate-800 dark:text-slate-100">ยังไม่มีกิจกรรมที่เปิดรับ</h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">เมื่อ staff หรือ lecturer เพิ่มกิจกรรม ข้อมูลจะแสดงจาก backend ที่นี่</p>
+                    </div>
+                  )}
                 </TabsContent>
               )}
 
               {activeTab === 'history' && (
                 <TabsContent value="history" className="mt-0" key="history" forceMount>
-                  {historyActivities.length === 0 ? (
-                    <div className="bg-white/40 backdrop-blur-xl rounded-[2rem] p-12 text-center text-slate-400 border border-dashed border-slate-300 dark:bg-slate-900/50">
-                      <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Hourglass className="w-10 h-10 opacity-30" />
+                  <div className="space-y-4">
+                    {historyActivities.map((activity) => (
+                      <button
+                        key={activity.id}
+                        type="button"
+                        onClick={() => setSelectedActivity(activity)}
+                        className="w-full text-left bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-5 border border-white/60 dark:border-slate-800/60 shadow-sm hover:shadow-lg transition-all"
+                      >
+                        <div className="flex items-center justify-between gap-4">
+                          <div>
+                            <h3 className="font-bold text-slate-900 dark:text-white">{isTH ? activity.titleThai : activity.title}</h3>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{new Date(activity.startDate).toLocaleDateString('th-TH')} • {activity.activityHours} ชม.</p>
+                          </div>
+                          <Badge variant={activity.attendedStudents.includes(student.id) ? 'default' : 'secondary'}>
+                            {activity.attendedStudents.includes(student.id) ? 'completed' : 'registered'}
+                          </Badge>
+                        </div>
+                      </button>
+                    ))}
+                    {historyActivities.length === 0 && (
+                      <div className="bg-white/40 backdrop-blur-xl rounded-[2rem] p-12 text-center text-slate-400 border border-dashed border-slate-300 dark:bg-slate-900/50">
+                        <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-200 dark:border-slate-700">
+                          <Hourglass className="w-10 h-10 opacity-30" />
+                        </div>
+                        <p className="text-lg font-medium">{t.activitiesPage.noHistory}</p>
+                        <p className="text-sm">{t.activitiesPage.startCollecting}</p>
                       </div>
-                      <p className="text-lg font-medium">{t.activitiesPage.noHistory}</p>
-                      <p className="text-sm">{t.activitiesPage.startCollecting}</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {historyActivities.map((activity, index) => {
-                        const attended = activity.attendedStudents.includes(mockStudent.id);
-                        return (
-                          <motion.div
-                            key={activity.id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.08 }}
-                            className="group bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-[2rem] p-5 shadow-sm hover:shadow-xl transition-all dark:bg-slate-900/50"
-                          >
-                            <div className="flex items-start gap-4">
-                              <div className={`flex-shrink-0 w-14 h-14 rounded-2xl flex flex-col items-center justify-center shadow-md ${
-                                attended ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
-                              }`}>
-                                {attended ? <CheckCircle className="w-6 h-6" /> : <Hourglass className="w-6 h-6" />}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex flex-wrap items-center gap-2 mb-1">
-                                  <h3 className="font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 transition-colors">
-                                    {isTH ? activity.titleThai : activity.title}
-                                  </h3>
-                                  <Badge className={`text-[10px] px-2 py-0.5 border-0 ${
-                                    attended ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-slate-100 text-slate-500 dark:bg-slate-800'
-                                  }`}>
-                                    {attended ? (isTH ? 'เข้าร่วมแล้ว' : 'Attended') : (isTH ? 'ไม่ได้เข้าร่วม' : 'Missed')}
-                                  </Badge>
-                                </div>
-                                <div className="flex flex-wrap gap-3 text-sm text-slate-500 dark:text-slate-400">
-                                  <span className="flex items-center gap-1">
-                                    <Calendar className="w-3.5 h-3.5" />
-                                    {new Date(activity.startDate).toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' })}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <Clock className="w-3.5 h-3.5" />
-                                    {activity.activityHours} ชม.
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="flex-shrink-0 text-right">
-                                <div className="text-lg font-bold text-amber-500">+{activity.gamificationPoints}</div>
-                                <div className="text-xs text-slate-400">XP</div>
-                              </div>
-                            </div>
-                          </motion.div>
-                        );
-                      })}
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </TabsContent>
               )}
 
@@ -424,7 +503,7 @@ export default function Activities() {
                     transition={{ delay: 0.1 }}
                     className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-[2rem] p-4 sm:p-6 shadow-sm dark:bg-slate-900/50"
                   >
-                    <CalendarView activities={mockActivities} isTH={isTH} />
+                    <CalendarView activities={activities} isTH={isTH} />
                   </motion.div>
                 </TabsContent>
               )}
@@ -478,7 +557,7 @@ export default function Activities() {
                   <Sparkles className="w-5 h-5 text-purple-300" />
                   {t.activitiesPage.badgesCollection}
                 </h3>
-                <div className="text-[10px] text-slate-400 font-bold tracking-widest uppercase">8 Unlocked</div>
+                <div className="text-[10px] text-slate-400 font-bold tracking-widest uppercase">{badgesEarned} Unlocked</div>
               </div>
 
               <div className="grid grid-cols-4 gap-3">
@@ -510,6 +589,64 @@ export default function Activities() {
           </div>
         </motion.div>
       </div>
+      <Dialog open={Boolean(selectedActivity)} onOpenChange={(open) => !open && setSelectedActivity(null)}>
+        <DialogContent className="sm:max-w-2xl rounded-[2rem]">
+          {selectedActivity && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-2xl">{isTH ? selectedActivity.titleThai : selectedActivity.title}</DialogTitle>
+                <DialogDescription>{selectedActivity.description}</DialogDescription>
+              </DialogHeader>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div className="rounded-2xl bg-slate-50 dark:bg-slate-900 p-4">
+                  <div className="text-slate-400 font-semibold mb-1">Date</div>
+                  <div className="font-bold text-slate-800 dark:text-slate-100">{new Date(selectedActivity.startDate).toLocaleString('th-TH')}</div>
+                </div>
+                <div className="rounded-2xl bg-slate-50 dark:bg-slate-900 p-4">
+                  <div className="text-slate-400 font-semibold mb-1">Location</div>
+                  <div className="font-bold text-slate-800 dark:text-slate-100">{selectedActivity.location}</div>
+                </div>
+                <div className="rounded-2xl bg-slate-50 dark:bg-slate-900 p-4">
+                  <div className="text-slate-400 font-semibold mb-1">Reward</div>
+                  <div className="font-bold text-slate-800 dark:text-slate-100">{selectedActivity.gamificationPoints} XP / {selectedActivity.activityHours} ชม.</div>
+                </div>
+                <div className="rounded-2xl bg-slate-50 dark:bg-slate-900 p-4">
+                  <div className="text-slate-400 font-semibold mb-1">Participants</div>
+                  <div className="font-bold text-slate-800 dark:text-slate-100">{selectedActivity.enrolledStudents.length}/{selectedActivity.maxParticipants || '-'}</div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                {selectedActivity.enrolledStudents.includes(student.id) && selectedActivity.checkInEnabled && (
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      try {
+                        await api.activities.checkIn(selectedActivity.id);
+                        await refreshActivities();
+                        toast.success('เช็คอินสำเร็จ');
+                        setSelectedActivity(null);
+                      } catch (error) {
+                        toast.error(error instanceof Error ? error.message : 'เช็คอินไม่สำเร็จ');
+                      }
+                    }}
+                  >
+                    Check in
+                  </Button>
+                )}
+                <Button
+                  disabled={selectedActivity.enrolledStudents.includes(student.id)}
+                  onClick={async () => {
+                    await handleEnroll(selectedActivity.id);
+                    setSelectedActivity(null);
+                  }}
+                >
+                  {selectedActivity.enrolledStudents.includes(student.id) ? 'ลงทะเบียนแล้ว' : t.activitiesPage.joinActivity}
+                </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }

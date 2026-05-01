@@ -31,8 +31,33 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { mockNotifications } from '@/lib/mockData';
-import type { UserRole } from '@/types';
+import { api } from '@/lib/api';
+import { asArray, asBoolean, asDate, asRecord, asString } from '@/lib/live-data';
+import type { Notification, UserRole } from '@/types';
+
+type NotificationRow = Notification;
+
+const mapNotification = (value: unknown, index: number): NotificationRow => {
+  const source = asRecord(value);
+  return {
+    id: asString(source.id, `notification-${index}`),
+    recipientId: asString(source.userId, asString(source.recipientId)),
+    recipientRole: asString(source.recipientRole, 'student') as NotificationRow['recipientRole'],
+    title: asString(source.title, '-'),
+    titleThai: asString(source.titleThai, asString(source.title, '-')),
+    message: asString(source.message, '-'),
+    messageThai: asString(source.messageThai, asString(source.message, '-')),
+    type: asString(source.type, 'info') as NotificationRow['type'],
+    priority: asString(source.priority, 'medium') as NotificationRow['priority'],
+    channels: (asArray(source.channels).length ? asArray(source.channels) : ['in-app']) as NotificationRow['channels'],
+    isRead: asBoolean(source.isRead, false),
+    readAt: source.readAt ? asDate(source.readAt) : undefined,
+    actionUrl: asString(source.actionUrl),
+    actionLabel: asString(source.actionLabel),
+    createdAt: asDate(source.createdAt),
+    expiresAt: source.expiresAt ? asDate(source.expiresAt) : undefined,
+  };
+};
 
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -46,6 +71,7 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
   const location = useLocation();
   const [showNotifications, setShowNotifications] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationRow[]>([]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -55,7 +81,69 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const unreadCount = mockNotifications.filter(n => !n.isRead).length;
+  useEffect(() => {
+    if (!user) return;
+    let mounted = true;
+
+    api.notifications
+      .list()
+      .then((response) => {
+        if (!mounted) return;
+        setNotifications(response.notifications.map(mapNotification));
+      })
+      .catch((error) => {
+        console.warn('Unable to load notifications from API', error);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [user]);
+
+  useEffect(() => {
+    const onRead = (event: Event) => {
+      const detail = (event as CustomEvent<{ id?: string; readAt?: Date }>).detail;
+      if (!detail?.id) return;
+      setNotifications(current => current.map(item => item.id === detail.id ? { ...item, isRead: true, readAt: detail.readAt ?? new Date() } : item));
+    };
+    const onReadAll = (event: Event) => {
+      const detail = (event as CustomEvent<{ readAt?: Date }>).detail;
+      const readAt = detail?.readAt ?? new Date();
+      setNotifications(current => current.map(item => ({ ...item, isRead: true, readAt })));
+    };
+
+    window.addEventListener('showpro:notification-read', onRead);
+    window.addEventListener('showpro:notification-read-all', onReadAll);
+    return () => {
+      window.removeEventListener('showpro:notification-read', onRead);
+      window.removeEventListener('showpro:notification-read-all', onReadAll);
+    };
+  }, []);
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
+  const handleNotificationClick = (notification: NotificationRow) => {
+    if (!notification.isRead) {
+      setNotifications(current => current.map(item => item.id === notification.id ? { ...item, isRead: true, readAt: new Date() } : item));
+      api.notifications.markRead(notification.id).catch((error) => {
+        console.warn('Unable to mark notification as read', error);
+      });
+      window.dispatchEvent(new CustomEvent('showpro:notification-read', { detail: { id: notification.id, readAt: new Date() } }));
+    }
+    if (notification.actionUrl) {
+      navigate(notification.actionUrl);
+      setShowNotifications(false);
+    }
+  };
+
+  const handleMarkAllNotifications = () => {
+    const readAt = new Date();
+    setNotifications(current => current.map(item => ({ ...item, isRead: true, readAt })));
+    api.notifications.markAllRead().catch((error) => {
+      console.warn('Unable to mark all notifications as read', error);
+    });
+    window.dispatchEvent(new CustomEvent('showpro:notification-read-all', { detail: { readAt } }));
+  };
 
   const handleLogout = () => {
     logout();
@@ -73,9 +161,9 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
   return (
     <header className={`sticky top-0 z-40 w-full transition-all duration-500 ${
       scrolled 
-        ? 'py-2 bg-white/70 backdrop-blur-2xl border-b border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.03)]' 
+        ? 'py-2 bg-white/70 dark:bg-slate-900/80 backdrop-blur-2xl border-b border-white/20 dark:border-slate-800 shadow-[0_4px_30px_rgba(0,0,0,0.03)]' 
         : 'py-0 bg-transparent border-b border-transparent'
-    } dark:bg-slate-900/50`}>
+    }`}>
       <div className={`mx-auto px-4 md:px-8 transition-all duration-500 ${scrolled ? 'h-16' : 'h-24'} flex items-center justify-between gap-4`}>
         
         <div className="flex items-center gap-4 md:gap-6 shrink-0">
@@ -91,8 +179,8 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
 
           {/* Dynamic Breadcrumb / Title with macOS feel */}
           <div className="hidden md:flex items-center gap-3">
-             <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100/50 flex items-center justify-center shadow-inner">
-               <Sparkles className="w-4 h-4 text-blue-600 dark:text-slate-300" />
+             <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-900 border border-blue-100/50 dark:border-slate-700 flex items-center justify-center shadow-inner">
+               <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
              </div>
              <div className="flex flex-col justify-center">
                <div className="flex items-center gap-2">
@@ -106,7 +194,7 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
 
         {/* Global Search Bar (Mac Spotlight Style) */}
         <div className="hidden lg:flex flex-1 max-w-[400px] justify-center ml-auto mr-4 md:mr-8 transition-all">
-          <div className={`w-full flex items-center gap-3 px-4 rounded-full border bg-white/40 backdrop-blur-xl transition-all duration-300 ${scrolled ? 'h-10 border-slate-200/60 shadow-sm' : 'h-12 border-slate-200/40 shadow-[inset_0_2px_10px_rgba(255,255,255,1),0_2px_15px_rgba(0,0,0,0.02)]'} dark:bg-slate-900/50`}>
+          <div className={`w-full flex items-center gap-3 px-4 rounded-full border bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl transition-all duration-300 ${scrolled ? 'h-10 border-slate-200/60 dark:border-slate-700 shadow-sm' : 'h-12 border-slate-200/40 dark:border-slate-800 shadow-[inset_0_2px_10px_rgba(255,255,255,1),0_2px_15px_rgba(0,0,0,0.02)] dark:shadow-none'}`}>
              <Search className="w-4 h-4 text-slate-400 shrink-0" />
              <input 
                type="text" 
@@ -127,7 +215,7 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
             variant="ghost"
             size="sm"
             onClick={toggleLanguage}
-            className="h-10 px-4 rounded-2xl bg-white/30 hover:bg-white/60 border border-white/40 shadow-sm backdrop-blur-md text-slate-600 dark:text-slate-400 gap-2 font-bold transition-all dark:bg-slate-900/50"
+            className="h-10 px-4 rounded-2xl bg-white/30 dark:bg-slate-800/30 hover:bg-white/60 dark:hover:bg-slate-800/60 border border-white/40 dark:border-slate-700 shadow-sm backdrop-blur-md text-slate-600 dark:text-slate-400 gap-2 font-bold transition-all"
           >
             <Globe className="h-4 w-4" />
             <span className="text-xs uppercase tracking-wider">{language === 'th' ? 'EN' : 'TH'}</span>
@@ -136,7 +224,7 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
           {/* Premium Notifications */}
           <DropdownMenu open={showNotifications} onOpenChange={setShowNotifications}>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative h-10 w-10 rounded-2xl bg-white/30 hover:bg-white/60 border border-white/40 shadow-sm backdrop-blur-md text-slate-600 dark:text-slate-400 transition-all data-[state=open]:bg-white/80 dark:bg-slate-900/50">
+              <Button variant="ghost" size="icon" className="relative h-10 w-10 rounded-2xl bg-white/30 dark:bg-slate-800/30 hover:bg-white/60 dark:hover:bg-slate-800/60 border border-white/40 dark:border-slate-700 shadow-sm backdrop-blur-md text-slate-600 dark:text-slate-400 transition-all data-[state=open]:bg-white/80 dark:data-[state=open]:bg-slate-800/80">
                 <Bell className="h-5 w-5" />
                 {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 flex h-3 w-3">
@@ -146,31 +234,48 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
                 )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[340px] p-0 rounded-3xl shadow-2xl border-white/60 dark:border-slate-800/60 bg-white/80 backdrop-blur-2xl overflow-hidden mt-2 dark:bg-slate-900/50">
+            <DropdownMenuContent align="end" className="w-[340px] p-0 rounded-3xl shadow-2xl border-white/60 dark:border-slate-800/60 bg-white/80 dark:bg-slate-900/90 backdrop-blur-2xl overflow-hidden mt-2">
               <div className="px-5 py-4 border-b border-slate-100/50 bg-gradient-to-b from-slate-50/50 to-transparent dark:border-slate-700">
                 <div className="flex items-center justify-between">
                   <h3 className="font-bold text-slate-900 dark:text-white tracking-tight">{t.header?.notifications || 'Notifications'}</h3>
-                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-none font-bold dark:text-slate-300 dark:bg-slate-800">{unreadCount} New</Badge>
+                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-none font-bold dark:text-slate-300 dark:bg-slate-800">{unreadCount} {language === 'th' ? 'ใหม่' : 'New'}</Badge>
                 </div>
+                {unreadCount > 0 && (
+                  <button type="button" onClick={handleMarkAllNotifications} className="mt-2 text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400">
+                    {language === 'th' ? 'ทำเครื่องหมายว่าอ่านทั้งหมด' : 'Mark all as read'}
+                  </button>
+                )}
               </div>
               <div className="max-h-[320px] overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-slate-200">
-                {mockNotifications.map((notification) => (
-                  <DropdownMenuItem key={notification.id} className="flex flex-col items-start p-3.5 cursor-pointer rounded-2xl focus:bg-slate-50/80 mb-1 transition-colors dark:bg-slate-900/50">
+                {notifications.map((notification) => (
+                  <DropdownMenuItem key={notification.id} onClick={() => handleNotificationClick(notification)} className="flex flex-col items-start p-3.5 cursor-pointer rounded-2xl focus:bg-slate-50/80 mb-1 transition-colors dark:bg-slate-900/50">
                     <div className="flex items-start gap-3 w-full">
                       <div className={`mt-1 shrink-0 w-2 h-2 rounded-full ${notification.isRead ? 'bg-slate-200' : 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]'}`} />
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className={`font-bold text-sm leading-none ${notification.isRead ? 'text-slate-600' : 'text-slate-900'} dark:text-slate-200`}>{notification.title}</span>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">2m ago</span>
+                          <span className={`font-bold text-sm leading-none ${notification.isRead ? 'text-slate-600' : 'text-slate-900'} dark:text-slate-200`}>{language === 'th' ? notification.titleThai : notification.title}</span>
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{notification.createdAt.toLocaleDateString(language === 'th' ? 'th-TH' : 'en-US')}</span>
                         </div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 pr-4">{notification.message}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 pr-4">{language === 'th' ? notification.messageThai : notification.message}</p>
                       </div>
                     </div>
                   </DropdownMenuItem>
                 ))}
+                {notifications.length === 0 && (
+                  <div className="p-6 text-center text-sm text-slate-500 dark:text-slate-400">
+                    {language === 'th' ? 'ยังไม่มีแจ้งเตือน' : 'No notifications yet'}
+                  </div>
+                )}
               </div>
               <div className="p-3 border-t border-slate-100/50 bg-slate-50/30 dark:border-slate-700 dark:bg-slate-900/50">
-                <Button variant="ghost" className="w-full text-blue-600 font-bold hover:bg-white hover:text-blue-700 rounded-xl h-10 shadow-sm border border-slate-200/50 transition-all dark:text-slate-300 dark:border-slate-700 dark:bg-slate-900/50">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setShowNotifications(false);
+                    navigate('/notifications');
+                  }}
+                  className="w-full text-blue-600 font-bold hover:bg-white hover:text-blue-700 rounded-xl h-10 shadow-sm border border-slate-200/50 transition-all dark:text-slate-300 dark:border-slate-700 dark:bg-slate-900/50"
+                >
                   {t.common?.viewAll || 'View All Activity'}
                 </Button>
               </div>
@@ -183,7 +288,7 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
               <DropdownMenuTrigger asChild>
                 <div className="relative group cursor-pointer">
                   <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <Button variant="ghost" className="relative flex items-center gap-3 pl-1.5 pr-3 h-11 rounded-full bg-white/40 hover:bg-white/80 border border-white/60 dark:border-slate-800/60 shadow-sm backdrop-blur-md transition-all dark:bg-slate-900/50">
+                  <Button variant="ghost" className="relative flex items-center gap-3 pl-1.5 pr-3 h-11 rounded-full bg-white/40 dark:bg-slate-800/40 hover:bg-white/80 dark:hover:bg-slate-800/80 border border-white/60 dark:border-slate-700 shadow-sm backdrop-blur-md transition-all">
                     <Avatar className="h-8 w-8 border-2 border-white shadow-sm ring-1 ring-slate-100">
                       <AvatarImage src={user.avatar} />
                       <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-xs font-bold">
@@ -197,7 +302,7 @@ export function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
                   </Button>
                 </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-72 p-2 rounded-3xl shadow-2xl border-white/60 dark:border-slate-800/60 bg-white/90 backdrop-blur-2xl mt-2 dark:bg-slate-900/50">
+              <DropdownMenuContent align="end" className="w-72 p-2 rounded-3xl shadow-2xl border-white/60 dark:border-slate-800/60 bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl mt-2">
                 <div className="p-4 bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-2xl mb-2 border border-slate-200/50 dark:border-slate-700">
                    <div className="flex items-center gap-3">
                      <Avatar className="h-12 w-12 border-2 border-white shadow-sm ring-1 ring-slate-200">

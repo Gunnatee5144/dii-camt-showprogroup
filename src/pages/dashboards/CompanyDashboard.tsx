@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Briefcase, Users, FileText, Building, Send, Sparkles, BrainCircuit, Bookmark, PlusCircle, CheckCircle2, TrendingUp, BellRing, Target, Trophy, Flame } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,23 +10,52 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { mockCompany, mockJobPostings, mockStudents } from '@/lib/mockData';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useToast } from '@/hooks/use-toast';
-
-const mockRequirements = [
-  { id: 'req-1', title: 'Frontend Developer (React/Vue)', skills: ['React', 'TypeScript', 'Tailwind CSS'], type: 'Internship', status: 'Active', matchCount: 12 },
-  { id: 'req-2', title: 'Data Scientist for ML Project', skills: ['Python', 'Machine Learning', 'SQL'], type: 'Project-based', status: 'Active', matchCount: 5 },
-];
-
-const mockFollowedStudents = mockStudents.slice(0, 2).map(s => ({ ...s, followDate: '2026-03-28', thresholdMet: true }));
-const mockAiMatchedStudents = mockStudents.slice(1, 4).map((s, idx) => ({ ...s, matchScore: [95, 88, 82][idx], matchedSkills: ['React', 'TypeScript', 'Node.js'].slice(0, idx + 1), interested: idx === 0, exclusiveAccess: idx === 0 }));
+import { useAuth } from '@/contexts/AuthContext';
+import { api } from '@/lib/api';
+import { asArray, asDate, asNumber, asRecord, asString } from '@/lib/live-data';
+import { mapCompany, mapJob, mapStudent } from '@/lib/live-mappers';
+import { toast } from 'sonner';
+import type { Company, JobPosting, Student } from '@/types';
 
 const mockNotifications = [
   { id: 1, type: 'interest', message: 'พีรดนย์ ศรีประเสริฐ (Year 3) has expressed interest in your Data Scientist requirement.', time: '2 hours ago', read: false },
   { id: 2, type: 'threshold', message: 'THRESHOLD MET: สมใจ รักดี (Followed) has just reached the required 3.5 GPA criteria.', time: '5 hours ago', read: false },
   { id: 3, type: 'competition', message: 'COMPETITION ALERT: Another company is viewing your top matched talent. Send an early offer now!', time: '1 day ago', read: true }
 ];
+
+type RequirementRow = {
+  id: string;
+  title: string;
+  skills: string[];
+  type: string;
+  status: string;
+  matchCount: number;
+};
+
+type RecruitingNotification = {
+  id: string;
+  type: string;
+  message: string;
+  time: string;
+  read: boolean;
+  actionUrl?: string;
+};
+
+type MatchedStudent = Student & {
+  matchScore: number;
+  matchedSkills: string[];
+  interested: boolean;
+  exclusiveAccess: boolean;
+};
+type FollowedStudent = MatchedStudent & {
+  followDate: string;
+  thresholdMet: boolean;
+};
+
+const makeFallbackMatches = (): MatchedStudent[] => [];
+
+const makeFallbackFollowed = (): FollowedStudent[] => [];
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -41,11 +70,266 @@ const itemVariants = {
 export default function CompanyDashboard() {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
-  const { toast } = useToast();
-  const company = mockCompany;
-  const companyJobPostings = mockJobPostings.filter(j => j.companyId === company.id);
+  const { user } = useAuth();
+  const [company, setCompany] = useState<Company | null>(null);
+  const [companyJobPostings, setCompanyJobPostings] = useState<JobPosting[]>([]);
+  const [accessibleStudents, setAccessibleStudents] = useState<Student[]>([]);
+  const [requirements, setRequirements] = useState<RequirementRow[]>([]);
+  const [notifications, setNotifications] = useState<RecruitingNotification[]>([]);
+  const [followedStudents, setFollowedStudents] = useState<FollowedStudent[]>(makeFallbackFollowed);
+  const [aiMatchedStudents, setAiMatchedStudents] = useState<MatchedStudent[]>(makeFallbackMatches);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRequirementOpen, setIsRequirementOpen] = useState(false);
+  const [isSubmittingRequirement, setIsSubmittingRequirement] = useState(false);
+  const [requirementForm, setRequirementForm] = useState({ title: '', skills: '', description: '' });
   const totalApplications = companyJobPostings.reduce((sum, job) => sum + job.applicants.length, 0);
-  const accessibleStudents = mockStudents.filter(s => company.studentViewConsent.includes(s.id));
+  const companyName = language === 'th'
+    ? (company?.companyNameThai || company?.companyName || user?.name || '')
+    : (company?.companyName || company?.companyNameThai || user?.name || '');
+  const copy = language === 'th'
+    ? {
+        submitRequirement: 'ส่ง Requirement ใหม่',
+        submitRequirementTitle: 'ส่ง Requirement ใหม่',
+        submitRequirementDesc: 'ระบุบทบาท ทักษะ และรายละเอียดงานเพื่อให้ระบบช่วยจับคู่กับนักศึกษา',
+        role: 'โปรเจกต์/ตำแหน่ง',
+        skills: 'ทักษะหลัก',
+        details: 'รายละเอียด',
+        submitToAi: 'ส่งให้ AI Matching',
+        liveAlerts: 'แจ้งเตือนการสรรหา',
+        new: 'ใหม่',
+        viewDetails: 'ดูรายละเอียด',
+        requirements: 'Requirements และ AI Matches',
+        followed: 'Talent ที่ติดตาม',
+        activeRequirements: 'Requirements ที่เปิดอยู่',
+        total: 'ทั้งหมด',
+        postedCriteria: 'เงื่อนไขที่ประกาศไว้สำหรับจับคู่นักศึกษา',
+        matches: 'Matches',
+        aiTalentMatching: 'AI Talent Matching',
+        bestMatches: 'นักศึกษาที่เหมาะกับ Requirement ของคุณที่สุด',
+        exclusiveAccess: 'สิทธิ์เข้าถึงพิเศษ',
+        fastTrackOffer: 'ส่งข้อเสนอเร็ว',
+        follow: 'ติดตาม',
+        viewProfile: 'ดูโปรไฟล์',
+        trackedProgress: 'ติดตามความคืบหน้าของนักศึกษาที่สนใจ',
+        followedDate: 'ติดตามเมื่อ',
+        currentGpa: 'GPA ปัจจุบัน',
+        profileOverview: 'ดูโปรไฟล์',
+        noJobs: 'ยังไม่มีประกาศงานจาก API',
+        noStudents: 'ยังไม่มีนักศึกษาที่เปิดสิทธิ์ให้ดู',
+        noRequirements: 'ยังไม่มี Requirement',
+        noMatches: 'ยังไม่มีผลจับคู่จาก AI',
+        noFollowed: 'ยังไม่มี Talent ที่ติดตาม',
+        noAlerts: 'ยังไม่มีแจ้งเตือนการสรรหา',
+      }
+    : {
+        submitRequirement: 'Submit Requirement',
+        submitRequirementTitle: 'Submit New Requirement',
+        submitRequirementDesc: 'Post a role, skills, and details so AI can match you with students.',
+        role: 'Project/Role',
+        skills: 'Key Skills',
+        details: 'Details',
+        submitToAi: 'Submit to AI Match',
+        liveAlerts: 'Live Recruiting Alerts',
+        new: 'New',
+        viewDetails: 'View Details',
+        requirements: 'Requirements & AI Matches',
+        followed: 'Followed Talents',
+        activeRequirements: 'Active Requirements',
+        total: 'Total',
+        postedCriteria: 'Your posted criteria for talent matching.',
+        matches: 'Matches',
+        aiTalentMatching: 'AI Talent Matching',
+        bestMatches: 'Best matching students based on your active requirements.',
+        exclusiveAccess: 'Exclusive Access',
+        fastTrackOffer: 'Fast-track Offer',
+        follow: 'Follow',
+        viewProfile: 'View Profile',
+        trackedProgress: 'Track the long-term progress of promising students.',
+        followedDate: 'Followed',
+        currentGpa: 'Current GPA',
+        profileOverview: 'Profile Overview',
+        noJobs: 'No job postings from API yet.',
+        noStudents: 'No students have granted access yet.',
+        noRequirements: 'No requirements yet.',
+        noMatches: 'No AI matches yet.',
+        noFollowed: 'No followed talents yet.',
+        noAlerts: 'No recruiting alerts yet.',
+      };
+
+  React.useEffect(() => {
+    let isMounted = true;
+    setIsLoading(true);
+
+    Promise.allSettled([api.auth.me(), api.jobs.list(), api.talent.search(), api.notifications.list(), api.students.profiles()])
+      .then(([profileResponse, jobsResponse, talentsResponse, notificationsResponse, studentProfilesResponse]) => {
+        if (!isMounted) return;
+
+        if (profileResponse.status === 'fulfilled') {
+          const profile = asRecord(profileResponse.value.user.companyProfile);
+          const profileUser = asRecord(profileResponse.value.user);
+          setCompany(mapCompany({
+            ...profile,
+            companyName: asString(profile.companyName, asString(profileUser.name, user?.name || '-')),
+            companyNameThai: asString(profile.companyNameThai, asString(profileUser.nameThai, asString(profileUser.name, user?.name || '-'))),
+            industry: asString(profile.industry, '-'),
+            size: asString(profile.size, 'medium'),
+            internshipSlots: asNumber(profile.internshipSlots, 0),
+            currentInterns: asNumber(profile.currentInterns, 0),
+            studentViewConsent: asArray(profile.studentViewConsent),
+            user: profileResponse.value.user,
+          }));
+        }
+
+        if (jobsResponse.status === 'fulfilled') {
+          const mappedJobs = jobsResponse.value.jobs.map(mapJob);
+          setCompanyJobPostings(mappedJobs);
+
+          const mappedRequirements = mappedJobs.map((job) => {
+            const skills = [...job.preferredSkills, ...job.requirements].filter(Boolean);
+
+            return {
+              id: job.id,
+              title: job.title,
+              skills: skills.slice(0, 5),
+              type: job.type,
+              status: job.status,
+              matchCount: job.applicants.length,
+            };
+          });
+
+          setRequirements(mappedRequirements);
+        }
+
+        if (studentProfilesResponse.status === 'fulfilled') {
+          const visibleStudents = studentProfilesResponse.value.profiles.map(mapStudent);
+          setAccessibleStudents(visibleStudents);
+        }
+
+        if (talentsResponse.status === 'fulfilled') {
+          const mappedTalents = talentsResponse.value.talents.map((item, index) => {
+            const talent = asRecord(item);
+            const mappedStudent = mapStudent(item, index);
+            const skills = asArray<string>(talent.matchedSkills).length ? asArray<string>(talent.matchedSkills) : asArray<string>(talent.skills);
+
+            return {
+              ...mappedStudent,
+              id: asString(talent.id, mappedStudent.id),
+              name: asString(talent.name, mappedStudent.name),
+              nameThai: asString(talent.nameThai, asString(talent.name, mappedStudent.nameThai)),
+              studentId: asString(talent.studentId, mappedStudent.studentId),
+              year: asNumber(talent.year, mappedStudent.year),
+              gpa: asNumber(talent.gpa, asNumber(talent.gpax, mappedStudent.gpa)),
+              gpax: asNumber(talent.gpax, mappedStudent.gpax),
+              major: asString(talent.major, mappedStudent.major),
+              matchScore: asNumber(talent.matchScore, 0),
+              matchedSkills: skills.slice(0, 5),
+              interested: Boolean(talent.interested),
+              exclusiveAccess: index === 0,
+            };
+          });
+
+          setAiMatchedStudents(mappedTalents);
+          setFollowedStudents(mappedTalents.slice(0, 2).map((student) => ({
+            ...student,
+            followDate: new Date().toISOString().slice(0, 10),
+            thresholdMet: student.gpa >= 3.5,
+          })));
+        }
+
+        if (notificationsResponse.status === 'fulfilled') {
+          const mappedNotifications = notificationsResponse.value.notifications.slice(0, 3).map((item) => {
+            const source = asRecord(item);
+
+            return {
+              id: asString(source.id),
+              type: asString(source.type, 'info'),
+              message: language === 'th'
+                ? asString(source.messageThai, asString(source.message, '-'))
+                : asString(source.message, asString(source.messageThai, '-')),
+              time: asDate(source.createdAt).toLocaleString(language === 'th' ? 'th-TH' : 'en-US'),
+              read: Boolean(source.isRead),
+              actionUrl: asString(source.actionUrl),
+            };
+          });
+
+          setNotifications(mappedNotifications);
+        }
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [language, user?.id]);
+
+  const handleSubmitRequirement = async () => {
+    const skills = requirementForm.skills.split(',').map(skill => skill.trim()).filter(Boolean);
+    if (!requirementForm.title.trim() || !requirementForm.description.trim()) {
+      toast.error(language === 'th' ? 'กรุณากรอกตำแหน่งและรายละเอียด' : 'Please enter a role and details.');
+      return;
+    }
+
+    setIsSubmittingRequirement(true);
+    try {
+      const deadline = new Date();
+      deadline.setDate(deadline.getDate() + 30);
+      const response = await api.jobs.create({
+        title: requirementForm.title.trim(),
+        type: 'internship',
+        positions: 1,
+        description: requirementForm.description.trim(),
+        responsibilities: [],
+        requirements: skills,
+        preferredSkills: skills,
+        salary: '',
+        benefits: [],
+        location: company?.address || 'Hybrid',
+        workType: 'hybrid',
+        deadline: deadline.toISOString(),
+        status: 'open',
+      });
+      const createdJob = mapJob(response.job);
+      setCompanyJobPostings(current => [createdJob, ...current]);
+      setRequirements(current => [{
+        id: createdJob.id,
+        title: createdJob.title,
+        skills: [...createdJob.preferredSkills, ...createdJob.requirements].filter(Boolean).slice(0, 5),
+        type: createdJob.type,
+        status: createdJob.status,
+        matchCount: createdJob.applicants.length,
+      }, ...current]);
+      setRequirementForm({ title: '', skills: '', description: '' });
+      setIsRequirementOpen(false);
+      toast.success(language === 'th' ? 'ส่ง Requirement แล้ว' : 'Requirement submitted.');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : (language === 'th' ? 'ส่ง Requirement ไม่สำเร็จ' : 'Unable to submit requirement.'));
+    } finally {
+      setIsSubmittingRequirement(false);
+    }
+  };
+
+  const handleOpenAlert = async (notification: RecruitingNotification) => {
+    setNotifications(current => current.map(item => item.id === notification.id ? { ...item, read: true } : item));
+    if (notification.id) {
+      api.notifications.markRead(notification.id).catch(() => undefined);
+    }
+    navigate(notification.actionUrl || '/notifications');
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8 pb-10">
+        <div className="h-28 rounded-3xl bg-slate-100 dark:bg-slate-900 animate-pulse" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[0, 1, 2, 3].map(item => <div key={item} className="h-40 rounded-3xl bg-slate-100 dark:bg-slate-900 animate-pulse" />)}
+        </div>
+        <div className="h-96 rounded-3xl bg-slate-100 dark:bg-slate-900 animate-pulse" />
+      </div>
+    );
+  }
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8 pb-10">
@@ -58,7 +342,7 @@ export default function CompanyDashboard() {
             className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2"
           >
             <Building className="w-4 h-4 text-orange-500 dark:text-slate-400" />
-            <span>{company.industry} • {company.size}</span>
+            <span>{company?.industry || '-'} / {company?.size || '-'}</span>
           </motion.div>
           <motion.h1
             className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight"
@@ -66,43 +350,41 @@ export default function CompanyDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            {t.companyDashboard.hello} <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">{company.companyNameThai}</span> 🏢
+            {t.companyDashboard.hello} <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">{companyName || '-'}</span>
           </motion.h1>
         </div>
 
         <motion.div className="flex gap-3" variants={itemVariants}>
-          <Dialog>
+          <Dialog open={isRequirementOpen} onOpenChange={setIsRequirementOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" className="rounded-xl border-orange-200 text-orange-600 hover:bg-orange-50 dark:border-orange-900 dark:text-orange-400 dark:hover:bg-orange-950">
                 <PlusCircle className="w-4 h-4 mr-2" />
-                Submit Requirement
+                {copy.submitRequirement}
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
-                <DialogTitle>Submit New Requirement</DialogTitle>
+                <DialogTitle>{copy.submitRequirementTitle}</DialogTitle>
                 <DialogDescription>
-                  Post a specific request (skills, project, stack) to let our AI match you with the best talents.
+                  {copy.submitRequirementDesc}
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="title" className="text-right">Project/Role</Label>
-                  <Input id="title" placeholder="e.g. Frontend Intern" className="col-span-3" />
+                  <Label htmlFor="title" className="text-right">{copy.role}</Label>
+                  <Input id="title" value={requirementForm.title} onChange={(event) => setRequirementForm(current => ({ ...current, title: event.target.value }))} placeholder="e.g. Frontend Intern" className="col-span-3" />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="skills" className="text-right">Key Skills</Label>
-                  <Input id="skills" placeholder="React, Node, etc." className="col-span-3" />
+                  <Label htmlFor="skills" className="text-right">{copy.skills}</Label>
+                  <Input id="skills" value={requirementForm.skills} onChange={(event) => setRequirementForm(current => ({ ...current, skills: event.target.value }))} placeholder="React, Node, etc." className="col-span-3" />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="desc" className="text-right">Details</Label>
-                  <Textarea id="desc" placeholder="Briefly describe what you are looking for..." className="col-span-3" />
+                  <Label htmlFor="desc" className="text-right">{copy.details}</Label>
+                  <Textarea id="desc" value={requirementForm.description} onChange={(event) => setRequirementForm(current => ({ ...current, description: event.target.value }))} placeholder="Briefly describe what you are looking for..." className="col-span-3" />
                 </div>
               </div>
               <DialogFooter>
-                <DialogTrigger asChild>
-                  <Button type="button" className="bg-orange-500 hover:bg-orange-600 text-white">Submit to AI Match</Button>
-                </DialogTrigger>
+                <Button type="button" disabled={isSubmittingRequirement} onClick={handleSubmitRequirement} className="bg-orange-500 hover:bg-orange-600 text-white">{copy.submitToAi}</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -192,7 +474,7 @@ export default function CompanyDashboard() {
               </div>
               <span className="font-medium text-slate-600 dark:text-slate-400">{t.companyDashboard.interns}</span>
             </div>
-            <div className="text-4xl font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 transition-colors">{company.currentInterns}/{company.internshipSlots}</div>
+            <div className="text-4xl font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 transition-colors">{company?.currentInterns ?? 0}/{company?.internshipSlots ?? 0}</div>
             <div className="mt-3 text-sm text-slate-400">
               {t.companyDashboard.current}
             </div>
@@ -205,12 +487,12 @@ export default function CompanyDashboard() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <BellRing className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-            <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">Live Recruiting Alerts</h3>
-            <Badge variant="secondary" className="bg-rose-100 text-rose-700 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-400">{mockNotifications.filter(n => !n.read).length} New</Badge>
+            <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">{copy.liveAlerts}</h3>
+            <Badge variant="secondary" className="bg-rose-100 text-rose-700 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-400">{notifications.filter(n => !n.read).length} {copy.new}</Badge>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {mockNotifications.map(notification => (
+          {notifications.map(notification => (
             <div key={notification.id} className={`relative p-4 border rounded-2xl ${notification.read ? 'bg-white/40 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800' : 'bg-white dark:bg-slate-900 border-purple-200 dark:border-purple-800/50 shadow-sm'} ${notification.type === 'threshold' ? 'ring-1 ring-emerald-400/50' : ''}`}>
               {!notification.read && <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />}
               <div className="flex gap-3 mb-2">
@@ -220,10 +502,15 @@ export default function CompanyDashboard() {
               <p className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-snug">{notification.message}</p>
               <div className="mt-4 flex justify-between items-center text-xs text-slate-500 dark:text-slate-400">
                 <span>{notification.time}</span>
-                <button className="font-semibold text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300">{t.common?.viewDetails || 'View Details'}</button>
+                <button onClick={() => handleOpenAlert(notification)} className="font-semibold text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300">{copy.viewDetails}</button>
               </div>
             </div>
           ))}
+          {notifications.length === 0 && (
+            <div className="md:col-span-3 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 p-6 text-center text-sm text-slate-500 dark:text-slate-400">
+              {copy.noAlerts}
+            </div>
+          )}
         </div>
       </motion.div>
 
@@ -231,9 +518,9 @@ export default function CompanyDashboard() {
         <Tabs defaultValue="requirements" className="space-y-4">
           <TabsList className="flex flex-wrap h-auto gap-2 p-1">
             <TabsTrigger value="jobs">{t.companyDashboard.ourJobs}</TabsTrigger>
-            <TabsTrigger value="requirements">Requirements & AI Matches</TabsTrigger>
+            <TabsTrigger value="requirements">{copy.requirements}</TabsTrigger>
             <TabsTrigger value="students">{t.companyDashboard.accessibleStudentsTab}</TabsTrigger>
-            <TabsTrigger value="followed">Followed Talents</TabsTrigger>
+            <TabsTrigger value="followed">{copy.followed}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="jobs">
@@ -260,6 +547,11 @@ export default function CompanyDashboard() {
                     <Button size="sm" variant="outline" className="w-full" onClick={() => navigate('/applicants')}>{t.companyDashboard.viewApplicants}</Button>
                   </div>
                 ))}
+                {companyJobPostings.length === 0 && (
+                  <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-6 text-center text-sm text-slate-500 dark:text-slate-400">
+                    {copy.noJobs}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -285,6 +577,11 @@ export default function CompanyDashboard() {
                     <Button size="sm" variant="outline" onClick={() => navigate('/student-profiles')}>{t.companyDashboard.viewProfile}</Button>
                   </div>
                 ))}
+                {accessibleStudents.length === 0 && (
+                  <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-6 text-center text-sm text-slate-500 dark:text-slate-400">
+                    {copy.noStudents}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -294,13 +591,13 @@ export default function CompanyDashboard() {
                 <Card className="bg-white/6 dark:bg-slate-900/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl shadow-sm h-full">
                   <CardHeader>
                     <div className="flex justify-between items-center">
-                      <CardTitle>Active Requirements</CardTitle>
-                      <Badge variant="outline" className="bg-orange-50 text-orange-600 border-none px-2 dark:text-slate-300">{mockRequirements.length} Total</Badge>
+                      <CardTitle>{copy.activeRequirements}</CardTitle>
+                      <Badge variant="outline" className="bg-orange-50 text-orange-600 border-none px-2 dark:bg-orange-950/40 dark:text-orange-300">{requirements.length} {copy.total}</Badge>
                     </div>
-                    <CardDescription>Your posted criteria for talent matching.</CardDescription>
+                    <CardDescription>{copy.postedCriteria}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {mockRequirements.map(req => (
+                    {requirements.map(req => (
                       <div key={req.id} className="p-4 border rounded-xl hover:bg-slate-50 dark:bg-slate-900 transition-colors cursor-pointer group dark:hover:bg-slate-800">
                         <div className="flex justify-between items-start mb-2">
                           <h4 className="font-semibold text-slate-800 dark:text-slate-100 group-hover:text-orange-600 transition-colors">{req.title}</h4>
@@ -310,11 +607,16 @@ export default function CompanyDashboard() {
                           {req.skills.map(s => <Badge key={s} variant="secondary" className="px-1.5 py-0 text-xs">{s}</Badge>)}
                         </div>
                         <div className="flex justify-between text-sm text-slate-500 dark:text-slate-400">
-                          <span className="flex items-center gap-1"><BrainCircuit className="w-3.5 h-3.5" /> {req.matchCount} Matches</span>
+                          <span className="flex items-center gap-1"><BrainCircuit className="w-3.5 h-3.5" /> {req.matchCount} {copy.matches}</span>
                           <span>{req.type}</span>
                         </div>
                       </div>
                     ))}
+                    {requirements.length === 0 && (
+                      <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-6 text-center text-sm text-slate-500 dark:text-slate-400">
+                        {copy.noRequirements}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -324,12 +626,12 @@ export default function CompanyDashboard() {
                   <CardHeader>
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-5 h-5 text-orange-500 dark:text-slate-400" />
-                      <CardTitle>AI Talent Matching</CardTitle>
+                      <CardTitle>{copy.aiTalentMatching}</CardTitle>
                     </div>
-                    <CardDescription>Best matching students based on your active requirements.</CardDescription>
+                    <CardDescription>{copy.bestMatches}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {mockAiMatchedStudents.map(student => (
+                    {aiMatchedStudents.map(student => (
                       <div key={student.id} className="flex flex-col sm:flex-row gap-4 p-4 border rounded-xl items-center sm:items-start bg-gradient-to-r from-transparent to-orange-50/30 dark:to-orange-950/20">
                         <div className="relative">
                           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-lg">
@@ -342,30 +644,42 @@ export default function CompanyDashboard() {
                         <div className="flex-1 text-center sm:text-left">
                           <div className="flex flex-col sm:flex-row items-center sm:justify-start gap-2 mb-1">
                             <h4 className="font-semibold text-lg text-slate-800 dark:text-white">{student.nameThai}</h4>
-                            {student.exclusiveAccess && <Badge variant="outline" className="bg-amber-100/50 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700 text-[10px] shadow-sm py-0"><Flame className="w-3 h-3 mr-1 text-orange-500" /> Exclusive Access</Badge>}
+                            {student.exclusiveAccess && <Badge variant="outline" className="bg-amber-100/50 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700 text-[10px] shadow-sm py-0"><Flame className="w-3 h-3 mr-1 text-orange-500" /> {copy.exclusiveAccess}</Badge>}
                           </div>
-                          <p className="text-sm border-b pb-2 mb-2 text-slate-500 dark:text-slate-400">Year {student.year} • GPA {student.gpa.toFixed(2)} • {student.faculty}</p>
+                          <p className="text-sm border-b pb-2 mb-2 text-slate-500 dark:text-slate-400">{t.companyDashboard.year} {student.year} • GPA {student.gpa.toFixed(2)} • {student.major}</p>
                           <div className="flex items-center justify-center sm:justify-start gap-2 text-sm text-green-600 dark:text-green-500 mt-2 font-medium">
                             <CheckCircle2 className="w-4 h-4" />
-                            <span>Matched skills: {student.matchedSkills.join(', ')}</span>
+                            <span>{copy.skills}: {student.matchedSkills.length ? student.matchedSkills.join(', ') : '-'}</span>
                           </div>
                         </div>
                         <div className="flex flex-col gap-2 w-full sm:w-auto mt-2 sm:mt-0">
                           {student.exclusiveAccess ? (
-                             <Button size="sm" className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/30 group border-0">
-                               <Send className="w-3.5 h-3.5 mr-1.5 group-hover:scale-110 transition-transform" /> Fast-track Offer
+                             <Button size="sm" onClick={() => navigate('/messages')} className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/30 group border-0">
+                               <Send className="w-3.5 h-3.5 mr-1.5 group-hover:scale-110 transition-transform" /> {copy.fastTrackOffer}
                              </Button>
                           ) : (
-                             <Button size="sm" className="bg-slate-900 dark:bg-slate-800 group hover:bg-slate-800 dark:hover:bg-slate-700">
-                               <Bookmark className="w-3.5 h-3.5 mr-1.5 group-hover:fill-current" /> Follow
+                             <Button
+                               size="sm"
+                               onClick={() => {
+                                 setFollowedStudents(current => current.some(item => item.id === student.id) ? current : [{ ...student, followDate: new Date().toISOString().slice(0, 10), thresholdMet: student.gpa >= 3.5 }, ...current]);
+                                 toast.success(language === 'th' ? 'เพิ่มในรายการติดตามแล้ว' : 'Talent followed.');
+                               }}
+                               className="bg-slate-900 dark:bg-slate-800 group hover:bg-slate-800 dark:hover:bg-slate-700"
+                             >
+                               <Bookmark className="w-3.5 h-3.5 mr-1.5 group-hover:fill-current" /> {copy.follow}
                              </Button>
                           )}
                           <Button size="sm" variant="outline" className="dark:border-slate-700 dark:text-slate-300" onClick={() => navigate('/student-profiles')}>
-                            View Profile
+                            {copy.viewProfile}
                           </Button>
                         </div>
                       </div>
                     ))}
+                    {aiMatchedStudents.length === 0 && (
+                      <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-6 text-center text-sm text-slate-500 dark:text-slate-400">
+                        {copy.noMatches}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -377,13 +691,13 @@ export default function CompanyDashboard() {
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Bookmark className="w-5 h-5 text-blue-500 fill-blue-500/20 dark:text-slate-400" />
-                  <CardTitle>Followed Talents</CardTitle>
+                  <CardTitle>{copy.followed}</CardTitle>
                 </div>
-                <CardDescription>Track the long-term progress of promising students.</CardDescription>
+                <CardDescription>{copy.trackedProgress}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {mockFollowedStudents.map(student => (
+                  {followedStudents.map(student => (
                     <div key={student.id} className="border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:shadow-md transition-shadow">
                       <div className="flex items-center gap-4 mb-4">
                         <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
@@ -391,23 +705,28 @@ export default function CompanyDashboard() {
                         </div>
                         <div>
                           <div className="font-semibold">{student.nameThai}</div>
-                          <div className="text-sm text-slate-500 dark:text-slate-400">Year {student.year}</div>
+                          <div className="text-sm text-slate-500 dark:text-slate-400">{t.companyDashboard.year} {student.year}</div>
                         </div>
                       </div>
                       <div className="flex justify-between items-center text-sm border-t pt-3 mt-3 border-slate-100 dark:border-slate-800">
-                        <span className="text-slate-400">Followed</span>
+                        <span className="text-slate-400">{copy.followedDate}</span>
                         <span className="font-medium text-slate-700 dark:text-slate-300">{student.followDate}</span>
                       </div>
                       <div className="flex justify-between items-center text-sm mt-2">
-                        <span className="text-slate-400">Current GPA</span>
+                        <span className="text-slate-400">{copy.currentGpa}</span>
                         <div className="flex items-center gap-1 font-medium text-emerald-600 dark:text-slate-300">
                           <TrendingUp className="w-3.5 h-3.5" />
                           {student.gpa.toFixed(2)}
                         </div>
                       </div>
-                      <Button className="w-full mt-4" variant="secondary" size="sm" onClick={() => navigate('/student-profiles')}>Profile Overview</Button>
+                      <Button className="w-full mt-4" variant="secondary" size="sm" onClick={() => navigate('/student-profiles')}>{copy.profileOverview}</Button>
                     </div>
                   ))}
+                  {followedStudents.length === 0 && (
+                    <div className="md:col-span-2 lg:col-span-3 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-6 text-center text-sm text-slate-500 dark:text-slate-400">
+                      {copy.noFollowed}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

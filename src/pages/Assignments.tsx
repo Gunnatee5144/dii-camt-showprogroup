@@ -13,6 +13,8 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mockCourses } from '@/lib/mockData';
+import { api } from '@/lib/api';
+import { asArray, asDate, asNumber, asRecord, asString } from '@/lib/live-data';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -75,20 +77,80 @@ const mockAssignments = [
     },
 ];
 
+type AssignmentRow = (typeof mockAssignments)[number] & {
+    submissions?: {
+        id: string;
+        name: string;
+        studentId: string;
+        submittedAt: Date;
+        score: number | null;
+    }[];
+};
+
 export default function Assignments() {
     const { t } = useLanguage();
     const { user } = useAuth();
     const [searchQuery, setSearchQuery] = React.useState('');
     const [statusFilter, setStatusFilter] = React.useState('all');
-    const [selectedAssignment, setSelectedAssignment] = React.useState<typeof mockAssignments[0] | null>(null);
+    const [assignments, setAssignments] = React.useState<AssignmentRow[]>(mockAssignments);
+    const [selectedAssignment, setSelectedAssignment] = React.useState<AssignmentRow | null>(null);
     const [viewMode, setViewMode] = React.useState<'view' | 'grade'>('view');
 
-    const activeAssignments = mockAssignments.filter(a => a.status === 'active').length;
-    const completedAssignments = mockAssignments.filter(a => a.status === 'completed').length;
-    const draftAssignments = mockAssignments.filter(a => a.status === 'draft').length;
+    React.useEffect(() => {
+        let isMounted = true;
 
-    const filterAssignments = (assignments: typeof mockAssignments, status?: string) => {
-        let result = assignments;
+        api.assignments.list('?includeSubmissions=true')
+            .then((response) => {
+                if (!isMounted) return;
+                const mapped = response.assignments.map((item, index) => {
+                    const assignment = asRecord(item);
+                    const fallback = mockAssignments[index % mockAssignments.length];
+                    const course = asRecord(assignment.course);
+                    const submissions = asArray(assignment.submissions).map((submissionItem, submissionIndex) => {
+                        const submission = asRecord(submissionItem);
+                        const student = asRecord(submission.student);
+                        const studentUser = asRecord(student.user);
+                        return {
+                            id: asString(submission.id, `S${submissionIndex + 1}`),
+                            name: asString(studentUser.nameThai, asString(studentUser.name, `Student ${submissionIndex + 1}`)),
+                            studentId: asString(student.studentId, `STU${submissionIndex + 1}`),
+                            submittedAt: asDate(submission.submittedAt),
+                            score: submission.score === null || typeof submission.score === 'undefined'
+                                ? null
+                                : asNumber(submission.score, 0),
+                        };
+                    });
+                    const dueDate = asDate(assignment.dueDate, fallback.dueDate);
+                    const isPublished = Boolean(assignment.isPublished);
+                    return {
+                        id: asString(assignment.id, fallback.id),
+                        title: asString(assignment.title, fallback.title),
+                        courseName: asString(course.nameThai, asString(course.name, fallback.courseName)),
+                        courseCode: asString(course.code, fallback.courseCode),
+                        dueDate,
+                        type: asString(assignment.type, fallback.type) as AssignmentRow['type'],
+                        maxScore: asNumber(assignment.maxScore, fallback.maxScore),
+                        submissionCount: submissions.length,
+                        totalStudents: asNumber(course.maxStudents, fallback.totalStudents),
+                        status: (!isPublished ? 'draft' : dueDate < new Date() ? 'completed' : 'active') as AssignmentRow['status'],
+                        submissions,
+                    };
+                });
+                if (mapped.length) setAssignments(mapped);
+            })
+            .catch(() => undefined);
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    const activeAssignments = assignments.filter(a => a.status === 'active').length;
+    const completedAssignments = assignments.filter(a => a.status === 'completed').length;
+    const draftAssignments = assignments.filter(a => a.status === 'draft').length;
+
+    const filterAssignments = (items: AssignmentRow[], status?: string) => {
+        let result = items;
         if (status && status !== 'all') result = result.filter(a => a.status === status);
         if (searchQuery.trim()) {
             const q = searchQuery.toLowerCase();
@@ -112,7 +174,7 @@ export default function Assignments() {
 
     // Detail / Grade view
     if (selectedAssignment) {
-        const mockSubmissions = Array.from({ length: selectedAssignment.submissionCount }, (_, i) => ({
+        const mockSubmissions = selectedAssignment.submissions?.length ? selectedAssignment.submissions : Array.from({ length: selectedAssignment.submissionCount }, (_, i) => ({
             id: `S${i + 1}`,
             name: `นักศึกษา ${i + 1}`,
             studentId: `6421${10000 + i}`,
@@ -225,7 +287,7 @@ export default function Assignments() {
                 <div>
                     <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2">
                         <ClipboardList className="w-4 h-4 text-blue-500 dark:text-slate-400" />
-                        <span>{`${mockAssignments.length} ${t.assignmentsPage.titleHighlight} • ${activeAssignments} ${t.assignmentsPage.subtitle}`}</span>
+                        <span>{`${assignments.length} ${t.assignmentsPage.titleHighlight} • ${activeAssignments} ${t.assignmentsPage.subtitle}`}</span>
                     </motion.div>
                     <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                         {t.assignmentsPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">{t.assignmentsPage.titleHighlight}</span>
@@ -299,7 +361,7 @@ export default function Assignments() {
                             </div>
                             <span className="font-medium text-white/90">{t.assignmentsPage.allTab}</span>
                         </div>
-                        <div className="text-4xl font-bold">{mockAssignments.length}</div>
+                        <div className="text-4xl font-bold">{assignments.length}</div>
                     </div>
                 </motion.div>
             </motion.div>
@@ -330,9 +392,9 @@ export default function Assignments() {
                         <Card className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl shadow-sm dark:bg-slate-900/50">
                             <CardContent className="pt-6">
                                 <div className="space-y-4">
-                                    {filterAssignments(mockAssignments).length === 0 ? (
+                                    {filterAssignments(assignments).length === 0 ? (
                                         <div className="text-center py-8 text-gray-400">ไม่พบงานที่ค้นหา</div>
-                                    ) : filterAssignments(mockAssignments).map((assignment, index) => (
+                                    ) : filterAssignments(assignments).map((assignment, index) => (
                                         <motion.div
                                             key={assignment.id}
                                             initial={{ opacity: 0, y: 10 }}
@@ -396,7 +458,7 @@ export default function Assignments() {
                         <Card className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl shadow-sm dark:bg-slate-900/50">
                             <CardContent className="pt-6">
                                 <div className="space-y-4">
-                                    {filterAssignments(mockAssignments, 'active').map((assignment, index) => (
+                                    {filterAssignments(assignments, 'active').map((assignment, index) => (
                                         <motion.div
                                             key={assignment.id}
                                             initial={{ opacity: 0, y: 10 }}
@@ -430,7 +492,7 @@ export default function Assignments() {
                         <Card className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl shadow-sm dark:bg-slate-900/50">
                             <CardContent className="pt-6">
                                 <div className="space-y-4">
-                                    {filterAssignments(mockAssignments, 'completed').map((assignment) => (
+                                    {filterAssignments(assignments, 'completed').map((assignment) => (
                                         <div key={assignment.id} className="p-5 border rounded-xl bg-emerald-50/50 hover:shadow-md transition-all cursor-pointer"
                                             onClick={() => { setSelectedAssignment(assignment); setViewMode('view'); }}>
                                             <div className="flex items-center justify-between">
@@ -454,7 +516,7 @@ export default function Assignments() {
                         <Card className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl shadow-sm dark:bg-slate-900/50">
                             <CardContent className="pt-6">
                                 <div className="space-y-4">
-                                    {filterAssignments(mockAssignments, 'draft').map((assignment) => (
+                                    {filterAssignments(assignments, 'draft').map((assignment) => (
                                         <div key={assignment.id} className="p-5 border rounded-xl bg-gray-50/50 dark:bg-slate-900/50">
                                             <div className="flex items-center justify-between">
                                                 <div>

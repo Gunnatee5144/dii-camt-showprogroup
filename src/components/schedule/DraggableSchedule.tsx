@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, Reorder } from 'framer-motion';
 import { format, startOfWeek, addDays, setHours, setMinutes } from 'date-fns';
 import { th } from 'date-fns/locale';
@@ -41,6 +41,10 @@ export function DraggableSchedule({ initialSchedule, editable = false, onRequest
     const [dropTarget, setDropTarget] = useState<{ day: number, time: string } | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [pendingMove, setPendingMove] = useState<{ item: ScheduleItem, targetDay: number, targetTime: string } | null>(null);
+
+    useEffect(() => {
+        setSchedule(initialSchedule);
+    }, [initialSchedule]);
 
     const handleDragStart = (e: React.DragEvent, item: ScheduleItem) => {
         if (!editable) return;
@@ -180,7 +184,7 @@ export function DraggableSchedule({ initialSchedule, editable = false, onRequest
                                             <motion.div
                                                 layoutId={item.id}
                                                 draggable={editable}
-                                                onDragStart={(e: React.DragEvent) => handleDragStart(e, item)}
+                                                onDragStart={((e: React.DragEvent) => handleDragStart(e, item)) as never}
                                                 className={cn(
                                                     "h-full p-3 rounded-xl shadow-sm border text-left cursor-grab active:cursor-grabbing",
                                                     // Dynamic colors based on ID or hash

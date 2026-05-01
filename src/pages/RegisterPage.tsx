@@ -9,19 +9,75 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { ApiError } from '@/lib/api';
 
 export default function RegisterPage() {
     const { t, language, toggleLanguage } = useLanguage();
     const navigate = useNavigate();
-    const { login } = useAuth(); // Assuming we auto-login or just use this for potential future direct register hook
+    const { login, register } = useAuth();
     const [step, setStep] = useState(1);
     const [role, setRole] = useState<'student' | 'company' | 'lecturer' | 'staff' | 'enterprise' | null>(null);
     const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
     const [enterpriseData, setEnterpriseData] = useState({ taxId: '', website: '', industry: '', regBlock: '' });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleRoleSelect = (selectedRole: 'student' | 'company' | 'lecturer' | 'staff' | 'enterprise') => {
         setRole(selectedRole);
         setStep(2);
+    };
+
+    const buildProfile = () => {
+        const timestamp = Date.now().toString().slice(-6);
+        const baseId = formData.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 8) || timestamp;
+
+        if (role === 'student') {
+            return {
+                studentId: `STU${timestamp}`,
+                major: 'Digital Industry Integration',
+                program: 'bachelor',
+                year: 1,
+                semester: 1,
+                academicYear: '2569',
+                allowDataSharing: false,
+                allowPortfolioSharing: false,
+            };
+        }
+
+        if (role === 'lecturer') {
+            return {
+                lecturerId: `LEC${timestamp}`,
+                department: 'Digital Industry Integration',
+                position: 'instructor',
+                specialization: [],
+                researchInterests: [],
+            };
+        }
+
+        if (role === 'staff') {
+            return {
+                staffId: `STA${timestamp}`,
+                department: 'DII Office',
+                position: 'Staff',
+                permissions: ['students', 'courses', 'reports'],
+                canManageUsers: true,
+                canManageCourses: true,
+                canManageSchedules: true,
+                canViewReports: true,
+                canManageInternships: true,
+            };
+        }
+
+        return {
+            companyId: `COM${timestamp}`,
+            companyName: formData.name,
+            companyNameThai: formData.name,
+            industry: enterpriseData.industry || 'Technology',
+            size: role === 'enterprise' ? 'enterprise' : 'small',
+            website: enterpriseData.website || undefined,
+            address: enterpriseData.regBlock || undefined,
+            taxId: enterpriseData.taxId || undefined,
+            internshipSlots: 0,
+        };
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -38,16 +94,46 @@ export default function RegisterPage() {
             }
         }
 
-        // Mock registration
-        toast.success(t.register.registerSuccess, { description: t.register.pleaseLogin });
-        navigate('/login');
+        if (!role) {
+            toast.error(t.register.chooseAccountType);
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            await register({
+                email: formData.email,
+                password: formData.password,
+                name: formData.name,
+                nameThai: formData.name,
+                role: role === 'enterprise' ? 'company' : role,
+                profile: buildProfile(),
+            });
+            toast.success(t.register.registerSuccess);
+            navigate('/dashboard');
+        } catch (error) {
+            if (error instanceof ApiError && error.status === 409) {
+                try {
+                    await login(formData.email, formData.password);
+                    toast.success(t.login.loginSuccess);
+                    navigate('/dashboard');
+                    return;
+                } catch {
+                    toast.error('อีเมลนี้สมัครไว้แล้ว กรุณาเข้าสู่ระบบด้วยรหัสผ่านเดิม หรือใช้เมนูลืมรหัสผ่าน');
+                    return;
+                }
+            }
+            toast.error(error instanceof Error ? error.message : t.register.pleaseLogin);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
 
         <div className="min-h-screen flex font-sans bg-white dark:bg-slate-900 selection:bg-blue-100 selection:text-blue-900 overflow-hidden dark:text-slate-200">
             {/* Left Side: Information - Premium Dark */}
-            <div className="hidden lg:flex w-1/2 h-screen sticky top-0 bg-slate-900 relative overflow-hidden flex-col justify-between p-12">
+            <div className="hidden lg:flex w-1/2 bg-slate-900 relative overflow-hidden flex-col justify-between p-12">
                 <div className="absolute inset-0 z-0">
                     <img
                         src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop"
@@ -101,12 +187,12 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="relative z-10 text-center text-slate-500 dark:text-slate-400 text-sm mt-12">
-                    © 2026 DII CAMT. All rights reserved.
+                    © 2026 ShowPro. All rights reserved.
                 </div>
             </div>
 
             {/* Right Side: Form */}
-            <div className="w-full lg:w-1/2 h-screen overflow-y-auto flex items-start justify-center p-6 lg:p-12 py-16 lg:py-20 relative bg-slate-50 dark:bg-slate-900">
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 relative bg-slate-50 dark:bg-slate-900">
                 {/* Language Toggle */}
                 <Button
                     variant="ghost"
@@ -119,10 +205,10 @@ export default function RegisterPage() {
                 </Button>
                 <div className="absolute inset-0 bg-white dark:bg-slate-900/40 backdrop-blur-3xl z-0"></div>
                 {/* Background blobs */}
-                <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-emerald-100 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
-                <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+                <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-emerald-100 dark:bg-emerald-900/20 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-blue-100 dark:bg-blue-900/20 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
-                <div className="w-full max-w-md relative z-10 bg-white dark:bg-slate-900/80 p-6 md:p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-white flex flex-col">
+                <div className="w-full max-w-md relative z-10 bg-white dark:bg-slate-900/80 p-6 md:p-8 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-black/50 border border-white dark:border-slate-800 min-h-[600px] flex flex-col justify-center">
                     <AnimatePresence mode="wait">
                         {step === 1 ? (
                             <motion.div
@@ -159,8 +245,8 @@ export default function RegisterPage() {
                                         onClick={() => handleRoleSelect('company')}
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-all duration-300 dark:bg-slate-800">
-                                                <Building2 className="w-6 h-6 text-orange-600 group-hover:text-white dark:text-slate-300" />
+                                            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-950/40 rounded-2xl flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-all duration-300">
+                                                <Building2 className="w-6 h-6 text-orange-600 group-hover:text-white dark:text-orange-400" />
                                             </div>
                                             <div className="flex-1">
                                                 <h3 className="font-bold text-slate-900 dark:text-white text-lg group-hover:text-orange-600 transition-colors">{t.register.companyOrg}</h3>
@@ -207,8 +293,8 @@ export default function RegisterPage() {
                                         onClick={() => handleRoleSelect('enterprise')}
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 dark:bg-slate-800">
-                                                <Building2 className="w-6 h-6 text-indigo-600 group-hover:text-white dark:text-slate-300" />
+                                            <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-950/40 rounded-2xl flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
+                                                <Building2 className="w-6 h-6 text-indigo-600 group-hover:text-white dark:text-indigo-400" />
                                             </div>
                                             <div className="flex-1">
                                                 <h3 className="font-bold text-indigo-900 dark:text-indigo-300 text-lg group-hover:text-indigo-600 transition-colors">Enterprise Entity</h3>
@@ -299,7 +385,9 @@ export default function RegisterPage() {
                                         </div>
                                     </div>
 
-                                    <Button type="submit" className="w-full h-12 text-lg font-semibold mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30 rounded-xl transition-all hover:scale-[1.01]">{t.register.registerButton}</Button>
+                                    <Button type="submit" disabled={isSubmitting} className="w-full h-12 text-lg font-semibold mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30 rounded-xl transition-all hover:scale-[1.01] disabled:opacity-70">
+                                        {isSubmitting ? 'Signing up...' : t.register.registerButton}
+                                    </Button>
                                 </form>
                             </motion.div>
                         )}

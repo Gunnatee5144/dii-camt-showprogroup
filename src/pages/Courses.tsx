@@ -15,7 +15,27 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mockCourses } from '@/lib/mockData';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { api } from '@/lib/api';
+import { mapCourse } from '@/lib/live-mappers';
+import type { Course } from '@/types';
+
+type CourseRow = Course;
+type CourseFormState = {
+  code: string;
+  name: string;
+  nameThai: string;
+  credits: string;
+  semester: string;
+  academicYear: string;
+  year: string;
+  maxStudents: string;
+  minStudents: string;
+  description: string;
+  syllabus: string;
+};
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -31,14 +51,97 @@ export default function Courses() {
   const { user } = useAuth();
   const { t, language } = useLanguage();
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [courses, setCourses] = React.useState<CourseRow[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [editingCourse, setEditingCourse] = React.useState<CourseRow | null>(null);
+  const [courseForm, setCourseForm] = React.useState<CourseFormState | null>(null);
+  const [isSaving, setIsSaving] = React.useState(false);
+
+  React.useEffect(() => {
+    let mounted = true;
+
+    const coursesRequest = user?.role === 'lecturer'
+      ? api.courses.lecturerSchedule().then((response) => ({ courses: response.schedule }))
+      : api.courses.list();
+
+    coursesRequest
+      .then((response) => {
+        if (!mounted) return;
+        setCourses(response.courses.map(mapCourse));
+      })
+      .catch((error) => {
+        console.warn('Unable to load courses from API', error);
+        setCourses([]);
+      })
+      .finally(() => {
+        if (mounted) setIsLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [user?.role]);
 
   const filteredCourses = searchQuery
-    ? mockCourses.filter(c =>
+    ? courses.filter(c =>
       c.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.nameThai?.toLowerCase().includes(searchQuery.toLowerCase())
     )
-    : mockCourses;
+    : courses;
+  const totalCredits = courses.reduce((sum, course) => sum + course.credits, 0);
+  const creditProgress = Math.min((totalCredits / 22) * 100, 100);
+
+  const openCourseEditor = (course: CourseRow) => {
+    setEditingCourse(course);
+    setCourseForm({
+      code: course.code,
+      name: course.name,
+      nameThai: course.nameThai,
+      credits: String(course.credits),
+      semester: String(course.semester),
+      academicYear: course.academicYear,
+      year: String(course.year),
+      maxStudents: String(course.maxStudents),
+      minStudents: String(course.minStudents),
+      description: course.description || '',
+      syllabus: course.syllabus || '',
+    });
+  };
+
+  const updateCourseForm = (field: keyof CourseFormState, value: string) => {
+    setCourseForm((current) => current ? { ...current, [field]: value } : current);
+  };
+
+  const saveCourse = async () => {
+    if (!editingCourse || !courseForm) return;
+    setIsSaving(true);
+    try {
+      const response = await api.courses.update(editingCourse.id, {
+        code: courseForm.code.trim(),
+        name: courseForm.name.trim(),
+        nameThai: courseForm.nameThai.trim(),
+        credits: Number(courseForm.credits),
+        semester: Number(courseForm.semester),
+        academicYear: courseForm.academicYear.trim(),
+        year: Number(courseForm.year),
+        maxStudents: Number(courseForm.maxStudents),
+        minStudents: Number(courseForm.minStudents),
+        description: courseForm.description.trim(),
+        syllabus: courseForm.syllabus.trim(),
+      });
+      const updatedCourse = mapCourse(response.course);
+      setCourses((current) => current.map((course) => course.id === updatedCourse.id ? updatedCourse : course));
+      toast.success(language === 'th' ? 'บันทึกรายวิชาแล้ว' : 'Course saved');
+      setEditingCourse(null);
+      setCourseForm(null);
+    } catch (error) {
+      console.error('Unable to save course', error);
+      toast.error(language === 'th' ? 'บันทึกรายวิชาไม่สำเร็จ' : 'Unable to save course');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (user?.role === 'student') {
     return (
@@ -94,7 +197,7 @@ export default function Courses() {
                 </div>
                 <span className="font-medium text-white/90">{t.coursesPage.registeredCourses}</span>
               </div>
-              <div className="text-4xl font-bold">{mockCourses.length}</div>
+              <div className="text-4xl font-bold">{courses.length}</div>
               <div className="mt-2 text-sm text-blue-100 flex items-center gap-1">
                 <Sparkles className="w-4 h-4" /> {t.coursesPage.regularSemester}
               </div>
@@ -114,13 +217,13 @@ export default function Courses() {
                 </div>
                 <span className="font-medium text-white/90">{t.coursesPage.totalCredits}</span>
               </div>
-              <div className="text-4xl font-bold">19</div>
+              <div className="text-4xl font-bold">{totalCredits}</div>
               <div className="mt-2 text-sm text-purple-100">
                 {t.coursesPage.maxCredits}
               </div>
               {/* Mini Progress Bar */}
               <div className="mt-4 h-1.5 w-full bg-black/20 rounded-full overflow-hidden">
-                <div className="h-full bg-white/90 w-[86%] dark:bg-slate-900/50" />
+                <div className="h-full bg-white/90 dark:bg-slate-900/50" style={{ width: `${creditProgress}%` }} />
               </div>
             </div>
           </motion.div>
@@ -284,7 +387,6 @@ export default function Courses() {
     );
   }
 
-  // Lecturer View (Simplified but Styled)
   if (user?.role === 'lecturer') {
     return (
       <motion.div
@@ -305,22 +407,107 @@ export default function Courses() {
           </div>
         </div>
 
+        {isLoading && (
+          <div className="rounded-3xl border border-slate-200 bg-white/70 p-8 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400">
+            Loading courses...
+          </div>
+        )}
+
+        {!isLoading && filteredCourses.length === 0 && (
+          <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50/70 p-10 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">
+            No courses assigned to this lecturer.
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mockCourses.slice(0, 3).map((course) => (
+          {filteredCourses.map((course) => (
             <motion.div variants={itemVariants} key={course.id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 hover:shadow-lg transition-all dark:bg-slate-900">
               <div className="flex justify-between items-start mb-4">
                 <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-0 dark:text-slate-300 dark:bg-slate-800">{course.code}</Badge>
-                <Button variant="ghost" size="icon" className="-mr-2 -mt-2"><MoreHorizontal className="w-4 h-4" /></Button>
+                <Button variant="ghost" size="icon" className="-mr-2 -mt-2" onClick={() => openCourseEditor(course)}>
+                  <MoreHorizontal className="w-4 h-4" />
+                </Button>
               </div>
               <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{course.name}</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">{course.nameThai}</p>
               <div className="flex items-center justify-between text-sm py-3 border-t border-slate-100 dark:border-slate-700">
                 <span className="text-slate-500 dark:text-slate-400">{t.coursesPage.studentsRegistered}</span>
-                <span className="font-bold text-slate-900 dark:text-slate-200">45 {t.coursesPage.studentsCount}</span>
+                <span className="font-bold text-slate-900 dark:text-slate-200">{course.enrolledStudents.length} {t.coursesPage.studentsCount}</span>
               </div>
+              <Button className="mt-5 w-full rounded-xl" variant="outline" onClick={() => openCourseEditor(course)}>
+                {language === 'th' ? 'แก้ไขรายวิชา' : 'Edit course'}
+              </Button>
             </motion.div>
           ))}
         </div>
+
+        <Dialog open={Boolean(editingCourse)} onOpenChange={(open) => {
+          if (!open) {
+            setEditingCourse(null);
+            setCourseForm(null);
+          }
+        }}>
+          <DialogContent className="max-w-2xl dark:border-slate-800">
+            <DialogHeader>
+              <DialogTitle>{language === 'th' ? 'แก้ไขรายวิชา' : 'Edit course'}</DialogTitle>
+              <DialogDescription>
+                {editingCourse?.code} {editingCourse?.name}
+              </DialogDescription>
+            </DialogHeader>
+            {courseForm && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="course-code">{language === 'th' ? 'รหัสวิชา' : 'Code'}</Label>
+                  <Input id="course-code" value={courseForm.code} onChange={(event) => updateCourseForm('code', event.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="course-credits">{language === 'th' ? 'หน่วยกิต' : 'Credits'}</Label>
+                  <Input id="course-credits" type="number" min="1" value={courseForm.credits} onChange={(event) => updateCourseForm('credits', event.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="course-name">{language === 'th' ? 'ชื่ออังกฤษ' : 'English name'}</Label>
+                  <Input id="course-name" value={courseForm.name} onChange={(event) => updateCourseForm('name', event.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="course-name-th">{language === 'th' ? 'ชื่อไทย' : 'Thai name'}</Label>
+                  <Input id="course-name-th" value={courseForm.nameThai} onChange={(event) => updateCourseForm('nameThai', event.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="course-semester">{language === 'th' ? 'ภาคเรียน' : 'Semester'}</Label>
+                  <Input id="course-semester" type="number" min="1" value={courseForm.semester} onChange={(event) => updateCourseForm('semester', event.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="course-year">{language === 'th' ? 'ปีการศึกษา' : 'Academic year'}</Label>
+                  <Input id="course-year" value={courseForm.academicYear} onChange={(event) => updateCourseForm('academicYear', event.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="course-level">{language === 'th' ? 'ชั้นปี' : 'Year level'}</Label>
+                  <Input id="course-level" type="number" min="1" value={courseForm.year} onChange={(event) => updateCourseForm('year', event.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="course-max">{language === 'th' ? 'จำนวนนักศึกษาสูงสุด' : 'Max students'}</Label>
+                  <Input id="course-max" type="number" min="1" value={courseForm.maxStudents} onChange={(event) => updateCourseForm('maxStudents', event.target.value)} />
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                  <Label htmlFor="course-description">{language === 'th' ? 'คำอธิบายรายวิชา' : 'Description'}</Label>
+                  <Textarea id="course-description" value={courseForm.description} onChange={(event) => updateCourseForm('description', event.target.value)} />
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                  <Label htmlFor="course-syllabus">{language === 'th' ? 'Syllabus' : 'Syllabus'}</Label>
+                  <Textarea id="course-syllabus" value={courseForm.syllabus} onChange={(event) => updateCourseForm('syllabus', event.target.value)} />
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEditingCourse(null)} disabled={isSaving}>
+                {language === 'th' ? 'ยกเลิก' : 'Cancel'}
+              </Button>
+              <Button onClick={saveCourse} disabled={isSaving || !courseForm}>
+                {isSaving ? (language === 'th' ? 'กำลังบันทึก...' : 'Saving...') : (language === 'th' ? 'บันทึก' : 'Save')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </motion.div>
     );
   }
@@ -348,15 +535,15 @@ export default function Courses() {
             </motion.h1>
             <p className="text-slate-500 mt-2 text-sm dark:text-slate-400">
               {language === 'th'
-                ? 'จัดการรายวิชา (ตัวอย่างข้อมูล) — เพิ่ม/แก้ไข/ปิดรายวิชาผ่าน UI ได้'
-                : 'Course administration (mock data) — add/edit/disable courses via UI'}
+                ? 'จัดการรายวิชาจากข้อมูลระบบจริง เพิ่มและแก้ไขผ่าน API ได้'
+                : 'Course administration — add/edit/disable courses via live system data'}
             </p>
           </div>
 
           <div className="flex gap-2">
             <Button
               className="h-11 px-5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white"
-              onClick={() => toast.info(language === 'th' ? 'โหมดสาธิต: ยังไม่เชื่อมต่อ Backend' : 'Demo mode: backend not connected yet')}
+              onClick={() => toast.info(language === 'th' ? 'ฟอร์มเพิ่มรายวิชาจะเปิดที่นี่' : 'Course creation form will open here')}
             >
               <Plus className="w-4 h-4 mr-2" />
               {language === 'th' ? 'เพิ่มรายวิชา' : 'Add course'}
@@ -418,7 +605,7 @@ export default function Courses() {
                       variant="ghost"
                       size="icon"
                       className="rounded-xl"
-                      onClick={() => toast.info(language === 'th' ? 'แก้ไขรายวิชา (โหมดสาธิต)' : 'Edit course (demo)')}
+                      onClick={() => toast.info(language === 'th' ? 'แก้ไขรายวิชา' : 'Edit course')}
                     >
                       <MoreHorizontal className="w-5 h-5 text-slate-500 dark:text-slate-400" />
                     </Button>

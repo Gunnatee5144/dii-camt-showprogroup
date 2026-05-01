@@ -12,7 +12,11 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { mockStudents } from '@/lib/mockData';
+import { api } from '@/lib/api';
+import { mapStudent } from '@/lib/live-mappers';
+import type { Student } from '@/types';
+
+type StudentRow = Student;
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -30,8 +34,32 @@ export default function Students() {
   const [searchQuery, setSearchQuery] = React.useState('');
   const [yearFilter, setYearFilter] = React.useState('all');
   const [statusFilter, setStatusFilter] = React.useState('all');
+  const [students, setStudents] = React.useState<StudentRow[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
 
-  const filteredStudents = mockStudents.filter(student => {
+  React.useEffect(() => {
+    let mounted = true;
+
+    api.students
+      .list()
+      .then((response) => {
+        if (!mounted) return;
+        setStudents(response.students.map(mapStudent));
+      })
+      .catch((error) => {
+        console.warn('Unable to load students from API', error);
+        if (mounted) setStudents([]);
+      })
+      .finally(() => {
+        if (mounted) setIsLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const filteredStudents = students.filter(student => {
     const matchesSearch = 
       student.nameThai.toLowerCase().includes(searchQuery.toLowerCase()) ||
       student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -41,8 +69,8 @@ export default function Students() {
     return matchesSearch && matchesYear && matchesStatus;
   });
 
-  const atRiskCount = mockStudents.filter(s => s.academicStatus === 'probation' || s.academicStatus === 'risk').length;
-  const avgGPA = (mockStudents.reduce((sum, s) => sum + s.gpa, 0) / mockStudents.length).toFixed(2);
+  const atRiskCount = students.filter(s => s.academicStatus === 'probation' || s.academicStatus === 'risk').length;
+  const avgGPA = (students.reduce((sum, s) => sum + s.gpa, 0) / Math.max(students.length, 1)).toFixed(2);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -64,7 +92,7 @@ export default function Students() {
       <div>
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2">
               <Users className="w-4 h-4 text-blue-500 dark:text-slate-400" />
-              <span>{`${t.studentsPage.totalStudents} ${mockStudents.length} • ${t.studentsPage.atRisk} ${atRiskCount}`}</span>
+              <span>{`${t.studentsPage.totalStudents} ${students.length} • ${t.studentsPage.atRisk} ${atRiskCount}`}</span>
           </motion.div>
           <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               {t.studentsPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">{t.studentsPage.titleHighlight}</span>
@@ -85,7 +113,7 @@ export default function Students() {
               </div>
               <span className="font-medium text-white/90">{t.studentsPage.totalStudents}</span>
             </div>
-            <div className="text-4xl font-bold">{mockStudents.length}</div>
+            <div className="text-4xl font-bold">{students.length}</div>
           </div>
         </motion.div>
 
@@ -133,7 +161,7 @@ export default function Students() {
               </div>
               <span className="font-medium text-white/90">{t.studentsPage.normalStatus}</span>
             </div>
-            <div className="text-4xl font-bold">{mockStudents.filter(s => s.academicStatus === 'normal').length}</div>
+            <div className="text-4xl font-bold">{students.filter(s => s.academicStatus === 'normal').length}</div>
           </div>
         </motion.div>
       </motion.div>
@@ -182,11 +210,21 @@ export default function Students() {
               <GraduationCap className="w-5 h-5" />
               {t.studentsPage.studentList}
             </CardTitle>
-            <CardDescription>{t.studentsPage.showing} {filteredStudents.length} {t.studentsPage.fromTotal} {mockStudents.length}</CardDescription>
+            <CardDescription>{t.studentsPage.showing} {filteredStudents.length} {t.studentsPage.fromTotal} {students.length}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {filteredStudents.map((student, index) => (
+              {isLoading && (
+                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">
+                  กำลังโหลดข้อมูลนักศึกษาจริงจากระบบ...
+                </div>
+              )}
+              {!isLoading && filteredStudents.length === 0 && (
+                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">
+                  ไม่พบข้อมูลนักศึกษาจากระบบ
+                </div>
+              )}
+              {!isLoading && filteredStudents.map((student, index) => (
                 <motion.div
                   key={student.id}
                   initial={{ opacity: 0, x: -20 }}

@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { asNumber, asRecord, asString, getRoleProfile } from '@/lib/user-profile';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -29,15 +30,17 @@ const itemVariants = {
 
 export default function Settings() {
   const { t, language, setLanguage } = useLanguage();
-  const { user, logout } = useAuth();
+  const { user, logout, updateProfile } = useAuth();
   const { theme, setTheme } = useTheme();
   const [activeTab, setActiveTab] = React.useState('profile');
+  const [isSaving, setIsSaving] = React.useState(false);
+  const [isChangingPassword, setIsChangingPassword] = React.useState(false);
 
   // Profile form state
   const [nameThai, setNameThai] = React.useState(user?.nameThai || '');
   const [nameEn, setNameEn] = React.useState(user?.name || '');
   const [email, setEmail] = React.useState(user?.email || '');
-  const [phone, setPhone] = React.useState('');
+  const [phone, setPhone] = React.useState(user?.phone || '');
 
   // Password form state
   const [currentPwd, setCurrentPwd] = React.useState('');
@@ -69,6 +72,112 @@ export default function Settings() {
     setNewPwd('');
     setConfirmPwd('');
     toast.success('เปลี่ยนรหัสผ่านเรียบร้อยแล้ว');
+  };
+
+  React.useEffect(() => {
+    setNameThai(user?.nameThai || '');
+    setNameEn(user?.name || '');
+    setEmail(user?.email || '');
+    setPhone(user?.phone || '');
+  }, [user]);
+
+  const buildRoleData = () => {
+    const profile = getRoleProfile(user);
+
+    switch (user?.role) {
+      case 'student':
+        return {
+          major: asString(profile.major, 'Digital Industry Integration'),
+          program: asString(profile.program, 'bachelor'),
+          year: asNumber(profile.year, 1),
+          semester: asNumber(profile.semester, 1),
+          academicYear: asString(profile.academicYear, '2569'),
+          cvUrl: asString(profile.cvUrl) || undefined,
+        };
+      case 'lecturer':
+        return {
+          department: asString(profile.department, 'Digital Industry Integration'),
+          position: asString(profile.position, 'instructor'),
+          specialization: Array.isArray(profile.specialization) ? profile.specialization : [],
+          researchInterests: Array.isArray(profile.researchInterests) ? profile.researchInterests : [],
+        };
+      case 'staff':
+        return {
+          department: asString(profile.department, 'DII Office'),
+          position: asString(profile.position, 'Staff'),
+          permissions: Array.isArray(profile.permissions) ? profile.permissions : [],
+        };
+      case 'company':
+        return {
+          companyName: asString(profile.companyName, nameEn),
+          companyNameThai: asString(profile.companyNameThai, nameThai),
+          industry: asString(profile.industry, 'Technology'),
+          size: asString(profile.size, 'small'),
+          website: asString(profile.website) || undefined,
+          address: asString(profile.address) || undefined,
+        };
+      case 'admin':
+        return {
+          permissions: Array.isArray(profile.permissions) ? profile.permissions : ['*'],
+          isSuperAdmin: typeof profile.isSuperAdmin === 'boolean' ? profile.isSuperAdmin : false,
+        };
+      default:
+        return {};
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    if (!nameThai.trim() || !nameEn.trim() || !email.trim()) {
+      toast.error('กรุณากรอกข้อมูลให้ครบถ้วน');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await updateProfile({
+        name: nameEn,
+        nameThai,
+        phone,
+        roleData: buildRoleData(),
+      });
+      toast.success(t.settingsPage.savedSuccess);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to save profile');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleChangePasswordLive = async () => {
+    if (!currentPwd) {
+      toast.error('กรุณากรอกรหัสผ่านปัจจุบัน');
+      return;
+    }
+    if (newPwd.length < 8) {
+      toast.error('รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร');
+      return;
+    }
+    if (newPwd !== confirmPwd) {
+      toast.error('รหัสผ่านใหม่ไม่ตรงกัน');
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      await updateProfile({
+        currentPassword: currentPwd,
+        newPassword: newPwd,
+        roleData: buildRoleData(),
+      });
+      setCurrentPwd('');
+      setNewPwd('');
+      setConfirmPwd('');
+      toast.success('Password updated successfully');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to update password');
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
 
   return (
@@ -190,8 +299,8 @@ export default function Settings() {
                       <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight mb-2">{t.settingsPage.personalInfo}</h2>
                       <p className="text-slate-500 font-medium dark:text-slate-400">{t.settingsPage.personalInfoDesc}</p>
                     </div>
-                    <Button onClick={handleSave} className="rounded-2xl h-12 px-8 bg-slate-900 text-white hover:bg-slate-800 shadow-xl shadow-slate-900/20 font-bold transform active:scale-95 transition-all">
-                      <Save className="w-4 h-4 mr-2" /> {t.settingsPage.saveData}
+                    <Button onClick={handleSaveProfile} disabled={isSaving} className="rounded-2xl h-12 px-8 bg-slate-900 text-white hover:bg-slate-800 shadow-xl shadow-slate-900/20 font-bold transform active:scale-95 transition-all disabled:opacity-70">
+                      <Save className="w-4 h-4 mr-2" /> {isSaving ? 'Saving...' : t.settingsPage.saveData}
                     </Button>
                   </div>
 
@@ -210,8 +319,19 @@ export default function Settings() {
                       <h3 className="font-black text-2xl text-slate-900 dark:text-white mb-2 tracking-tight">{t.settingsPage.profilePhoto}</h3>
                       <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 font-medium">{t.settingsPage.profilePhotoDesc}</p>
                       <div className="flex justify-center md:justify-start gap-3">
-                        <Button className="rounded-xl h-11 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-50 shadow-sm px-6">{t.settingsPage.uploadNew}</Button>
-                        <Button variant="ghost" className="rounded-xl h-11 text-red-500 font-bold hover:bg-red-50 px-6 dark:text-slate-400 dark:bg-slate-800">{t.settingsPage.deletePhoto}</Button>
+                        <Button
+                          className="rounded-xl h-11 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-50 shadow-sm px-6"
+                          onClick={() => toast.info('อัปโหลดรูปผ่านระบบไฟล์กำลังเชื่อมกับโปรไฟล์ผู้ใช้')}
+                        >
+                          {t.settingsPage.uploadNew}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="rounded-xl h-11 text-red-500 font-bold hover:bg-red-50 px-6 dark:text-slate-400 dark:bg-slate-800"
+                          onClick={() => toast.info('ยังไม่มีรูปโปรไฟล์ที่บันทึกไว้ให้ลบ')}
+                        >
+                          {t.settingsPage.deletePhoto}
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -227,7 +347,7 @@ export default function Settings() {
                     </div>
                     <div className="space-y-2">
                       <Label className="ml-1 text-slate-700 dark:text-slate-300 font-bold">{t.settingsPage.emailAddress}</Label>
-                      <Input value={email} onChange={e => setEmail(e.target.value)} className="h-14 rounded-2xl bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 shadow-inner px-5 font-medium focus-visible:ring-indigo-500" />
+                      <Input value={email} readOnly className="h-14 rounded-2xl bg-slate-100 dark:bg-slate-950 border-slate-100 dark:border-slate-800 shadow-inner px-5 font-medium text-slate-500" />
                     </div>
                     <div className="space-y-2">
                       <Label className="ml-1 text-slate-700 dark:text-slate-300 font-bold">{t.settingsPage.phoneNumber}</Label>
@@ -328,8 +448,8 @@ export default function Settings() {
                           </div>
                         </div>
                       </div>
-                      <Button onClick={handlePasswordChange} className="mt-10 w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white hover:bg-slate-100 rounded-[1.5rem] h-14 font-black text-base shadow-xl transform active:scale-[0.98] transition-all relative z-10">
-                        {t.settingsPage.updatePassword}
+                      <Button onClick={handleChangePasswordLive} disabled={isChangingPassword} className="mt-10 w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white hover:bg-slate-100 rounded-[1.5rem] h-14 font-black text-base shadow-xl transform active:scale-[0.98] transition-all relative z-10 disabled:opacity-70">
+                        {isChangingPassword ? 'Updating...' : t.settingsPage.updatePassword}
                       </Button>
                     </div>
 
@@ -342,7 +462,13 @@ export default function Settings() {
                           </div>
                           <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{t.settingsPage.smsVerification}</p>
                         </div>
-                        <Button variant="outline" className="rounded-xl h-12 border-slate-200 dark:border-slate-700 font-bold px-6">{t.settingsPage.enable}</Button>
+                        <Button
+                          variant="outline"
+                          className="rounded-xl h-12 border-slate-200 dark:border-slate-700 font-bold px-6"
+                          onClick={() => toast.info('2FA ยังไม่ได้เปิดใช้บน backend production')}
+                        >
+                          {t.settingsPage.enable}
+                        </Button>
                       </div>
                       <div className="flex items-center justify-between p-8 rounded-[2rem] bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm group hover:border-slate-300 transition-all">
                         <div className="space-y-2">
@@ -352,7 +478,16 @@ export default function Settings() {
                           </div>
                           <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{t.settingsPage.loginHistoryDesc}</p>
                         </div>
-                        <Button variant="ghost" className="rounded-xl h-12 text-slate-500 dark:text-slate-400 font-bold px-4">{t.settingsPage.viewData}</Button>
+                        <Button
+                          variant="ghost"
+                          className="rounded-xl h-12 text-slate-500 dark:text-slate-400 font-bold px-4"
+                          onClick={() => {
+                            const lastLogin = asRecord(user?.raw).lastLogin;
+                            toast.info(lastLogin ? `Last login: ${new Date(String(lastLogin)).toLocaleString('th-TH')}` : 'ยังไม่มีประวัติ login เพิ่มเติม');
+                          }}
+                        >
+                          {t.settingsPage.viewData}
+                        </Button>
                       </div>
                     </div>
                   </div>

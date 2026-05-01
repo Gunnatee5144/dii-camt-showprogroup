@@ -4,6 +4,9 @@ import { CreditCard, Check, Shield, Zap, Star, Crown, Sparkles, Receipt } from '
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { api } from '@/lib/api';
+import { asArray, asDate, asNumber, asRecord, asString } from '@/lib/live-data';
+import { toast } from 'sonner';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -17,7 +20,7 @@ const itemVariants = {
 export default function Subscription() {
     const { t } = useLanguage();
 
-    const plans = [
+    const [plans, setPlans] = React.useState([
         {
             name: 'Basic', price: 'ฟรี', description: 'สำหรับเริ่มต้นใช้งาน', icon: Zap, current: false,
             gradient: 'from-slate-50 to-slate-100', border: 'border-slate-200 dark:border-slate-800', text: 'text-slate-800 dark:text-slate-200', btnClass: '',
@@ -41,7 +44,96 @@ export default function Subscription() {
                 'เข้าร่วม Job Fair ฟรี', 
             ],
         },
-    ];
+    ]);
+    const [isLoading, setIsLoading] = React.useState(true);
+    const [payments, setPayments] = React.useState<Array<{ id: string; date: string; item: string; amount: string; status: string; receiptUrl: string }>>([]);
+
+    React.useEffect(() => {
+        let isMounted = true;
+
+        Promise.allSettled([api.subscription.plans(), api.subscription.payments()])
+            .then(([plansResponse, paymentsResponse]) => {
+                if (!isMounted) return;
+
+                if (plansResponse.status === 'fulfilled') {
+                    const mappedPlans = plansResponse.value.plans.map((item, index) => {
+                        const plan = asRecord(item);
+                        const fallback = plans[index % plans.length];
+                        const name = asString(plan.name, fallback.name);
+                        const price = asNumber(plan.price, 0);
+                        return {
+                            ...fallback,
+                            name: name === 'pro' ? 'Professional' : name.charAt(0).toUpperCase() + name.slice(1),
+                            price: price === 0 ? 'ฟรี' : `฿${price.toLocaleString()} / ปี`,
+                            description: asString(plan.description, fallback.description),
+                            features: asArray<string>(plan.features).length ? asArray<string>(plan.features) : fallback.features,
+                        };
+                    });
+                    setPlans(mappedPlans);
+                } else {
+                    setPlans([]);
+                }
+
+                if (paymentsResponse.status === 'fulfilled') {
+                    const mappedPayments = paymentsResponse.value.payments.map((item, index) => {
+                        const payment = asRecord(item);
+                        return {
+                            id: asString(payment.id, `payment-${index}`),
+                            date: asDate(payment.date).toLocaleDateString('th-TH'),
+                            item: asString(payment.planName, '-'),
+                            amount: `฿${asNumber(payment.amount, 0).toLocaleString()}`,
+                            status: asString(payment.status, 'pending'),
+                            receiptUrl: asString(payment.receiptUrl),
+                        };
+                    });
+                    setPayments(mappedPayments);
+                } else {
+                    setPayments([]);
+                }
+            })
+            .catch(() => {
+                if (isMounted) {
+                    setPlans([]);
+                    setPayments([]);
+                }
+            })
+            .finally(() => {
+                if (isMounted) setIsLoading(false);
+            });
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    const parsePlanAmount = (price: string) => {
+        const match = price.replace(/,/g, '').match(/\d+/);
+        return match ? Number(match[0]) : 0;
+    };
+
+    const handleSelectPlan = async (plan: typeof plans[number]) => {
+        const amount = parsePlanAmount(plan.price);
+        try {
+            const response = await api.subscription.createPayment({
+                amount: Math.max(amount, 1),
+                planName: plan.name,
+                status: amount === 0 ? 'paid' : 'pending',
+                referenceNumber: `SUB-${Date.now()}`,
+            });
+            const payment = asRecord(response.payment);
+            setPayments(current => [{
+                id: asString(payment.id, `payment-${Date.now()}`),
+                date: asDate(payment.date).toLocaleDateString('th-TH'),
+                item: asString(payment.planName, plan.name),
+                amount: `฿${asNumber(payment.amount, amount).toLocaleString()}`,
+                status: asString(payment.status, amount === 0 ? 'paid' : 'pending'),
+                receiptUrl: asString(payment.receiptUrl),
+            }, ...current]);
+            toast.success(t.subscriptionPage.selectPlan);
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : t.subscriptionPage.selectPlan);
+        }
+    };
 
     return (
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8 pb-10">
@@ -61,7 +153,7 @@ export default function Subscription() {
 
             {/* Plans Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-                {plans.map((plan, index) => (
+                {!isLoading && plans.map((plan, index) => (
                     <motion.div key={index} variants={itemVariants} whileHover={{ y: -8 }}
                         className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${plan.gradient} border ${plan.border} p-7 shadow-sm hover:shadow-xl transition-all flex flex-col ${plan.current ? 'ring-2 ring-orange-400 shadow-xl shadow-orange-200 scale-[1.02]' : ''}`}>
                         {plan.current && (
@@ -89,11 +181,21 @@ export default function Subscription() {
                                 ))}
                             </ul>
                         </div>
-                        <Button className={`w-full rounded-xl h-12 text-sm font-semibold ${plan.btnClass || ''}`} variant={plan.current || plan.btnClass ? 'default' : 'outline'} disabled={plan.current}>
+                        <Button onClick={() => handleSelectPlan(plan)} className={`w-full rounded-xl h-12 text-sm font-semibold ${plan.btnClass || ''}`} variant={plan.current || plan.btnClass ? 'default' : 'outline'} disabled={plan.current}>
                             {plan.current ? t.subscriptionPage.inUse : t.subscriptionPage.selectPlan}
                         </Button>
                     </motion.div>
                 ))}
+                {isLoading && (
+                    <div className="md:col-span-3 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                        กำลังโหลดแพ็กเกจ...
+                    </div>
+                )}
+                {!isLoading && plans.length === 0 && (
+                    <div className="md:col-span-3 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                        {t.common.noData}
+                    </div>
+                )}
             </div>
 
             {/* Payment History */}
@@ -113,13 +215,31 @@ export default function Subscription() {
                             </tr>
                         </thead>
                         <tbody>
+                            {payments.map((payment) => (
+                                <tr key={payment.id}>
+                                    <td className="py-4 text-slate-700 dark:text-slate-300">{payment.date}</td>
+                                    <td className="text-slate-700 dark:text-slate-300">{payment.item}</td>
+                                    <td className="font-semibold text-slate-800 dark:text-slate-200">{payment.amount}</td>
+                                    <td><Badge className="bg-emerald-50 text-emerald-600 border-emerald-200 rounded-lg dark:text-slate-300 dark:bg-slate-800">{payment.status === 'paid' ? t.subscriptionPage.paid : payment.status}</Badge></td>
+                                    <td className="text-right">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => payment.receiptUrl ? window.open(payment.receiptUrl, '_blank', 'noopener,noreferrer') : toast.info('ยังไม่มีใบเสร็จ')}
+                                            className="text-blue-500 hover:text-blue-600 rounded-xl text-xs dark:text-slate-300"
+                                        >
+                                            {t.subscriptionPage.downloadReceipt}
+                                        </Button>
+                                    </td>
+                                </tr>
+                            ))}
+                            {payments.length === 0 && (
                             <tr>
-                                <td className="py-4 text-slate-700 dark:text-slate-300">1 ม.ค. 2567</td>
-                                <td className="text-slate-700 dark:text-slate-300">Professional Plan (1 ปี)</td>
-                                <td className="font-semibold text-slate-800 dark:text-slate-200">฿5,000</td>
-                                <td><Badge className="bg-emerald-50 text-emerald-600 border-emerald-200 rounded-lg dark:text-slate-300 dark:bg-slate-800">{t.subscriptionPage.paid}</Badge></td>
-                                <td className="text-right"><Button variant="ghost" size="sm" className="text-blue-500 hover:text-blue-600 rounded-xl text-xs dark:text-slate-300">{t.subscriptionPage.downloadReceipt}</Button></td>
+                                <td colSpan={5} className="py-6 text-center text-slate-500 dark:text-slate-400">
+                                    {isLoading ? 'กำลังโหลดประวัติการชำระเงิน...' : t.common.noData}
+                                </td>
                             </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>

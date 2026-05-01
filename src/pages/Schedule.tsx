@@ -11,8 +11,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Timetable } from '@/components/common/Timetable';
 import { DraggableSchedule } from '@/components/schedule/DraggableSchedule';
-import { mockStudent, mockCourses } from '@/lib/mockData';
 import { toast } from 'sonner';
+import { api } from '@/lib/api';
+import { asRecord, asString } from '@/lib/live-data';
+import { mapCourse, mapStudent } from '@/lib/live-mappers';
+import type { Course, Student } from '@/types';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -29,6 +32,9 @@ export default function Schedule() {
   const { t } = useLanguage();
   const [currentWeek, setCurrentWeek] = React.useState(0);
   const [isEditMode, setIsEditMode] = React.useState(false);
+  const [courses, setCourses] = React.useState<Course[]>([]);
+  const [student, setStudent] = React.useState<Student | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
 
   type ScheduleItem = {
     id: string;
@@ -42,20 +48,96 @@ export default function Schedule() {
 
   // Transform courses to schedule items
   const scheduleItems: ScheduleItem[] = React.useMemo(() => {
-    return mockCourses.flatMap(course =>
+    const dayIndexByName: Record<string, number> = {
+      mon: 1,
+      monday: 1,
+      tue: 2,
+      tuesday: 2,
+      wed: 3,
+      wednesday: 3,
+      thu: 4,
+      thursday: 4,
+      fri: 5,
+      friday: 5,
+    };
+
+    return courses.flatMap(course =>
       (course.schedule || []).map((slot, idx) => ({
         id: `${course.id}-${idx}`,
         courseCode: course.code,
         courseName: course.name,
-        day: ['mon', 'tue', 'wed', 'thu', 'fri'].indexOf(slot.day.toLowerCase()) + 1,
+        day: dayIndexByName[slot.day.toLowerCase()] ?? 0,
         startTime: slot.startTime,
         endTime: slot.endTime,
         room: slot.room
       }))
     ).filter(item => item.day > 0);
-  }, []);
+  }, [courses]);
 
-  const handleRequestMove = (item: ScheduleItem, targetDay: number, targetTime: string, mode: 'permanent' | 'todayOnly') => {
+  React.useEffect(() => {
+    let mounted = true;
+    setIsLoading(true);
+
+    if (user?.role === 'student') {
+      Promise.allSettled([
+        api.students.profile(),
+        api.enrollments.list(),
+      ]).then(([profileResult, enrollmentsResult]) => {
+        if (!mounted) return;
+        let nextStudent: Student | null = null;
+        if (profileResult.status === 'fulfilled') {
+          nextStudent = mapStudent(profileResult.value.profile);
+          setStudent(nextStudent);
+        } else {
+          setStudent(null);
+        }
+        if (enrollmentsResult.status === 'fulfilled') {
+          const enrolledCourses = enrollmentsResult.value.enrollments.map((item, index) => {
+            const enrollment = asRecord(item);
+            const course = mapCourse(enrollment.course, index);
+            return {
+              ...course,
+              enrolledStudents: [asString(enrollment.studentId, nextStudent?.id ?? '')].filter(Boolean),
+            };
+          });
+          setCourses(enrolledCourses);
+        } else {
+          setCourses([]);
+        }
+      }).catch((error) => {
+        console.warn('Unable to load student schedule from API', error);
+        if (!mounted) return;
+        setStudent(null);
+        setCourses([]);
+      }).finally(() => {
+        if (mounted) setIsLoading(false);
+      });
+    } else if (user?.role === 'lecturer') {
+      api.courses
+        .lecturerSchedule()
+        .then((response) => {
+          if (!mounted) return;
+          setCourses(response.schedule.map(mapCourse));
+        })
+        .catch((error) => {
+          console.warn('Unable to load lecturer schedule from API', error);
+          if (mounted) setCourses([]);
+        })
+        .finally(() => {
+          if (mounted) setIsLoading(false);
+        });
+    } else {
+      setCourses([]);
+      setStudent(null);
+      setIsLoading(false);
+    }
+
+    return () => {
+      mounted = false;
+    };
+  }, [user?.role]);
+
+  const handleRequestMove = (item: ScheduleItem, targetDay: number, targetTime: string, mode: 'permanent' | 'one-time') => {
     toast.success(t.schedulePage.editSuccess, {
       description: `${t.schedulePage.editSuccessDesc} (${mode === 'permanent' ? t.schedulePage.permanent : t.schedulePage.todayOnly})`
     });
@@ -74,9 +156,42 @@ export default function Schedule() {
   endOfWeek.setDate(startOfWeek.getDate() + 4);
 
   if (user?.role === 'student') {
+    if (!student) {
+      return (
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="space-y-8 pb-10"
+        >
+          <div>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2"
+            >
+              <Calendar className="w-4 h-4 text-purple-500 dark:text-slate-400" />
+              <span>{t.schedulePage.semester}</span>
+            </motion.div>
+            <motion.h1
+              className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              {t.schedulePage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">{t.schedulePage.titleHighlight}</span>
+            </motion.h1>
+          </div>
+          <div className="rounded-3xl border border-dashed border-slate-200 bg-white/70 p-10 text-center text-slate-500 shadow-sm dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-400">
+            {isLoading ? 'กำลังโหลดตารางเรียนจากระบบ...' : 'ไม่พบข้อมูลตารางเรียนจากระบบ'}
+          </div>
+        </motion.div>
+      );
+    }
+
     // Correctly filter courses for the student
-    const studentCourses = mockCourses.filter(c =>
-      c.enrolledStudents.includes(mockStudent.id)
+    const studentCourses = courses.filter(c =>
+      c.enrolledStudents.includes(student.id) || c.enrolledStudents.includes(student.studentId)
     );
 
     const totalCredits = studentCourses.reduce((sum, c) => sum + c.credits, 0);
@@ -187,11 +302,21 @@ export default function Schedule() {
 
         {/* Timetable Card */}
         <motion.div variants={itemVariants} className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-6 shadow-sm dark:bg-slate-900/50">
-          <Timetable
-            courses={studentCourses}
-            semester={mockStudent.semester}
-            academicYear={mockStudent.academicYear}
-          />
+          {isLoading ? (
+            <div className="rounded-2xl border border-dashed border-slate-200 p-10 text-center text-sm font-medium text-slate-500 dark:border-slate-700 dark:text-slate-400">
+              กำลังโหลดตารางเรียนจากระบบ...
+            </div>
+          ) : studentCourses.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-slate-200 p-10 text-center text-sm font-medium text-slate-500 dark:border-slate-700 dark:text-slate-400">
+              ยังไม่มีรายวิชาที่ลงทะเบียนในระบบ
+            </div>
+          ) : (
+            <Timetable
+              courses={studentCourses}
+              semester={student.semester}
+              academicYear={student.academicYear}
+            />
+          )}
         </motion.div>
 
         {/* Today's Classes */}
@@ -201,31 +326,38 @@ export default function Schedule() {
               <Calendar className="w-5 h-5 text-purple-500 dark:text-slate-400" /> {t.schedulePage.todayClasses}
             </h3>
             <div className="space-y-3">
+              {!isLoading && studentCourses.length === 0 && (
+                <div className="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-6 text-center text-sm font-medium text-slate-500 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-400">
+                  ยังไม่มีคาบเรียนวันนี้จากระบบ
+                </div>
+              )}
               {studentCourses.slice(0, 3).map((course, index) => {
                 const slot = course.schedule?.[0];
+                const location = [slot?.room, slot?.building].filter(Boolean).join(' ');
+
                 return (
-                  <motion.div
-                    key={course.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all cursor-pointer group"
-                  >
-                    <div className="flex flex-col items-center justify-center bg-purple-50 text-purple-700 rounded-xl px-4 py-2 min-w-[80px] group-hover:bg-purple-500 group-hover:text-white transition-colors dark:text-slate-300 dark:bg-slate-800">
-                      <div className="text-sm font-bold">{slot?.startTime || '09:00'}</div>
-                      <div className="text-xs opacity-75">{slot?.endTime || '12:00'}</div>
+                <motion.div
+                  key={course.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all cursor-pointer group"
+                >
+                  <div className="flex flex-col items-center justify-center bg-purple-50 text-purple-700 rounded-xl px-4 py-2 min-w-[80px] group-hover:bg-purple-500 group-hover:text-white transition-colors dark:text-slate-300 dark:bg-slate-800">
+                    <div className="text-sm font-bold">{slot?.startTime || '--:--'}</div>
+                    <div className="text-xs opacity-75">{slot?.endTime || '--:--'}</div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-bold text-slate-800 dark:text-slate-200 group-hover:text-purple-600 transition-colors truncate">{course.name}</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-1">
+                      <MapPin className="w-3 h-3 shrink-0" />
+                      <span className="truncate">{location || '-'}</span>
                     </div>
-                    <div className="flex-1">
-                      <div className="font-bold text-slate-800 dark:text-slate-200 group-hover:text-purple-600 transition-colors truncate">{course.name}</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-1">
-                        <MapPin className="w-3 h-3" />
-                        {slot ? `ห้อง ${slot.room} ${slot.building}` : 'ห้อง 301 อาคาร DII'}
-                      </div>
-                    </div>
-                    <Badge variant="secondary" className="bg-purple-100 text-purple-600 group-hover:bg-white group-hover:text-purple-600 dark:text-slate-300 dark:bg-slate-800 flex-shrink-0">
-                      {t.schedulePage.inClass}
-                    </Badge>
-                  </motion.div>
+                  </div>
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-600 group-hover:bg-white group-hover:text-purple-600 dark:text-slate-300 dark:bg-slate-800 shrink-0">
+                    {t.schedulePage.inClass}
+                  </Badge>
+                </motion.div>
                 );
               })}
             </div>
@@ -300,7 +432,15 @@ export default function Schedule() {
       )}
 
       <motion.div variants={itemVariants} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 dark:bg-slate-900 dark:border-slate-700">
-        {isEditMode ? (
+        {isLoading ? (
+          <div className="rounded-2xl border border-dashed border-slate-200 p-10 text-center text-sm font-medium text-slate-500 dark:border-slate-700 dark:text-slate-400">
+            กำลังโหลดตารางสอนจากระบบ...
+          </div>
+        ) : courses.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-slate-200 p-10 text-center text-sm font-medium text-slate-500 dark:border-slate-700 dark:text-slate-400">
+            ไม่พบข้อมูลตารางสอนจากระบบ
+          </div>
+        ) : isEditMode ? (
           <DraggableSchedule
             initialSchedule={scheduleItems}
             editable={true}
@@ -308,9 +448,9 @@ export default function Schedule() {
           />
         ) : (
           <Timetable
-            courses={mockCourses.slice(0, 3)}
-            semester={1}
-            academicYear="2568"
+            courses={courses}
+            semester={courses[0]?.semester ?? 1}
+            academicYear={courses[0]?.academicYear ?? '2568'}
           />
         )}
       </motion.div>

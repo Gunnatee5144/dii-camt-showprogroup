@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { UserRole } from '@/types';
 
 interface RoleCardProps {
-  role: UserRole;
+  role: UserRole | 'teacher';
   title: string;
   description: string;
   icon: LucideIcon;

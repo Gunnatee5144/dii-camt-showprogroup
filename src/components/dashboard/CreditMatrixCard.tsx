@@ -17,7 +17,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 type ColKey = 'completed' | 'inProgress' | 'remaining';
 type RowKey = 'required' | 'ge' | 'free';
 
-interface CurriculumCourse {
+export interface CurriculumCourse {
     id: string;
     code: string;
     nameTH: string;
@@ -128,10 +128,19 @@ const CATEGORY_TOTALS: Record<RowKey, number> = {
     free: 6,
 };
 
+interface CreditMatrixCardProps {
+    courses?: CurriculumCourse[];
+    categoryTotals?: Partial<Record<RowKey, number>>;
+    gpax?: number;
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
-export function CreditMatrixCard() {
+export function CreditMatrixCard({ courses, categoryTotals, gpax }: CreditMatrixCardProps = {}) {
     const { language } = useLanguage();
     const isTH = language !== 'en';
+    const curriculum = useMemo(() => (courses ? courses : CURRICULUM), [courses]);
+    const totals = useMemo(() => ({ ...CATEGORY_TOTALS, ...categoryTotals }), [categoryTotals]);
+    const gpaxValue = gpax ?? GPAX_VALUE;
 
     const [sheetOpen, setSheetOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<RowKey | null>(null);
@@ -143,26 +152,26 @@ export function CreditMatrixCard() {
     // Calculate matrix data
     const matrix = useMemo(() => {
         const counts = {} as Record<RowKey, Record<ColKey, number>>;
-        (Object.keys(CATEGORY_TOTALS) as RowKey[]).forEach(cat => {
+        (Object.keys(totals) as RowKey[]).forEach(cat => {
             counts[cat] = { completed: 0, inProgress: 0, remaining: 0 };
         });
-        CURRICULUM.forEach(c => {
+        curriculum.forEach(c => {
             counts[c.category][c.status] += c.credits;
         });
         return counts;
-    }, []);
+    }, [curriculum, totals]);
 
-    const totalEarned = CURRICULUM.filter(c => c.status === 'completed').reduce((s, c) => s + c.credits, 0);
-    const totalOngoing = CURRICULUM.filter(c => c.status === 'inProgress').reduce((s, c) => s + c.credits, 0);
-    const totalRequired = Object.values(CATEGORY_TOTALS).reduce((s, v) => s + v, 0);
-    const totalRemaining = totalRequired - totalEarned - totalOngoing;
-    const completionPct = Math.round((totalEarned / totalRequired) * 100);
+    const totalEarned = curriculum.filter(c => c.status === 'completed').reduce((s, c) => s + c.credits, 0);
+    const totalOngoing = curriculum.filter(c => c.status === 'inProgress').reduce((s, c) => s + c.credits, 0);
+    const totalRequired = Object.values(totals).reduce((s, v) => s + v, 0);
+    const totalRemaining = Math.max(0, totalRequired - totalEarned - totalOngoing);
+    const completionPct = totalRequired > 0 ? Math.round((totalEarned / totalRequired) * 100) : 0;
 
     // Sheet course filtering
     const sheetCourses = useMemo(() => {
         let filtered = selectedCategory
-            ? CURRICULUM.filter(c => c.category === selectedCategory)
-            : CURRICULUM;
+            ? curriculum.filter(c => c.category === selectedCategory)
+            : curriculum;
 
         if (yearFilter !== 'all') {
             filtered = filtered.filter(c => c.year === yearFilter);
@@ -186,7 +195,7 @@ export function CreditMatrixCard() {
         }
 
         return filtered;
-    }, [selectedCategory, yearFilter, search, listTab]);
+    }, [curriculum, selectedCategory, yearFilter, search, listTab]);
 
     const sheetCredits = sheetCourses.reduce((s, c) => s + c.credits, 0);
 
@@ -338,12 +347,12 @@ export function CreditMatrixCard() {
 
                 {/* ── Category Cards ── */}
                 <div className="space-y-4">
-                    {(Object.keys(CATEGORY_TOTALS) as RowKey[]).map((category, idx) => {
-                        const total = CATEGORY_TOTALS[category];
+                    {(Object.keys(totals) as RowKey[]).map((category, idx) => {
+                        const total = totals[category];
                         const completed = matrix[category].completed;
                         const inProgress = matrix[category].inProgress;
                         const remaining = matrix[category].remaining;
-                        const pct = Math.round((completed / total) * 100);
+                        const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
 
                         const config = CATEGORY_CONFIG[category];
 
@@ -404,11 +413,11 @@ export function CreditMatrixCard() {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{isTH ? 'คะแนนเฉลี่ย' : 'GPA'}</p>
-                            <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">{GPAX_VALUE.toFixed(2)}</p>
+                            <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">{gpaxValue.toFixed(2)}</p>
                         </div>
                         <div className="text-right">
                             <Badge className="bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800">
-                                {GPAX_VALUE >= 3.5 ? '🏆 Distinction' : GPAX_VALUE >= 3.0 ? '⭐ Excellent' : '✅ Good'}
+                                {gpaxValue >= 3.5 ? '🏆 Distinction' : gpaxValue >= 3.0 ? '⭐ Excellent' : '✅ Good'}
                             </Badge>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">/ 4.00</p>
                         </div>

@@ -1,9 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Handshake, FileText, CheckCircle, Clock, Calendar, Download, Shield, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { api } from '@/lib/api';
+import { asDate, asRecord, asString } from '@/lib/live-data';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -15,7 +18,73 @@ const itemVariants = {
 };
 
 export default function Cooperation() {
+    const navigate = useNavigate();
     const { t } = useLanguage();
+    const [records, setRecords] = React.useState<Array<{ id: string; title: string; type: string; details: string; status: string; companyName: string; createdAt: Date; expiryDate?: Date }>>([]);
+    const [isLoading, setIsLoading] = React.useState(true);
+
+    React.useEffect(() => {
+        let mounted = true;
+
+        api.cooperation
+            .list()
+            .then((response) => {
+                if (!mounted) return;
+                const mapped = response.cooperation.map((item) => {
+                    const source = asRecord(item);
+                    const company = asRecord(source.company);
+                    return {
+                        id: asString(source.id, 'cooperation'),
+                        title: asString(source.title, t.cooperationPage.mouTitle),
+                        type: asString(source.type, 'MOU'),
+                        details: asString(source.details, t.cooperationPage.mouParties),
+                        status: asString(source.status, 'active'),
+                        companyName: asString(company.companyNameThai, asString(company.companyName, 'Partner')),
+                        createdAt: asDate(source.createdAt),
+                        expiryDate: source.expiryDate ? asDate(source.expiryDate) : undefined,
+                    };
+                });
+                setRecords(mapped);
+            })
+            .catch((error) => {
+                console.warn('Unable to load cooperation records from API', error);
+            })
+            .finally(() => {
+                if (mounted) setIsLoading(false);
+            });
+
+        return () => {
+            mounted = false;
+        };
+    }, [t.cooperationPage.mouParties, t.cooperationPage.mouTitle]);
+
+    const hasMou = records.length > 0;
+    const currentMou = records.find((record) => record.status === 'active') ?? records[0] ?? {
+        id: '-',
+        title: t.cooperationPage.mouTitle,
+        type: 'MOU',
+        details: t.common.noData,
+        status: 'none',
+        companyName: '-',
+        createdAt: new Date(),
+        expiryDate: new Date(),
+    };
+    const expiryDate = currentMou.expiryDate ?? new Date();
+    const remainingDays = Math.max(0, Math.ceil((expiryDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+    const activityRows = records.slice(0, 3).map((record) => ({
+        title: record.title,
+        date: record.createdAt.toLocaleDateString('th-TH', { dateStyle: 'medium' as const }),
+        desc: record.details,
+        icon: record.type.toLowerCase().includes('mou') ? Handshake : Calendar,
+    }));
+
+    const handleDownload = async () => {
+        if (!hasMou || !currentMou?.id) return;
+        const blob = await api.documents.cooperationSummary(currentMou.id);
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank', 'noopener,noreferrer');
+        window.setTimeout(() => URL.revokeObjectURL(url), 5000);
+    };
 
     return (
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8 pb-10">
@@ -42,33 +111,35 @@ export default function Cooperation() {
                                 <div className="p-2.5 rounded-xl bg-white/20 backdrop-blur-sm dark:bg-slate-900/50"><Shield className="w-6 h-6" /></div>
                                 <div>
                                     <h2 className="text-2xl font-bold">{t.cooperationPage.mouStatus}</h2>
-                                    <p className="text-emerald-100 text-sm mt-0.5">{t.cooperationPage.mouTitle}</p>
+                                    <p className="text-emerald-100 text-sm mt-0.5">{currentMou.title}</p>
                                 </div>
                             </div>
                             <p className="text-emerald-100 text-sm max-w-2xl">
-                                {t.cooperationPage.mouParties}
+                                {currentMou.details}
                             </p>
                         </div>
-                        <Badge className="bg-white/20 text-white border-white/30 text-base px-4 py-1.5 backdrop-blur-sm self-start dark:bg-slate-900/50">Valid</Badge>
+                        <Badge className="bg-white/20 text-white border-white/30 text-base px-4 py-1.5 backdrop-blur-sm self-start dark:bg-slate-900/50">{currentMou.status}</Badge>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
                         {[
-                            { label: t.cooperationPage.contractNo, value: 'MOU-2567/042' },
+                            { label: t.cooperationPage.contractNo, value: currentMou.id },
                             { label: t.cooperationPage.startDate, value: '1 มกราคม 2567' },
                             { label: t.cooperationPage.endDate, value: '31 ธันวาคม 2569', sub: `${t.cooperationPage.timeRemaining} 1 ปี 9 เดือน` },
                         ].map((item, i) => (
                             <div key={i} className="p-4 rounded-2xl bg-white/10 backdrop-blur-sm dark:bg-slate-900/50">
                                 <p className="text-sm text-emerald-200">{item.label}</p>
-                                <p className="font-bold text-lg mt-1">{item.value}</p>
-                                {item.sub && <p className="text-xs text-amber-200 mt-1">{item.sub}</p>}
+                                <p className="font-bold text-lg mt-1">
+                                    {i === 1 ? currentMou.createdAt.toLocaleDateString('th-TH', { dateStyle: 'medium' }) : i === 2 ? expiryDate.toLocaleDateString('th-TH', { dateStyle: 'medium' }) : item.value}
+                                </p>
+                                {i === 2 && <p className="text-xs text-amber-200 mt-1">{t.cooperationPage.timeRemaining} {remainingDays} วัน</p>}
                             </div>
                         ))}
                     </div>
                     <div className="flex gap-3 mt-6">
-                        <Button className="bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm rounded-xl border border-white/20 dark:bg-slate-900/50">
+                        <Button disabled={!hasMou || isLoading} onClick={handleDownload} className="bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm rounded-xl border border-white/20 dark:bg-slate-900/50">
                             <Download className="w-4 h-4 mr-2" /> {t.cooperationPage.downloadMOU}
                         </Button>
-                        <Button className="bg-white text-emerald-700 hover:bg-emerald-50 rounded-xl shadow-lg dark:text-slate-300 dark:bg-slate-900 dark:bg-slate-800">
+                        <Button onClick={() => navigate('/messages')} className="bg-white text-emerald-700 hover:bg-emerald-50 rounded-xl shadow-lg dark:text-slate-300 dark:bg-slate-900 dark:bg-slate-800">
                             {t.cooperationPage.renewContract}
                         </Button>
                     </div>
@@ -83,22 +154,23 @@ export default function Cooperation() {
                         <Clock className="w-5 h-5 text-orange-500 dark:text-slate-400" /> {t.cooperationPage.activityHistory}
                     </h3>
                     <div className="space-y-3">
-                        {[
-                            { title: t.cooperationPage.activity1Title, date: t.cooperationPage.activity1Date, desc: t.cooperationPage.activity1Desc, icon: Users },
-                            { title: t.cooperationPage.activity2Title, date: t.cooperationPage.activity2Date, desc: t.cooperationPage.activity2Desc, icon: Calendar },
-                            { title: t.cooperationPage.activity3Title, date: t.cooperationPage.activity3Date, desc: t.cooperationPage.activity3Desc, icon: Handshake },
-                        ].map((item, idx) => (
+                        {activityRows.map((row, idx) => (
                             <motion.div key={idx} whileHover={{ x: 4 }} className="flex items-start gap-4 p-4 rounded-2xl hover:bg-white border border-transparent hover:border-slate-100 hover:shadow-sm transition-all dark:bg-slate-900 dark:border-slate-700">
                                 <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white flex-shrink-0 shadow-lg shadow-orange-200">
-                                    <item.icon className="w-5 h-5" />
+                                    <row.icon className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h4 className="font-semibold text-slate-800 dark:text-slate-200">{item.title}</h4>
-                                    <p className="text-xs text-slate-400 mb-1">{item.date}</p>
-                                    <p className="text-sm text-slate-600 dark:text-slate-300">{item.desc}</p>
+                                    <h4 className="font-semibold text-slate-800 dark:text-slate-200">{row.title}</h4>
+                                    <p className="text-xs text-slate-400 mb-1">{row.date}</p>
+                                    <p className="text-sm text-slate-600 dark:text-slate-300">{row.desc}</p>
                                 </div>
                             </motion.div>
                         ))}
+                        {activityRows.length === 0 && (
+                            <div className="rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 p-6 text-center text-sm text-slate-500 dark:text-slate-400">
+                                {isLoading ? 'กำลังโหลดข้อมูลความร่วมมือ...' : t.common.noData}
+                            </div>
+                        )}
                     </div>
                 </motion.div>
 
@@ -122,7 +194,7 @@ export default function Cooperation() {
                             <p>✉️ somchai@cmu.ac.th</p>
                         </div>
                     </div>
-                    <Button className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200 h-11">
+                    <Button onClick={() => navigate('/messages')} className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200 h-11">
                         {t.cooperationPage.sendMessage}
                     </Button>
                 </motion.div>

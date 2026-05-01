@@ -1,13 +1,59 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { GraduationCap, Search, Filter, Eye, Mail, Star, Code, Award, ChevronRight, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { mockStudents, mockCompany } from '@/lib/mockData';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { api } from '@/lib/api';
+import { asArray, asNumber, asRecord, asString } from '@/lib/live-data';
+import { mapStudent } from '@/lib/live-mappers';
+import type { Student } from '@/types';
+
+type StudentRow = Student;
+type StudentSkill = StudentRow['skills'][number];
+
+const normalizeSkillCategory = (value: unknown): StudentSkill['category'] => {
+    const category = asString(value, 'programming');
+    if (category === 'framework' || category === 'tool' || category === 'language' || category === 'soft_skill') {
+        return category;
+    }
+    return 'programming';
+};
+
+const mapVisibleStudent = (value: unknown, index: number): StudentRow => {
+    const source = asRecord(value);
+    const student = mapStudent(value, index);
+    return {
+        ...student,
+        nameThai: asString(source.nameThai, asString(source.name, student.nameThai)),
+        gpa: asNumber(source.gpa, asNumber(source.gpax, student.gpa)),
+        gpax: asNumber(source.gpax, student.gpax),
+        skills: asArray(source.skills).length
+            ? asArray(source.skills).map((skill) => {
+                if (typeof skill === 'string') {
+                    return { name: skill, category: 'programming', level: 'intermediate' };
+                }
+                const item = asRecord(skill);
+                return {
+                    name: asString(item.name, 'Skill'),
+                    category: normalizeSkillCategory(item.category),
+                    level: asString(item.level, 'intermediate') as StudentRow['skills'][number]['level'],
+                    verifiedBy: asString(item.verifiedBy, ''),
+                };
+            })
+            : student.skills,
+        dataConsent: {
+            ...student.dataConsent,
+            allowPortfolioSharing: true,
+            profileVisibility: 'public',
+        },
+    };
+};
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -20,17 +66,37 @@ const itemVariants = {
 };
 
 export default function StudentProfiles() {
+    const navigate = useNavigate();
     const { t } = useLanguage();
     const [searchQuery, setSearchQuery] = React.useState('');
     const [yearFilter, setYearFilter] = React.useState('all');
     const [skillFilter, setSkillFilter] = React.useState('all');
+    const [students, setStudents] = React.useState<StudentRow[]>([]);
+    const [isLoading, setIsLoading] = React.useState(true);
+    const [selectedStudent, setSelectedStudent] = React.useState<StudentRow | null>(null);
 
-    const accessibleStudents = mockStudents.filter(s =>
-        s.dataConsent.allowPortfolioSharing &&
-        (s.dataConsent.profileVisibility === 'public' ||
-            s.dataConsent.profileVisibility === 'university' ||
-            mockCompany.studentViewConsent.includes(s.id))
-    );
+    React.useEffect(() => {
+        let mounted = true;
+
+        api.students
+            .profiles()
+            .then((response) => {
+                if (!mounted) return;
+                setStudents(response.profiles.map(mapVisibleStudent));
+            })
+            .catch((error) => {
+                console.warn('Unable to load student profiles from API', error);
+            })
+            .finally(() => {
+                if (mounted) setIsLoading(false);
+            });
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    const accessibleStudents = students;
 
     const filteredStudents = accessibleStudents.filter(student => {
         const matchesSearch = student.nameThai.includes(searchQuery) || student.name.includes(searchQuery);
@@ -216,15 +282,58 @@ export default function StudentProfiles() {
                                     )}
 
                                     <div className="flex gap-2 pt-4 border-t">
-                                        <Button size="sm" className="flex-1"><Eye className="w-4 h-4 mr-1" />{t.studentProfiles.viewProfile}</Button>
-                                        <Button size="sm" variant="outline"><Mail className="w-4 h-4" /></Button>
+                                        <Button size="sm" className="flex-1" onClick={() => setSelectedStudent(student)}><Eye className="w-4 h-4 mr-1" />{t.studentProfiles.viewProfile}</Button>
+                                        <Button size="sm" variant="outline" onClick={() => navigate('/messages')}><Mail className="w-4 h-4" /></Button>
                                     </div>
                                 </CardContent>
                             </Card>
                         </motion.div>
                     ))}
+                    {isLoading && (
+                        <div className="md:col-span-2 lg:col-span-3 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                            กำลังโหลดโปรไฟล์นักศึกษา...
+                        </div>
+                    )}
+                    {!isLoading && filteredStudents.length === 0 && (
+                        <div className="md:col-span-2 lg:col-span-3 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                            ยังไม่มีโปรไฟล์นักศึกษาจาก API หรือไม่ตรงกับตัวกรอง
+                        </div>
+                    )}
                 </div>
             </motion.div>
+
+            <Dialog open={Boolean(selectedStudent)} onOpenChange={(open) => !open && setSelectedStudent(null)}>
+                <DialogContent className="sm:max-w-[640px]">
+                    {selectedStudent && (
+                        <>
+                            <DialogHeader>
+                                <DialogTitle>{selectedStudent.nameThai || selectedStudent.name}</DialogTitle>
+                                <DialogDescription>{selectedStudent.studentId} / {selectedStudent.major} / GPA {selectedStudent.gpa.toFixed(2)}</DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                                    <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3"><div className="text-slate-500">Year</div><div className="font-bold">{selectedStudent.year}</div></div>
+                                    <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3"><div className="text-slate-500">GPA</div><div className="font-bold">{selectedStudent.gpa.toFixed(2)}</div></div>
+                                    <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3"><div className="text-slate-500">Credits</div><div className="font-bold">{selectedStudent.earnedCredits}/{selectedStudent.requiredCredits}</div></div>
+                                    <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3"><div className="text-slate-500">Status</div><div className="font-bold">{selectedStudent.academicStatus}</div></div>
+                                </div>
+                                <div>
+                                    <div className="font-semibold mb-2">{t.studentProfiles.skillsLabel}</div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {selectedStudent.skills.map((skill) => <Badge key={`${skill.name}-${skill.level}`} variant="secondary">{skill.name} / {skill.level}</Badge>)}
+                                        {selectedStudent.skills.length === 0 && <span className="text-sm text-slate-500">-</span>}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div className="font-semibold mb-1">Portfolio</div>
+                                    <p className="text-sm text-slate-600 dark:text-slate-300">{selectedStudent.portfolio?.summaryThai || selectedStudent.portfolio?.summary || '-'}</p>
+                                </div>
+                                <Button className="w-full" onClick={() => navigate('/messages')}><Mail className="w-4 h-4 mr-2" />ติดต่อผู้สมัคร</Button>
+                            </div>
+                        </>
+                    )}
+                </DialogContent>
+            </Dialog>
         </motion.div>
     );
 }

@@ -8,8 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DraggableSchedule, ScheduleItem } from '@/components/schedule/DraggableSchedule';
 import { toast } from 'sonner';
+import { api } from '@/lib/api';
+import { asArray, asNumber, asRecord, asString } from '@/lib/live-data';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -20,42 +23,197 @@ const itemVariants = {
     visible: { opacity: 1, y: 0 },
 };
 
-const initialScheduleData: ScheduleItem[] = [
-    { id: '1', day: 1, startTime: '09:00', endTime: '12:00', courseCode: 'DII302', courseName: 'Advanced AI', room: 'DII-301' },
-    { id: '2', day: 2, startTime: '13:00', endTime: '16:00', courseCode: 'DII305', courseName: 'Software Arch', room: 'DII-302' },
-    { id: '3', day: 4, startTime: '09:00', endTime: '12:00', courseCode: 'DII101', courseName: 'Intro to CS', room: 'CAMT-411' },
-    { id: '4', day: 3, startTime: '13:00', endTime: '16:00', courseCode: 'DII202', courseName: 'Database', room: 'DII-301' },
-    { id: '5', day: 5, startTime: '09:00', endTime: '12:00', courseCode: 'DII400', courseName: 'Senior Project', room: 'Meeting Room' },
-];
-
-const mockRequests = [
-    { id: 101, lecturer: 'อ.สมชาย', courseCode: 'DII302', courseName: 'Advanced AI', oldTime: 'จันทร์ 09:00', newTime: 'อังคาร 13:00', reason: 'ติดภารกิจราชการ', type: 'one-time', targetDate: '28 ม.ค. 2026' },
-    { id: 102, lecturer: 'อ.วิชัย', courseCode: 'DII101', courseName: 'Intro to CS', oldTime: 'พฤหัส 09:00', newTime: 'ศุกร์ 09:00', reason: 'ห้องเรียนแอร์เสีย', type: 'permanent' },
-];
+const dayToIndex = (day: unknown) => {
+    const value = asString(day).toLowerCase();
+    const map: Record<string, number> = {
+        monday: 1,
+        mon: 1,
+        tuesday: 2,
+        tue: 2,
+        wednesday: 3,
+        wed: 3,
+        thursday: 4,
+        thu: 4,
+        friday: 5,
+        fri: 5,
+    };
+    return map[value] ?? asNumber(day, 1);
+};
 
 export default function ScheduleManagement() {
     const { t } = useLanguage();
     const [isEditMode, setIsEditMode] = useState(false);
-    const [schedule, setSchedule] = useState(initialScheduleData);
-    const [requests, setRequests] = useState(mockRequests);
+    const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
+    const [requests, setRequests] = useState<Array<{ id: string; lecturer: string; courseCode: string; courseName: string; oldTime: string; newTime: string; reason: string; type: string; targetDate?: string }>>([]);
+    const [rooms, setRooms] = useState<Array<{ id: string; code: string; name: string; building: string; room: string; type: string; capacity: number; status: string }>>([]);
+    const [isRoomDialogOpen, setIsRoomDialogOpen] = useState(false);
+    const [roomForm, setRoomForm] = useState({
+        code: '',
+        name: '',
+        building: 'DII',
+        room: '',
+        floor: '',
+        type: 'classroom',
+        capacity: '30',
+        notes: '',
+    });
 
-    const rooms = [
-        { name: 'DII-301 (Lecture)', capacity: 60, status: 'available' },
-        { name: 'DII-302 (Lab Mac)', capacity: 40, status: 'occupied' },
-        { name: 'DII-303 (Meeting)', capacity: 20, status: 'available' },
-        { name: 'CAMT-411 (Auditorium)', capacity: 150, status: 'maintenance' },
-    ];
+    React.useEffect(() => {
+        let isMounted = true;
 
-    const handleApprove = (req: { id: number; lecturer: string }) => {
+        Promise.allSettled([api.courses.list(), api.facilities.list(), api.requests.list()])
+            .then(([coursesResponse, facilitiesResponse, requestsResponse]) => {
+                if (!isMounted) return;
+
+                if (coursesResponse.status === 'fulfilled') {
+                    const mappedSchedule = coursesResponse.value.courses.flatMap((item, courseIndex) => {
+                        const course = asRecord(item);
+                        const sections = asArray(course.sections);
+                        const slots = sections.length
+                            ? sections.flatMap((section) => asArray(asRecord(section).schedule).map((slot) => ({ slot, section })))
+                            : asArray(course.schedule).map((slot) => ({ slot, section: {} }));
+
+                        return slots.map(({ slot, section }, slotIndex) => {
+                            const scheduleSlot = asRecord(slot);
+                            const sectionRecord = asRecord(section);
+                            const facility = asRecord(sectionRecord.facility);
+                            return {
+                                id: `${asString(course.id, `course-${courseIndex}`)}-${slotIndex}`,
+                                day: dayToIndex(scheduleSlot.day),
+                                startTime: asString(scheduleSlot.startTime, '09:00'),
+                                endTime: asString(scheduleSlot.endTime, '12:00'),
+                                courseCode: asString(course.code, 'DII'),
+                                courseName: asString(course.nameThai, asString(course.name, '-')),
+                                room: asString(sectionRecord.room, asString(facility.room, asString(scheduleSlot.room, '-'))),
+                            };
+                        });
+                    });
+                    setSchedule(mappedSchedule);
+                }
+
+                if (facilitiesResponse.status === 'fulfilled') {
+                    const mappedRooms = facilitiesResponse.value.facilities.map((item) => {
+                        const facility = asRecord(item);
+                        const sectionCount = asArray(facility.sections).length;
+                        return {
+                            id: asString(facility.id),
+                            code: asString(facility.code),
+                            name: `${asString(facility.code, asString(facility.room, '-'))} (${asString(facility.type, 'Room')})`,
+                            building: asString(facility.building),
+                            room: asString(facility.room),
+                            type: asString(facility.type, 'Room'),
+                            capacity: asNumber(facility.capacity, 0),
+                            status: facility.isActive === false
+                                ? 'maintenance'
+                                : sectionCount > 0 ? 'occupied' : 'available',
+                        };
+                    });
+                    setRooms(mappedRooms);
+                }
+
+                if (requestsResponse.status === 'fulfilled') {
+                    const mappedRequests = requestsResponse.value.requests
+                        .filter((item) => {
+                            const request = asRecord(item);
+                            const text = `${asString(request.type)} ${asString(request.title)} ${asString(request.description)}`.toLowerCase();
+                            return text.includes('schedule') || text.includes('section') || text.includes('room') || text.includes('ตาราง') || text.includes('ห้อง');
+                        })
+                        .map((item, index) => {
+                            const request = asRecord(item);
+                            const student = asRecord(request.student);
+                            const studentUser = asRecord(student.user);
+                            return {
+                                id: asString(request.id, String(index + 1)),
+                                lecturer: asString(studentUser.nameThai, asString(studentUser.name, '-')),
+                                courseCode: asString(request.type, '-'),
+                                courseName: asString(request.title, '-'),
+                                oldTime: '-',
+                                newTime: '-',
+                                reason: asString(request.description, '-'),
+                                type: 'one-time',
+                                targetDate: asString(request.submittedAt, ''),
+                            };
+                        });
+                    setRequests(mappedRequests);
+                }
+            })
+            .catch(() => undefined);
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    const handleApprove = async (req: { id: string; lecturer: string }) => {
+        try {
+            await api.requests.updateStatus(String(req.id), { status: 'approved' });
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Unable to approve request');
+            return;
+        }
         toast.success(`${t.scheduleManagementPage.approveSuccess} - ${req.lecturer}`, {
             description: t.scheduleManagementPage.approveDesc
         });
         setRequests(prev => prev.filter(r => r.id !== req.id));
     };
 
-    const handleReject = (id: number) => {
+    const handleReject = async (id: string) => {
+        try {
+            await api.requests.updateStatus(String(id), { status: 'rejected' });
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Unable to reject request');
+            return;
+        }
         toast.error(t.scheduleManagementPage.rejectSuccess);
         setRequests(prev => prev.filter(r => r.id !== id));
+    };
+
+    const createRoom = async () => {
+        if (!roomForm.code.trim() || !roomForm.name.trim() || !roomForm.building.trim()) {
+            toast.error('กรุณากรอกข้อมูลห้องให้ครบ');
+            return;
+        }
+
+        try {
+            const response = await api.facilities.create({
+                code: roomForm.code,
+                name: roomForm.name,
+                building: roomForm.building,
+                room: roomForm.room || undefined,
+                floor: roomForm.floor || undefined,
+                type: roomForm.type,
+                capacity: Number(roomForm.capacity || 0),
+                isActive: true,
+                notes: roomForm.notes || undefined,
+            });
+            const facility = asRecord(response.facility);
+            setRooms((current) => [{
+                id: asString(facility.id),
+                code: asString(facility.code),
+                name: `${asString(facility.code)} (${asString(facility.type, 'Room')})`,
+                building: asString(facility.building),
+                room: asString(facility.room),
+                type: asString(facility.type),
+                capacity: asNumber(facility.capacity, 0),
+                status: 'available',
+            }, ...current]);
+            setRoomForm({ code: '', name: '', building: 'DII', room: '', floor: '', type: 'classroom', capacity: '30', notes: '' });
+            setIsRoomDialogOpen(false);
+            toast.success('เพิ่มห้องแล้ว');
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Unable to create room');
+        }
+    };
+
+    const toggleRoomStatus = async (room: { id: string; status: string }) => {
+        try {
+            const isActive = room.status === 'maintenance';
+            await api.facilities.update(room.id, { isActive });
+            setRooms((current) => current.map((item) => item.id === room.id ? { ...item, status: isActive ? 'available' : 'maintenance' } : item));
+            toast.success(isActive ? 'เปิดใช้งานห้องแล้ว' : 'ปิดใช้งานห้องแล้ว');
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Unable to update room');
+        }
     };
 
     return (
@@ -72,7 +230,7 @@ export default function ScheduleManagement() {
                     </motion.h1>
                 </div>
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                    <Button className="rounded-xl bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-200 h-11">
+                    <Button onClick={() => setIsRoomDialogOpen(true)} className="rounded-xl bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-200 h-11">
                         <Plus className="w-4 h-4 mr-2" /> {t.scheduleManagementPage.bookRoom}
                     </Button>
                 </motion.div>
@@ -130,11 +288,18 @@ export default function ScheduleManagement() {
                             <MapPin className="w-3.5 h-3.5" /> {t.scheduleManagementPage.capacity} {room.capacity} {t.scheduleManagementPage.seats}
                         </p>
                         <div className="flex gap-2">
-                            <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs">{t.scheduleManagementPage.scheduleTab}</Button>
-                            <Button size="sm" className="flex-1 rounded-xl text-xs bg-purple-600 hover:bg-purple-700">{t.scheduleManagementPage.bookingTab}</Button>
+                            <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs" onClick={() => setIsEditMode(true)}>{t.scheduleManagementPage.scheduleTab}</Button>
+                            <Button size="sm" className="flex-1 rounded-xl text-xs bg-purple-600 hover:bg-purple-700" onClick={() => toggleRoomStatus(room)}>
+                                {room.status === 'maintenance' ? 'เปิดใช้' : 'ปิดใช้'}
+                            </Button>
                         </div>
                     </motion.div>
                 ))}
+                {rooms.length === 0 && (
+                    <div className="col-span-2 lg:col-span-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">
+                        ยังไม่มีข้อมูลห้องจากระบบ
+                    </div>
+                )}
             </motion.div>
 
             {/* Schedule */}
@@ -160,6 +325,52 @@ export default function ScheduleManagement() {
                 )}
                 <DraggableSchedule initialSchedule={schedule} editable={isEditMode} />
             </motion.div>
+
+            <Dialog open={isRoomDialogOpen} onOpenChange={setIsRoomDialogOpen}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>เพิ่มห้อง/ทรัพยากรการเรียน</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+                        <div className="space-y-2">
+                            <Label>รหัสห้อง</Label>
+                            <Input value={roomForm.code} onChange={(event) => setRoomForm({ ...roomForm, code: event.target.value })} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>ชื่อห้อง</Label>
+                            <Input value={roomForm.name} onChange={(event) => setRoomForm({ ...roomForm, name: event.target.value })} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>อาคาร</Label>
+                            <Input value={roomForm.building} onChange={(event) => setRoomForm({ ...roomForm, building: event.target.value })} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>เลขห้อง</Label>
+                            <Input value={roomForm.room} onChange={(event) => setRoomForm({ ...roomForm, room: event.target.value })} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>ชั้น</Label>
+                            <Input value={roomForm.floor} onChange={(event) => setRoomForm({ ...roomForm, floor: event.target.value })} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>ประเภท</Label>
+                            <Input value={roomForm.type} onChange={(event) => setRoomForm({ ...roomForm, type: event.target.value })} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>ความจุ</Label>
+                            <Input type="number" value={roomForm.capacity} onChange={(event) => setRoomForm({ ...roomForm, capacity: event.target.value })} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>หมายเหตุ</Label>
+                            <Input value={roomForm.notes} onChange={(event) => setRoomForm({ ...roomForm, notes: event.target.value })} />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsRoomDialogOpen(false)}>ยกเลิก</Button>
+                        <Button onClick={createRoom} className="bg-purple-600 hover:bg-purple-700">บันทึก</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </motion.div>
     );
 }

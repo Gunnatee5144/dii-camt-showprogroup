@@ -7,6 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { api } from '@/lib/api';
+import { asDate, asRecord, asString, roleToClient } from '@/lib/live-data';
+import { toast } from 'sonner';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -18,19 +21,51 @@ const itemVariants = {
     visible: { opacity: 1, y: 0 },
 };
 
-const mockAuditLogs = [
-    { id: 'LOG001', userId: 'STU001', userName: 'สมชาย ใจดี', userRole: 'student', action: 'login', resource: 'auth', timestamp: new Date('2026-01-09T08:30:00'), status: 'success' },
-    { id: 'LOG002', userId: 'LEC001', userName: 'ดร.สมศักดิ์ วิชาการ', userRole: 'lecturer', action: 'update_grade', resource: 'grades', timestamp: new Date('2026-01-09T09:15:00'), status: 'success' },
-    { id: 'LOG003', userId: 'STA001', userName: 'สมหญิง รักงาน', userRole: 'staff', action: 'approve_request', resource: 'requests', timestamp: new Date('2026-01-09T10:00:00'), status: 'success' },
-    { id: 'LOG004', userId: 'COM001', userName: 'Tech Innovation', userRole: 'company', action: 'view_student', resource: 'students', timestamp: new Date('2026-01-09T11:30:00'), status: 'success' },
-    { id: 'LOG005', userId: 'ADM001', userName: 'ผู้ดูแลระบบ', userRole: 'admin', action: 'create_user', resource: 'users', timestamp: new Date('2026-01-09T14:00:00'), status: 'success' },
-    { id: 'LOG006', userId: 'STU002', userName: 'สุดา มณี', userRole: 'student', action: 'login', resource: 'auth', timestamp: new Date('2026-01-09T14:30:00'), status: 'failed' },
-];
+type AuditLogRow = {
+    id: string;
+    userId: string;
+    userName: string;
+    userRole: string;
+    action: string;
+    resource: string;
+    timestamp: Date;
+    status: string;
+};
 
 export default function Audit() {
     const { t } = useLanguage();
     const [searchQuery, setSearchQuery] = React.useState('');
     const [roleFilter, setRoleFilter] = React.useState('all');
+    const [auditLogs, setAuditLogs] = React.useState<AuditLogRow[]>([]);
+
+    React.useEffect(() => {
+        let isMounted = true;
+
+        api.audit.list()
+            .then((response) => {
+                if (!isMounted) return;
+                const logs = response.logs.map((item, index) => {
+                    const log = asRecord(item);
+                    const user = asRecord(log.user);
+                    return {
+                        id: asString(log.id, `LOG${index + 1}`),
+                        userId: asString(log.userId, asString(user.id, '-')),
+                        userName: asString(user.nameThai, asString(user.name, '-')),
+                        userRole: roleToClient(user.role),
+                        action: asString(log.action, '-').toLowerCase(),
+                        resource: asString(log.resource, '-'),
+                        timestamp: asDate(log.timestamp),
+                        status: asString(log.status, 'success'),
+                    };
+                });
+                setAuditLogs(logs);
+            })
+            .catch(() => undefined);
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     const getActionBadge = (action: string) => {
         switch (action) {
@@ -54,11 +89,33 @@ export default function Audit() {
         }
     };
 
-    const filteredLogs = mockAuditLogs.filter(log => {
+    const filteredLogs = auditLogs.filter(log => {
         const matchesSearch = log.userName.includes(searchQuery) || log.action.includes(searchQuery);
         const matchesRole = roleFilter === 'all' || log.userRole === roleFilter;
         return matchesSearch && matchesRole;
     });
+
+    const exportLogs = () => {
+        const rows = filteredLogs.map((log) => [
+            log.id,
+            log.userId,
+            log.userName,
+            log.userRole,
+            log.action,
+            log.resource,
+            log.status,
+            log.timestamp.toISOString(),
+        ]);
+        const csv = [['id', 'userId', 'userName', 'role', 'action', 'resource', 'status', 'timestamp'], ...rows]
+            .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+            .join('\n');
+        const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'audit-logs.csv';
+        link.click();
+        URL.revokeObjectURL(url);
+    };
 
     return (
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8 pb-10">
@@ -84,7 +141,7 @@ export default function Audit() {
                 </div>
 
                 <motion.div className="flex gap-3" variants={itemVariants}>
-                    <Button variant="outline" className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-white hover:text-indigo-600 dark:text-slate-300 dark:bg-slate-900">
+                    <Button variant="outline" onClick={exportLogs} className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-white hover:text-indigo-600 dark:text-slate-300 dark:bg-slate-900">
                         <Download className="w-4 h-4 mr-2" />{t.audit.exportLabel}
                     </Button>
                 </motion.div>
@@ -105,7 +162,7 @@ export default function Audit() {
                             </div>
                             <span className="font-medium text-white/90">{t.audit.totalLabel}</span>
                         </div>
-                        <div className="text-5xl font-bold tracking-tight">{mockAuditLogs.length}</div>
+                        <div className="text-5xl font-bold tracking-tight">{auditLogs.length}</div>
                         <div className="mt-3 text-sm text-indigo-100 flex items-center gap-1">
                             <Sparkles className="w-4 h-4" />
                             {t.audit.logEntries}
@@ -125,7 +182,7 @@ export default function Audit() {
                             </div>
                             <span className="font-medium text-slate-600 dark:text-slate-300">{t.audit.success}</span>
                         </div>
-                        <div className="text-4xl font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 transition-colors">{mockAuditLogs.filter(l => l.status === 'success').length}</div>
+                        <div className="text-4xl font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 transition-colors">{auditLogs.filter(l => l.status === 'success').length}</div>
                         <div className="mt-3 text-sm text-slate-400">{t.audit.successDesc}</div>
                     </div>
                 </motion.div>
@@ -142,7 +199,7 @@ export default function Audit() {
                             </div>
                             <span className="font-medium text-slate-600 dark:text-slate-300">{t.audit.failed}</span>
                         </div>
-                        <div className="text-4xl font-bold text-slate-900 dark:text-white group-hover:text-red-600 transition-colors">{mockAuditLogs.filter(l => l.status === 'failed').length}</div>
+                        <div className="text-4xl font-bold text-slate-900 dark:text-white group-hover:text-red-600 transition-colors">{auditLogs.filter(l => l.status === 'failed').length}</div>
                         <div className="mt-3 text-sm text-slate-400">{t.audit.failedDesc}</div>
                     </div>
                 </motion.div>
@@ -159,7 +216,7 @@ export default function Audit() {
                             </div>
                             <span className="font-medium text-slate-600 dark:text-slate-300">{t.audit.todayLabel}</span>
                         </div>
-                        <div className="text-4xl font-bold text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">{mockAuditLogs.length}</div>
+                        <div className="text-4xl font-bold text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">{auditLogs.length}</div>
                         <div className="mt-3 text-sm text-slate-400">{t.audit.todayDesc}</div>
                     </div>
                 </motion.div>
@@ -212,7 +269,7 @@ export default function Audit() {
                                     <div className="flex items-center gap-3">
                                         {getActionBadge(log.action)}
                                         <Badge variant="outline">{log.resource}</Badge>
-                                        <Button size="sm" variant="ghost"><Eye className="w-4 h-4" /></Button>
+                                        <Button size="sm" variant="ghost" onClick={() => toast.info(`${log.action} • ${log.resource} • ${log.status}`)}><Eye className="w-4 h-4" /></Button>
                                     </div>
                                 </motion.div>
                             ))}

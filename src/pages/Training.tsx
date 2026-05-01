@@ -13,6 +13,9 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { api } from '@/lib/api';
+import { asArray, asDate, asNumber, asRecord, asString } from '@/lib/live-data';
+import { toast } from 'sonner';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -137,12 +140,118 @@ const playerStats = {
   ]
 };
 
+type QuestRow = {
+  id: string;
+  type: string;
+  status: string;
+  title: string;
+  titleEn: string;
+  description: string;
+  descriptionEn: string;
+  assignedBy: string;
+  assignedByEn: string;
+  assignerType: string;
+  xp: number;
+  coins: number;
+  deadline: string;
+  progress: number;
+  difficulty: string;
+  category: string;
+  groupSize?: number;
+  groupMembers?: string[];
+  tasks: Array<{ id: string; title: string; titleEn: string; done: boolean }>;
+};
+
+type PlayerStats = typeof playerStats;
+
 export default function Training() {
   const { t, language } = useLanguage();
   const { user } = useAuth();
-  const [selectedQuest, setSelectedQuest] = useState<typeof mockQuests[0] | null>(null);
+  const [quests, setQuests] = useState<QuestRow[]>(mockQuests);
+  const [stats, setStats] = useState<PlayerStats>(playerStats);
+  const [selectedQuest, setSelectedQuest] = useState<QuestRow | null>(null);
   const [activeTab, setActiveTab] = useState('all');
   const tr = t.training;
+
+  const loadLiveData = React.useCallback(async () => {
+    const [questsResponse, statsResponse] = await Promise.allSettled([
+      api.quests.list(),
+      api.player.stats(),
+    ]);
+
+    if (questsResponse.status === 'fulfilled') {
+      const mapped = questsResponse.value.quests.map((item, index) => {
+        const quest = asRecord(item);
+        const fallback = mockQuests[index % mockQuests.length];
+        const enrollments = asArray(quest.enrollments);
+        const enrollment = asRecord(enrollments[0]);
+        const completedTasks = asArray<string>(enrollment.completedTasks);
+        const tasks = asArray(quest.tasks).map((taskItem, taskIndex) => {
+          const task = asRecord(taskItem);
+          const id = asString(task.id, `t${taskIndex + 1}`);
+          return {
+            id,
+            title: asString(task.title, fallback.tasks[taskIndex]?.title ?? `Task ${taskIndex + 1}`),
+            titleEn: asString(task.titleEn, fallback.tasks[taskIndex]?.titleEn ?? `Task ${taskIndex + 1}`),
+            done: completedTasks.includes(id),
+          };
+        });
+        const status = asString(enrollment.status, asDate(quest.deadline) > new Date() ? 'available' : 'completed').replace('_', '-');
+        const fallbackGroupSize = 'groupSize' in fallback ? fallback.groupSize : 0;
+        return {
+          id: asString(quest.id, fallback.id),
+          type: asString(quest.type, fallback.type) as QuestRow['type'],
+          status: status as QuestRow['status'],
+          title: asString(quest.title, fallback.title),
+          titleEn: asString(quest.titleEn, fallback.titleEn),
+          description: asString(quest.description, fallback.description),
+          descriptionEn: asString(quest.descriptionEn, fallback.descriptionEn),
+          assignedBy: asString(quest.assignerNameThai, fallback.assignedBy),
+          assignedByEn: asString(quest.assignerName, fallback.assignedByEn),
+          assignerType: asString(quest.assignerType, fallback.assignerType) as QuestRow['assignerType'],
+          xp: asNumber(quest.xp, fallback.xp),
+          coins: asNumber(quest.coins, fallback.coins),
+          deadline: asDate(quest.deadline, new Date(fallback.deadline)).toISOString().split('T')[0],
+          progress: asNumber(enrollment.progress, status === 'completed' ? 100 : fallback.progress),
+          difficulty: asString(quest.difficulty, fallback.difficulty) as QuestRow['difficulty'],
+          category: asString(quest.category, fallback.category),
+          tasks,
+          groupSize: fallbackGroupSize ? asNumber(quest.groupSize, fallbackGroupSize) : undefined,
+          groupMembers: 'groupMembers' in fallback ? fallback.groupMembers : undefined,
+        } as QuestRow;
+      });
+      if (mapped.length) setQuests(mapped);
+    }
+
+    if (statsResponse.status === 'fulfilled') {
+      const liveStats = asRecord(statsResponse.value.stats);
+      const badges = asArray(liveStats.badges);
+      setStats((current) => ({
+        ...current,
+        level: asNumber(liveStats.level, current.level),
+        currentXP: asNumber(liveStats.xp, current.currentXP),
+        totalXP: asNumber(liveStats.xp, current.totalXP),
+        coins: asNumber(liveStats.coins, current.coins),
+        questsCompleted: asArray(liveStats.quests).filter((quest) => asRecord(quest).status === 'completed').length || current.questsCompleted,
+        badges: badges.length
+          ? badges.map((badge, index) => {
+              const source = asRecord(badge);
+              return {
+                id: asString(source.id, `badge-${index}`),
+                name: asString(source.name, current.badges[index]?.name ?? 'Badge'),
+                nameEn: asString(source.nameEn, current.badges[index]?.nameEn ?? asString(source.name, 'Badge')),
+                icon: asString(source.icon, current.badges[index]?.icon ?? '*'),
+                earned: true,
+              };
+            })
+          : current.badges,
+      }));
+    }
+  }, []);
+
+  React.useEffect(() => {
+    void loadLiveData();
+  }, [loadLiveData]);
 
   const getDifficultyConfig = (diff: string) => {
     switch (diff) {
@@ -175,12 +284,40 @@ export default function Training() {
     }
   };
 
-  const xpProgress = (playerStats.currentXP / playerStats.nextLevelXP) * 100;
+  const handleAcceptQuest = async (quest: QuestRow) => {
+    try {
+      await api.quests.accept(quest.id);
+      toast.success(tr.acceptQuest);
+      await loadLiveData();
+      setSelectedQuest(null);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : tr.noQuests);
+    }
+  };
 
-  const filteredQuests = activeTab === 'all' ? mockQuests :
-    activeTab === 'active' ? mockQuests.filter(q => q.status === 'in-progress') :
-    activeTab === 'available' ? mockQuests.filter(q => q.status === 'available' || q.status === 'upcoming') :
-    mockQuests.filter(q => q.status === 'completed');
+  const handleSubmitQuest = async (quest: QuestRow) => {
+    const nextTask = quest.tasks.find((task) => !task.done);
+    if (!nextTask) {
+      setSelectedQuest(null);
+      return;
+    }
+
+    try {
+      await api.quests.completeTask({ questId: quest.id, taskId: nextTask.id });
+      toast.success(tr.submitQuest);
+      await loadLiveData();
+      setSelectedQuest(null);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : tr.noQuests);
+    }
+  };
+
+  const xpProgress = (stats.currentXP / stats.nextLevelXP) * 100;
+
+  const filteredQuests = activeTab === 'all' ? quests :
+    activeTab === 'active' ? quests.filter(q => q.status === 'in-progress') :
+    activeTab === 'available' ? quests.filter(q => q.status === 'available' || q.status === 'upcoming') :
+    quests.filter(q => q.status === 'completed');
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8 pb-10">
@@ -208,7 +345,7 @@ export default function Training() {
               </div>
               <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/10 dark:bg-slate-900/50">
                 <Crown className="w-5 h-5 text-amber-400" />
-                <span className="font-bold text-amber-300">{playerStats.rank}</span>
+                <span className="font-bold text-amber-300">{stats.rank}</span>
               </div>
             </div>
 
@@ -218,36 +355,36 @@ export default function Training() {
                   <Shield className="w-4 h-4 text-indigo-400" />
                   <span className="text-xs text-slate-400">{tr.level}</span>
                 </div>
-                <div className="text-2xl font-bold">{playerStats.level}</div>
+                <div className="text-2xl font-bold">{stats.level}</div>
               </div>
               <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 dark:bg-slate-900/50">
                 <div className="flex items-center gap-2 mb-1">
                   <Sparkles className="w-4 h-4 text-amber-400" />
                   <span className="text-xs text-slate-400">XP</span>
                 </div>
-                <div className="text-2xl font-bold">{playerStats.totalXP.toLocaleString()}</div>
+                <div className="text-2xl font-bold">{stats.totalXP.toLocaleString()}</div>
               </div>
               <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 dark:bg-slate-900/50">
                 <div className="flex items-center gap-2 mb-1">
                   <Trophy className="w-4 h-4 text-emerald-400" />
                   <span className="text-xs text-slate-400">{tr.questsDone}</span>
                 </div>
-                <div className="text-2xl font-bold">{playerStats.questsCompleted}</div>
+                <div className="text-2xl font-bold">{stats.questsCompleted}</div>
               </div>
               <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 dark:bg-slate-900/50">
                 <div className="flex items-center gap-2 mb-1">
                   <Flame className="w-4 h-4 text-orange-400" />
                   <span className="text-xs text-slate-400">{tr.streak}</span>
                 </div>
-                <div className="text-2xl font-bold">{playerStats.streak} {tr.days}</div>
+                <div className="text-2xl font-bold">{stats.streak} {tr.days}</div>
               </div>
             </div>
 
             {/* XP Bar */}
             <div>
               <div className="flex items-center justify-between text-sm mb-2">
-                <span className="text-slate-400">{tr.level} {playerStats.level}</span>
-                <span className="text-indigo-300">{playerStats.currentXP} / {playerStats.nextLevelXP} XP</span>
+                <span className="text-slate-400">{tr.level} {stats.level}</span>
+                <span className="text-indigo-300">{stats.currentXP} / {stats.nextLevelXP} XP</span>
               </div>
               <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden dark:bg-slate-900/50">
                 <motion.div
@@ -268,7 +405,7 @@ export default function Training() {
             <h3 className="font-bold text-lg">{tr.badges}</h3>
           </div>
           <div className="grid grid-cols-3 gap-3">
-            {playerStats.badges.map(badge => (
+            {stats.badges.map(badge => (
               <div
                 key={badge.id}
                 className={`flex flex-col items-center gap-1 p-3 rounded-xl transition-all ${
@@ -289,7 +426,7 @@ export default function Training() {
             <div className="flex items-center gap-2">
               <Star className="w-4 h-4 text-amber-500" />
               <span className="text-sm font-semibold text-amber-700">
-                {playerStats.badges.filter(b => b.earned).length}/{playerStats.badges.length} {tr.badgesEarned}
+                {stats.badges.filter(b => b.earned).length}/{stats.badges.length} {tr.badgesEarned}
               </span>
             </div>
           </div>
@@ -496,12 +633,12 @@ export default function Training() {
                   {/* Action buttons */}
                   <div className="flex gap-3 pt-2">
                     {selectedQuest.status === 'available' && (
-                      <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700">
+                      <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => handleAcceptQuest(selectedQuest)}>
                         <Swords className="w-4 h-4 mr-2" />{tr.acceptQuest}
                       </Button>
                     )}
                     {selectedQuest.status === 'in-progress' && (
-                      <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700">
+                      <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={() => handleSubmitQuest(selectedQuest)}>
                         <CheckCircle2 className="w-4 h-4 mr-2" />{tr.submitQuest}
                       </Button>
                     )}

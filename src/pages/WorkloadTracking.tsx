@@ -1,10 +1,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { BarChart3, Users, Clock, AlertTriangle, TrendingUp, BookOpen } from 'lucide-react';
+import { BarChart3, Users, Clock, AlertTriangle, TrendingUp, BookOpen, Plus } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { mockLecturers } from '@/lib/mockData';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { api } from '@/lib/api';
+import { asNumber, asRecord, asString } from '@/lib/live-data';
+import { toast } from 'sonner';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -15,19 +22,112 @@ const itemVariants = {
     visible: { opacity: 1, y: 0 },
 };
 
+type LecturerWorkloadRow = {
+    id: string;
+    nameThai: string;
+    teachingHours: number;
+    workload: number;
+    advisees: string[];
+};
+
 export default function WorkloadTracking() {
     const { t } = useLanguage();
-    const lecturerData = mockLecturers.map((l, i) => ({
-        ...l,
-        workload: [12, 16, 10, 18, 14, 8, 15][i % 7],
-    }));
-    const avgWorkload = (lecturerData.reduce((sum, l) => sum + l.workload, 0) / lecturerData.length).toFixed(1);
+    const [lecturerData, setLecturerData] = React.useState<LecturerWorkloadRow[]>([]);
+    const [lecturers, setLecturers] = React.useState<Array<{ id: string; nameThai: string }>>([]);
+    const [isLoading, setIsLoading] = React.useState(true);
+    const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+    const [formData, setFormData] = React.useState({
+        lecturerId: '',
+        academicYear: '2569',
+        semester: '1',
+        teachingHours: '0',
+        researchHours: '0',
+        advisingHours: '0',
+        serviceHours: '0',
+    });
+
+    const mapWorkloadRow = React.useCallback((item: unknown, index = 0): LecturerWorkloadRow => {
+        const record = asRecord(item);
+        const lecturer = asRecord(record.lecturer);
+        const lecturerUser = asRecord(lecturer.user);
+        const advisingHours = asNumber(record.advisingHours, 0);
+        const teachingHours = asNumber(record.teachingHours, 0);
+
+        return {
+            id: asString(lecturer.id, asString(record.lecturerId, `lecturer-${index}`)),
+            nameThai: asString(lecturerUser.nameThai, asString(lecturerUser.name, asString(lecturer.lecturerId, '-'))),
+            teachingHours,
+            workload:
+                teachingHours +
+                asNumber(record.researchHours, 0) +
+                advisingHours +
+                asNumber(record.serviceHours, 0),
+            advisees: Array.from({ length: Math.max(advisingHours, 0) }, (_, adviseeIndex) => `ADV-${adviseeIndex + 1}`),
+        };
+    }, []);
+
+    React.useEffect(() => {
+        let isMounted = true;
+
+        Promise.allSettled([api.workload.list(), api.lecturers.list()])
+            .then(([workloadResult, lecturersResult]) => {
+                if (!isMounted) return;
+                if (workloadResult.status === 'fulfilled') {
+                    setLecturerData(workloadResult.value.workload.map(mapWorkloadRow));
+                }
+                if (lecturersResult.status === 'fulfilled') {
+                    setLecturers(lecturersResult.value.lecturers.map((item, index) => {
+                        const lecturer = asRecord(item);
+                        const lecturerUser = asRecord(lecturer.user);
+                        return {
+                            id: asString(lecturer.id, `lecturer-${index}`),
+                            nameThai: asString(lecturerUser.nameThai, asString(lecturerUser.name, asString(lecturer.lecturerId, '-'))),
+                        };
+                    }));
+                }
+            })
+            .catch(() => setLecturerData([]))
+            .finally(() => {
+                if (isMounted) setIsLoading(false);
+            });
+
+        return () => {
+            isMounted = false;
+        };
+    }, [mapWorkloadRow]);
+
+    const createWorkload = async () => {
+        if (!formData.lecturerId) {
+            toast.error('กรุณาเลือกอาจารย์');
+            return;
+        }
+
+        try {
+            const response = await api.workload.create({
+                lecturerId: formData.lecturerId,
+                academicYear: formData.academicYear,
+                semester: Number(formData.semester),
+                teachingHours: Number(formData.teachingHours),
+                researchHours: Number(formData.researchHours),
+                advisingHours: Number(formData.advisingHours),
+                serviceHours: Number(formData.serviceHours),
+            });
+            setLecturerData((current) => [mapWorkloadRow(response.workload), ...current]);
+            setIsDialogOpen(false);
+            toast.success('เพิ่มภาระงานแล้ว');
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Unable to create workload');
+        }
+    };
+
+    const avgWorkload = (lecturerData.reduce((sum, l) => sum + l.workload, 0) / Math.max(lecturerData.length, 1)).toFixed(1);
     const overloaded = lecturerData.filter(l => l.workload > 15).length;
 
     return (
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8 pb-10">
             {/* Header */}
-            <div>
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                <div>
                 <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2">
                     <BarChart3 className="w-4 h-4 text-purple-500 dark:text-slate-400" />
                     <span>{t.workloadTrackingPage.subtitle}</span>
@@ -35,12 +135,16 @@ export default function WorkloadTracking() {
                 <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                     {t.workloadTrackingPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-violet-600">{t.workloadTrackingPage.titleHighlight}</span>
                 </motion.h1>
+                </div>
+                <Button onClick={() => setIsDialogOpen(true)} className="rounded-xl bg-purple-600 hover:bg-purple-700">
+                    <Plus className="w-4 h-4 mr-2" /> เพิ่มภาระงาน
+                </Button>
             </div>
 
             {/* Stats */}
             <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                    { icon: Users, label: t.workloadTrackingPage.totalLecturers, value: String(lecturerData.length), gradient: 'from-blue-500 to-indigo-500', shadow: 'shadow-blue-200' },
+                    { icon: Users, label: t.workloadTrackingPage.totalLecturers, value: isLoading ? '...' : String(lecturerData.length), gradient: 'from-blue-500 to-indigo-500', shadow: 'shadow-blue-200' },
                     { icon: Clock, label: t.workloadTrackingPage.avgWorkload, value: `${avgWorkload} ${t.workloadTrackingPage.hours}`, gradient: 'from-purple-500 to-violet-500', shadow: 'shadow-purple-200' },
                     { icon: AlertTriangle, label: t.workloadTrackingPage.overLimit, value: String(overloaded), gradient: 'from-red-500 to-rose-500', shadow: 'shadow-red-200' },
                     { icon: TrendingUp, label: t.workloadTrackingPage.normalStatus, value: String(lecturerData.length - overloaded), gradient: 'from-emerald-500 to-teal-500', shadow: 'shadow-emerald-200' },
@@ -94,12 +198,17 @@ export default function WorkloadTracking() {
                         <p className="text-sm text-slate-500 dark:text-slate-400">{t.workloadTrackingPage.individualDesc}</p>
                     </div>
                     <div className="space-y-3">
+                        {!isLoading && lecturerData.length === 0 && (
+                            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">
+                                {t.common?.noData || 'No workload records found'}
+                            </div>
+                        )}
                         {lecturerData.map((lecturer, idx) => {
                             const percentage = (lecturer.workload / 20) * 100;
                             const isOver = lecturer.workload > 15;
                             return (
                                 <motion.div key={idx} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.05 }}
-                                    className="flex items-center gap-4 p-3 rounded-2xl hover:bg-white transition-all dark:bg-slate-900">
+                                    className="flex items-center gap-4 p-3 rounded-2xl hover:bg-white transition-all dark:hover:bg-slate-800/70">
                                     <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold shadow-lg ${isOver ? 'bg-gradient-to-br from-red-400 to-rose-500 shadow-red-200' : 'bg-gradient-to-br from-purple-400 to-violet-500 shadow-purple-200'}`}>
                                         {lecturer.nameThai.charAt(0)}
                                     </div>
@@ -122,6 +231,49 @@ export default function WorkloadTracking() {
                     </div>
                 </motion.div>
             </div>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>เพิ่มภาระงานอาจารย์</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+                        <div className="space-y-2 md:col-span-2">
+                            <Label>อาจารย์</Label>
+                            <Select value={formData.lecturerId} onValueChange={(value) => setFormData({ ...formData, lecturerId: value })}>
+                                <SelectTrigger><SelectValue placeholder="เลือกอาจารย์" /></SelectTrigger>
+                                <SelectContent>
+                                    {lecturers.map((lecturer) => (
+                                        <SelectItem key={lecturer.id} value={lecturer.id}>{lecturer.nameThai}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>ปีการศึกษา</Label>
+                            <Input value={formData.academicYear} onChange={(event) => setFormData({ ...formData, academicYear: event.target.value })} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>เทอม</Label>
+                            <Input type="number" value={formData.semester} onChange={(event) => setFormData({ ...formData, semester: event.target.value })} />
+                        </div>
+                        {[
+                            ['teachingHours', 'สอน'],
+                            ['researchHours', 'วิจัย'],
+                            ['advisingHours', 'ที่ปรึกษา'],
+                            ['serviceHours', 'บริการวิชาการ'],
+                        ].map(([field, label]) => (
+                            <div key={field} className="space-y-2">
+                                <Label>{label} (ชั่วโมง)</Label>
+                                <Input type="number" value={formData[field as keyof typeof formData]} onChange={(event) => setFormData({ ...formData, [field]: event.target.value })} />
+                            </div>
+                        ))}
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsDialogOpen(false)}>ยกเลิก</Button>
+                        <Button onClick={createWorkload} className="bg-purple-600 hover:bg-purple-700">บันทึก</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </motion.div>
     );
 }

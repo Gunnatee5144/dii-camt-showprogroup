@@ -7,11 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mockStudents, mockLecturers, mockStaffUsers, mockCompanies } from '@/lib/mockData';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { api } from '@/lib/api';
+import { asRecord, asString, roleToClient } from '@/lib/live-data';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -26,8 +27,7 @@ const itemVariants = {
 export default function UsersPage() {
     const { t } = useLanguage();
     const [searchQuery, setSearchQuery] = useState('');
-    // Merge all mock users into one state for CRUD simulation
-    type UserType = 'student' | 'lecturer' | 'staff' | 'company';
+    type UserType = 'student' | 'lecturer' | 'staff' | 'company' | 'admin';
     type UserRow = {
         id: string;
         name: string;
@@ -35,54 +35,277 @@ export default function UsersPage() {
         type: UserType;
         roleLabel: string;
         image?: string;
+        isActive?: boolean;
+        nameThai?: string;
+        phone?: string;
+        identifier?: string;
+        department?: string;
+        position?: string;
+        major?: string;
+        program?: string;
+        year?: number;
+        semester?: number;
+        academicYear?: string;
+        companyName?: string;
+        companyNameThai?: string;
+        industry?: string;
+        size?: string;
+        website?: string;
+        address?: string;
         [key: string]: unknown;
     };
 
-    const [users, setUsers] = useState<UserRow[]>([
-        ...mockStudents.map(u => ({ ...u, type: 'student', name: u.nameThai, roleLabel: t.roles.student })),
-        ...mockLecturers.map(u => ({ ...u, type: 'lecturer', name: u.nameThai, roleLabel: t.roles.lecturer })),
-        ...mockStaffUsers.map(u => ({ ...u, type: 'staff', name: u.nameThai, roleLabel: t.roles.staff })),
-        ...mockCompanies.map(u => ({ ...u, type: 'company', name: u.companyNameThai, roleLabel: t.roles.company })),
-    ]);
+    type UserFormData = {
+        name: string;
+        nameThai: string;
+        email: string;
+        phone: string;
+        role: Exclude<UserType, 'admin'>;
+        status: 'active' | 'inactive';
+        identifier: string;
+        department: string;
+        position: string;
+        major: string;
+        program: string;
+        year: string;
+        semester: string;
+        academicYear: string;
+        companyName: string;
+        companyNameThai: string;
+        industry: string;
+        size: string;
+        website: string;
+        address: string;
+    };
+
+    const emptyForm: UserFormData = {
+        name: '',
+        nameThai: '',
+        email: '',
+        phone: '',
+        role: 'student',
+        status: 'active',
+        identifier: '',
+        department: 'Digital Industry Integration',
+        position: '',
+        major: 'Digital Industry Integration',
+        program: 'bachelor',
+        year: '1',
+        semester: '1',
+        academicYear: '2569',
+        companyName: '',
+        companyNameThai: '',
+        industry: 'Technology',
+        size: 'small',
+        website: '',
+        address: '',
+    };
+
+    const getRoleText = React.useCallback((role: UserType) => {
+        switch (role) {
+            case 'student': return t.roles.student;
+            case 'lecturer': return t.roles.lecturer;
+            case 'staff': return t.roles.staff;
+            case 'company': return t.roles.company;
+            case 'admin': return t.roles.admin;
+            default: return role;
+        }
+    }, [t.roles.admin, t.roles.company, t.roles.lecturer, t.roles.staff, t.roles.student]);
+
+    const mapBackendUser = React.useCallback((item: unknown): UserRow => {
+        const source = asRecord(item);
+        const role = roleToClient(source.role) as UserType;
+        const studentProfile = asRecord(source.studentProfile);
+        const lecturerProfile = asRecord(source.lecturerProfile);
+        const staffProfile = asRecord(source.staffProfile);
+        const companyProfile = asRecord(source.companyProfile);
+        const profileName = role === 'company'
+            ? asString(companyProfile.companyNameThai, asString(companyProfile.companyName))
+            : '';
+        const identifier = role === 'student'
+            ? asString(studentProfile.studentId)
+            : role === 'lecturer'
+                ? asString(lecturerProfile.lecturerId)
+                : role === 'staff'
+                    ? asString(staffProfile.staffId)
+                    : asString(companyProfile.companyId);
+        const department = role === 'lecturer'
+            ? asString(lecturerProfile.department)
+            : asString(staffProfile.department);
+        const position = role === 'lecturer'
+            ? asString(lecturerProfile.position)
+            : asString(staffProfile.position);
+
+        return {
+            ...source,
+            id: asString(source.id),
+            name: asString(profileName, asString(source.nameThai, asString(source.name, source.email as string))),
+            email: asString(source.email),
+            type: role,
+            roleLabel: getRoleText(role),
+            image: asString(source.avatar),
+            isActive: source.isActive !== false,
+            nameThai: asString(source.nameThai),
+            phone: asString(source.phone),
+            identifier,
+            department,
+            position,
+            major: asString(studentProfile.major),
+            program: asString(studentProfile.program),
+            year: Number(studentProfile.year ?? 1),
+            semester: Number(studentProfile.semester ?? 1),
+            academicYear: asString(studentProfile.academicYear),
+            companyName: asString(companyProfile.companyName),
+            companyNameThai: asString(companyProfile.companyNameThai),
+            industry: asString(companyProfile.industry),
+            size: asString(companyProfile.size),
+            website: asString(companyProfile.website),
+            address: asString(companyProfile.address),
+            studentProfile,
+            lecturerProfile,
+            staffProfile,
+            companyProfile,
+        };
+    }, [getRoleText]);
+
+    const [users, setUsers] = useState<UserRow[]>([]);
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<UserRow | null>(null);
-    const [formData, setFormData] = useState<{ name: string; email: string; role: UserType; status: 'active' | 'inactive' }>({ name: '', email: '', role: 'student', status: 'active' });
+    const [formData, setFormData] = useState<UserFormData>(emptyForm);
 
     const totalUsers = users.length;
 
+    React.useEffect(() => {
+        let isMounted = true;
+        api.users.list()
+            .then((response) => {
+                if (!isMounted) return;
+                const mapped = response.users.map(mapBackendUser);
+                setUsers(mapped);
+            })
+            .catch(() => undefined);
+
+        return () => {
+            isMounted = false;
+        };
+    }, [mapBackendUser]);
+
     const handleAdd = () => {
         setEditingUser(null);
-        setFormData({ name: '', email: '', role: 'student', status: 'active' });
+        setFormData(emptyForm);
         setIsDialogOpen(true);
     };
 
     const handleEdit = (user: UserRow) => {
         setEditingUser(user);
-        setFormData({ name: user.name, email: user.email || '', role: user.type, status: 'active' });
+        setFormData({
+            name: user.name,
+            nameThai: user.nameThai || user.name,
+            email: user.email || '',
+            phone: user.phone || '',
+            role: user.type === 'admin' ? 'staff' : user.type,
+            status: user.isActive === false ? 'inactive' : 'active',
+            identifier: user.identifier || '',
+            department: user.department || 'Digital Industry Integration',
+            position: user.position || '',
+            major: user.major || 'Digital Industry Integration',
+            program: user.program || 'bachelor',
+            year: String(user.year || 1),
+            semester: String(user.semester || 1),
+            academicYear: user.academicYear || '2569',
+            companyName: user.companyName || user.name,
+            companyNameThai: user.companyNameThai || user.nameThai || user.name,
+            industry: user.industry || 'Technology',
+            size: user.size || 'small',
+            website: user.website || '',
+            address: user.address || '',
+        });
         setIsDialogOpen(true);
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
         if (confirm(t.users.deleteConfirm)) {
-            setUsers(users.filter(u => u.id !== id));
-            toast.success(t.users.deleteSuccess);
+            try {
+                await api.users.remove(id);
+                setUsers(users.map(u => u.id === id ? { ...u, isActive: false } : u).filter(u => u.id !== id));
+                toast.success(t.users.deleteSuccess);
+            } catch (error) {
+                toast.error(error instanceof Error ? error.message : t.users.deleteConfirm);
+            }
         }
     };
 
-    const handleSave = () => {
-        if (editingUser) {
-            setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...formData, type: formData.role } : u));
-            toast.success(t.users.editSuccess);
-        } else {
-            const newUser = {
-                id: Math.random().toString(36).substr(2, 9),
-                ...formData,
-                type: formData.role,
-                image: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=100&h=100&fit=crop',
+    const buildProfile = (role: Exclude<UserType, 'admin'>) => {
+        const suffix = Date.now().toString().slice(-6);
+        if (role === 'student') {
+            return {
+                studentId: formData.identifier || `STU${suffix}`,
+                major: formData.major,
+                program: formData.program,
+                year: Number(formData.year || 1),
+                semester: Number(formData.semester || 1),
+                academicYear: formData.academicYear,
             };
-            setUsers([...users, newUser]);
-            toast.success(t.users.addSuccess);
+        }
+        if (role === 'lecturer') {
+            return {
+                lecturerId: formData.identifier || `LEC${suffix}`,
+                department: formData.department,
+                position: formData.position || 'Lecturer',
+            };
+        }
+        if (role === 'staff') {
+            return {
+                staffId: formData.identifier || `STA${suffix}`,
+                department: formData.department || 'DII Office',
+                position: formData.position || 'Staff',
+            };
+        }
+        return {
+            companyId: formData.identifier || `COM${suffix}`,
+            companyName: formData.companyName || formData.name,
+            companyNameThai: formData.companyNameThai || formData.nameThai || formData.name,
+            industry: formData.industry,
+            size: formData.size,
+            website: formData.website || undefined,
+            address: formData.address || undefined,
+        };
+    };
+
+    const handleSave = async () => {
+        if (editingUser) {
+            try {
+                const response = await api.users.update(editingUser.id, {
+                    name: formData.name,
+                    nameThai: formData.nameThai || formData.name,
+                    phone: formData.phone,
+                    isActive: formData.status === 'active',
+                    roleData: buildProfile(editingUser.type === 'admin' ? 'staff' : editingUser.type),
+                });
+                setUsers(users.map(u => u.id === editingUser.id ? mapBackendUser(response.user) : u));
+                toast.success(t.users.editSuccess);
+            } catch (error) {
+                toast.error(error instanceof Error ? error.message : t.users.editUser);
+                return;
+            }
+        } else {
+            try {
+                const response = await api.users.create({
+                    name: formData.name,
+                    nameThai: formData.nameThai || formData.name,
+                    email: formData.email,
+                    phone: formData.phone,
+                    role: formData.role.toUpperCase(),
+                    isActive: formData.status === 'active',
+                    profile: buildProfile(formData.role),
+                });
+                setUsers([mapBackendUser(response.user), ...users]);
+                toast.success(response.temporaryPassword ? `${t.users.addSuccess} (${response.temporaryPassword})` : t.users.addSuccess);
+            } catch (error) {
+                toast.error(error instanceof Error ? error.message : t.users.addUser);
+                return;
+            }
         }
         setIsDialogOpen(false);
     };
@@ -244,7 +467,7 @@ export default function UsersPage() {
                                                             user.type === 'lecturer' ? 'from-green-400 to-green-600' :
                                                                 user.type === 'staff' ? 'from-purple-400 to-purple-600' : 'from-orange-400 to-orange-600'}`}
                                                     >
-                                                        {user.name.charAt(0)}
+                                                        {(user.name || user.email || '?').charAt(0)}
                                                     </div>
                                                     <div>
                                                         <div className="font-semibold text-gray-900 dark:text-slate-200">{user.name}</div>
@@ -279,12 +502,12 @@ export default function UsersPage() {
 
             {/* User Dialog */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent>
+                <DialogContent className="max-w-3xl">
                     <DialogHeader>
                         <DialogTitle>{editingUser ? t.users.editUser : t.users.addUser}</DialogTitle>
                         <DialogDescription>{t.users.formDescription}</DialogDescription>
                     </DialogHeader>
-                    <div className="space-y-4 py-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
                         <div className="space-y-2">
                             <Label>{t.users.nameLabel}</Label>
                             <Input
@@ -294,18 +517,35 @@ export default function UsersPage() {
                             />
                         </div>
                         <div className="space-y-2">
+                            <Label>ชื่อภาษาไทย</Label>
+                            <Input
+                                value={formData.nameThai}
+                                onChange={(e) => setFormData({ ...formData, nameThai: e.target.value })}
+                                placeholder="ชื่อที่ใช้แสดงในระบบ"
+                            />
+                        </div>
+                        <div className="space-y-2">
                             <Label>{t.users.emailLabel}</Label>
                             <Input
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                 placeholder={t.users.emailPlaceholder}
+                                disabled={!!editingUser}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>เบอร์โทรศัพท์</Label>
+                            <Input
+                                value={formData.phone}
+                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                placeholder="+66 XX XXX XXXX"
                             />
                         </div>
                         <div className="space-y-2">
                             <Label>{t.users.roleLabel}</Label>
                             <Select
                                 value={formData.role}
-                                onValueChange={(val) => setFormData({ ...formData, role: val })}
+                                onValueChange={(val) => setFormData({ ...formData, role: val as Exclude<UserType, 'admin'> })}
                                 disabled={!!editingUser} // Prevent role change on edit for simplicity
                             >
                                 <SelectTrigger>
@@ -319,6 +559,92 @@ export default function UsersPage() {
                                 </SelectContent>
                             </Select>
                         </div>
+                        <div className="space-y-2">
+                            <Label>สถานะบัญชี</Label>
+                            <Select value={formData.status} onValueChange={(val) => setFormData({ ...formData, status: val as 'active' | 'inactive' })}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="active">Active</SelectItem>
+                                    <SelectItem value="inactive">Inactive</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>{formData.role === 'company' ? 'รหัสบริษัท' : formData.role === 'student' ? 'รหัสนักศึกษา' : 'รหัสบุคลากร'}</Label>
+                            <Input
+                                value={formData.identifier}
+                                onChange={(e) => setFormData({ ...formData, identifier: e.target.value })}
+                                placeholder="เว้นว่างเพื่อให้ระบบสร้างให้อัตโนมัติ"
+                            />
+                        </div>
+                        {formData.role === 'student' && (
+                            <>
+                                <div className="space-y-2">
+                                    <Label>สาขา</Label>
+                                    <Input value={formData.major} onChange={(e) => setFormData({ ...formData, major: e.target.value })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>หลักสูตร</Label>
+                                    <Input value={formData.program} onChange={(e) => setFormData({ ...formData, program: e.target.value })} />
+                                </div>
+                                <div className="grid grid-cols-3 gap-3 md:col-span-2">
+                                    <div className="space-y-2">
+                                        <Label>ชั้นปี</Label>
+                                        <Input value={formData.year} onChange={(e) => setFormData({ ...formData, year: e.target.value })} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>เทอม</Label>
+                                        <Input value={formData.semester} onChange={(e) => setFormData({ ...formData, semester: e.target.value })} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>ปีการศึกษา</Label>
+                                        <Input value={formData.academicYear} onChange={(e) => setFormData({ ...formData, academicYear: e.target.value })} />
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                        {(formData.role === 'lecturer' || formData.role === 'staff') && (
+                            <>
+                                <div className="space-y-2">
+                                    <Label>หน่วยงาน</Label>
+                                    <Input value={formData.department} onChange={(e) => setFormData({ ...formData, department: e.target.value })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>ตำแหน่ง</Label>
+                                    <Input value={formData.position} onChange={(e) => setFormData({ ...formData, position: e.target.value })} />
+                                </div>
+                            </>
+                        )}
+                        {formData.role === 'company' && (
+                            <>
+                                <div className="space-y-2">
+                                    <Label>ชื่อบริษัท</Label>
+                                    <Input value={formData.companyName} onChange={(e) => setFormData({ ...formData, companyName: e.target.value })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>ชื่อบริษัทภาษาไทย</Label>
+                                    <Input value={formData.companyNameThai} onChange={(e) => setFormData({ ...formData, companyNameThai: e.target.value })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>อุตสาหกรรม</Label>
+                                    <Input value={formData.industry} onChange={(e) => setFormData({ ...formData, industry: e.target.value })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>ขนาดบริษัท</Label>
+                                    <Input value={formData.size} onChange={(e) => setFormData({ ...formData, size: e.target.value })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>เว็บไซต์</Label>
+                                    <Input value={formData.website} onChange={(e) => setFormData({ ...formData, website: e.target.value })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>ที่อยู่</Label>
+                                    <Input value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
+                                </div>
+                            </>
+                        )}
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsDialogOpen(false)}>{t.common.cancel}</Button>

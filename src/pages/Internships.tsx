@@ -12,7 +12,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { mockJobPostings } from '@/lib/mockData';
+import { api, ApiError } from '@/lib/api';
+import type { JobPosting } from '@/types';
+import { mapJob } from '@/lib/live-mappers';
+import { useToast } from '@/hooks/use-toast';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -27,12 +30,32 @@ const itemVariants = {
 export default function Internships() {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = React.useState('');
   const [selectedJobId, setSelectedJobId] = React.useState<string | null>(null);
   const [savedJobs, setSavedJobs] = React.useState<string[]>([]);
   const [filterType, setFilterType] = React.useState('all');
+  const [jobs, setJobs] = React.useState<JobPosting[]>([]);
 
-  const filteredJobs = mockJobPostings.filter(job => {
+  React.useEffect(() => {
+    let mounted = true;
+
+    api.jobs
+      .list()
+      .then((response) => {
+        if (!mounted) return;
+        setJobs(response.jobs.map(mapJob).filter((job) => job.isActive && job.status === 'open'));
+      })
+      .catch((error) => {
+        console.warn('Unable to load internship jobs from API', error);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const filteredJobs = jobs.filter(job => {
     const matchesSearch =
       job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -41,7 +64,7 @@ export default function Internships() {
     return matchesSearch && matchesType;
   });
 
-  const selectedJob = mockJobPostings.find(j => j.id === selectedJobId) || filteredJobs[0];
+  const selectedJob = jobs.find(j => j.id === selectedJobId) || filteredJobs[0];
 
   const toggleSaveJob = (e: React.MouseEvent, jobId: string) => {
     e.stopPropagation();
@@ -51,6 +74,24 @@ export default function Internships() {
   };
 
   const isSaved = (jobId: string) => savedJobs.includes(jobId);
+
+  const handleApply = async () => {
+    if (!selectedJob || user?.role !== 'student') return;
+
+    try {
+      await api.applications.create({ jobPostingId: selectedJob.id });
+      toast({
+        title: 'ส่งใบสมัครแล้ว',
+        description: selectedJob.title,
+      });
+    } catch (error) {
+      toast({
+        title: 'ส่งใบสมัครไม่สำเร็จ',
+        description: error instanceof ApiError ? error.message : 'ไม่สามารถเชื่อมต่อระบบสมัครงานได้',
+        variant: 'destructive',
+      });
+    }
+  };
 
   type StatCardProps = {
     icon: React.ElementType;
@@ -83,7 +124,7 @@ export default function Internships() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="space-y-6 flex flex-col lg:h-[calc(100vh-6rem)]"
+      className="space-y-6 flex flex-col h-[calc(100vh-6rem)]"
     >
       <div className="flex-shrink-0">
         {/* Header Section - Matching Dashboard/Courses/Schedule Style */}
@@ -109,11 +150,11 @@ export default function Internships() {
         </div>
 
         {/* Bento Stats for Internships */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-          <StatCard icon={TrendingUp} label={t.internshipsPage.totalPositions} value={mockJobPostings.length} gradient="bg-gradient-to-br from-blue-500 to-indigo-600" />
-          <StatCard icon={Building} label={t.internshipsPage.partnerCompanies} value="48" gradient="bg-gradient-to-br from-violet-500 to-purple-600" />
-          <StatCard icon={Users} label={t.internshipsPage.studentsPlaced} value="124" gradient="bg-gradient-to-br from-emerald-400 to-teal-600" />
-          <StatCard icon={Sparkles} label={t.internshipsPage.matchedForYou} value="12" gradient="bg-gradient-to-br from-amber-400 to-orange-500" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+          <StatCard icon={TrendingUp} label={t.internshipsPage.totalPositions} value={jobs.length} gradient="bg-gradient-to-br from-blue-500 to-indigo-600" />
+          <StatCard icon={Building} label={t.internshipsPage.partnerCompanies} value={new Set(jobs.map((job) => job.companyId)).size} gradient="bg-gradient-to-br from-violet-500 to-purple-600" />
+          <StatCard icon={Users} label={t.internshipsPage.studentsPlaced} value={jobs.reduce((sum, job) => sum + job.applicants.length, 0)} gradient="bg-gradient-to-br from-emerald-400 to-teal-600" />
+          <StatCard icon={Sparkles} label={t.internshipsPage.matchedForYou} value={filteredJobs.length} gradient="bg-gradient-to-br from-amber-400 to-orange-500" />
         </div>
       </div>
 
@@ -145,9 +186,16 @@ export default function Internships() {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 grid grid-cols-12 gap-6 pb-2 lg:overflow-hidden">
+      <div className="flex-1 min-h-0 grid grid-cols-12 gap-6 pb-2 overflow-hidden">
         {/* Job List */}
-        <div className="col-span-12 lg:col-span-5 flex flex-col gap-4 lg:overflow-y-auto pr-2 custom-scrollbar">
+        <div className="col-span-12 lg:col-span-5 flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar">
+          {filteredJobs.length === 0 && (
+            <div className="rounded-[2rem] border border-dashed border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/70 p-8 text-center">
+              <Briefcase className="w-10 h-10 mx-auto text-slate-400 mb-3" />
+              <h3 className="font-bold text-slate-800 dark:text-slate-100">ยังไม่มีตำแหน่งฝึกงาน</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">เมื่อบริษัทเปิดรับสมัคร ตำแหน่งจาก backend จะแสดงที่นี่</p>
+            </div>
+          )}
           {filteredJobs.map((job) => (
             <motion.div
               key={job.id}
@@ -275,7 +323,7 @@ export default function Internships() {
                   <Button variant="outline" size="lg" className="rounded-2xl h-14 px-8 border-slate-200 dark:border-slate-700 font-bold hover:bg-slate-50 dark:bg-slate-800">
                     <Globe className="w-5 h-5 mr-3" /> {t.internshipsPage.website}
                   </Button>
-                  <Button size="lg" className="rounded-2xl h-14 px-16 bg-slate-900 text-lg hover:bg-slate-800 shadow-2xl shadow-slate-900/40 font-bold tracking-tight transform active:scale-95 transition-all">
+                  <Button size="lg" onClick={handleApply} disabled={user?.role !== 'student'} className="rounded-2xl h-14 px-16 bg-slate-900 text-lg hover:bg-slate-800 shadow-2xl shadow-slate-900/40 font-bold tracking-tight transform active:scale-95 transition-all">
                     {t.internshipsPage.applyNow}
                     <ChevronRight className="w-5 h-5 ml-2" />
                   </Button>

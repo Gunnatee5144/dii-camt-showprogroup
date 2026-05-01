@@ -7,19 +7,19 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import {
-  mockLecturer,
-  mockCourses,
-  mockStudents,
-  mockAppointments,
-  mockGrades,
-  getLecturerAppointments,
-} from '@/lib/mockData';
+import { api } from '@/lib/api';
+import { mapAppointment, mapCourse, mapGrade, mapStudent } from '@/lib/live-mappers';
+
+type LecturerCourse = ReturnType<typeof mapCourse>;
+type LecturerStudent = ReturnType<typeof mapStudent>;
+type LecturerGrade = ReturnType<typeof mapGrade>;
+type LecturerAppointment = ReturnType<typeof mapAppointment>;
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -33,20 +33,65 @@ const itemVariants = {
 
 export default function LecturerDashboard() {
   const { t, language } = useLanguage();
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const lecturer = mockLecturer;
-  const appointments = getLecturerAppointments(lecturer.id);
+  const lecturer = {
+    department: '',
+    position: '',
+    advisees: [] as string[],
+    maxAdvisees: 0,
+    teachingHours: 0,
+    maxTeachingHours: 1,
+    officeHours: [] as Array<{ id: string; day: string; startTime: string; endTime: string; location?: string }>,
+    nameThai: user?.nameThai || user?.name || '',
+    name: user?.name || '',
+  };
+  const [appointments, setAppointments] = React.useState<LecturerAppointment[]>([]);
+  const [lecturerCourses, setLecturerCourses] = React.useState<LecturerCourse[]>([]);
+  const [students, setStudents] = React.useState<LecturerStudent[]>([]);
+  const [grades, setGrades] = React.useState<LecturerGrade[]>([]);
   const upcomingAppointments = appointments.filter(a => a.status === 'confirmed').slice(0, 3);
 
-  // Lecturer's courses
-  const lecturerCourses = mockCourses.filter(c => c.lecturerId === lecturer.id);
   const totalStudents = lecturerCourses.reduce((sum, course) => sum + course.enrolledStudents.length, 0);
 
   // Advisees
-  const adviseesList = mockStudents.filter(s => lecturer.advisees.includes(s.id));
+  const matchedAdvisees = students.filter(s => lecturer.advisees.includes(s.id) || lecturer.advisees.includes(s.studentId));
+  const adviseesList = matchedAdvisees.length > 0 ? matchedAdvisees : students.slice(0, lecturer.maxAdvisees);
   const atRiskAdvisees = adviseesList.filter(s => s.academicStatus === 'probation' || s.academicStatus === 'risk');
 
   const workloadPercentage = (lecturer.teachingHours / lecturer.maxTeachingHours) * 100;
+
+  React.useEffect(() => {
+    let mounted = true;
+
+    Promise.allSettled([
+      api.courses.lecturerSchedule(),
+      api.students.list(),
+      api.appointments.list(),
+      api.enrollments.list(),
+    ]).then(([scheduleResult, studentsResult, appointmentsResult, enrollmentsResult]) => {
+      if (!mounted) return;
+      if (scheduleResult.status === 'fulfilled') {
+        setLecturerCourses(scheduleResult.value.schedule.map(mapCourse));
+      }
+      if (studentsResult.status === 'fulfilled') {
+        setStudents(studentsResult.value.students.map(mapStudent));
+      }
+      if (appointmentsResult.status === 'fulfilled') {
+        setAppointments(appointmentsResult.value.appointments.map(mapAppointment));
+      }
+      if (enrollmentsResult.status === 'fulfilled') {
+        const nextGrades = enrollmentsResult.value.enrollments.map(mapGrade).filter((grade) => grade.letterGrade || typeof grade.total === 'number');
+        setGrades(nextGrades);
+      }
+    }).catch((error) => {
+      console.warn('Unable to load lecturer dashboard data from API', error);
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <motion.div
@@ -326,7 +371,7 @@ export default function LecturerDashboard() {
               <CardContent>
                 <div className="space-y-4">
                   {lecturerCourses.map(course => {
-                    const courseStudents = mockStudents.filter(s =>
+                    const courseStudents = students.filter(s =>
                       course.enrolledStudents.includes(s.id)
                     );
                     return (
@@ -453,7 +498,7 @@ export default function LecturerDashboard() {
               <CardContent>
                 <div className="space-y-4">
                   {lecturerCourses.map(course => {
-                    const courseGrades = mockGrades.filter(g => g.courseId === course.id);
+                    const courseGrades = grades.filter(g => g.courseId === course.id);
                     return (
                       <div key={course.id} className="border rounded-lg p-4">
                         <div className="flex items-center justify-between mb-4">
@@ -469,7 +514,7 @@ export default function LecturerDashboard() {
                         {courseGrades.length > 0 && (
                           <div className="space-y-2">
                             {courseGrades.map((grade, index) => {
-                              const student = mockStudents.find(s => s.id === grade.studentId);
+                              const student = students.find(s => s.id === grade.studentId || s.studentId === grade.studentId);
                               return (
                                 <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded dark:bg-slate-800">
                                   <span className="text-sm">{student?.nameThai}</span>

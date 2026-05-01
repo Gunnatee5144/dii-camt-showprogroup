@@ -10,7 +10,12 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mockAppointments, mockLecturers } from '@/lib/mockData';
+import { api } from '@/lib/api';
+import { mapAppointment, mapLecturer } from '@/lib/live-mappers';
+import type { Appointment, Lecturer } from '@/types';
+
+type AppointmentRow = Appointment;
+type LecturerRow = Lecturer;
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -25,9 +30,60 @@ const itemVariants = {
 export default function Appointments() {
     const { t } = useLanguage();
     const { user } = useAuth();
-    const pendingCount = mockAppointments.filter(a => a.status === 'pending').length;
-    const confirmedCount = mockAppointments.filter(a => a.status === 'confirmed').length;
+    const [appointments, setAppointments] = React.useState<AppointmentRow[]>([]);
+    const [lecturers, setLecturers] = React.useState<LecturerRow[]>([]);
+    const [isLoading, setIsLoading] = React.useState(true);
+    const pendingCount = appointments.filter(a => a.status === 'pending').length;
+    const confirmedCount = appointments.filter(a => a.status === 'confirmed').length;
     const isTeacher = user?.role === 'lecturer';
+
+    React.useEffect(() => {
+        let mounted = true;
+
+        Promise.allSettled([
+            api.appointments.list(),
+            api.lecturers.list(),
+        ]).then(([appointmentsResult, lecturersResult]) => {
+            if (!mounted) return;
+            if (appointmentsResult.status === 'fulfilled') {
+                setAppointments(appointmentsResult.value.appointments.map(mapAppointment));
+            } else {
+                setAppointments([]);
+            }
+            if (lecturersResult.status === 'fulfilled') {
+                setLecturers(lecturersResult.value.lecturers.map(mapLecturer));
+            } else {
+                setLecturers([]);
+            }
+        }).catch((error) => {
+            console.warn('Unable to load appointments from API', error);
+            if (mounted) {
+                setAppointments([]);
+                setLecturers([]);
+            }
+        }).finally(() => {
+            if (mounted) setIsLoading(false);
+        });
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    const updateAppointmentStatus = async (id: string, status: AppointmentRow['status']) => {
+        const previous = appointments;
+        setAppointments(current => current.map(item => item.id === id ? { ...item, status } : item));
+
+        try {
+            const response = await api.appointments.updateStatus(id, { status });
+            setAppointments(current => current.map(item => item.id === id ? mapAppointment(response.appointment) : item));
+            toast.success(status === 'confirmed' ? t.appointmentsPage.confirmedTab : status);
+        } catch (error) {
+            console.warn('Unable to update appointment status', error);
+            setAppointments(previous);
+            toast.error(t.appointmentsPage.systemUpgrade);
+        }
+    };
 
     const getStatusBadge = (status: string) => {
         switch (status) {
@@ -45,7 +101,7 @@ export default function Appointments() {
                 <div>
                     <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium mb-2">
                         <Calendar className="w-4 h-4 text-blue-500 dark:text-slate-400" />
-                        <span>{`${mockAppointments.length} ${t.appointmentsPage.titleHighlight} • ${pendingCount} ${t.appointmentsPage.subtitle}`}</span>
+                        <span>{`${appointments.length} ${t.appointmentsPage.titleHighlight} • ${pendingCount} ${t.appointmentsPage.subtitle}`}</span>
                     </motion.div>
                     <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                         {t.appointmentsPage.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">{t.appointmentsPage.titleHighlight}</span>
@@ -62,8 +118,8 @@ export default function Appointments() {
                 {[
                     { label: t.appointmentsPage.pendingTab, value: pendingCount, gradient: 'from-orange-500 to-amber-500', icon: Clock },
                     { label: t.appointmentsPage.confirmedTab, value: confirmedCount, gradient: 'from-blue-500 to-indigo-500', icon: Calendar },
-                    { label: t.appointmentsPage.completedTab, value: mockAppointments.filter(a => a.status === 'completed').length, gradient: 'from-emerald-500 to-teal-500', icon: CheckCircle },
-                    { label: t.appointmentsPage.allTab, value: mockAppointments.length, gradient: 'from-purple-500 to-pink-500', icon: Calendar },
+                    { label: t.appointmentsPage.completedTab, value: appointments.filter(a => a.status === 'completed').length, gradient: 'from-emerald-500 to-teal-500', icon: CheckCircle },
+                    { label: t.appointmentsPage.allTab, value: appointments.length, gradient: 'from-purple-500 to-pink-500', icon: Calendar },
                 ].map((stat, i) => (
                     <motion.div key={i} whileHover={{ scale: 1.02 }} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradient} p-6 text-white shadow-xl`}>
                         <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
@@ -86,7 +142,17 @@ export default function Appointments() {
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {mockLecturers.map((lecturer) => (
+                                {isLoading && (
+                                    <div className="md:col-span-2 rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">
+                                        กำลังโหลดข้อมูลอาจารย์จากระบบ...
+                                    </div>
+                                )}
+                                {!isLoading && lecturers.length === 0 && (
+                                    <div className="md:col-span-2 rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">
+                                        ไม่พบข้อมูลอาจารย์จากระบบ
+                                    </div>
+                                )}
+                                {!isLoading && lecturers.map((lecturer) => (
                                     <div key={lecturer.id} className="p-4 border rounded-xl hover:shadow-md transition-all">
                                         <div className="flex items-start gap-4">
                                             <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-bold text-lg">{lecturer.nameThai.charAt(0)}</div>
@@ -120,7 +186,17 @@ export default function Appointments() {
                     <TabsContent value="upcoming">
                         <Card className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl shadow-sm dark:bg-slate-900/50"><CardContent className="pt-6">
                             <div className="space-y-4">
-                                {mockAppointments.filter(a => a.status === 'confirmed').map((apt) => (
+                                {isLoading && (
+                                    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">
+                                        กำลังโหลดนัดหมายจริงจากระบบ...
+                                    </div>
+                                )}
+                                {!isLoading && appointments.filter(a => a.status === 'confirmed').length === 0 && (
+                                    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">
+                                        ไม่มีนัดหมายที่ยืนยันแล้ว
+                                    </div>
+                                )}
+                                {!isLoading && appointments.filter(a => a.status === 'confirmed').map((apt) => (
                                     <div key={apt.id} className="flex items-start gap-4 p-4 border rounded-xl bg-gradient-to-r from-blue-50 to-white">
                                         <div className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white rounded-xl px-4 py-3 text-center min-w-[80px]">
                                             <div className="text-xl font-bold">{new Date(apt.date).getDate()}</div>
@@ -144,7 +220,17 @@ export default function Appointments() {
                     <TabsContent value="pending">
                         <Card className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl shadow-sm dark:bg-slate-900/50"><CardContent className="pt-6">
                             <div className="space-y-4">
-                                {mockAppointments.filter(a => a.status === 'pending').map((apt) => (
+                                {isLoading && (
+                                    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">
+                                        กำลังโหลดนัดหมายจริงจากระบบ...
+                                    </div>
+                                )}
+                                {!isLoading && appointments.filter(a => a.status === 'pending').length === 0 && (
+                                    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">
+                                        ไม่มีนัดหมายที่รอยืนยัน
+                                    </div>
+                                )}
+                                {!isLoading && appointments.filter(a => a.status === 'pending').map((apt) => (
                                     <div key={apt.id} className="flex items-start gap-4 p-4 border rounded-xl bg-orange-50">
                                         <div className="bg-gradient-to-br from-orange-500 to-amber-500 text-white rounded-xl px-4 py-3 text-center min-w-[80px]">
                                             <div className="text-xl font-bold">{new Date(apt.date).getDate()}</div>
@@ -155,8 +241,8 @@ export default function Appointments() {
                                         </div>
                                         {isTeacher ? (
                                             <div className="flex gap-2">
-                                                <Button size="sm" className="bg-emerald-500"><CheckCircle className="w-4 h-4 mr-1" />{t.appointmentsPage.confirm}</Button>
-                                                <Button size="sm" variant="outline" className="text-red-600 dark:text-slate-300"><XCircle className="w-4 h-4" /></Button>
+                                                <Button size="sm" className="bg-emerald-500" onClick={() => updateAppointmentStatus(apt.id, 'confirmed')}><CheckCircle className="w-4 h-4 mr-1" />{t.appointmentsPage.confirm}</Button>
+                                                <Button size="sm" variant="outline" className="text-red-600 dark:text-slate-300" onClick={() => updateAppointmentStatus(apt.id, 'cancelled')}><XCircle className="w-4 h-4" /></Button>
                                             </div>
                                         ) : getStatusBadge(apt.status)}
                                     </div>
@@ -168,7 +254,17 @@ export default function Appointments() {
                     <TabsContent value="completed">
                         <Card className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl shadow-sm dark:bg-slate-900/50"><CardContent className="pt-6">
                             <div className="space-y-3">
-                                {mockAppointments.filter(a => a.status === 'completed').map((apt) => (
+                                {isLoading && (
+                                    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">
+                                        กำลังโหลดนัดหมายจริงจากระบบ...
+                                    </div>
+                                )}
+                                {!isLoading && appointments.filter(a => a.status === 'completed').length === 0 && (
+                                    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">
+                                        ยังไม่มีประวัตินัดหมาย
+                                    </div>
+                                )}
+                                {!isLoading && appointments.filter(a => a.status === 'completed').map((apt) => (
                                     <div key={apt.id} className="flex items-center justify-between p-4 border rounded-xl bg-gray-50 dark:bg-slate-800">
                                         <div className="flex items-center gap-4">
                                             <CheckCircle className="w-6 h-6 text-emerald-600 dark:text-slate-300" />

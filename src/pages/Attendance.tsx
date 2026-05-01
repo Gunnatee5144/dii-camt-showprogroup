@@ -9,6 +9,17 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { mockCourses } from '@/lib/mockData';
+import { api } from '@/lib/api';
+import { asRecord, asString } from '@/lib/live-data';
+import { mapCourse } from '@/lib/live-mappers';
+
+type CourseRow = (typeof mockCourses)[number];
+type AttendanceRow = {
+    enrollmentId: string;
+    studentName: string;
+    studentCode: string;
+    status: 'present' | 'late' | 'absent' | 'leave';
+};
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -23,8 +34,98 @@ const itemVariants = {
 export default function Attendance() {
     const { t } = useLanguage();
     const { user } = useAuth();
+    const [courses, setCourses] = React.useState<CourseRow[]>(mockCourses);
     const [selectedCourse, setSelectedCourse] = React.useState(mockCourses[0]?.id || '');
     const [date, setDate] = React.useState(new Date().toISOString().split('T')[0]);
+    const [attendanceRows, setAttendanceRows] = React.useState<AttendanceRow[]>([]);
+
+    React.useEffect(() => {
+        let mounted = true;
+
+        api.courses
+            .list()
+            .then((response) => {
+                if (!mounted) return;
+                const liveCourses = response.courses.map(mapCourse);
+                setCourses(liveCourses);
+                if (liveCourses[0] && !liveCourses.some(course => course.id === selectedCourse)) {
+                    setSelectedCourse(liveCourses[0].id);
+                }
+            })
+            .catch((error) => {
+                console.warn('Unable to load courses for attendance', error);
+            });
+
+        return () => {
+            mounted = false;
+        };
+    }, [selectedCourse]);
+
+    React.useEffect(() => {
+        if (!selectedCourse) return;
+        let mounted = true;
+        const query = `?courseId=${encodeURIComponent(selectedCourse)}`;
+
+        Promise.allSettled([
+            api.enrollments.list(query),
+            api.attendance.report(query),
+        ]).then(([enrollmentsResult, attendanceResult]) => {
+            if (!mounted) return;
+            if (enrollmentsResult.status !== 'fulfilled') return;
+
+            const statusByEnrollment = new Map<string, AttendanceRow['status']>();
+            if (attendanceResult.status === 'fulfilled') {
+                attendanceResult.value.attendance.forEach((item) => {
+                    const record = asRecord(item);
+                    const enrollment = asRecord(record.enrollment);
+                    const recordDate = record.date ? new Date(String(record.date)).toISOString().slice(0, 10) : '';
+                    if (recordDate === date) {
+                        statusByEnrollment.set(
+                            asString(record.enrollmentId, asString(enrollment.id)),
+                            asString(record.status, 'absent') as AttendanceRow['status'],
+                        );
+                    }
+                });
+            }
+
+            setAttendanceRows(enrollmentsResult.value.enrollments.map((item) => {
+                const enrollment = asRecord(item);
+                const student = asRecord(enrollment.student);
+                const studentUser = asRecord(student.user);
+                const enrollmentId = asString(enrollment.id);
+                return {
+                    enrollmentId,
+                    studentName: asString(studentUser.nameThai, asString(studentUser.name, 'Student')),
+                    studentCode: asString(student.studentId, asString(student.id)),
+                    status: statusByEnrollment.get(enrollmentId) ?? 'absent',
+                };
+            }));
+        }).catch((error) => {
+            console.warn('Unable to load attendance rows', error);
+        });
+
+        return () => {
+            mounted = false;
+        };
+    }, [date, selectedCourse]);
+
+    const selectedCourseInfo = courses.find(course => course.id === selectedCourse);
+    const presentCount = attendanceRows.filter(row => row.status === 'present').length;
+    const lateCount = attendanceRows.filter(row => row.status === 'late').length;
+    const absentCount = attendanceRows.filter(row => row.status === 'absent').length;
+
+    const updateStatus = async (row: AttendanceRow, status: AttendanceRow['status']) => {
+        setAttendanceRows(current => current.map(item => item.enrollmentId === row.enrollmentId ? { ...item, status } : item));
+        try {
+            await api.attendance.checkIn({
+                enrollmentId: row.enrollmentId,
+                date,
+                status,
+            });
+        } catch (error) {
+            console.warn('Unable to save attendance status', error);
+        }
+    };
 
     return (
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8 pb-10">
@@ -42,10 +143,10 @@ export default function Attendance() {
             {/* Stats */}
             <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                    { icon: Users, label: t.attendancePage.totalStudents, value: '45', gradient: 'from-blue-500 to-indigo-500', shadow: 'shadow-blue-200' },
-                    { icon: CheckCircle2, label: t.attendancePage.present, value: '42', gradient: 'from-emerald-500 to-teal-500', shadow: 'shadow-emerald-200' },
-                    { icon: Clock, label: t.attendancePage.late, value: '2', gradient: 'from-amber-500 to-orange-500', shadow: 'shadow-amber-200' },
-                    { icon: XCircle, label: t.attendancePage.absent, value: '1', gradient: 'from-red-500 to-rose-500', shadow: 'shadow-red-200' },
+                    { icon: Users, label: t.attendancePage.totalStudents, value: String(attendanceRows.length), gradient: 'from-blue-500 to-indigo-500', shadow: 'shadow-blue-200' },
+                    { icon: CheckCircle2, label: t.attendancePage.present, value: String(presentCount), gradient: 'from-emerald-500 to-teal-500', shadow: 'shadow-emerald-200' },
+                    { icon: Clock, label: t.attendancePage.late, value: String(lateCount), gradient: 'from-amber-500 to-orange-500', shadow: 'shadow-amber-200' },
+                    { icon: XCircle, label: t.attendancePage.absent, value: String(absentCount), gradient: 'from-red-500 to-rose-500', shadow: 'shadow-red-200' },
                 ].map((stat, i) => (
                     <motion.div key={i} whileHover={{ scale: 1.02 }} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradient} p-6 text-white shadow-xl ${stat.shadow}`}>
                         <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
@@ -72,7 +173,7 @@ export default function Attendance() {
                             <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t.attendancePage.courseLabel}</label>
                             <Select value={selectedCourse} onValueChange={setSelectedCourse}>
                                 <SelectTrigger className="rounded-xl"><SelectValue placeholder={t.attendancePage.selectCourse} /></SelectTrigger>
-                                <SelectContent>{mockCourses.slice(0, 3).map(c => (<SelectItem key={c.id} value={c.id}>{c.code} {c.name}</SelectItem>))}</SelectContent>
+                                <SelectContent>{courses.map(c => (<SelectItem key={c.id} value={c.id}>{c.code} {c.name}</SelectItem>))}</SelectContent>
                             </Select>
                         </div>
                         <div className="space-y-2">
@@ -103,30 +204,30 @@ export default function Attendance() {
                     <div className="flex justify-between items-center mb-5">
                         <div>
                             <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">{t.attendancePage.studentList}</h3>
-                            <p className="text-sm text-slate-500 dark:text-slate-400">วิชา Advanced AI • Sec 001</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">{selectedCourseInfo ? `${selectedCourseInfo.code} ${selectedCourseInfo.name}` : t.attendancePage.selectCourse}</p>
                         </div>
                         <div className="flex gap-3 text-sm">
-                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 rounded-xl dark:bg-slate-800"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> {t.attendancePage.presentShort} 42</div>
-                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 rounded-xl"><div className="w-2.5 h-2.5 rounded-full bg-amber-500" /> {t.attendancePage.lateShort} 2</div>
-                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 rounded-xl dark:bg-slate-800"><div className="w-2.5 h-2.5 rounded-full bg-red-500" /> {t.attendancePage.absentShort} 1</div>
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 rounded-xl dark:bg-slate-800"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> {t.attendancePage.presentShort} {presentCount}</div>
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 rounded-xl"><div className="w-2.5 h-2.5 rounded-full bg-amber-500" /> {t.attendancePage.lateShort} {lateCount}</div>
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 rounded-xl dark:bg-slate-800"><div className="w-2.5 h-2.5 rounded-full bg-red-500" /> {t.attendancePage.absentShort} {absentCount}</div>
                         </div>
                     </div>
                     <div className="space-y-2">
-                        {Array.from({ length: 10 }).map((_, i) => (
+                        {attendanceRows.map((row, i) => (
                             <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.03 }}
                                 className="flex items-center justify-between p-3 rounded-2xl hover:bg-white border border-transparent hover:border-slate-100 hover:shadow-sm transition-all dark:bg-slate-900 dark:border-slate-700">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm">{String.fromCharCode(65 + i)}</div>
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm">{row.studentName.charAt(0)}</div>
                                     <div>
-                                        <div className="font-medium text-slate-800 dark:text-slate-200">{t.attendancePage.student} {i + 1}</div>
-                                        <div className="text-xs text-slate-400">642110{100 + i}</div>
+                                        <div className="font-medium text-slate-800 dark:text-slate-200">{row.studentName}</div>
+                                        <div className="text-xs text-slate-400">{row.studentCode}</div>
                                     </div>
                                 </div>
                                 <div className="flex gap-1.5">
-                                    <Button size="sm" className={i !== 5 ? "bg-emerald-500 hover:bg-emerald-600 h-8 px-3 rounded-xl text-xs" : "bg-transparent text-slate-400 h-8 px-3 rounded-xl text-xs hover:bg-slate-50"}>{t.attendancePage.presentShort}</Button>
-                                    <Button size="sm" className={i === 5 ? "bg-amber-500 hover:bg-amber-600 h-8 px-3 rounded-xl text-xs" : "bg-transparent text-slate-400 h-8 px-3 rounded-xl text-xs hover:bg-slate-50"}>{t.attendancePage.lateShort}</Button>
-                                    <Button size="sm" className="bg-transparent text-slate-400 h-8 px-3 rounded-xl text-xs hover:bg-slate-50 dark:bg-slate-800">{t.attendancePage.absentShort}</Button>
-                                    <Button size="sm" className="bg-transparent text-slate-400 h-8 px-3 rounded-xl text-xs hover:bg-slate-50 dark:bg-slate-800">{t.attendancePage.leaveShort}</Button>
+                                    <Button size="sm" className={row.status === 'present' ? "bg-emerald-500 hover:bg-emerald-600 h-8 px-3 rounded-xl text-xs" : "bg-transparent text-slate-400 h-8 px-3 rounded-xl text-xs hover:bg-slate-50"} onClick={() => updateStatus(row, 'present')}>{t.attendancePage.presentShort}</Button>
+                                    <Button size="sm" className={row.status === 'late' ? "bg-amber-500 hover:bg-amber-600 h-8 px-3 rounded-xl text-xs" : "bg-transparent text-slate-400 h-8 px-3 rounded-xl text-xs hover:bg-slate-50"} onClick={() => updateStatus(row, 'late')}>{t.attendancePage.lateShort}</Button>
+                                    <Button size="sm" className={row.status === 'absent' ? "bg-red-500 hover:bg-red-600 h-8 px-3 rounded-xl text-xs" : "bg-transparent text-slate-400 h-8 px-3 rounded-xl text-xs hover:bg-slate-50 dark:bg-slate-800"} onClick={() => updateStatus(row, 'absent')}>{t.attendancePage.absentShort}</Button>
+                                    <Button size="sm" className={row.status === 'leave' ? "bg-slate-500 hover:bg-slate-600 h-8 px-3 rounded-xl text-xs" : "bg-transparent text-slate-400 h-8 px-3 rounded-xl text-xs hover:bg-slate-50 dark:bg-slate-800"} onClick={() => updateStatus(row, 'leave')}>{t.attendancePage.leaveShort}</Button>
                                 </div>
                             </motion.div>
                         ))}

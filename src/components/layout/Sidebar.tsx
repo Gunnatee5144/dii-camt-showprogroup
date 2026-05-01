@@ -213,7 +213,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Sidebar - Premium Dark Glass */}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-50 h-full w-72 bg-slate-900 text-white shadow-2xl transition-transform duration-300 md:sticky md:top-0 md:h-screen md:translate-x-0 border-r border-white/5 flex flex-col",
+          "fixed inset-y-0 left-0 z-50 h-[100dvh] min-h-[100dvh] max-h-[100dvh] w-72 shrink-0 self-start bg-slate-900 text-white shadow-2xl transition-transform duration-300 md:sticky md:inset-auto md:top-0 md:translate-x-0 border-r border-white/5 flex flex-col overflow-hidden",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -231,8 +231,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               <Command className="w-6 h-6 text-white relative z-10" />
             </div>
             <div>
-              <h2 className={`font-bold text-lg tracking-tight transition-colors ${activeScheme.textHover}`}>DII CAMT</h2>
-              <p className="text-xs text-slate-400 font-medium tracking-wide">ShowPro v2.0</p>
+              <h2 className={`font-bold text-lg tracking-tight transition-colors ${activeScheme.textHover}`}>ShowPro</h2>
+              <p className="text-xs text-slate-400 font-medium tracking-wide">Ecosystem v2.0</p>
             </div>
           </Link>
           <Button variant="ghost" size="icon" className="md:hidden text-slate-400 hover:text-white" onClick={onClose}>
@@ -241,8 +241,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         </div>
 
         {/* Navigation */}
-        <ScrollArea className="relative z-10 flex-1 py-6 px-4">
-          <nav className="space-y-1.5 pb-20">
+        <ScrollArea className="relative z-10 flex-1 min-h-0 py-6 px-4">
+          <nav className="space-y-1.5 pb-3">
             {navItems.map((item) => {
               const isActive = location.pathname === item.href;
               return (

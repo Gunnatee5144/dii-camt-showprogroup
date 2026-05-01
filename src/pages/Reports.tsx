@@ -6,8 +6,26 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mockStudents, mockCourses, mockActivities } from '@/lib/mockData';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { api } from '@/lib/api';
+import { asNumber, asRecord, asString } from '@/lib/live-data';
+
+type StudentRow = {
+    id: string;
+    gpa: number;
+    year: number;
+    academicStatus: string;
+};
+
+type CourseRow = {
+    id: string;
+};
+
+type ActivityRow = {
+    id: string;
+    status: string;
+    activityHours: number;
+};
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -19,16 +37,98 @@ const itemVariants = {
     visible: { opacity: 1, y: 0 },
 };
 
+const mapReportStudent = (item: unknown): StudentRow => {
+    const source = asRecord(item);
+    return {
+        id: asString(source.id),
+        gpa: asNumber(source.gpa, asNumber(source.gpax, 0)),
+        year: asNumber(source.year, 0),
+        academicStatus: asString(source.academicStatus, 'normal'),
+    };
+};
+
+const mapReportCourse = (item: unknown): CourseRow => {
+    const source = asRecord(item);
+    return {
+        id: asString(source.id),
+    };
+};
+
+const mapReportActivity = (item: unknown): ActivityRow => {
+    const source = asRecord(item);
+    return {
+        id: asString(source.id),
+        status: asString(source.status, ''),
+        activityHours: asNumber(source.activityHours, 0),
+    };
+};
+
 export default function Reports() {
     const { t } = useLanguage();
-    const avgGPA = (mockStudents.reduce((sum, s) => sum + s.gpa, 0) / mockStudents.length).toFixed(2);
-    const atRiskCount = mockStudents.filter(s => s.academicStatus === 'probation' || s.academicStatus === 'risk').length;
+    const [students, setStudents] = React.useState<StudentRow[]>([]);
+    const [courses, setCourses] = React.useState<CourseRow[]>([]);
+    const [activities, setActivities] = React.useState<ActivityRow[]>([]);
+    const [systemReport, setSystemReport] = React.useState<unknown>(null);
+
+    React.useEffect(() => {
+        let mounted = true;
+
+        Promise.allSettled([
+            api.students.list(),
+            api.courses.list(),
+            api.activities.list(),
+            api.reports.systemUsage(),
+        ]).then(([studentsResult, coursesResult, activitiesResult, reportResult]) => {
+            if (!mounted) return;
+            if (studentsResult.status === 'fulfilled') {
+                setStudents(studentsResult.value.students.map(mapReportStudent));
+            }
+            if (coursesResult.status === 'fulfilled') {
+                setCourses(coursesResult.value.courses.map(mapReportCourse));
+            }
+            if (activitiesResult.status === 'fulfilled') {
+                setActivities(activitiesResult.value.activities.map(mapReportActivity));
+            }
+            if (reportResult.status === 'fulfilled') {
+                setSystemReport(reportResult.value.report);
+            }
+        }).catch((error) => {
+            console.warn('Unable to load report data from API', error);
+        });
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    const studentCount = Math.max(students.length, 1);
+    const avgGPA = (students.reduce((sum, s) => sum + s.gpa, 0) / studentCount).toFixed(2);
     const yearDistribution = [
-        { year: 1, count: mockStudents.filter(s => s.year === 1).length },
-        { year: 2, count: mockStudents.filter(s => s.year === 2).length },
-        { year: 3, count: mockStudents.filter(s => s.year === 3).length },
-        { year: 4, count: mockStudents.filter(s => s.year === 4).length },
+        { year: 1, count: students.filter(s => s.year === 1).length },
+        { year: 2, count: students.filter(s => s.year === 2).length },
+        { year: 3, count: students.filter(s => s.year === 3).length },
+        { year: 4, count: students.filter(s => s.year === 4).length },
     ];
+
+    const downloadReport = () => {
+        const payload = {
+            generatedAt: new Date().toISOString(),
+            totals: {
+                students: students.length,
+                courses: courses.length,
+                activities: activities.length,
+                avgGPA,
+            },
+            yearDistribution,
+            systemReport,
+        };
+        const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'system-report.json';
+        link.click();
+        URL.revokeObjectURL(url);
+    };
 
     return (
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8 pb-10">
@@ -54,7 +154,7 @@ export default function Reports() {
                 </div>
 
                 <motion.div className="flex gap-3" variants={itemVariants}>
-                    <Button variant="outline" className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-white hover:text-emerald-600 dark:text-slate-300 dark:bg-slate-900">
+                    <Button variant="outline" onClick={downloadReport} className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-white hover:text-emerald-600 dark:text-slate-300 dark:bg-slate-900">
                         <Download className="w-4 h-4 mr-2" />{t.reports.downloadReport}
                     </Button>
                 </motion.div>
@@ -75,7 +175,7 @@ export default function Reports() {
                             </div>
                             <span className="font-medium text-white/90">{t.reports.totalStudents}</span>
                         </div>
-                        <div className="text-5xl font-bold tracking-tight">{mockStudents.length}</div>
+                        <div className="text-5xl font-bold tracking-tight">{students.length}</div>
                         <div className="mt-3 text-sm text-emerald-100 flex items-center gap-1">
                             <Sparkles className="w-4 h-4" />
                             {t.reports.inSystemAll}
@@ -112,7 +212,7 @@ export default function Reports() {
                             </div>
                             <span className="font-medium text-slate-600 dark:text-slate-300">{t.reports.coursesLabel}</span>
                         </div>
-                        <div className="text-4xl font-bold text-slate-900 dark:text-white group-hover:text-purple-600 transition-colors">{mockCourses.length}</div>
+                        <div className="text-4xl font-bold text-slate-900 dark:text-white group-hover:text-purple-600 transition-colors">{courses.length}</div>
                         <div className="mt-3 text-sm text-slate-400">{t.reports.coursesInSystem}</div>
                     </div>
                 </motion.div>
@@ -129,7 +229,7 @@ export default function Reports() {
                             </div>
                             <span className="font-medium text-slate-600 dark:text-slate-300">{t.reports.activitiesLabel}</span>
                         </div>
-                        <div className="text-4xl font-bold text-slate-900 dark:text-white group-hover:text-orange-600 transition-colors">{mockActivities.length}</div>
+                        <div className="text-4xl font-bold text-slate-900 dark:text-white group-hover:text-orange-600 transition-colors">{activities.length}</div>
                         <div className="mt-3 text-sm text-slate-400">{t.reports.allActivities}</div>
                     </div>
                 </motion.div>
@@ -150,11 +250,11 @@ export default function Reports() {
                                 <CardContent>
                                     <div className="space-y-4">
                                         {[
-                                            { range: '3.50-4.00', count: mockStudents.filter(s => s.gpa >= 3.5).length, color: 'bg-emerald-500' },
-                                            { range: '3.00-3.49', count: mockStudents.filter(s => s.gpa >= 3.0 && s.gpa < 3.5).length, color: 'bg-blue-500' },
-                                            { range: '2.50-2.99', count: mockStudents.filter(s => s.gpa >= 2.5 && s.gpa < 3.0).length, color: 'bg-yellow-500' },
-                                            { range: '2.00-2.49', count: mockStudents.filter(s => s.gpa >= 2.0 && s.gpa < 2.5).length, color: 'bg-orange-500' },
-                                            { range: t.reports.gpaBelowTwo, count: mockStudents.filter(s => s.gpa < 2.0).length, color: 'bg-red-500' },
+                                            { range: '3.50-4.00', count: students.filter(s => s.gpa >= 3.5).length, color: 'bg-emerald-500' },
+                                            { range: '3.00-3.49', count: students.filter(s => s.gpa >= 3.0 && s.gpa < 3.5).length, color: 'bg-blue-500' },
+                                            { range: '2.50-2.99', count: students.filter(s => s.gpa >= 2.5 && s.gpa < 3.0).length, color: 'bg-yellow-500' },
+                                            { range: '2.00-2.49', count: students.filter(s => s.gpa >= 2.0 && s.gpa < 2.5).length, color: 'bg-orange-500' },
+                                            { range: t.reports.gpaBelowTwo, count: students.filter(s => s.gpa < 2.0).length, color: 'bg-red-500' },
                                         ].map((item) => (
                                             <div key={item.range}>
                                                 <div className="flex justify-between text-sm mb-1">
@@ -162,7 +262,7 @@ export default function Reports() {
                                                     <span className="font-semibold">{item.count} {t.common.person}</span>
                                                 </div>
                                                 <div className="h-3 bg-gray-100 rounded-full overflow-hidden dark:bg-slate-800">
-                                                    <div className={`h-full ${item.color} rounded-full`} style={{ width: `${(item.count / mockStudents.length) * 100}%` }} />
+                                                    <div className={`h-full ${item.color} rounded-full`} style={{ width: `${(item.count / studentCount) * 100}%` }} />
                                                 </div>
                                             </div>
                                         ))}
@@ -175,9 +275,9 @@ export default function Reports() {
                                 <CardContent>
                                     <div className="space-y-4">
                                         {[
-                                            { label: t.reports.normal, count: mockStudents.filter(s => s.academicStatus === 'normal').length, color: 'bg-emerald-500' },
-                                            { label: t.reports.probation, count: mockStudents.filter(s => s.academicStatus === 'probation').length, color: 'bg-orange-500' },
-                                            { label: t.reports.risk, count: mockStudents.filter(s => s.academicStatus === 'risk').length, color: 'bg-red-500' },
+                                            { label: t.reports.normal, count: students.filter(s => s.academicStatus === 'normal').length, color: 'bg-emerald-500' },
+                                            { label: t.reports.probation, count: students.filter(s => s.academicStatus === 'probation').length, color: 'bg-orange-500' },
+                                            { label: t.reports.risk, count: students.filter(s => s.academicStatus === 'risk').length, color: 'bg-red-500' },
                                         ].map((item) => (
                                             <div key={item.label} className="flex items-center justify-between p-4 border rounded-xl">
                                                 <div className="flex items-center gap-3">
@@ -216,10 +316,10 @@ export default function Reports() {
                             <CardContent>
                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                                     {[
-                                        { label: t.reports.allActivitiesStat, value: mockActivities.length },
-                                        { label: t.reports.upcoming, value: mockActivities.filter(a => a.status === 'upcoming').length },
-                                        { label: t.reports.completed, value: mockActivities.filter(a => a.status === 'completed').length },
-                                        { label: t.reports.totalHours, value: mockActivities.reduce((sum, a) => sum + a.activityHours, 0) },
+                                        { label: t.reports.allActivitiesStat, value: activities.length },
+                                        { label: t.reports.upcoming, value: activities.filter(a => a.status === 'upcoming').length },
+                                        { label: t.reports.completed, value: activities.filter(a => a.status === 'completed').length },
+                                        { label: t.reports.totalHours, value: activities.reduce((sum, a) => sum + a.activityHours, 0) },
                                     ].map((item) => (
                                         <div key={item.label} className="text-center p-4 bg-gray-50 rounded-xl dark:bg-slate-800">
                                             <div className="text-sm text-gray-600 dark:text-slate-400 mb-1">{item.label}</div>

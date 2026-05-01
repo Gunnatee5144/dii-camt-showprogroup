@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { StatsCard } from '@/components/common/StatsCard';
 import { mockAdmin, mockStudents, mockCourses, mockLecturers, mockCompanies } from '@/lib/mockData';
+import { api } from '@/lib/api';
+import { asNumber, asRecord } from '@/lib/live-data';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -21,6 +23,40 @@ const itemVariants = {
 export default function AdminDashboard() {
   const { t, language } = useLanguage();
   const admin = mockAdmin;
+  const [stats, setStats] = React.useState({
+    totalUsers: mockStudents.length + mockLecturers.length + 1 + mockCompanies.length,
+    totalCourses: mockCourses.length,
+    totalCompanies: mockCompanies.length,
+    totalStudents: mockStudents.length,
+    totalLecturers: mockLecturers.length,
+  });
+
+  React.useEffect(() => {
+    let mounted = true;
+
+    Promise.allSettled([
+      api.reports.systemUsage(),
+      api.companies.list(),
+      api.students.list(),
+      api.lecturers.list(),
+    ]).then(([reportResult, companiesResult, studentsResult, lecturersResult]) => {
+      if (!mounted) return;
+      const report = reportResult.status === 'fulfilled' ? asRecord(reportResult.value.report) : {};
+      setStats(current => ({
+        totalUsers: asNumber(report.totalUsers, current.totalUsers),
+        totalCourses: asNumber(report.totalCourses, current.totalCourses),
+        totalCompanies: companiesResult.status === 'fulfilled' ? companiesResult.value.companies.length : current.totalCompanies,
+        totalStudents: studentsResult.status === 'fulfilled' ? studentsResult.value.students.length : current.totalStudents,
+        totalLecturers: lecturersResult.status === 'fulfilled' ? lecturersResult.value.lecturers.length : current.totalLecturers,
+      }));
+    }).catch((error) => {
+      console.warn('Unable to load admin dashboard stats from API', error);
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6 p-6">
@@ -33,9 +69,9 @@ export default function AdminDashboard() {
       </motion.div>
 
       <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatsCard title={t.adminDashboard.totalUsers} value={(mockStudents.length + mockLecturers.length + 1 + mockCompanies.length).toString()} icon={<Users className="w-5 h-5" />} description={t.adminDashboard.totalUsersDesc} />
-        <StatsCard title={t.adminDashboard.courses} value={mockCourses.length.toString()} icon={<BookOpen className="w-5 h-5" />} description={t.adminDashboard.coursesDesc} />
-        <StatsCard title={t.adminDashboard.companies} value={mockCompanies.length.toString()} icon={<Building className="w-5 h-5" />} description={t.adminDashboard.companiesDesc} />
+        <StatsCard title={t.adminDashboard.totalUsers} value={stats.totalUsers.toString()} icon={<Users className="w-5 h-5" />} description={t.adminDashboard.totalUsersDesc} />
+        <StatsCard title={t.adminDashboard.courses} value={stats.totalCourses.toString()} icon={<BookOpen className="w-5 h-5" />} description={t.adminDashboard.coursesDesc} />
+        <StatsCard title={t.adminDashboard.companies} value={stats.totalCompanies.toString()} icon={<Building className="w-5 h-5" />} description={t.adminDashboard.companiesDesc} />
         <StatsCard title={t.adminDashboard.system} value={t.adminDashboard.systemNormal} icon={<Activity className="w-5 h-5" />} description={t.adminDashboard.systemWorking} />
       </motion.div>
 
@@ -43,9 +79,9 @@ export default function AdminDashboard() {
         <Card>
           <CardHeader><CardTitle>{t.adminDashboard.manageUsers}</CardTitle></CardHeader>
           <CardContent className="space-y-2">
-            <Button variant="outline" className="w-full justify-start"><Users className="w-4 h-4 mr-2" />{t.adminDashboard.manageStudents} ({mockStudents.length})</Button>
-            <Button variant="outline" className="w-full justify-start"><Users className="w-4 h-4 mr-2" />{t.adminDashboard.manageLecturers} ({mockLecturers.length})</Button>
-            <Button variant="outline" className="w-full justify-start"><Building className="w-4 h-4 mr-2" />{t.adminDashboard.manageCompanies} ({mockCompanies.length})</Button>
+            <Button variant="outline" className="w-full justify-start"><Users className="w-4 h-4 mr-2" />{t.adminDashboard.manageStudents} ({stats.totalStudents})</Button>
+            <Button variant="outline" className="w-full justify-start"><Users className="w-4 h-4 mr-2" />{t.adminDashboard.manageLecturers} ({stats.totalLecturers})</Button>
+            <Button variant="outline" className="w-full justify-start"><Building className="w-4 h-4 mr-2" />{t.adminDashboard.manageCompanies} ({stats.totalCompanies})</Button>
           </CardContent>
         </Card>
         <Card>

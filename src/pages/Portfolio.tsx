@@ -4,19 +4,21 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import {
   Briefcase, Award, Code, Download, Share2, Edit, Plus,
-  Github, Linkedin, Globe, Mail, Phone, MapPin, Calendar, Clock,
+  Github, Linkedin, Globe, Mail, Phone, MapPin, Calendar,
   Trophy, GraduationCap, Target, Zap, ArrowUpRight, Layers
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  mockStudent,
-  getProjectsByStudentId,
-  getCertificatesByStudentId,
-  getAchievementsByStudentId
-} from '@/lib/mockData';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { mockStudent } from '@/lib/mockData';
+import { api } from '@/lib/api';
+import { mapStudent, mapStudentStatsToStudent } from '@/lib/live-mappers';
+import { toast } from 'sonner';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -32,19 +34,124 @@ export default function Portfolio() {
   const { user } = useAuth();
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = React.useState('projects');
+  const [student, setStudent] = React.useState(mockStudent);
+  const [isProjectDialogOpen, setIsProjectDialogOpen] = React.useState(false);
+  const [projectForm, setProjectForm] = React.useState({
+    title: '',
+    description: '',
+    technologies: '',
+    role: '',
+    startDate: new Date().toISOString().split('T')[0],
+    url: '',
+  });
 
-  const projects = getProjectsByStudentId(mockStudent.id);
-  const achievements = getAchievementsByStudentId(mockStudent.id);
-  const certificates = getCertificatesByStudentId(mockStudent.id);
+  React.useEffect(() => {
+    let mounted = true;
 
-  // Use real student skills from mockData
-  const skills = mockStudent.skills.map(s => ({
-    name: s.name,
-    level: s.level === 'advanced' ? 85 : s.level === 'intermediate' ? 65 : 40,
-    icon: <Code className="w-4 h-4" />,
-    category: s.category,
-    verifiedBy: s.verifiedBy,
+    Promise.allSettled([api.students.profile(), api.students.stats()])
+      .then(([profileResult, statsResult]) => {
+        if (!mounted) return;
+        let nextStudent = mockStudent;
+        if (profileResult.status === 'fulfilled') {
+          nextStudent = mapStudent(profileResult.value.profile);
+        }
+        if (statsResult.status === 'fulfilled') {
+          nextStudent = mapStudentStatsToStudent(nextStudent, statsResult.value.stats);
+        }
+        setStudent(nextStudent);
+      })
+      .catch((error) => {
+        console.warn('Unable to load portfolio from API', error);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const projects = student.portfolio?.projects ?? [];
+  const achievements = student.badges.length
+    ? student.badges.map((badge) => ({
+      id: badge.id,
+      studentId: student.studentId,
+      title: badge.nameThai || badge.name,
+      description: badge.description,
+      category: 'badge',
+      date: badge.earnedAt,
+    }))
+    : [];
+
+  const skillLevelPercent: Record<string, number> = {
+    beginner: 35,
+    intermediate: 60,
+    advanced: 82,
+    expert: 96,
+  };
+  const skills = student.skills.map((skill) => ({
+    name: skill.name,
+    level: skillLevelPercent[skill.level] ?? 60,
+    icon: skill.category === 'soft_skill' ? <Layers className="w-4 h-4" /> : <Code className="w-4 h-4" />,
   }));
+
+  const handleAddProject = async () => {
+    if (!projectForm.title.trim() || !projectForm.description.trim() || !projectForm.role.trim()) {
+      toast.error('กรุณากรอกข้อมูลผลงานให้ครบ');
+      return;
+    }
+
+    const currentPortfolio = student.portfolio;
+    const projectPayload = {
+      title: projectForm.title.trim(),
+      description: projectForm.description.trim(),
+      technologies: projectForm.technologies.split(',').map((item) => item.trim()).filter(Boolean),
+      role: projectForm.role.trim(),
+      startDate: projectForm.startDate,
+      url: projectForm.url.trim(),
+      images: [],
+      highlights: [],
+    };
+
+    try {
+      const response = await api.students.updateProfile({
+        portfolio: {
+          summary: currentPortfolio?.summary || '',
+          summaryThai: currentPortfolio?.summaryThai || '',
+          githubUrl: currentPortfolio?.githubUrl || '',
+          linkedinUrl: currentPortfolio?.linkedinUrl || '',
+          personalWebsite: currentPortfolio?.personalWebsite || '',
+          isPublic: currentPortfolio?.isPublic ?? true,
+          sharedWith: currentPortfolio?.sharedWith ?? [],
+          projects: [
+            ...projects.map((project) => ({
+              title: project.title,
+              description: project.description,
+              technologies: project.technologies,
+              role: project.role,
+              startDate: project.startDate,
+              endDate: project.endDate,
+              url: project.url || '',
+              images: project.images || [],
+              highlights: project.highlights || [],
+            })),
+            projectPayload,
+          ],
+        },
+      });
+      setStudent(mapStudent(response.profile));
+      setProjectForm({
+        title: '',
+        description: '',
+        technologies: '',
+        role: '',
+        startDate: new Date().toISOString().split('T')[0],
+        url: '',
+      });
+      setIsProjectDialogOpen(false);
+      toast.success('เพิ่มผลงานลง Portfolio แล้ว');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'ไม่สามารถเพิ่มผลงานได้');
+    }
+  };
 
   if (user?.role !== 'student') {
     return (
@@ -114,10 +221,27 @@ export default function Portfolio() {
           </motion.h1>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="rounded-xl border-slate-200 dark:border-slate-700">
+          <Button
+            variant="outline"
+            className="rounded-xl border-slate-200 dark:border-slate-700"
+            onClick={() => {
+              const url = `${window.location.origin}/student-profiles?studentId=${encodeURIComponent(student.id)}`;
+              void navigator.clipboard?.writeText(url);
+              toast.success('Portfolio link copied');
+            }}
+          >
             <Share2 className="w-4 h-4 mr-2" /> {t.portfolioPage.shareProfile}
           </Button>
-          <Button className="rounded-xl bg-slate-900 text-white hover:bg-slate-800 shadow-lg shadow-slate-900/20">
+          <Button
+            className="rounded-xl bg-slate-900 text-white hover:bg-slate-800 shadow-lg shadow-slate-900/20"
+            onClick={() => {
+              if (student.cvUrl) {
+                window.open(student.cvUrl, '_blank', 'noopener,noreferrer');
+                return;
+              }
+              toast.info('ยังไม่มี CV ในโปรไฟล์ กรุณาเพิ่มลิงก์ CV ที่หน้า Settings');
+            }}
+          >
             <Download className="w-4 h-4 mr-2" /> ดาวน์โหลด CV
           </Button>
         </div>
@@ -144,9 +268,9 @@ export default function Portfolio() {
           gradient="bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-600"
         />
         <StatCard
-          icon={GraduationCap}
-          label="Certificates"
-          value={certificates.length}
+          icon={Target}
+          label={t.portfolioPage.completeness}
+          value="95%"
           gradient="bg-gradient-to-br from-blue-500 via-blue-600 to-cyan-600"
         />
       </div>
@@ -166,12 +290,6 @@ export default function Portfolio() {
                 className="rounded-xl px-6 py-3 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-lg shadow-blue-500/10 transition-all duration-300 font-medium text-slate-600 dark:text-slate-300 dark:bg-slate-900/50"
               >
                 {t.portfolioPage.awards}
-              </TabsTrigger>
-              <TabsTrigger
-                value="certificates"
-                className="rounded-xl px-6 py-3 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-lg shadow-blue-500/10 transition-all duration-300 font-medium text-slate-600 dark:text-slate-300 dark:bg-slate-900/50"
-              >
-                Certificates ({certificates.length})
               </TabsTrigger>
             </TabsList>
 
@@ -220,10 +338,18 @@ export default function Portfolio() {
                     </div>
                   </motion.div>
                 ))}
+                {projects.length === 0 && (
+                  <div className="md:col-span-2 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/70 p-10 text-center">
+                    <Briefcase className="w-10 h-10 mx-auto text-slate-400 mb-3" />
+                    <h3 className="font-bold text-slate-800 dark:text-slate-100">ยังไม่มีผลงานใน Portfolio</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">เมื่อเพิ่มข้อมูล portfolio ลงฐานข้อมูล ผลงานจะแสดงที่นี่ทันที</p>
+                  </div>
+                )}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   whileHover={{ scale: 1.02 }}
+                  onClick={() => setIsProjectDialogOpen(true)}
                   className="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl flex flex-col items-center justify-center p-8 text-slate-400 hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all cursor-pointer min-h-[300px] dark:text-slate-300"
                 >
                   <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-950 flex items-center justify-center mb-4 group-hover:bg-white">
@@ -257,66 +383,13 @@ export default function Portfolio() {
                     </div>
                   </motion.div>
                 ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="certificates" className="mt-0">
-              <div className="space-y-4">
-                {certificates.map((cert, index) => {
-                  const isExpired = cert.expiryDate && new Date(cert.expiryDate) < new Date();
-                  const isExpiringSoon = cert.expiryDate && !isExpired &&
-                    new Date(cert.expiryDate).getTime() - Date.now() < 90 * 24 * 60 * 60 * 1000;
-                  return (
-                    <motion.div
-                      key={cert.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="group bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all"
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shrink-0 shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
-                          <Award className="w-7 h-7" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-wrap items-start gap-2 mb-1">
-                            <h3 className="font-bold text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">{cert.title}</h3>
-                            {isExpired && <Badge className="bg-red-100 text-red-600 border-0 text-[10px]">Expired</Badge>}
-                            {isExpiringSoon && <Badge className="bg-orange-100 text-orange-600 border-0 text-[10px]">Expiring Soon</Badge>}
-                          </div>
-                          <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">{cert.issuer}</p>
-                          <div className="flex flex-wrap gap-3 text-xs text-slate-400">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              Issued: {new Date(cert.issueDate).toLocaleDateString('th-TH', { month: 'short', year: 'numeric' })}
-                            </span>
-                            {cert.expiryDate && (
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                Expires: {new Date(cert.expiryDate).toLocaleDateString('th-TH', { month: 'short', year: 'numeric' })}
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex flex-wrap gap-1.5 mt-3">
-                            {cert.skills.map(skill => (
-                              <Badge key={skill} variant="secondary" className="text-[10px] bg-blue-50 text-blue-700 border border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">{skill}</Badge>
-                            ))}
-                          </div>
-                        </div>
-                        <a
-                          href={cert.credentialUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-shrink-0"
-                        >
-                          <Button variant="outline" size="sm" className="rounded-xl border-blue-200 text-blue-600 hover:bg-blue-50 text-xs">
-                            <ArrowUpRight className="w-3.5 h-3.5 mr-1" />Verify
-                          </Button>
-                        </a>
-                      </div>
-                    </motion.div>
-                  );
-                })}
+                {achievements.length === 0 && (
+                  <div className="rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/70 p-8 text-center">
+                    <Trophy className="w-10 h-10 mx-auto text-slate-400 mb-3" />
+                    <p className="font-semibold text-slate-700 dark:text-slate-200">ยังไม่มีรางวัลหรือ badge</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">เมื่อมีกิจกรรมหรือผลงานที่ได้รับ badge ระบบจะแสดงจากข้อมูลจริงที่นี่</p>
+                  </div>
+                )}
               </div>
             </TabsContent>
           </Tabs>
@@ -331,17 +404,17 @@ export default function Portfolio() {
             <div className="h-24 bg-gradient-to-r from-blue-600 to-indigo-600 absolute top-0 left-0 right-0" />
             <div className="relative pt-10 text-center">
               <Avatar className="w-24 h-24 border-4 border-white shadow-xl rounded-2xl mx-auto mb-4">
-                <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${mockStudent.name}`} />
+                <AvatarImage src={student.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${student.name}`} />
                 <AvatarFallback className="text-2xl bg-indigo-100 text-indigo-600 rounded-3xl dark:text-slate-300">
-                  {mockStudent.nameThai.charAt(0)}
+                  {student.nameThai.charAt(0)}
                 </AvatarFallback>
               </Avatar>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-200">{mockStudent.nameThai}</h2>
-              <p className="text-slate-500 mb-4 dark:text-slate-400">{mockStudent.name}</p>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-200">{student.nameThai}</h2>
+              <p className="text-slate-500 mb-4 dark:text-slate-400">{student.name}</p>
 
               <div className="flex flex-wrap gap-2 justify-center mb-6">
-                <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800">{mockStudent.major}</Badge>
-                <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800">{t.portfolioPage.year} {mockStudent.year}</Badge>
+                <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800">{student.major}</Badge>
+                <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800">{t.portfolioPage.year} {student.year}</Badge>
               </div>
 
               <div className="flex gap-2 justify-center">
@@ -360,11 +433,11 @@ export default function Portfolio() {
             <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 space-y-3">
               <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
                 <Mail className="w-4 h-4 text-slate-400" />
-                {mockStudent.email}
+                {student.email}
               </div>
               <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
                 <Phone className="w-4 h-4 text-slate-400" />
-                +66 81 234 5678
+                {student.phone || '-'}
               </div>
               <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
                 <MapPin className="w-4 h-4 text-slate-400" />
@@ -387,9 +460,6 @@ export default function Portfolio() {
                   <div className="flex justify-between text-sm mb-2">
                     <span className="font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
                       {skill.icon} {skill.name}
-                      {skill.verifiedBy && (
-                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-1.5 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">✓ Verified</span>
-                      )}
                     </span>
                     <span className="text-slate-500 dark:text-slate-400">{skill.level}%</span>
                   </div>
@@ -398,11 +468,7 @@ export default function Portfolio() {
                       initial={{ width: 0 }}
                       animate={{ width: `${skill.level}%` }}
                       transition={{ delay: 0.5 + (idx * 0.1), duration: 1 }}
-                      className={`h-full rounded-full ${
-                        skill.level >= 80 ? 'bg-gradient-to-r from-emerald-500 to-teal-500' :
-                        skill.level >= 60 ? 'bg-gradient-to-r from-blue-500 to-indigo-500' :
-                        'bg-gradient-to-r from-slate-400 to-slate-500'
-                      }`}
+                      className="h-full bg-slate-900 rounded-full"
                     />
                   </div>
                 </div>
@@ -411,6 +477,46 @@ export default function Portfolio() {
           </motion.div>
         </div>
       </div>
+      <Dialog open={isProjectDialogOpen} onOpenChange={setIsProjectDialogOpen}>
+        <DialogContent className="sm:max-w-2xl rounded-[2rem]">
+          <DialogHeader>
+            <DialogTitle>เพิ่มผลงานใน Portfolio</DialogTitle>
+            <DialogDescription>ข้อมูลจะถูกบันทึกลงฐานข้อมูลจริงของโปรไฟล์นักศึกษา</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <div className="space-y-2">
+              <Label>ชื่อผลงาน</Label>
+              <Input value={projectForm.title} onChange={(event) => setProjectForm((current) => ({ ...current, title: event.target.value }))} />
+            </div>
+            <div className="space-y-2">
+              <Label>รายละเอียด</Label>
+              <Textarea value={projectForm.description} onChange={(event) => setProjectForm((current) => ({ ...current, description: event.target.value }))} />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>บทบาทในงาน</Label>
+                <Input value={projectForm.role} onChange={(event) => setProjectForm((current) => ({ ...current, role: event.target.value }))} placeholder="Frontend Developer" />
+              </div>
+              <div className="space-y-2">
+                <Label>วันที่เริ่ม</Label>
+                <Input type="date" value={projectForm.startDate} onChange={(event) => setProjectForm((current) => ({ ...current, startDate: event.target.value }))} />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>เทคโนโลยี</Label>
+              <Input value={projectForm.technologies} onChange={(event) => setProjectForm((current) => ({ ...current, technologies: event.target.value }))} placeholder="React, TypeScript, Prisma" />
+            </div>
+            <div className="space-y-2">
+              <Label>ลิงก์ผลงาน</Label>
+              <Input type="url" value={projectForm.url} onChange={(event) => setProjectForm((current) => ({ ...current, url: event.target.value }))} placeholder="https://example.com" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsProjectDialogOpen(false)}>ยกเลิก</Button>
+            <Button onClick={handleAddProject}>บันทึกผลงาน</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }

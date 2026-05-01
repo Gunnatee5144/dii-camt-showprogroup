@@ -8,6 +8,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { api } from '@/lib/api';
+import { asArray, asNumber, asRecord, asString } from '@/lib/live-data';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -81,10 +83,95 @@ const internsData = [
   },
 ];
 
+type InternRow = typeof internsData[number];
+
 export default function InternTracking() {
   const { t, language } = useLanguage();
   const tr = t.internTracking;
-  const [selectedIntern, setSelectedIntern] = useState<typeof internsData[0] | null>(null);
+  const [interns, setInterns] = useState<InternRow[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedIntern, setSelectedIntern] = useState<InternRow | null>(null);
+
+  React.useEffect(() => {
+    let isMounted = true;
+
+    api.internship.list()
+      .then((response) => {
+        if (!isMounted) return;
+
+        const mapped = response.internships.map((item, index) => {
+          const record = asRecord(item);
+          const fallback = internsData[index % internsData.length];
+          const student = asRecord(record.student);
+          const studentUser = asRecord(student.user);
+          const company = asRecord(record.company);
+          const companyUser = asRecord(company.user);
+          const evaluation = asRecord(record.evaluation);
+          const logs = asArray(record.logs);
+          const totalWeeks = Math.max(asNumber(record.duration, fallback.totalWeeks), 1);
+          const completedWeeks = Math.min(logs.length || fallback.weeks, totalWeeks);
+          const rawScore = asNumber(evaluation.overallScore, fallback.rating * 20);
+          const rating = Number((rawScore > 5 ? rawScore / 20 : rawScore).toFixed(1));
+          const fallbackReports = fallback.performance.weeklyReports;
+          const weeklyReports = logs.length
+            ? [
+                ...logs.map((logItem, logIndex) => {
+                  const log = asRecord(logItem);
+                  return {
+                    week: logIndex + 1,
+                    submitted: true,
+                    score: Math.round(rawScore || 80),
+                    summary: asString(log.activities, fallbackReports[logIndex % fallbackReports.length]?.summary ?? '-'),
+                    summaryEn: asString(log.activities, fallbackReports[logIndex % fallbackReports.length]?.summaryEn ?? '-'),
+                  };
+                }),
+                ...(logs.length < totalWeeks
+                  ? [{
+                      week: logs.length + 1,
+                      submitted: false,
+                      score: 0,
+                      summary: fallbackReports[Math.min(logs.length, fallbackReports.length - 1)]?.summary ?? 'Pending',
+                      summaryEn: 'Pending',
+                    }]
+                  : []),
+              ]
+            : fallbackReports;
+
+          return {
+            ...fallback,
+            id: asString(record.id, fallback.id),
+            name: asString(studentUser.nameThai, fallback.name),
+            nameEn: asString(studentUser.name, fallback.nameEn),
+            position: asString(record.position, fallback.position),
+            company: asString(company.companyName, asString(record.companyName, fallback.company)),
+            companyEn: asString(companyUser.name, asString(record.companyName, fallback.companyEn)),
+            progress: Math.round((completedWeeks / totalWeeks) * 100),
+            weeks: completedWeeks,
+            totalWeeks,
+            rating,
+            avatar: asString(studentUser.nameThai, fallback.avatar).charAt(0) || fallback.avatar,
+            performance: {
+              technical: Math.round(asNumber(evaluation.technicalSkills, fallback.performance.technical)),
+              communication: Math.round(asNumber(evaluation.softSkills, fallback.performance.communication)),
+              teamwork: Math.round(asNumber(evaluation.softSkills, fallback.performance.teamwork)),
+              punctuality: Math.round(asNumber(evaluation.workEthic, fallback.performance.punctuality)),
+              initiative: Math.round(asNumber(evaluation.problemSolving, fallback.performance.initiative)),
+              weeklyReports,
+            },
+          };
+        });
+
+        setInterns(mapped);
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const getScoreColor = (score: number) => {
     if (score >= 90) return 'text-emerald-600';
@@ -101,17 +188,17 @@ export default function InternTracking() {
   };
 
   const getScoreBg = (score: number) => {
-    if (score >= 90) return 'bg-emerald-50 border-emerald-100';
-    if (score >= 75) return 'bg-blue-50 border-blue-100';
-    if (score >= 60) return 'bg-amber-50 border-amber-100';
-    return 'bg-red-50 border-red-100';
+    if (score >= 90) return 'bg-emerald-50 border-emerald-100 dark:bg-emerald-950/30 dark:border-emerald-900';
+    if (score >= 75) return 'bg-blue-50 border-blue-100 dark:bg-blue-950/30 dark:border-blue-900';
+    if (score >= 60) return 'bg-amber-50 border-amber-100 dark:bg-amber-950/30 dark:border-amber-900';
+    return 'bg-red-50 border-red-100 dark:bg-red-950/30 dark:border-red-900';
   };
 
   // Performance detail view
   if (selectedIntern) {
     const perf = selectedIntern.performance;
     const submittedReports = perf.weeklyReports.filter(r => r.submitted);
-    const avgScore = Math.round(submittedReports.reduce((s, r) => s + r.score, 0) / submittedReports.length);
+    const avgScore = Math.round(submittedReports.reduce((s, r) => s + r.score, 0) / Math.max(submittedReports.length, 1));
 
     return (
       <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6 pb-10">
@@ -214,10 +301,10 @@ export default function InternTracking() {
 
       <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { icon: Users, label: tr.totalInterns, value: '3', gradient: 'from-orange-500 to-amber-500', shadow: 'shadow-orange-200' },
-          { icon: Briefcase, label: tr.companies, value: '3', gradient: 'from-blue-500 to-indigo-500', shadow: 'shadow-blue-200' },
-          { icon: Clock, label: tr.avgDuration, value: `12 ${tr.weeks}`, gradient: 'from-purple-500 to-violet-500', shadow: 'shadow-purple-200' },
-          { icon: Star, label: tr.avgRating, value: '4.5', gradient: 'from-emerald-500 to-teal-500', shadow: 'shadow-emerald-200' },
+          { icon: Users, label: tr.totalInterns, value: String(interns.length), gradient: 'from-orange-500 to-amber-500', shadow: 'shadow-orange-200' },
+          { icon: Briefcase, label: tr.companies, value: String(new Set(interns.map((intern) => intern.company)).size), gradient: 'from-blue-500 to-indigo-500', shadow: 'shadow-blue-200' },
+          { icon: Clock, label: tr.avgDuration, value: `${Math.round(interns.reduce((sum, intern) => sum + intern.totalWeeks, 0) / Math.max(interns.length, 1))} ${tr.weeks}`, gradient: 'from-purple-500 to-violet-500', shadow: 'shadow-purple-200' },
+          { icon: Star, label: tr.avgRating, value: (interns.reduce((sum, intern) => sum + intern.rating, 0) / Math.max(interns.length, 1)).toFixed(1), gradient: 'from-emerald-500 to-teal-500', shadow: 'shadow-emerald-200' },
         ].map((stat, i) => (
           <motion.div key={i} whileHover={{ scale: 1.02 }} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradient} p-5 text-white shadow-xl ${stat.shadow}`}>
             <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
@@ -233,7 +320,7 @@ export default function InternTracking() {
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {internsData.map((intern, idx) => (
+        {interns.map((intern, idx) => (
           <motion.div key={idx} variants={itemVariants} whileHover={{ y: -4 }}
             className="bg-white/60 backdrop-blur-xl border border-white/60 dark:border-slate-800/60 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all dark:bg-slate-900/50">
             <div className="flex items-start gap-4 mb-5">
@@ -269,10 +356,10 @@ export default function InternTracking() {
             </div>
 
             <div className="grid grid-cols-3 gap-2">
-              <Button variant="outline" className="w-full rounded-xl text-xs" size="sm">
+              <Button variant="outline" className="w-full rounded-xl text-xs" size="sm" onClick={() => setSelectedIntern(intern)}>
                 <ClipboardList className="w-3.5 h-3.5 mr-1" /> {tr.timesheet}
               </Button>
-              <Button className="w-full rounded-xl bg-orange-500 hover:bg-orange-600 text-xs shadow-lg shadow-orange-200" size="sm">
+              <Button className="w-full rounded-xl bg-orange-500 hover:bg-orange-600 text-xs shadow-lg shadow-orange-200" size="sm" onClick={() => setSelectedIntern(intern)}>
                 <CheckSquare className="w-3.5 h-3.5 mr-1" /> {tr.evaluate}
               </Button>
               <Button variant="outline" className="w-full rounded-xl text-xs border-blue-200 text-blue-600 hover:bg-blue-50 dark:text-slate-300 dark:bg-slate-800" size="sm"
@@ -282,6 +369,16 @@ export default function InternTracking() {
             </div>
           </motion.div>
         ))}
+        {isLoading && (
+          <div className="lg:col-span-3 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+            {language === 'th' ? 'กำลังโหลดข้อมูลฝึกงาน...' : 'Loading internships...'}
+          </div>
+        )}
+        {!isLoading && interns.length === 0 && (
+          <div className="lg:col-span-3 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+            {language === 'th' ? 'ยังไม่มีข้อมูลฝึกงานจาก API' : 'No internship records from API yet.'}
+          </div>
+        )}
       </div>
     </motion.div>
   );

@@ -1,11 +1,12 @@
 import React from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
-import { BarChart3, Clock, Users, BookOpen, Search, Download, Briefcase, FlaskConical, CalendarDays } from 'lucide-react';
+import { BarChart3, Clock, Users, BookOpen, Download, Briefcase, FlaskConical, CalendarDays } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { api } from '@/lib/api';
+import { asArray, asNumber, asRecord, asString, pickLocalized } from '@/lib/live-data';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -19,19 +20,106 @@ const itemVariants = {
 
 export default function Workload() {
     const { t } = useLanguage();
-    const { user } = useAuth();
+    const emptyStats = React.useMemo(() => ({
+        teachingHours: 0,
+        advisees: 0,
+        courses: 0,
+        researchHours: 0,
+        targetProgress: 0,
+    }), []);
+    const [workloadStats, setWorkloadStats] = React.useState(emptyStats);
 
-    const scheduleSlots = [
-        { day: 'วันจันทร์', time: '09:00 - 12:00', code: 'DII302', name: 'Advanced AI', type: 'Lecture' },
-        { day: 'วันอังคาร', time: '13:00 - 16:00', code: 'DII305', name: 'Software Arch', type: 'Lab' },
-        { day: 'วันพฤหัสบดี', time: '09:00 - 12:00', code: 'DII101', name: 'Intro to CS', type: 'Lecture' },
-    ];
+    const [scheduleSlots, setScheduleSlots] = React.useState<Array<{ day: string; time: string; code: string; name: string; type: string }>>([]);
 
-    const otherTasks = [
-        { title: 'กรรมการสอบโครงงาน', desc: 'สอบหัวข้อโครงงานนักศึกษาชั้นปีที่ 4 (15 คน)', color: 'from-blue-500 to-cyan-500' },
-        { title: 'อาจารย์ที่ปรึกษาชมรม', desc: 'ชมรม AI & Robotics', color: 'from-purple-500 to-pink-500' },
-        { title: 'วิทยากรรับเชิญ', desc: 'งาน Open House 2026', color: 'from-orange-500 to-amber-500' },
-    ];
+    const [otherTasks, setOtherTasks] = React.useState<Array<{ title: string; desc: string; color: string }>>([]);
+    const [isLoading, setIsLoading] = React.useState(true);
+
+    React.useEffect(() => {
+        let isMounted = true;
+        const scheduleRequest = api.courses.lecturerSchedule().catch(() =>
+            api.courses.list().then((response) => ({ success: true, lecturer: null, schedule: response.courses })),
+        );
+
+        Promise.allSettled([api.workload.list(), scheduleRequest])
+            .then(([workloadResponse, scheduleResponse]) => {
+                if (!isMounted) return;
+
+                let nextStats = { ...emptyStats };
+                if (workloadResponse.status === 'fulfilled' && workloadResponse.value.workload.length) {
+                    const latest = asRecord(workloadResponse.value.workload[0]);
+                    const teachingHours = asNumber(latest.teachingHours, nextStats.teachingHours);
+                    const researchHours = asNumber(latest.researchHours, nextStats.researchHours);
+                    const advisingHours = asNumber(latest.advisingHours, nextStats.advisees);
+                    const serviceHours = asNumber(latest.serviceHours, 0);
+
+                    nextStats = {
+                        ...nextStats,
+                        teachingHours,
+                        researchHours,
+                        advisees: advisingHours,
+                        targetProgress: Math.min(Math.round((teachingHours / 15) * 100), 100),
+                    };
+
+                    setOtherTasks([
+                        { title: 'Research', desc: `${researchHours} hours/week`, color: 'from-blue-500 to-cyan-500' },
+                        { title: 'Advising', desc: `${advisingHours} hours/week`, color: 'from-purple-500 to-pink-500' },
+                        { title: 'Service', desc: `${serviceHours} hours/week`, color: 'from-orange-500 to-amber-500' },
+                    ]);
+                }
+
+                if (scheduleResponse.status === 'fulfilled') {
+                    const scheduleItems = asArray(scheduleResponse.value.schedule);
+                    const dayLabels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                    const mappedSlots = scheduleItems.flatMap((item, courseIndex) => {
+                        const course = asRecord(item);
+                        const sections = asArray(course.sections);
+                        const sectionSource = sections.length ? sections : [course];
+
+                        return sectionSource.map((sectionItem, sectionIndex) => {
+                            const section = asRecord(sectionItem);
+                            const schedule = asRecord(section.schedule || course.schedule);
+                            const startTime = asString(schedule.startTime, asString(schedule.start, '09:00'));
+                            const endTime = asString(schedule.endTime, asString(schedule.end, '12:00'));
+
+                            return {
+                                day: asString(schedule.day, asString(schedule.dayOfWeek, dayLabels[(courseIndex + sectionIndex) % dayLabels.length])),
+                                time: asString(schedule.time, `${startTime} - ${endTime}`),
+                                code: asString(course.code, `COURSE-${courseIndex + 1}`),
+                                name: pickLocalized(course, 'nameThai', 'name', 'Course'),
+                                type: asString(section.type, asString(course.type, 'Lecture')),
+                            };
+                        });
+                    });
+
+                    if (mappedSlots.length) {
+                        const enrolledCount = scheduleItems.reduce<number>(
+                            (sum, item) => sum + asArray(asRecord(item).enrollments).length,
+                            0,
+                        );
+                        nextStats = {
+                            ...nextStats,
+                            courses: scheduleItems.length,
+                            advisees: Math.max(nextStats.advisees, enrolledCount),
+                        };
+                        setScheduleSlots(mappedSlots.slice(0, 8));
+                    }
+                }
+
+                setWorkloadStats(nextStats);
+            })
+            .catch(() => {
+                setWorkloadStats(emptyStats);
+                setScheduleSlots([]);
+                setOtherTasks([]);
+            })
+            .finally(() => {
+                if (isMounted) setIsLoading(false);
+            });
+
+        return () => {
+            isMounted = false;
+        };
+    }, [emptyStats]);
 
     return (
         <motion.div
@@ -64,14 +152,14 @@ export default function Workload() {
                             </div>
                             <span className="font-medium text-white/90">{t.workloadPage.teachingHours}</span>
                         </div>
-                        <div className="text-4xl font-bold">12</div>
+                        <div className="text-4xl font-bold">{workloadStats.teachingHours}</div>
                         <p className="text-white/70 text-sm mt-1">{t.workloadPage.hoursPerWeek}</p>
                         <div className="mt-3">
                             <div className="flex justify-between text-xs mb-1 text-white/80">
                                 <span>{t.workloadPage.target}</span>
-                                <span>80%</span>
+                                <span>{workloadStats.targetProgress}%</span>
                             </div>
-                            <Progress value={80} className="bg-white/20 h-1.5 dark:bg-slate-900/50" />
+                            <Progress value={workloadStats.targetProgress} className="bg-white/20 h-1.5 dark:bg-slate-900/50" />
                         </div>
                     </div>
                 </motion.div>
@@ -88,7 +176,7 @@ export default function Workload() {
                             </div>
                             <span className="font-medium text-white/90">{t.workloadPage.advisees}</span>
                         </div>
-                        <div className="text-4xl font-bold">25</div>
+                        <div className="text-4xl font-bold">{workloadStats.advisees}</div>
                         <p className="text-white/70 text-sm mt-1">{t.workloadPage.adviseesDesc}</p>
                     </div>
                 </motion.div>
@@ -105,7 +193,7 @@ export default function Workload() {
                             </div>
                             <span className="font-medium text-white/90">{t.workloadPage.coursesLabel}</span>
                         </div>
-                        <div className="text-4xl font-bold">3</div>
+                        <div className="text-4xl font-bold">{workloadStats.courses}</div>
                         <p className="text-white/70 text-sm mt-1">{t.workloadPage.coursesDesc}</p>
                     </div>
                 </motion.div>
@@ -122,7 +210,7 @@ export default function Workload() {
                             </div>
                             <span className="font-medium text-white/90">{t.workloadPage.research}</span>
                         </div>
-                        <div className="text-4xl font-bold">2</div>
+                        <div className="text-4xl font-bold">{workloadStats.researchHours}</div>
                         <p className="text-white/70 text-sm mt-1">{t.workloadPage.researchDesc}</p>
                     </div>
                 </motion.div>
@@ -146,6 +234,11 @@ export default function Workload() {
                         </div>
                     </div>
                     <div className="space-y-3">
+                        {!isLoading && scheduleSlots.length === 0 && (
+                            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">
+                                No teaching schedule found
+                            </div>
+                        )}
                         {scheduleSlots.map((slot, idx) => (
                             <motion.div
                                 key={idx}
@@ -153,7 +246,7 @@ export default function Workload() {
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: idx * 0.1 }}
                                 whileHover={{ scale: 1.01, x: 4 }}
-                                className="flex justify-between items-center p-4 bg-gradient-to-r from-gray-50 to-white rounded-2xl border border-gray-100 hover:border-green-200 hover:shadow-md transition-all cursor-pointer group dark:border-slate-700"
+                                className="flex justify-between items-center p-4 bg-gradient-to-r from-gray-50 to-white rounded-2xl border border-gray-100 hover:border-green-200 hover:shadow-md transition-all cursor-pointer group dark:from-slate-900 dark:to-slate-950 dark:border-slate-700"
                             >
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white font-bold text-sm shadow-lg">
@@ -166,7 +259,7 @@ export default function Workload() {
                                 </div>
                                 <div className="text-right flex items-center gap-3">
                                     <div>
-                                        <div className="font-bold text-green-700">{slot.code}</div>
+                                        <div className="font-bold text-green-700 dark:text-emerald-300">{slot.code}</div>
                                         <div className="text-xs text-gray-500 dark:text-slate-400">{slot.name}</div>
                                     </div>
                                     <Badge className={slot.type === 'Lecture'
@@ -197,6 +290,11 @@ export default function Workload() {
                         </div>
                     </div>
                     <div className="space-y-3">
+                        {!isLoading && otherTasks.length === 0 && (
+                            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">
+                                No workload records found
+                            </div>
+                        )}
                         {otherTasks.map((task, idx) => (
                             <motion.div
                                 key={idx}
@@ -204,7 +302,7 @@ export default function Workload() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: idx * 0.1 }}
                                 whileHover={{ scale: 1.02 }}
-                                className="flex items-start gap-3 p-4 bg-gradient-to-r from-gray-50 to-white rounded-2xl border border-gray-100 hover:shadow-md transition-all cursor-pointer dark:border-slate-700"
+                                className="flex items-start gap-3 p-4 bg-gradient-to-r from-gray-50 to-white rounded-2xl border border-gray-100 hover:shadow-md transition-all cursor-pointer dark:from-slate-900 dark:to-slate-950 dark:border-slate-700"
                             >
                                 <div className={`w-2 h-full min-h-[40px] rounded-full bg-gradient-to-b ${task.color}`} />
                                 <div>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Bell, Check, Trash2, Settings, Filter, Mail, Calendar, AlertTriangle, Info, CheckCircle, Plus, Save } from 'lucide-react';
@@ -12,9 +13,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mockNotifications } from '@/lib/mockData';
 import { toast } from 'sonner';
 import type { Notification } from '@/types';
+import { api } from '@/lib/api';
+import { asArray, asDate, asRecord, asString } from '@/lib/live-data';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -27,48 +29,149 @@ const itemVariants = {
 };
 
 export default function Notifications() {
-    const { t } = useLanguage();
+    const navigate = useNavigate();
+    const { t, language } = useLanguage();
     const { user } = useAuth();
     const canManage = user?.role === 'admin' || user?.role === 'staff';
 
-    const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [formData, setFormData] = useState<{
         title: string;
         message: string;
         type: Notification['type'];
         priority: Notification['priority'];
-    }>({ title: '', message: '', type: 'info', priority: 'medium' });
+        target: 'self' | 'STUDENT' | 'LECTURER' | 'STAFF' | 'COMPANY' | 'ADMIN';
+    }>({ title: '', message: '', type: 'info', priority: 'medium', target: 'self' });
 
     const unreadCount = notifications.filter(n => !n.isRead).length;
 
-    const handleDelete = (id: string) => {
+    const mapNotification = React.useCallback((item: unknown, index = 0): Notification => {
+        const source = asRecord(item);
+        return {
+            id: asString(source.id, `notification-${index}`),
+            recipientId: asString(source.userId, user?.id || ''),
+            recipientRole: (user?.role || 'staff') as Notification['recipientRole'],
+            title: asString(source.title, '-'),
+            titleThai: asString(source.titleThai, asString(source.title, '-')),
+            message: asString(source.message, '-'),
+            messageThai: asString(source.messageThai, asString(source.message, '-')),
+            type: asString(source.type, 'info') as Notification['type'],
+            priority: asString(source.priority, 'medium') as Notification['priority'],
+            isRead: Boolean(source.isRead ?? false),
+            channels: (asArray<string>(source.channels).length ? asArray<string>(source.channels) : ['in-app']) as Notification['channels'],
+            createdAt: asDate(source.createdAt),
+            readAt: source.readAt ? asDate(source.readAt) : undefined,
+            actionUrl: asString(source.actionUrl),
+            actionLabel: asString(source.actionLabel),
+            expiresAt: source.expiresAt ? asDate(source.expiresAt) : undefined,
+        };
+    }, [user?.id, user?.role]);
+
+    React.useEffect(() => {
+        let isMounted = true;
+        api.notifications.list()
+            .then((response) => {
+                if (!isMounted) return;
+                const mapped = response.notifications.map(mapNotification);
+                setNotifications(mapped);
+            })
+            .catch(() => undefined);
+
+        return () => {
+            isMounted = false;
+        };
+    }, [mapNotification]);
+
+    const handleDelete = async (id: string) => {
         if (confirm(t.notificationsPage.deleteConfirm)) {
-            setNotifications(notifications.filter(n => n.id !== id));
-            toast.success(t.notificationsPage.deleteSuccess);
+            try {
+                await api.notifications.remove(id);
+                setNotifications(current => current.filter(n => n.id !== id));
+                toast.success(t.notificationsPage.deleteSuccess);
+            } catch (error) {
+                toast.error(error instanceof Error ? error.message : t.notificationsPage.deleteConfirm);
+            }
         }
     };
 
-    const handleCreate = () => {
-        const newNotif: Notification = {
-            id: Math.random().toString(36).substr(2, 9),
-            recipientId: 'STU001',
-            recipientRole: 'student',
-            title: formData.title,
-            titleThai: formData.title,
-            message: formData.message,
-            messageThai: formData.message,
-            type: formData.type,
-            priority: formData.priority,
-            isRead: false,
-            channels: ['in-app'],
-            createdAt: new Date(),
-        };
-        setNotifications([newNotif, ...notifications]);
-        toast.success(t.notificationsPage.createSuccess);
-        setIsDialogOpen(false);
-        setFormData({ title: '', message: '', type: 'info', priority: 'medium' });
+    const handleMarkRead = async (id: string) => {
+        try {
+            await api.notifications.markRead(id);
+        } catch {
+            // Keep the UI responsive for legacy/local rows.
+        }
+        const readAt = new Date();
+        setNotifications(current => current.map((item) => item.id === id ? { ...item, isRead: true, readAt } : item));
+        window.dispatchEvent(new CustomEvent('showpro:notification-read', { detail: { id, readAt } }));
     };
+
+    const handleMarkAllRead = async () => {
+        try {
+            await api.notifications.markAllRead();
+        } catch {
+            // Keep the UI responsive for legacy/local rows.
+        }
+        const readAt = new Date();
+        setNotifications(current => current.map((item) => ({ ...item, isRead: true, readAt })));
+        window.dispatchEvent(new CustomEvent('showpro:notification-read-all', { detail: { readAt } }));
+    };
+
+    const handleOpenNotification = async (notification: Notification) => {
+        if (!notification.isRead) {
+            await handleMarkRead(notification.id);
+        }
+        if (notification.actionUrl) {
+            navigate(notification.actionUrl);
+        }
+    };
+
+    const handleCreate = async () => {
+        try {
+            const response = await api.notifications.broadcast({
+                title: formData.title,
+                titleThai: formData.title,
+                message: formData.message,
+                messageThai: formData.message,
+                type: formData.type,
+                priority: formData.priority,
+                channels: ['in-app'],
+                userIds: formData.target === 'self' && user?.id ? [user.id] : [],
+                targetRoles: formData.target === 'self' ? [] : [formData.target],
+            });
+            const mapped = response.notifications
+                .map(mapNotification)
+                .filter((notification) => notification.recipientId === user?.id);
+            if (mapped.length) {
+                setNotifications([...mapped, ...notifications]);
+            }
+            toast.success(`${t.notificationsPage.createSuccess} (${response.notifications.length})`);
+            setIsDialogOpen(false);
+            setFormData({ title: '', message: '', type: 'info', priority: 'medium', target: 'self' });
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : t.notificationsPage.createTitle);
+        }
+    };
+
+    React.useEffect(() => {
+        const onRead = (event: Event) => {
+            const detail = (event as CustomEvent<{ id?: string; readAt?: Date }>).detail;
+            if (!detail?.id) return;
+            setNotifications(current => current.map(item => item.id === detail.id ? { ...item, isRead: true, readAt: detail.readAt ?? new Date() } : item));
+        };
+        const onReadAll = (event: Event) => {
+            const detail = (event as CustomEvent<{ readAt?: Date }>).detail;
+            const readAt = detail?.readAt ?? new Date();
+            setNotifications(current => current.map(item => ({ ...item, isRead: true, readAt })));
+        };
+
+        window.addEventListener('showpro:notification-read', onRead);
+        window.addEventListener('showpro:notification-read-all', onReadAll);
+        return () => {
+            window.removeEventListener('showpro:notification-read', onRead);
+            window.removeEventListener('showpro:notification-read-all', onReadAll);
+        };
+    }, []);
 
     const getTypeIcon = (type: string) => {
         switch (type) {
@@ -88,6 +191,77 @@ export default function Notifications() {
             default: return <Badge className="bg-gray-100 text-gray-700 dark:text-slate-300 dark:bg-slate-800">{t.notificationsPage.general}</Badge>;
         }
     };
+
+    const formatDate = (date: Date) => new Date(date).toLocaleDateString(language === 'th' ? 'th-TH' : 'en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    const getTitle = (notification: Notification) => language === 'th' ? notification.titleThai : notification.title;
+    const getMessage = (notification: Notification) => language === 'th' ? notification.messageThai : notification.message;
+    const unreadNotifications = notifications.filter(notification => !notification.isRead);
+    const urgentNotifications = notifications.filter(notification => notification.priority === 'urgent' || notification.priority === 'high');
+
+    const renderNotificationList = (items: Notification[]) => (
+        <Card>
+            <CardContent className="pt-6">
+                <div className="space-y-3">
+                    <AnimatePresence>
+                        {items.map((notification, index) => (
+                            <motion.div
+                                layout
+                                key={notification.id}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ delay: index * 0.03 }}
+                                role="button"
+                                tabIndex={0}
+                                onClick={() => handleOpenNotification(notification)}
+                                onKeyDown={(event) => {
+                                    if (event.key === 'Enter' || event.key === ' ') {
+                                        event.preventDefault();
+                                        handleOpenNotification(notification);
+                                    }
+                                }}
+                                className={`flex items-start gap-4 p-4 border rounded-xl transition-all hover:shadow-md cursor-pointer ${!notification.isRead ? 'bg-blue-50/70 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800/60' : 'bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800'
+                                    }`}
+                            >
+                                <div className="mt-1">{getTypeIcon(notification.type)}</div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <h3 className="font-semibold text-gray-900 dark:text-slate-200">{getTitle(notification)}</h3>
+                                        {!notification.isRead && <div className="w-2 h-2 bg-blue-500 rounded-full" />}
+                                    </div>
+                                    <p className="text-sm text-gray-600 dark:text-slate-400 line-clamp-2">{getMessage(notification)}</p>
+                                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                                        <span className="text-xs text-gray-400">
+                                            {formatDate(notification.createdAt)}
+                                        </span>
+                                        {getPriorityBadge(notification.priority)}
+                                        {notification.actionLabel && <Badge variant="outline" className="dark:border-slate-700 dark:text-slate-300">{notification.actionLabel}</Badge>}
+                                    </div>
+                                </div>
+                                <div className="flex gap-1">
+                                    {!notification.isRead && (
+                                        <Button size="sm" variant="ghost" onClick={(event) => { event.stopPropagation(); handleMarkRead(notification.id); }}>
+                                            <Check className="w-4 h-4" />
+                                        </Button>
+                                    )}
+                                    {canManage && (
+                                        <Button size="sm" variant="ghost" className="text-gray-400 hover:text-red-600 dark:text-slate-300" onClick={(event) => { event.stopPropagation(); handleDelete(notification.id); }}>
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    )}
+                                </div>
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
+                    {items.length === 0 && (
+                        <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                            {language === 'th' ? 'ยังไม่มีรายการแจ้งเตือนในหมวดนี้' : 'No notifications in this section.'}
+                        </div>
+                    )}
+                </div>
+            </CardContent>
+        </Card>
+    );
 
     return (
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8 pb-10">
@@ -111,7 +285,7 @@ export default function Notifications() {
                             <Plus className="w-4 h-4 mr-2" />{t.notificationsPage.createAnnouncement}
                         </Button>
                     )}
-                    <Button variant="outline" size="sm" className="rounded-xl"><Check className="w-4 h-4 mr-2" />{t.notificationsPage.markAllRead}</Button>
+                    <Button variant="outline" size="sm" className="rounded-xl" onClick={handleMarkAllRead}><Check className="w-4 h-4 mr-2" />{t.notificationsPage.markAllRead}</Button>
                 </motion.div>
             </div>
 
@@ -144,55 +318,14 @@ export default function Notifications() {
                     </TabsList>
 
                     <TabsContent value="all">
-                        <Card><CardContent className="pt-6">
-                            <div className="space-y-3">
-                                <AnimatePresence>
-                                    {notifications.map((notification, index) => (
-                                        <motion.div
-                                            layout
-                                            key={notification.id}
-                                            initial={{ opacity: 0, x: -20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0 }}
-                                            transition={{ delay: index * 0.03 }}
-                                            className={`flex items-start gap-4 p-4 border rounded-xl transition-all hover:shadow-md ${!notification.isRead ? 'bg-blue-50/50 border-blue-200' : 'bg-white'
-                                                } dark:bg-slate-900/50`}
-                                        >
-                                            <div className="mt-1">{getTypeIcon(notification.type)}</div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <h3 className="font-semibold text-gray-900 dark:text-slate-200">{notification.titleThai}</h3>
-                                                    {!notification.isRead && <div className="w-2 h-2 bg-blue-500 rounded-full" />}
-                                                </div>
-                                                <p className="text-sm text-gray-600 dark:text-slate-400 line-clamp-2">{notification.messageThai}</p>
-                                                <div className="flex items-center gap-2 mt-2">
-                                                    <span className="text-xs text-gray-400">
-                                                        {new Date(notification.createdAt).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                                                    </span>
-                                                    {getPriorityBadge(notification.priority)}
-                                                </div>
-                                            </div>
-                                            <div className="flex gap-1">
-                                                {!notification.isRead && <Button size="sm" variant="ghost"><Check className="w-4 h-4" /></Button>}
-                                                {canManage && (
-                                                    <Button size="sm" variant="ghost" className="text-gray-400 hover:text-red-600 dark:text-slate-300" onClick={() => handleDelete(notification.id)}>
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </Button>
-                                                )}
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                </AnimatePresence>
-                            </div>
-                        </CardContent></Card>
+                        {renderNotificationList(notifications)}
                     </TabsContent>
 
-                    {/* Other tabs reusing similar structure or simplifying for brevity */}
                     <TabsContent value="unread">
-                        <div className="p-4 text-center text-gray-500 dark:text-slate-400">{t.notificationsPage.showUnread}</div>
+                        {renderNotificationList(unreadNotifications)}
                     </TabsContent>
                     <TabsContent value="urgent">
-                        <div className="p-4 text-center text-gray-500 dark:text-slate-400">{t.notificationsPage.showUrgent}</div>
+                        {renderNotificationList(urgentNotifications)}
                     </TabsContent>
                 </Tabs>
             </motion.div>
@@ -213,10 +346,24 @@ export default function Notifications() {
                             <Label>{t.notificationsPage.messageLabel}</Label>
                             <Textarea value={formData.message} onChange={e => setFormData({ ...formData, message: e.target.value })} />
                         </div>
+                        <div className="grid gap-2">
+                            <Label>ผู้รับ</Label>
+                            <Select value={formData.target} onValueChange={v => setFormData({ ...formData, target: v as typeof formData.target })}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="self">เฉพาะฉัน</SelectItem>
+                                    <SelectItem value="STUDENT">{t.roles.student}</SelectItem>
+                                    <SelectItem value="LECTURER">{t.roles.lecturer}</SelectItem>
+                                    <SelectItem value="STAFF">{t.roles.staff}</SelectItem>
+                                    <SelectItem value="COMPANY">{t.roles.company}</SelectItem>
+                                    <SelectItem value="ADMIN">{t.roles.admin}</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="grid gap-2">
                                 <Label>{t.notificationsPage.typeLabel}</Label>
-                                <Select value={formData.type} onValueChange={v => setFormData({ ...formData, type: v })}>
+                                <Select value={formData.type} onValueChange={v => setFormData({ ...formData, type: v as Notification['type'] })}>
                                     <SelectTrigger><SelectValue /></SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="info">{t.notificationsPage.typeGeneral}</SelectItem>
@@ -228,10 +375,10 @@ export default function Notifications() {
                             </div>
                             <div className="grid gap-2">
                                 <Label>{t.notificationsPage.importanceLabel}</Label>
-                                <Select value={formData.priority} onValueChange={v => setFormData({ ...formData, priority: v })}>
+                                <Select value={formData.priority} onValueChange={v => setFormData({ ...formData, priority: v as Notification['priority'] })}>
                                     <SelectTrigger><SelectValue /></SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="normal">{t.notificationsPage.importanceNormal}</SelectItem>
+                                        <SelectItem value="medium">{t.notificationsPage.importanceNormal}</SelectItem>
                                         <SelectItem value="high">{t.notificationsPage.importanceUrgent}</SelectItem>
                                         <SelectItem value="urgent">{t.notificationsPage.importanceVeryUrgent}</SelectItem>
                                     </SelectContent>

@@ -16,6 +16,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { api } from '@/lib/api';
+import { asArray, asDate, asNumber, asRecord, asString } from '@/lib/live-data';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -78,61 +80,82 @@ export default function Requests() {
     { id: 'general', name: language === 'en' ? 'General Request' : 'คำร้องทั่วไป', icon: <FileQuestion className="w-5 h-5" />, color: 'bg-slate-50 text-slate-600' },
   ];
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const [requests, setRequests] = React.useState(initialRequests);
+  const [requests, setRequests] = React.useState<typeof initialRequests>([]);
   const [formData, setFormData] = React.useState({
     type: '',
     title: '',
     description: ''
   });
 
-  // Role guard — only students
-  if (user?.role !== 'student') {
-    return (
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="flex flex-col items-center justify-center min-h-[60vh] space-y-4"
-      >
-        <div className="w-20 h-20 rounded-3xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-          <FileBox className="w-10 h-10 text-slate-400" />
-        </div>
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">
-          {language === 'th' ? 'ระบบคำร้องสำหรับนักศึกษาเท่านั้น' : 'Student Requests Only'}
-        </h2>
-        <p className="text-slate-500 dark:text-slate-400 text-center max-w-sm">
-          {language === 'th'
-            ? 'หน้านี้แสดงเฉพาะบัญชีนักศึกษา กรุณาเข้าสู่ระบบในฐานะนักศึกษา'
-            : 'This page is only available for student accounts.'}
-        </p>
-      </motion.div>
-    );
-  }
+  React.useEffect(() => {
+    let isMounted = true;
 
+    api.requests.list()
+      .then((response) => {
+        if (!isMounted) return;
+        const mapped = response.requests.map((item, index) => {
+          const request = asRecord(item);
+          const student = asRecord(request.student);
+          const studentUser = asRecord(student.user);
+          const status = asString(request.status, 'pending');
+          const totalSteps = status === 'pending' ? 4 : 3;
+          return {
+            id: asString(request.id, String(index + 1)) as never,
+            type: asString(request.type, '-'),
+            title: asString(request.title, '-'),
+            status: status as never,
+            step: status === 'pending' ? 2 : status === 'rejected' ? 1 : totalSteps,
+            totalSteps,
+            createdAt: asDate(request.submittedAt, asDate(request.createdAt)).toISOString().split('T')[0],
+            updatedAt: asDate(request.reviewedAt, asDate(request.updatedAt, asDate(request.submittedAt))).toISOString().split('T')[0],
+            description: asString(request.description, asString(studentUser.nameThai, '')),
+            documents: asArray<string>(request.documents),
+          };
+        });
+        setRequests(mapped);
+      })
+      .catch(() => undefined);
 
-  const handleSubmit = () => {
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleSubmit = async () => {
     if (!formData.type || !formData.title || !formData.description) {
       toast.error(t.requestsPage.fillComplete);
       return;
     }
 
-    const newRequest = {
-      id: requests.length + 1,
-      type: formData.type,
-      title: formData.title,
-      description: formData.description,
-      status: 'pending',
-      step: 1,
-      totalSteps: 3,
-      createdAt: new Date().toISOString().split('T')[0],
-      updatedAt: new Date().toISOString().split('T')[0],
-      documents: []
-    };
+    try {
+      const response = await api.requests.create({
+        type: formData.type,
+        title: formData.title,
+        description: formData.description,
+        documents: [],
+      });
+      const request = asRecord(response.request);
+      const createdAt = asDate(request.submittedAt, new Date()).toISOString().split('T')[0];
+      const newRequest = {
+        id: asString(request.id, String(Date.now())) as never,
+        type: asString(request.type, formData.type),
+        title: asString(request.title, formData.title),
+        description: asString(request.description, formData.description),
+        status: asString(request.status, 'pending') as never,
+        step: asNumber(request.step, 1),
+        totalSteps: 3,
+        createdAt,
+        updatedAt: createdAt,
+        documents: asArray<string>(request.documents),
+      };
 
-    setRequests([newRequest, ...requests]);
-    setIsDialogOpen(false);
-    setFormData({ type: '', title: '', description: '' });
-    toast.success(t.requestsPage.submitSuccess);
+      setRequests([newRequest, ...requests]);
+      setIsDialogOpen(false);
+      setFormData({ type: '', title: '', description: '' });
+      toast.success(t.requestsPage.submitSuccess);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t.requestsPage.fillComplete);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -304,6 +327,13 @@ export default function Requests() {
           </div>
 
           <div className="space-y-5">
+            {requests.length === 0 && (
+              <div className="rounded-[2.5rem] border border-dashed border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-900/60 p-10 text-center">
+                <Inbox className="w-10 h-10 mx-auto text-slate-400 mb-3" />
+                <h3 className="font-bold text-slate-800 dark:text-slate-100">ยังไม่มีคำร้อง</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">กดสร้างคำร้องใหม่เพื่อบันทึกข้อมูลลงฐานข้อมูลจริง</p>
+              </div>
+            )}
             {requests.map((req, idx) => (
               <motion.div
                 key={req.id}

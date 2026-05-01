@@ -15,6 +15,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
+import { api } from '@/lib/api';
+import { asArray, asNumber, asRecord, asString } from '@/lib/live-data';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -89,18 +91,104 @@ const mockMatches = [
   { name: 'วิชัย พยายาม', nameEn: 'Wichai Phayayam', gpa: 3.42, year: 3, matchScore: 78, skills: ['Node.js', 'TypeScript', 'MongoDB'] },
 ];
 
+type RequirementRow = {
+  id: string;
+  name: string;
+  nameEn: string;
+  description: string;
+  descriptionEn: string;
+  skills: { name: string; level: string }[];
+  priority: string;
+  matchedStudents: number;
+  avgMatch: number;
+  positions: number;
+};
+
+type MatchRow = {
+  name: string;
+  nameEn: string;
+  gpa: number;
+  year: number;
+  matchScore: number;
+  skills: string[];
+};
+
 export default function SkillsRequirement() {
   const { t, language } = useLanguage();
   const { toast } = useToast();
   const tr = t.skillsRequirement;
-  const [requirements, setRequirements] = useState(mockRequirements);
+  const [requirements, setRequirements] = useState<RequirementRow[]>([]);
+  const [matches, setMatches] = useState<MatchRow[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [showMatches, setShowMatches] = useState(false);
-  const [selectedReq, setSelectedReq] = useState<typeof mockRequirements[0] | null>(null);
+  const [selectedReq, setSelectedReq] = useState<RequirementRow | null>(null);
+  const [editingReq, setEditingReq] = useState<RequirementRow | null>(null);
   const [formData, setFormData] = useState({
     name: '', description: '', priority: 'medium' as string,
     skills: [{ name: '', level: 'beginner' }] as { name: string; level: string }[],
   });
+
+  const mapJobRequirement = React.useCallback((item: unknown): RequirementRow => {
+    const job = asRecord(item);
+    const preferredSkills = asArray<string>(job.preferredSkills);
+    const requirementsList = asArray<string>(job.requirements);
+    const applications = asArray(job.applications);
+    const skills = (preferredSkills.length ? preferredSkills : requirementsList).slice(0, 6).map((skill) => ({
+      name: String(skill),
+      level: 'intermediate',
+    }));
+
+    return {
+      id: asString(job.id),
+      name: asString(job.title, '-'),
+      nameEn: asString(job.title, '-'),
+      description: asString(job.description, '-'),
+      descriptionEn: asString(job.description, '-'),
+      skills,
+      priority: asString(job.status, 'open') === 'open' ? 'high' : 'medium',
+      matchedStudents: applications.length,
+      avgMatch: applications.length ? Math.min(95, 70 + applications.length * 5) : 0,
+      positions: asNumber(job.positions, 1),
+    };
+  }, []);
+
+  React.useEffect(() => {
+    let isMounted = true;
+
+    Promise.allSettled([api.jobs.list(), api.talent.search()])
+      .then(([jobsResponse, talentResponse]) => {
+        if (!isMounted) return;
+
+        if (jobsResponse.status === 'fulfilled') {
+          const mapped = jobsResponse.value.jobs.map((job) => mapJobRequirement(job));
+          setRequirements(mapped);
+        }
+
+        if (talentResponse.status === 'fulfilled') {
+          const mapped = talentResponse.value.talents.map((item, index) => {
+            const talent = asRecord(item);
+            return {
+              name: asString(talent.nameThai, asString(talent.name, `Student ${index + 1}`)),
+              nameEn: asString(talent.name, asString(talent.nameThai, `Student ${index + 1}`)),
+              gpa: asNumber(talent.gpax, asNumber(talent.gpa, 0)),
+              year: asNumber(talent.year, 0),
+              matchScore: asNumber(talent.matchScore, asNumber(talent.score, 0)),
+              skills: asArray<string>(talent.skills),
+            };
+          });
+          setMatches(mapped);
+        }
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [mapJobRequirement]);
 
   const getPriorityConfig = (p: string) => {
     switch (p) {
@@ -139,10 +227,47 @@ export default function SkillsRequirement() {
     setFormData(prev => ({ ...prev, skills: prev.skills.filter((_, i) => i !== index) }));
   };
 
-  const handleSave = () => {
-    toast({ title: tr.saveRequirement, description: formData.name });
-    setShowForm(false);
-    setFormData({ name: '', description: '', priority: 'medium', skills: [{ name: '', level: 'beginner' }] });
+  const handleSave = async () => {
+    const payload = {
+      title: formData.name,
+      type: 'internship',
+      positions: 1,
+      description: formData.description || formData.name,
+      responsibilities: [],
+      requirements: formData.skills.map((skill) => skill.name).filter(Boolean),
+      preferredSkills: formData.skills.map((skill) => skill.name).filter(Boolean),
+      salary: '',
+      benefits: [],
+      location: 'Chiang Mai',
+      workType: 'hybrid',
+      deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      status: formData.priority === 'low' ? 'closed' : 'open',
+    };
+
+    try {
+      if (editingReq) {
+        const response = await api.jobs.update(editingReq.id, payload);
+        setRequirements((current) => current.map((item) => item.id === editingReq.id ? mapJobRequirement(response.job) : item));
+      } else {
+        const response = await api.jobs.create(payload);
+        setRequirements((current) => [mapJobRequirement(response.job), ...current]);
+      }
+      toast({ title: tr.saveRequirement, description: formData.name });
+      setShowForm(false);
+      setEditingReq(null);
+      setFormData({ name: '', description: '', priority: 'medium', skills: [{ name: '', level: 'beginner' }] });
+    } catch (error) {
+      toast({ title: tr.saveRequirement, description: error instanceof Error ? error.message : 'Unable to save requirement' });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await api.jobs.remove(id);
+    } catch {
+      // Keep local removal available for older seeded rows that do not map to a job id.
+    }
+    setRequirements((current) => current.filter((item) => item.id !== id));
   };
 
   return (
@@ -157,7 +282,7 @@ export default function SkillsRequirement() {
           <motion.h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             {tr.title}<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">{tr.titleHighlight}</span>
           </motion.h1>
-          <Button onClick={() => setShowForm(true)} className="bg-indigo-600 hover:bg-indigo-700 gap-2">
+          <Button onClick={() => { setEditingReq(null); setFormData({ name: '', description: '', priority: 'medium', skills: [{ name: '', level: 'beginner' }] }); setShowForm(true); }} className="bg-indigo-600 hover:bg-indigo-700 gap-2">
             <Plus className="w-4 h-4" /> {tr.createNew}
           </Button>
         </div>
@@ -169,7 +294,7 @@ export default function SkillsRequirement() {
           { icon: Target, label: tr.totalRequirements, value: requirements.length.toString(), gradient: 'from-indigo-500 to-purple-500', shadow: 'shadow-indigo-200' },
           { icon: Briefcase, label: tr.activePositions, value: requirements.reduce((s, r) => s + r.positions, 0).toString(), gradient: 'from-blue-500 to-cyan-500', shadow: 'shadow-blue-200' },
           { icon: Users, label: tr.matchedStudents, value: requirements.reduce((s, r) => s + r.matchedStudents, 0).toString(), gradient: 'from-emerald-500 to-teal-500', shadow: 'shadow-emerald-200' },
-          { icon: Star, label: tr.avgMatch, value: `${Math.round(requirements.reduce((s, r) => s + r.avgMatch, 0) / requirements.length)}%`, gradient: 'from-amber-500 to-orange-500', shadow: 'shadow-amber-200' },
+          { icon: Star, label: tr.avgMatch, value: `${requirements.length ? Math.round(requirements.reduce((s, r) => s + r.avgMatch, 0) / requirements.length) : 0}%`, gradient: 'from-amber-500 to-orange-500', shadow: 'shadow-amber-200' },
         ].map((stat, i) => (
           <motion.div key={i} whileHover={{ scale: 1.02 }} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradient} p-5 text-white shadow-xl ${stat.shadow}`}>
             <div className="absolute -top-10 -right-10 w-28 h-28 bg-white/10 rounded-full blur-2xl dark:bg-slate-900/50" />
@@ -240,16 +365,40 @@ export default function SkillsRequirement() {
                   onClick={() => { setSelectedReq(req); setShowMatches(true); }}>
                   <Search className="w-3.5 h-3.5" /> {tr.viewMatches}
                 </Button>
-                <Button variant="outline" size="sm" className="rounded-xl">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl"
+                  onClick={() => {
+                    setEditingReq(req);
+                    setFormData({
+                      name: req.name,
+                      description: req.description,
+                      priority: req.priority,
+                      skills: req.skills.length ? req.skills : [{ name: '', level: 'beginner' }],
+                    });
+                    setShowForm(true);
+                  }}
+                >
                   <Edit2 className="w-3.5 h-3.5" />
                 </Button>
-                <Button variant="outline" size="sm" className="rounded-xl text-red-500 hover:text-red-700 hover:bg-red-50 dark:text-slate-300 dark:bg-slate-800">
+                <Button variant="outline" size="sm" className="rounded-xl text-red-500 hover:text-red-700 hover:bg-red-50 dark:text-slate-300 dark:bg-slate-800" onClick={() => handleDelete(req.id)}>
                   <Trash2 className="w-3.5 h-3.5" />
                 </Button>
               </div>
             </motion.div>
           );
         })}
+        {isLoading && (
+          <div className="lg:col-span-2 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+            {language === 'th' ? 'กำลังโหลด Requirements...' : 'Loading requirements...'}
+          </div>
+        )}
+        {!isLoading && requirements.length === 0 && (
+          <div className="lg:col-span-2 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+            {language === 'th' ? 'ยังไม่มี Requirement จาก API' : 'No requirements from API yet.'}
+          </div>
+        )}
       </div>
 
       {/* Create / Edit Dialog */}
@@ -257,7 +406,7 @@ export default function SkillsRequirement() {
         <DialogContent className="sm:max-w-[550px] max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Target className="w-5 h-5 text-indigo-500 dark:text-slate-400" /> {tr.createNew}
+              <Target className="w-5 h-5 text-indigo-500 dark:text-slate-400" /> {editingReq ? (language === 'th' ? 'แก้ไข Requirement' : 'Edit Requirement') : tr.createNew}
             </DialogTitle>
             <DialogDescription>{tr.description}</DialogDescription>
           </DialogHeader>
@@ -345,7 +494,7 @@ export default function SkillsRequirement() {
           </DialogHeader>
 
           <div className="space-y-3 mt-4">
-            {mockMatches.map((match, i) => (
+            {matches.map((match, i) => (
               <div key={i} className="flex items-center gap-4 p-4 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 transition-colors dark:bg-slate-800">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
                   {(language === 'th' ? match.name : match.nameEn).charAt(0)}
@@ -365,6 +514,11 @@ export default function SkillsRequirement() {
                 </div>
               </div>
             ))}
+            {matches.length === 0 && (
+              <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-6 text-center text-sm text-slate-500 dark:text-slate-400">
+                {language === 'th' ? 'ยังไม่มีผลจับคู่จาก API' : 'No match results from API yet.'}
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>

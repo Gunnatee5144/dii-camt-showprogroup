@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Briefcase, Plus, MapPin, Clock, Users, Edit, Trash2, Eye, Calendar, DollarSign, Save, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,10 +11,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { mockJobPostings, mockCompany } from '@/lib/mockData';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { JobPosting } from '@/types';
+import { api } from '@/lib/api';
+import { mapJob as mapLiveJob } from '@/lib/live-mappers';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -26,15 +28,18 @@ const itemVariants = {
 };
 
 export default function JobPostings() {
+    const navigate = useNavigate();
     const { user } = useAuth();
     const { t, language } = useLanguage();
     const isAdmin = user?.role === 'admin';
     const isCompany = user?.role === 'company';
     const canManage = isAdmin || isCompany;
 
-    const [jobs, setJobs] = useState(mockJobPostings);
+    const [jobs, setJobs] = useState<JobPosting[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingJob, setEditingJob] = useState<JobPosting | null>(null);
+    const [selectedJob, setSelectedJob] = useState<JobPosting | null>(null);
     const [formData, setFormData] = useState<{
         title: string;
         type: JobPosting['type'];
@@ -44,13 +49,33 @@ export default function JobPostings() {
         deadline: string; // yyyy-mm-dd
     }>({ title: '', type: 'full-time', location: '', salary: '', positions: 1, deadline: '' });
 
-    const companyJobPostings = isCompany ? jobs.filter(j => j.companyId === mockCompany.id) : jobs;
+    const mapJob = React.useCallback((item: unknown, index = 0): JobPosting => mapLiveJob(item, index), []);
+
+    React.useEffect(() => {
+        let isMounted = true;
+        api.jobs.list()
+            .then((response) => {
+                if (!isMounted) return;
+                const mapped = response.jobs.map(mapJob);
+                setJobs(mapped);
+            })
+            .catch(() => undefined)
+            .finally(() => {
+                if (isMounted) setIsLoading(false);
+            });
+
+        return () => {
+            isMounted = false;
+        };
+    }, [mapJob]);
+
+    const companyJobPostings = jobs;
     const openJobs = companyJobPostings.filter(j => j.status === 'open').length;
     const totalApplicants = companyJobPostings.reduce((sum, j) => sum + j.applicants.length, 0);
 
     const handleAdd = () => {
         setEditingJob(null);
-        setFormData({ title: '', type: 'full-time', location: 'เชียงใหม่', salary: '20,000+', positions: 1, deadline: new Date().toISOString().split('T')[0] });
+        setFormData({ title: '', type: 'full-time', location: 'Chiang Mai', salary: '20,000+', positions: 1, deadline: new Date().toISOString().split('T')[0] });
         setIsDialogOpen(true);
     };
 
@@ -67,29 +92,53 @@ export default function JobPostings() {
         setIsDialogOpen(true);
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
         if (confirm(t.jobPostings.deleteConfirm)) {
-            setJobs(jobs.filter(j => j.id !== id));
-            toast.success(t.jobPostings.deleteSuccess);
+            try {
+                await api.jobs.remove(id);
+                setJobs(jobs.filter(j => j.id !== id));
+                toast.success(t.jobPostings.deleteSuccess);
+            } catch (error) {
+                toast.error(error instanceof Error ? error.message : t.jobPostings.deleteConfirm);
+            }
         }
     };
 
-    const handleSave = () => {
+    const buildJobPayload = () => ({
+        title: formData.title,
+        type: formData.type,
+        positions: formData.positions,
+        description: formData.title,
+        responsibilities: [],
+        requirements: [],
+        preferredSkills: [],
+        salary: formData.salary,
+        benefits: [],
+        location: formData.location,
+        workType: 'hybrid',
+        deadline: new Date(formData.deadline).toISOString(),
+        status: 'open',
+    });
+
+    const handleSave = async () => {
         if (editingJob) {
-            setJobs(jobs.map(j => j.id === editingJob.id ? { ...j, ...formData } : j));
-            toast.success(t.jobPostings.editSuccess);
+            try {
+                const response = await api.jobs.update(editingJob.id, buildJobPayload());
+                setJobs(jobs.map(j => j.id === editingJob.id ? mapJob(response.job) : j));
+                toast.success(t.jobPostings.editSuccess);
+            } catch (error) {
+                toast.error(error instanceof Error ? error.message : t.jobPostings.editJob);
+                return;
+            }
         } else {
-            const newJob = {
-                id: Math.random().toString(36).substr(2, 9),
-                companyId: isCompany ? mockCompany.id : 'comp-new',
-                companyName: isCompany ? mockCompany.companyNameThai : 'New Company',
-                status: 'open',
-                applicants: [],
-                createdAt: new Date().toISOString(),
-                ...formData
-            };
-            setJobs([newJob, ...jobs]);
-            toast.success(t.jobPostings.createSuccess);
+            try {
+                const response = await api.jobs.create(buildJobPayload());
+                setJobs([mapJob(response.job), ...jobs]);
+                toast.success(t.jobPostings.createSuccess);
+            } catch (error) {
+                toast.error(error instanceof Error ? error.message : t.jobPostings.addNew);
+                return;
+            }
         }
         setIsDialogOpen(false);
     };
@@ -233,7 +282,7 @@ export default function JobPostings() {
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0 }}
                                         transition={{ delay: index * 0.05 }}
-                                        className="p-5 border rounded-xl hover:shadow-md transition-all bg-gradient-to-r from-gray-50/50 to-white"
+                                        className="p-5 border border-slate-200 dark:border-slate-800 rounded-xl hover:shadow-md transition-all bg-gradient-to-r from-gray-50/50 to-white dark:from-slate-900/70 dark:to-slate-950/70"
                                     >
                                         <div className="flex items-start justify-between mb-4">
                                             <div className="flex-1">
@@ -264,7 +313,8 @@ export default function JobPostings() {
                                                 <Progress value={job.maxApplicants ? (job.applicants.length / job.maxApplicants) * 100 : 50} className="h-2" />
                                             </div>
                                             <div className="flex gap-2">
-                                                <Button size="sm" variant="outline"><Eye className="w-4 h-4 mr-1" />{t.jobPostings.viewApplicants}</Button>
+                                                <Button size="sm" variant="outline" onClick={() => setSelectedJob(job)}><Eye className="w-4 h-4 mr-1" />{language === 'th' ? 'รายละเอียด' : 'Details'}</Button>
+                                                <Button size="sm" variant="outline" onClick={() => navigate('/applicants')}>{t.jobPostings.viewApplicants}</Button>
                                                 {canManage && (
                                                     <>
                                                         <Button size="sm" variant="ghost" onClick={() => handleEdit(job)}><Edit className="w-4 h-4" /></Button>
@@ -276,6 +326,16 @@ export default function JobPostings() {
                                     </motion.div>
                                 ))}
                             </AnimatePresence>
+                            {isLoading && (
+                                <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                                    {language === 'th' ? 'กำลังโหลดประกาศงาน...' : 'Loading job postings...'}
+                                </div>
+                            )}
+                            {!isLoading && companyJobPostings.length === 0 && (
+                                <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                                    {language === 'th' ? 'ยังไม่มีประกาศงานจาก API' : 'No job postings from API yet.'}
+                                </div>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
@@ -296,7 +356,7 @@ export default function JobPostings() {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="grid gap-2">
                                 <Label>{t.jobPostings.type}</Label>
-                                <Select value={formData.type} onValueChange={v => setFormData({ ...formData, type: v })}>
+                                <Select value={formData.type} onValueChange={v => setFormData({ ...formData, type: v as JobPosting['type'] })}>
                                     <SelectTrigger><SelectValue /></SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="full-time">Full-time</SelectItem>
@@ -329,6 +389,56 @@ export default function JobPostings() {
                             <Save className="w-4 h-4 mr-2" />{t.common.save}
                         </Button>
                     </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={Boolean(selectedJob)} onOpenChange={(open) => !open && setSelectedJob(null)}>
+                <DialogContent className="sm:max-w-[640px]">
+                    {selectedJob && (
+                        <>
+                            <DialogHeader>
+                                <DialogTitle>{selectedJob.title}</DialogTitle>
+                                <DialogDescription>{selectedJob.companyName} / {selectedJob.location} / {selectedJob.workType}</DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                                    <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3">
+                                        <div className="text-slate-500 dark:text-slate-400">{t.jobPostings.positions}</div>
+                                        <div className="font-bold">{selectedJob.positions}</div>
+                                    </div>
+                                    <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3">
+                                        <div className="text-slate-500 dark:text-slate-400">{t.jobPostings.applicantsCount}</div>
+                                        <div className="font-bold">{selectedJob.applicants.length}</div>
+                                    </div>
+                                    <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3">
+                                        <div className="text-slate-500 dark:text-slate-400">{t.jobPostings.salary}</div>
+                                        <div className="font-bold">{selectedJob.salary || '-'}</div>
+                                    </div>
+                                    <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3">
+                                        <div className="text-slate-500 dark:text-slate-400">{t.jobPostings.closeDateLabel}</div>
+                                        <div className="font-bold">{new Date(selectedJob.deadline).toLocaleDateString(language === 'th' ? 'th-TH' : 'en-US')}</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div className="font-semibold mb-1">{language === 'th' ? 'รายละเอียดงาน' : 'Description'}</div>
+                                    <p className="text-sm text-slate-600 dark:text-slate-300">{selectedJob.description || '-'}</p>
+                                </div>
+                                <div>
+                                    <div className="font-semibold mb-2">{language === 'th' ? 'ทักษะและเงื่อนไข' : 'Skills & requirements'}</div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {[...selectedJob.preferredSkills, ...selectedJob.requirements].filter(Boolean).map((skill) => (
+                                            <Badge key={skill} variant="secondary">{skill}</Badge>
+                                        ))}
+                                        {[...selectedJob.preferredSkills, ...selectedJob.requirements].filter(Boolean).length === 0 && <span className="text-sm text-slate-500">-</span>}
+                                    </div>
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button variant="outline" onClick={() => navigate('/applicants')}>{t.jobPostings.viewApplicants}</Button>
+                                {canManage && <Button onClick={() => { handleEdit(selectedJob); setSelectedJob(null); }}>{t.jobPostings.editJob}</Button>}
+                            </DialogFooter>
+                        </>
+                    )}
                 </DialogContent>
             </Dialog>
         </motion.div>

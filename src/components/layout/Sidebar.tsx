@@ -75,7 +75,6 @@ const getNavItems = (role: UserRole, nav: Record<string, string>): NavItem[] => 
         { icon: ClipboardList, label: nav.attendanceBehavior, href: '/attendance' },
         { icon: GraduationCap, label: nav.grading, href: '/grades' },
         { icon: FileText, label: nav.appointments, href: '/appointments' },
-        { icon: BarChart3, label: nav.workloadReport, href: '/workload' },
         { icon: MessageSquare, label: nav.messages, href: '/messages' },
         { icon: Settings, label: nav.settings, href: '/settings' },
       ];

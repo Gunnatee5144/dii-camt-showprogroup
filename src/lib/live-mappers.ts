@@ -346,6 +346,17 @@ export const mapCompany = (value: unknown, index = 0): Company => {
     size: normalizeCompanySize(source.size, fallback.size),
     website: asString(source.website, fallback.website ?? ""),
     address: asString(source.address, fallback.address ?? ""),
+    locationMapUrl: asString(source.locationMapUrl, fallback.locationMapUrl ?? ""),
+    productsServices: asString(source.productsServices, fallback.productsServices ?? ""),
+    contactPersonName: asString(source.contactPersonName, fallback.contactPersonName ?? ""),
+    contactPersonRole: asString(source.contactPersonRole, fallback.contactPersonRole ?? ""),
+    contactPersonEmail: asString(source.contactPersonEmail, fallback.contactPersonEmail ?? ""),
+    contactPersonPhone: asString(source.contactPersonPhone, fallback.contactPersonPhone ?? ""),
+    socialMedia: asString(source.socialMedia, fallback.socialMedia ?? ""),
+    onboardingStatus: asString(source.onboardingStatus, fallback.onboardingStatus ?? "pending_review"),
+    privacyProtocolAcceptedAt: source.privacyProtocolAcceptedAt
+      ? asDate(source.privacyProtocolAcceptedAt, fallback.privacyProtocolAcceptedAt)
+      : fallback.privacyProtocolAcceptedAt,
     jobPostings: asArray(source.jobPostings).length
       ? asArray(source.jobPostings).map(mapJob)
       : fallback.jobPostings,

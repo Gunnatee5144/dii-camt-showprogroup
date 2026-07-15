@@ -112,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async (phone: string): Promise<boolean> => {
       const response = await api.auth.companyLogin(phone);
       
-      const rawUser: any = response.user.raw || response.user;
+      const rawUser: any = (response.user as any).raw || response.user;
       const onboardingStatus = rawUser?.companyProfile?.onboardingStatus;
       
       if (onboardingStatus !== 'completed') {

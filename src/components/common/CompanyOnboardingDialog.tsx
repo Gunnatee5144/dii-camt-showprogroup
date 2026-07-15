@@ -43,7 +43,7 @@ const requiredCompanyFields = [
 ];
 
 export function CompanyOnboardingDialog() {
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, logout } = useAuth();
   // memoize ป้องกัน asRecord() คืน object ใหม่ทุก render → useEffect deps เปลี่ยนทุกครั้ง
   // → setState วนไม่หยุด (Maximum update depth exceeded / infinite re-render loop, D-33)
   const rawUser = React.useMemo(() => asRecord(user?.raw), [user?.raw]);

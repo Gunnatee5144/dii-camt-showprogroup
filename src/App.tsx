@@ -100,9 +100,9 @@ const App = () => (
 
                   {/* Academic (D-04: map ตาม Sidebar) */}
                   <Route path="/courses" element={<RoleGuard allowedRoles={['student', 'lecturer', 'staff', 'admin']}><Courses /></RoleGuard>} />
-                  <Route path="/courses/:courseId/grading" element={<RoleGuard allowedRoles={['lecturer', 'admin']}><CourseGradingSettings /></RoleGuard>} />
+                  <Route path="/courses/:courseId/grading" element={<RoleGuard allowedRoles={['lecturer', 'staff', 'admin']}><CourseGradingSettings /></RoleGuard>} />
                   <Route path="/schedule" element={<RoleGuard allowedRoles={['student', 'lecturer', 'admin']}><Schedule /></RoleGuard>} />
-                  <Route path="/grades" element={<RoleGuard allowedRoles={['student', 'lecturer', 'admin']}><Grades /></RoleGuard>} />
+                  <Route path="/grades" element={<RoleGuard allowedRoles={['student', 'lecturer', 'staff', 'admin']}><Grades /></RoleGuard>} />
 
                   {/* Student Routes */}
                   <Route path="/activities" element={<RoleGuard allowedRoles={['student', 'admin']}><Activities /></RoleGuard>} />

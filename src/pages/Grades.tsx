@@ -157,8 +157,15 @@ export default function Grades() {
         if (mounted) setIsLoading(false);
       });
     } else {
+      // Staff/admin aren't lecturers — lecturerSchedule() would 400 without an
+      // explicit lecturerId, so they get the full course list instead. The
+      // backend already scopes enrollments to "everything" for these roles.
+      const coursesRequest = user?.role === 'lecturer'
+        ? api.courses.lecturerSchedule().then((response) => response.schedule)
+        : api.courses.list().then((response) => response.courses);
+
       Promise.allSettled([
-        api.courses.lecturerSchedule().then((response) => response.schedule),
+        coursesRequest,
         api.enrollments.list(),
       ])
         .then(([coursesResult, enrollmentsResult]) => {

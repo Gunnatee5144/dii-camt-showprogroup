@@ -70,7 +70,7 @@ const getNavItems = (role: UserRole, nav: Record<string, string>): NavItem[] => 
       return [
         ...commonItems,
         { icon: Calendar, label: nav.teachingSchedule, href: '/schedule' },
-        { icon: Users, label: nav.adviseeStudents, href: '/students' },
+        { icon: Users, label: nav.adviseeStudents, href: '/advisees' },
         { icon: BookOpen, label: nav.courseManagement, href: '/courses' },
         { icon: ClipboardList, label: nav.attendanceBehavior, href: '/attendance' },
         { icon: GraduationCap, label: nav.grading, href: '/grades' },

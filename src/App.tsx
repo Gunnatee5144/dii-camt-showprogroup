@@ -33,6 +33,7 @@ const Messages = lazy(() => import("./pages/Messages"));
 const Settings = lazy(() => import("./pages/Settings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Students = lazy(() => import("./pages/Students"));
+const Advisees = lazy(() => import("./pages/Advisees"));
 const Assignments = lazy(() => import("./pages/Assignments"));
 const Appointments = lazy(() => import("./pages/Appointments"));
 const Attendance = lazy(() => import("./pages/Attendance"));
@@ -114,6 +115,7 @@ const App = () => (
 
                   {/* Lecturer Routes */}
                   <Route path="/students" element={<RoleGuard allowedRoles={['lecturer', 'staff', 'admin']}><Students /></RoleGuard>} />
+                  <Route path="/advisees" element={<RoleGuard allowedRoles={['lecturer']}><Advisees /></RoleGuard>} />
                   <Route path="/assignments" element={<RoleGuard allowedRoles={['lecturer', 'admin']}><Assignments /></RoleGuard>} />
                   <Route path="/appointments" element={<RoleGuard allowedRoles={['lecturer', 'admin']}><Appointments /></RoleGuard>} />
                   <Route path="/attendance" element={<RoleGuard allowedRoles={['lecturer', 'admin']}><Attendance /></RoleGuard>} />

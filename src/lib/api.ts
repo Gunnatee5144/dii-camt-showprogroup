@@ -311,6 +311,17 @@ export const api = {
   careerTargets: {
     list: () => request<ApiEnvelope<{ targets: unknown[] }>>("/career-targets"),
   },
+  careerTracks: {
+    list: () => request<ApiEnvelope<{ tracks: unknown[] }>>("/career-tracks"),
+  },
+  careerGoal: {
+    get: () => request<ApiEnvelope<{ goal: unknown }>>("/students/career-goal"),
+    set: (careerTrackId: string | null) =>
+      request<ApiEnvelope<{ goal: unknown }>>("/students/career-goal", {
+        method: "PUT",
+        body: { careerTrackId },
+      }),
+  },
   applications: {
     update: (id: string, payload: Record<string, unknown>) =>
       request<ApiEnvelope<{ application: unknown }>>(`/applications/${id}`, {

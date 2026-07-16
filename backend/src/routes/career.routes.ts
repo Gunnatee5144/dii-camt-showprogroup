@@ -15,6 +15,7 @@ import {
   internshipDocumentCreateSchema,
   internshipDocumentStatusSchema,
   talentQuerySchema,
+  careerGoalUpdateSchema,
 } from "../schemas/career.schema";
 import {
   getJobsHandler,
@@ -31,12 +32,16 @@ import {
   createInternshipDocumentHandler,
   updateInternshipDocumentStatusHandler,
   searchTalentHandler,
+  getCareerTracksHandler,
+  getMyCareerGoalHandler,
+  updateMyCareerGoalHandler,
 } from "../controllers/career.controller";
 
 const router = Router();
 
 router.get(
   "/jobs",
+  requireAuth,
   validate(jobQuerySchema, "query"),
   getJobsHandler
 );
@@ -146,6 +151,27 @@ router.get(
   checkRole([Role.COMPANY, Role.ADMIN, Role.STAFF, Role.LECTURER]),
   validate(talentQuerySchema, "query"),
   searchTalentHandler
+);
+
+router.get(
+  "/career-tracks",
+  requireAuth,
+  getCareerTracksHandler
+);
+
+router.get(
+  "/students/career-goal",
+  requireAuth,
+  checkRole([Role.STUDENT]),
+  getMyCareerGoalHandler
+);
+
+router.put(
+  "/students/career-goal",
+  requireAuth,
+  checkRole([Role.STUDENT]),
+  validate(careerGoalUpdateSchema),
+  updateMyCareerGoalHandler
 );
 
 export const careerRoutes = router;

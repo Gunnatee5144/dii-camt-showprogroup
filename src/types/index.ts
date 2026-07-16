@@ -475,7 +475,7 @@ export interface JobPosting {
   maxApplicants?: number;
 
   // Status
-  status: 'open' | 'closed' | 'filled';
+  status: 'draft' | 'open' | 'closed' | 'filled';
   isActive: boolean;
   postedAt: Date;
 }

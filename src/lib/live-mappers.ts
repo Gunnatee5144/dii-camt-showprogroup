@@ -322,7 +322,7 @@ const normalizeWorkType = (value: unknown, fallback: JobPosting["workType"] = "o
 
 const normalizeJobStatus = (value: unknown, fallback: JobPosting["status"] = "open") => {
   const status = asString(value, fallback).toLowerCase();
-  return (["open", "closed", "filled"].includes(status) ? status : fallback) as JobPosting["status"];
+  return (["draft", "open", "closed", "filled"].includes(status) ? status : fallback) as JobPosting["status"];
 };
 
 const normalizeCompanySize = (value: unknown, fallback: Company["size"] = "medium") => {

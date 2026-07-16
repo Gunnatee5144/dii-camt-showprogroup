@@ -97,6 +97,13 @@ const sendPasswordResetEmail = async (payload: {
 export const register = asyncHandler(async (req, res) => {
   const { email, password, name, nameThai, role, avatar, phone, profile } = req.body;
 
+  // Public self-registration must never be able to mint an ADMIN account —
+  // admin accounts are created only via the authenticated internal Users
+  // management flow (system.controller.ts createUserHandler).
+  if (role === Role.ADMIN) {
+    throw new AppError(403, "Cannot self-register as admin");
+  }
+
   const existingUser = await prisma.user.findUnique({
     where: { email },
   });
@@ -180,11 +187,16 @@ export const register = asyncHandler(async (req, res) => {
             permissions: Array.isArray(profile.permissions)
               ? profile.permissions.map(String)
               : [],
-            canManageUsers: Boolean(profile.canManageUsers ?? true),
-            canManageCourses: Boolean(profile.canManageCourses ?? true),
-            canManageSchedules: Boolean(profile.canManageSchedules ?? true),
-            canViewReports: Boolean(profile.canViewReports ?? true),
-            canManageInternships: Boolean(profile.canManageInternships ?? true),
+            // Self-registered staff accounts start with zero elevated permissions —
+            // an existing admin must grant these explicitly via Users management.
+            // (The client-supplied profile.canManage* flags are intentionally
+            // ignored here, not just defaulted, so a crafted request body can't
+            // grant itself permissions either.)
+            canManageUsers: false,
+            canManageCourses: false,
+            canManageSchedules: false,
+            canViewReports: false,
+            canManageInternships: false,
           },
         });
         break;

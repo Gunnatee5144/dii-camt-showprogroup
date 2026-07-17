@@ -282,6 +282,7 @@ export const login = asyncHandler(async (req, res) => {
       companyProfile: true,
       adminProfile: true,
     },
+    omit: { passwordHash: false },
   });
 
   if (!user || !(await comparePassword(password, user.passwordHash))) {
@@ -368,6 +369,7 @@ export const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
   const user = await prisma.user.findUnique({
     where: { email },
+    omit: { passwordHash: false },
   });
 
   const response: {
@@ -430,6 +432,7 @@ export const resetPassword = asyncHandler(async (req, res) => {
 
   const user = await prisma.user.findUnique({
     where: { id: data.sub },
+    omit: { passwordHash: false },
   });
 
   if (!user || user.email !== data.email || data.marker !== passwordMarker(user.passwordHash)) {
@@ -489,6 +492,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
   const existingUser = await prisma.user.findUnique({
     where: { id: currentUser.id },
     include: { companyProfile: true },
+    omit: { passwordHash: false },
   });
 
   if (!existingUser) {

@@ -238,6 +238,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                   to={item.href}
                   onClick={onClose}
                   title={collapsed ? item.label : undefined}
+                  aria-label={collapsed ? item.label : undefined}
                   className={cn(
                     "flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors",
                     collapsed && "md:justify-center",

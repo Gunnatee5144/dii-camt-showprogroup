@@ -17,6 +17,12 @@ export function CareerGoalCard() {
   const { language } = useLanguage();
   const [tracks, setTracks] = useState<Track[]>([]);
   const [currentTrackId, setCurrentTrackId] = useState<string | null>(null);
+  // The goal's own embedded track name — independent of whether the separate
+  // /career-tracks list call succeeded, so a partial-failure load never shows
+  // "+ Set career goal" for a student who actually has one set (the trigger
+  // label used to cross-reference `tracks` by id, which went blank if that
+  // fetch failed while the goal fetch itself succeeded).
+  const [currentTrackName, setCurrentTrackName] = useState<{ name: string; nameThai: string } | null>(null);
   const [selectedTrackId, setSelectedTrackId] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -39,9 +45,14 @@ export function CareerGoalCard() {
         }
         if (goalRes.status === 'fulfilled' && goalRes.value.goal) {
           const goal = asRecord(goalRes.value.goal);
+          const track = asRecord(goal.careerTrack);
           const trackId = asString(goal.careerTrackId);
           setCurrentTrackId(trackId || null);
           setSelectedTrackId(trackId || '');
+          setCurrentTrackName({
+            name: asString(track.name),
+            nameThai: asString(track.nameThai, asString(track.name)),
+          });
         }
       })
       .finally(() => {
@@ -52,7 +63,7 @@ export function CareerGoalCard() {
     };
   }, []);
 
-  const currentTrack = tracks.find((track) => track.id === currentTrackId);
+  const currentTrack = currentTrackName ?? tracks.find((track) => track.id === currentTrackId);
 
   const copy = language === 'th'
     ? {
@@ -84,6 +95,7 @@ export function CareerGoalCard() {
     try {
       await api.careerGoal.set(selectedTrackId);
       setCurrentTrackId(selectedTrackId);
+      setCurrentTrackName(tracks.find((track) => track.id === selectedTrackId) ?? null);
       toast.success(copy.saved);
       setOpen(false);
     } catch (error) {
@@ -98,6 +110,7 @@ export function CareerGoalCard() {
     try {
       await api.careerGoal.set(null);
       setCurrentTrackId(null);
+      setCurrentTrackName(null);
       setSelectedTrackId('');
       toast.success(copy.cleared);
       setOpen(false);
@@ -108,7 +121,11 @@ export function CareerGoalCard() {
     }
   };
 
-  if (isLoading) return null;
+  if (isLoading) {
+    // Same footprint as the real trigger button so it doesn't shift the
+    // other Quick Actions buttons once this resolves.
+    return <div className="h-9 w-40 rounded-xl bg-white/10 animate-pulse" />;
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

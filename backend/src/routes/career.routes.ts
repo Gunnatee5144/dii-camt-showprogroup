@@ -99,6 +99,12 @@ router.post(
 router.get(
   "/applications",
   requireAuth,
+  // Only student (own applications) and company (own postings' applications)
+  // get scoped in getApplicationsHandler; any other role fell through with
+  // no where-clause at all and got every application system-wide, resumes
+  // and cover letters included. Admin is the only other role with a
+  // legitimate reason to see everything.
+  checkRole([Role.STUDENT, Role.COMPANY, Role.ADMIN]),
   validate(applicationQuerySchema, "query"),
   getApplicationsHandler
 );

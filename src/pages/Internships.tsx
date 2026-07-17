@@ -19,6 +19,14 @@ import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useNavigate } from 'react-router-dom';
 
+// Postings created without an explicit deadline (the norm since Job Postings
+// dropped the deadline field for "continuous hiring") get a server-side
+// placeholder ~5 years out so the DB column's NOT NULL constraint is
+// satisfied. That placeholder must never render as a real date here.
+const FAR_FUTURE_THRESHOLD_MS = 2 * 365 * 24 * 60 * 60 * 1000; // 2 years
+const isOngoingDeadline = (deadline: Date | string) =>
+  new Date(deadline).getTime() - Date.now() > FAR_FUTURE_THRESHOLD_MS;
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
@@ -250,7 +258,11 @@ export default function Internships() {
                 </div>
                 <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                   <Clock className="w-4 h-4 shrink-0" />
-                  <span>{new Date(job.deadline).toLocaleDateString(language === 'th' ? 'th-TH' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                  <span>
+                    {isOngoingDeadline(job.deadline)
+                      ? (language === 'th' ? 'รับสมัครต่อเนื่อง' : 'Ongoing')
+                      : new Date(job.deadline).toLocaleDateString(language === 'th' ? 'th-TH' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </span>
                 </div>
               </div>
               <div className="flex flex-wrap gap-2 items-center mt-2 pt-4 border-t border-slate-100 dark:border-slate-800">
@@ -323,7 +335,7 @@ export default function Internships() {
                         { label: t.internshipsPage.locationLabel, value: selectedJob.workType || 'On-site', icon: MapPin, color: 'text-purple-600', bg: 'bg-purple-50' },
                         { label: t.internshipsPage.salary, value: selectedJob.salary || 'N/A', icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
                         { label: 'Positions', value: selectedJob.positions?.toString() || '1', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-                        { label: 'Deadline', value: new Date(selectedJob.deadline).toLocaleDateString(), icon: Clock, color: 'text-rose-600', bg: 'bg-rose-50' }
+                        { label: 'Deadline', value: isOngoingDeadline(selectedJob.deadline) ? (language === 'th' ? 'รับสมัครต่อเนื่อง' : 'Ongoing') : new Date(selectedJob.deadline).toLocaleDateString(), icon: Clock, color: 'text-rose-600', bg: 'bg-rose-50' }
                       ].map((stat, i) => (
                         <div key={i} className="p-3 rounded-2xl bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col items-center text-center">
                           <div className={`w-8 h-8 rounded-lg ${stat.bg} ${stat.color} flex items-center justify-center mb-2`}>

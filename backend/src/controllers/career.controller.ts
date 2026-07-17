@@ -241,9 +241,15 @@ export const updateJobHandler = asyncHandler(async (req, res) => {
     throw new AppError(403, "You can only manage your own job postings");
   }
 
+  // companyId must never be settable through this endpoint — the ownership
+  // check above only validates the *current* owner, so without stripping
+  // this, a company could PATCH its own job's companyId to reassign it into
+  // another company's account.
+  const { companyId: _ignoredCompanyId, ...updateData } = req.body;
+
   const job = await prisma.jobPosting.update({
     where: { id: jobId },
-    data: req.body,
+    data: updateData,
     include: {
       company: { include: { user: { select: { id: true, name: true, email: true } } } },
       applications: {

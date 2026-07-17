@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Users, Search, X, FileText, Send, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -33,6 +33,7 @@ type ApplicantRow = Application & {
   jobPostingId: string;
   student?: {
     id: string;
+    userId: string;
     nameThai: string;
     name: string;
     email: string;
@@ -47,6 +48,7 @@ const STAGE_ORDER: Application['status'][] = ['pending', 'reviewed', 'shortliste
 export default function Applicants() {
   const { user } = useAuth();
   const { t, language } = useLanguage();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const isAdmin = user?.role === 'admin';
   const isCompany = user?.role === 'company';
@@ -159,6 +161,7 @@ export default function Applicants() {
             jobTitle: asString(job.title, '-'),
             student: {
               id: asString(student.id),
+              userId: asString(studentUser.id),
               nameThai: asString(studentUser.nameThai, asString(studentUser.name, '-')),
               name: asString(studentUser.name, '-'),
               email: asString(studentUser.email),
@@ -205,6 +208,24 @@ export default function Applicants() {
     const next = new URLSearchParams(searchParams);
     next.delete('jobId');
     setSearchParams(next);
+  };
+
+  const reachOut = (applicant: ApplicantRow) => {
+    if (!applicant.student?.userId) {
+      toast.error(copy.errorGeneric);
+      return;
+    }
+    navigate('/messages', {
+      state: {
+        recipient: {
+          id: applicant.student.userId,
+          email: applicant.student.email,
+          name: applicant.student.name,
+          nameThai: applicant.student.nameThai,
+          role: 'student',
+        },
+      },
+    });
   };
 
   const applyStatus = async (id: string, status: Application['status']) => {
@@ -453,8 +474,8 @@ export default function Applicants() {
                     >
                       <FileText className="w-4 h-4 mr-1.5" /> {copy.openResume}
                     </Button>
-                    <Button variant="outline" size="sm" asChild>
-                      <a href="/messages"><Send className="w-4 h-4 mr-1.5" /> {copy.sendMessage}</a>
+                    <Button variant="outline" size="sm" onClick={() => reachOut(selected)}>
+                      <Send className="w-4 h-4 mr-1.5" /> {copy.sendMessage}
                     </Button>
                   </div>
                 </div>

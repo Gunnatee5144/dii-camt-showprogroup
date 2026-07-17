@@ -713,3 +713,87 @@ export const updateMyCareerGoalHandler = asyncHandler(async (req, res) => {
 
   res.json({ success: true, goal });
 });
+
+export const getTrackWatchesHandler = asyncHandler(async (req, res) => {
+  const currentUser = requireUser(req);
+  const company = await getCompanyProfileByUserId(currentUser.id);
+  const watches = await prisma.companyTrackWatch.findMany({
+    where: { companyId: company.id },
+    include: { careerTrack: true },
+    orderBy: { createdAt: "asc" },
+  });
+
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+  const results = await Promise.all(
+    watches.map(async (watch) => {
+      const goalSetters = await prisma.studentCareerGoal.findMany({
+        where: { careerTrackId: watch.careerTrackId },
+        include: { student: { include: { skills: { include: { skill: true } } } } },
+      });
+      const desired = watch.desiredSkills.map((skill) => skill.toLowerCase());
+      // No desired skills specified = nothing to clear, everyone who set the
+      // goal counts as "reached" it.
+      const matchedCount = desired.length === 0
+        ? goalSetters.length
+        : goalSetters.filter((goal) => {
+            const skillSet = new Set(goal.student.skills.map((item) => item.skill.name.toLowerCase()));
+            return desired.every((skill) => skillSet.has(skill));
+          }).length;
+      const newCount = goalSetters.filter((goal) => goal.createdAt >= sevenDaysAgo).length;
+
+      return {
+        id: watch.id,
+        careerTrack: {
+          id: watch.careerTrack.id,
+          name: watch.careerTrack.name,
+          nameThai: watch.careerTrack.nameThai,
+        },
+        desiredSkills: watch.desiredSkills,
+        totalGoalSetters: goalSetters.length,
+        matchedCount,
+        newCount,
+      };
+    }),
+  );
+
+  res.json({ success: true, watches: results });
+});
+
+export const createTrackWatchHandler = asyncHandler(async (req, res) => {
+  const currentUser = requireUser(req);
+  const company = await getCompanyProfileByUserId(currentUser.id);
+  const careerTrackId = String(req.body.careerTrackId);
+
+  const track = await prisma.careerTrack.findUnique({ where: { id: careerTrackId } });
+  if (!track) {
+    throw new AppError(404, "Career track not found");
+  }
+
+  const watch = await prisma.companyTrackWatch.upsert({
+    where: { companyId_careerTrackId: { companyId: company.id, careerTrackId } },
+    update: { desiredSkills: Array.isArray(req.body.desiredSkills) ? req.body.desiredSkills.map(String) : [] },
+    create: {
+      companyId: company.id,
+      careerTrackId,
+      desiredSkills: Array.isArray(req.body.desiredSkills) ? req.body.desiredSkills.map(String) : [],
+    },
+    include: { careerTrack: true },
+  });
+
+  res.status(201).json({ success: true, watch });
+});
+
+export const deleteTrackWatchHandler = asyncHandler(async (req, res) => {
+  const currentUser = requireUser(req);
+  const company = await getCompanyProfileByUserId(currentUser.id);
+  const watchId = String(req.params.id);
+
+  const existing = await prisma.companyTrackWatch.findUnique({ where: { id: watchId } });
+  if (!existing || existing.companyId !== company.id) {
+    throw new AppError(404, "Track watch not found");
+  }
+
+  await prisma.companyTrackWatch.delete({ where: { id: watchId } });
+  res.json({ success: true });
+});

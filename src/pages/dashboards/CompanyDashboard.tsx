@@ -11,6 +11,7 @@ import { api } from '@/lib/api';
 import { asArray, asDate, asNumber, asRecord, asString } from '@/lib/live-data';
 import { mapCompany, mapJob } from '@/lib/live-mappers';
 import { getFavorites, type FavoriteStudent } from '@/lib/company-favorites';
+import { TargetTrackHero } from '@/components/dashboard/TargetTrackHero';
 import type { Application, Company, JobPosting } from '@/types';
 
 type ApplicantRow = Application & {
@@ -252,6 +253,11 @@ export default function CompanyDashboard() {
           </Link>
         </motion.div>
       </div>
+
+      {/* Target Track hero */}
+      <motion.div variants={itemVariants}>
+        <TargetTrackHero />
+      </motion.div>
 
       {/* Favorites strip */}
       <motion.div variants={itemVariants}>

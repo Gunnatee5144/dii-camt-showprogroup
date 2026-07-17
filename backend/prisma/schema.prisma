@@ -93,12 +93,13 @@ model StudentProfile {
 // how many students are aiming for that direction, even before they have
 // the matching skills yet.
 model CareerTrack {
-  id           String              @id @default(cuid())
-  key          String              @unique
-  name         String
-  nameThai     String
-  createdAt    DateTime            @default(now())
-  studentGoals StudentCareerGoal[]
+  id             String              @id @default(cuid())
+  key            String              @unique
+  name           String
+  nameThai       String
+  createdAt      DateTime            @default(now())
+  studentGoals   StudentCareerGoal[]
+  companyWatches CompanyTrackWatch[]
 }
 
 model StudentCareerGoal {
@@ -175,8 +176,24 @@ model CompanyProfile {
   cooperation        CooperationRecord[]
   payments           PaymentHistory[]
   interns            InternshipRecord[]
+  trackWatches       CompanyTrackWatch[]
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
+}
+
+// A company "watching" a career track — the Dashboard hero shows how many
+// students have set this as their goal, and how many already have the
+// company's desired skills for it. No matching/scoring beyond an honest count.
+model CompanyTrackWatch {
+  id            String         @id @default(cuid())
+  companyId     String
+  company       CompanyProfile @relation(fields: [companyId], references: [id])
+  careerTrackId String
+  careerTrack   CareerTrack    @relation(fields: [careerTrackId], references: [id])
+  desiredSkills String[]       @default([])
+  createdAt     DateTime       @default(now())
+
+  @@unique([companyId, careerTrackId])
 }
 
 model AdminProfile {

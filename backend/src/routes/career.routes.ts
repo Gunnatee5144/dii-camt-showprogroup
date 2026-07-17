@@ -16,6 +16,7 @@ import {
   internshipDocumentStatusSchema,
   talentQuerySchema,
   careerGoalUpdateSchema,
+  trackWatchCreateSchema,
 } from "../schemas/career.schema";
 import {
   getJobsHandler,
@@ -35,6 +36,9 @@ import {
   getCareerTracksHandler,
   getMyCareerGoalHandler,
   updateMyCareerGoalHandler,
+  getTrackWatchesHandler,
+  createTrackWatchHandler,
+  deleteTrackWatchHandler,
 } from "../controllers/career.controller";
 
 const router = Router();
@@ -172,6 +176,28 @@ router.put(
   checkRole([Role.STUDENT]),
   validate(careerGoalUpdateSchema),
   updateMyCareerGoalHandler
+);
+
+router.get(
+  "/company/track-watches",
+  requireAuth,
+  checkRole([Role.COMPANY]),
+  getTrackWatchesHandler
+);
+
+router.post(
+  "/company/track-watches",
+  requireAuth,
+  checkRole([Role.COMPANY]),
+  validate(trackWatchCreateSchema),
+  createTrackWatchHandler
+);
+
+router.delete(
+  "/company/track-watches/:id",
+  requireAuth,
+  checkRole([Role.COMPANY]),
+  deleteTrackWatchHandler
 );
 
 export const careerRoutes = router;

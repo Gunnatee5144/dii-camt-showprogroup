@@ -74,6 +74,11 @@ export const careerGoalUpdateSchema = z.object({
   careerTrackId: z.string().min(1).nullable(),
 });
 
+export const trackWatchCreateSchema = z.object({
+  careerTrackId: z.string().min(1),
+  desiredSkills: z.array(z.string()).default([]),
+});
+
 export const talentQuerySchema = z.object({
   jobId: z.string().optional(),
   skills: z.string().optional(),

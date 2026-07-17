@@ -356,8 +356,13 @@ export const getApplicationsHandler = asyncHandler(async (req, res) => {
       ],
     },
     include: {
-      student: { include: { user: true } },
-      jobPosting: { include: { company: { include: { user: true } } } },
+      student: {
+        include: {
+          user: { select: { id: true, name: true, nameThai: true, email: true } },
+          skills: { include: { skill: true } },
+        },
+      },
+      jobPosting: { include: { company: { include: { user: { select: { id: true, name: true, email: true } } } } } },
     },
     orderBy: { appliedAt: "desc" },
   });

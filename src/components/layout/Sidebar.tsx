@@ -106,7 +106,7 @@ const getNavItems = (role: UserRole, nav: Record<string, string>): NavItem[] => 
         ...commonItems,
         { icon: Briefcase, label: nav.jobPostings, href: '/job-postings' },
         { icon: Target, label: nav.skillsRequirement, href: '/skills-requirement' },
-        { icon: Search, label: nav.searchStudents, href: '/student-profiles' },
+        { icon: Search, label: nav.searchStudents, href: '/talent-search' },
         { icon: Users, label: nav.applicants, href: '/applicants' },
         { icon: UserCog, label: nav.internTracking, href: '/intern-tracking' },
         { icon: Settings, label: nav.settings, href: '/settings' },

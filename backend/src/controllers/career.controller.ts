@@ -628,10 +628,15 @@ export const searchTalentHandler = asyncHandler(async (req, res) => {
       success: true,
       talents: await searchTalent(company.id, {
         jobId: req.query.jobId ? String(req.query.jobId) : undefined,
+        skills: req.query.skills
+          ? String(req.query.skills).split(",").map((s) => s.trim()).filter(Boolean)
+          : undefined,
+        careerTrackId: req.query.careerTrackId ? String(req.query.careerTrackId) : undefined,
         q: req.query.q ? String(req.query.q) : undefined,
         major: req.query.major ? String(req.query.major) : undefined,
         minGpax:
           typeof req.query.minGpax !== "undefined" ? Number(req.query.minGpax) : undefined,
+        year: typeof req.query.year !== "undefined" ? Number(req.query.year) : undefined,
       }),
     });
   }
@@ -646,7 +651,7 @@ export const searchTalentHandler = asyncHandler(async (req, res) => {
       ],
     },
     include: {
-      user: true,
+      user: { select: { id: true, name: true, nameThai: true } },
       skills: { include: { skill: true } },
       portfolio: { include: { projects: true } },
       badges: true,

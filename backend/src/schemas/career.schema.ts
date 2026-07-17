@@ -76,7 +76,10 @@ export const careerGoalUpdateSchema = z.object({
 
 export const talentQuerySchema = z.object({
   jobId: z.string().optional(),
+  skills: z.string().optional(),
+  careerTrackId: z.string().optional(),
   q: z.string().optional(),
   major: z.string().optional(),
   minGpax: z.coerce.number().optional(),
+  year: z.coerce.number().optional(),
 });

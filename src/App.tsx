@@ -52,6 +52,7 @@ const ActivitiesManagement = lazy(() => import("./pages/ActivitiesManagement"));
 const JobPostings = lazy(() => import("./pages/JobPostings"));
 const Applicants = lazy(() => import("./pages/Applicants"));
 const StudentProfiles = lazy(() => import("./pages/StudentProfiles"));
+const TalentSearch = lazy(() => import("./pages/TalentSearch"));
 const Cooperation = lazy(() => import("./pages/Cooperation"));
 const Subscription = lazy(() => import("./pages/Subscription"));
 const InternTracking = lazy(() => import("./pages/InternTracking"));
@@ -143,7 +144,7 @@ const App = () => (
                   <Route path="/subscription" element={<RoleGuard allowedRoles={['company', 'admin']}><Subscription /></RoleGuard>} />
                   <Route path="/intern-tracking" element={<RoleGuard allowedRoles={['company', 'admin']}><InternTracking /></RoleGuard>} />
                   <Route path="/cooperation" element={<RoleGuard allowedRoles={['company', 'staff', 'admin']}><Cooperation /></RoleGuard>} />
-                  <Route path="/talent-search" element={<RoleGuard allowedRoles={['company', 'admin']}><StudentProfiles /></RoleGuard>} />
+                  <Route path="/talent-search" element={<RoleGuard allowedRoles={['company', 'admin']}><TalentSearch /></RoleGuard>} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>

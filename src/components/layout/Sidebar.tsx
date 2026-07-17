@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
@@ -25,6 +26,8 @@ import {
   Swords,
   Target,
   Bot,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -145,10 +148,27 @@ const getRoleAccent = (role: UserRole) => {
   }
 };
 
+const COLLAPSE_STORAGE_KEY = 'showpro:sidebar-collapsed';
+
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const location = useLocation();
   const { user } = useAuth();
   const { t } = useLanguage();
+  const [collapsed, setCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem(COLLAPSE_STORAGE_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(COLLAPSE_STORAGE_KEY, String(collapsed));
+    } catch {
+      // localStorage unavailable — collapse preference just won't persist.
+    }
+  }, [collapsed]);
 
   if (!user) return null;
 
@@ -174,19 +194,30 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 h-[100dvh] w-64 shrink-0 self-start flex flex-col",
+          "fixed inset-y-0 left-0 z-50 h-[100dvh] shrink-0 self-start flex flex-col",
+          collapsed ? "md:w-[72px]" : "md:w-64",
+          "w-64",
           "bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800",
-          "transition-transform duration-300 md:sticky md:inset-auto md:top-0 md:translate-x-0",
+          "transition-[transform,width] duration-300 md:sticky md:inset-auto md:top-0 md:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
+        {/* Collapse toggle (desktop only) */}
+        <button
+          onClick={() => setCollapsed((current) => !current)}
+          className="hidden md:flex absolute -right-3 top-20 z-10 w-6 h-6 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-500 hover:text-slate-900 dark:hover:text-white shadow-sm"
+          aria-label={collapsed ? 'ขยายแถบเมนู' : 'ย่อแถบเมนู'}
+        >
+          {collapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
+        </button>
+
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-4 border-b border-slate-200 dark:border-slate-800 shrink-0">
+        <div className={cn("flex items-center justify-between py-4 border-b border-slate-200 dark:border-slate-800 shrink-0", collapsed ? "md:px-0 md:justify-center px-4" : "px-4")}>
           <Link to="/dashboard" className="flex items-center gap-2.5 group">
             <div className="w-7 h-7 bg-slate-900 dark:bg-white rounded-md flex items-center justify-center shrink-0">
               <span className="text-[9px] font-bold text-white dark:text-slate-900">SP</span>
             </div>
-            <div>
+            <div className={collapsed ? "md:hidden" : ""}>
               <div className="font-bold text-sm text-slate-900 dark:text-white leading-tight">ShowPro</div>
               <div className="text-[10px] text-slate-400 dark:text-slate-500 leading-tight capitalize">{user.role}</div>
             </div>
@@ -206,18 +237,21 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                   key={item.href}
                   to={item.href}
                   onClick={onClose}
+                  title={collapsed ? item.label : undefined}
                   className={cn(
                     "flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors",
+                    collapsed && "md:justify-center",
                     isActive
                       ? `${accent.active}`
                       : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60"
                   )}
                 >
                   <item.icon className="h-4 w-4 shrink-0" />
-                  <span className="font-medium truncate">{item.label}</span>
+                  <span className={cn("font-medium truncate", collapsed && "md:hidden")}>{item.label}</span>
                   {item.badge && (
                     <span className={cn(
                       "ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full",
+                      collapsed && "md:hidden",
                       isActive ? "bg-white/20 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
                     )}>
                       {item.badge}
@@ -231,11 +265,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
         {/* User Profile */}
         <div className="shrink-0 border-t border-slate-200 dark:border-slate-800 p-3">
-          <div className="flex items-center gap-3 px-2 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors cursor-pointer">
+          <div className={cn("flex items-center gap-3 px-2 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors cursor-pointer", collapsed && "md:justify-center")}>
             <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0", accent.init)}>
               {initials}
             </div>
-            <div className="flex-1 min-w-0">
+            <div className={cn("flex-1 min-w-0", collapsed && "md:hidden")}>
               <div className="text-sm font-medium text-slate-900 dark:text-white truncate">{user.name}</div>
               <div className="flex items-center gap-1.5">
                 <div className={cn("w-1.5 h-1.5 rounded-full", accent.dot)} />

@@ -20,11 +20,7 @@ export const courseCreateSchema = z.object({
   prerequisites: z.array(z.string()).default([]),
   learningOutcomes: z.array(z.string()).default([]),
   syllabus: z.string().optional(),
-  schedule: z.any().optional(),
-  room: z.string().optional(),
   status: z.string().optional(),
-  maxStudents: z.coerce.number().int().positive().default(60),
-  minStudents: z.coerce.number().int().nonnegative().default(0),
   sections: z
     .array(
       z.object({
@@ -32,6 +28,7 @@ export const courseCreateSchema = z.object({
         room: z.string().optional(),
         facilityId: z.string().optional(),
         maxStudents: z.coerce.number().int().positive().default(60),
+        minStudents: z.coerce.number().int().nonnegative().default(0),
         schedule: z.any(),
       }),
     )

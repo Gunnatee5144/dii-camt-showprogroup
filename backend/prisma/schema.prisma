@@ -223,11 +223,7 @@ model Course {
   prerequisites    String[]         @default([])
   learningOutcomes String[]         @default([])
   syllabus         String?
-  schedule         Json?
-  room             String?
   status           String           @default("active")
-  maxStudents      Int              @default(60)
-  minStudents      Int              @default(1)
   sections         Section[]
   materials        CourseMaterial[]
   assignments      Assignment[]
@@ -248,6 +244,7 @@ model Section {
   facilityId  String?
   facility    Facility?    @relation(fields: [facilityId], references: [id])
   maxStudents Int          @default(60)
+  minStudents Int          @default(1)
   schedule    Json
   enrollments Enrollment[]
 

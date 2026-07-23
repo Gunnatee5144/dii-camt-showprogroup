@@ -73,7 +73,7 @@ export default function ScheduleManagement() {
                         const sections = asArray(course.sections);
                         const slots = sections.length
                             ? sections.flatMap((section, sectionIndex) => asArray(asRecord(section).schedule).map((slot, scheduleIndex) => ({ slot, section, sectionIndex, scheduleIndex })))
-                            : asArray(course.schedule).map((slot, scheduleIndex) => ({ slot, section: {}, sectionIndex: undefined, scheduleIndex }));
+                            : asArray(course.sections?.[0]?.schedule).map((slot, scheduleIndex) => ({ slot, section: {}, sectionIndex: undefined, scheduleIndex }));
 
                         return slots.map(({ slot, section, sectionIndex, scheduleIndex }, slotIndex) => {
                             const scheduleSlot = asRecord(slot);

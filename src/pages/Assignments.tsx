@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -90,7 +90,7 @@ export default function Assignments() {
                         type: asString(assignment.type, 'individual') as AssignmentRow['type'],
                         maxScore: asNumber(assignment.maxScore, 100),
                         submissionCount: submissions.length,
-                        totalStudents: Math.max(asNumber(course.maxStudents, submissions.length), submissions.length),
+                        totalStudents: Math.max(asNumber(course.sections?.[0]?.maxStudents, submissions.length), submissions.length),
                         status: (!isPublished ? 'draft' : dueDate < new Date() ? 'completed' : 'active') as AssignmentRow['status'],
                         submissions,
                     };

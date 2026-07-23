@@ -579,9 +579,6 @@ async function main() {
       prerequisites: ["DII210"],
       learningOutcomes: ["Build secure APIs", "Design maintainable frontends", "Ship MVPs"],
       syllabus: "https://docs.example.com/dii340-syllabus",
-      schedule: courseSchedule("monday", "09:00", "12:00", "DII-401"),
-      maxStudents: 40,
-      minStudents: 10,
       sections: {
         create: [
           {
@@ -589,6 +586,7 @@ async function main() {
             room: "DII-401",
             facilityId: facilityA.id,
             maxStudents: 40,
+            minStudents: 10,
             schedule: courseSchedule("monday", "09:00", "12:00", "DII-401"),
           },
         ],
@@ -623,9 +621,6 @@ async function main() {
       prerequisites: ["DII310"],
       learningOutcomes: ["Plan studies", "Synthesize insights", "Pitch UX roadmaps"],
       syllabus: "https://docs.example.com/dii420-syllabus",
-      schedule: courseSchedule("wednesday", "13:00", "16:00", "DII-502"),
-      maxStudents: 35,
-      minStudents: 8,
       sections: {
         create: [
           {
@@ -633,6 +628,7 @@ async function main() {
             room: "DII-502",
             facilityId: facilityB.id,
             maxStudents: 35,
+            minStudents: 8,
             schedule: courseSchedule("wednesday", "13:00", "16:00", "DII-502"),
           },
         ],

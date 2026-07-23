@@ -73,11 +73,11 @@ export default function Workload() {
                     const mappedSlots = scheduleItems.flatMap((item, courseIndex) => {
                         const course = asRecord(item);
                         const sections = asArray(course.sections);
-                        const sectionSource = sections.length ? sections : [course];
+                        const sectionSource = sections.length ? sections : [course.sections?.[0] || {}];
 
                         return sectionSource.map((sectionItem, sectionIndex) => {
                             const section = asRecord(sectionItem);
-                            const schedule = asRecord(section.schedule || course.schedule);
+                            const schedule = asRecord(section.schedule || course.sections?.[0]?.schedule);
                             const startTime = asString(schedule.startTime, asString(schedule.start, '09:00'));
                             const endTime = asString(schedule.endTime, asString(schedule.end, '12:00'));
 

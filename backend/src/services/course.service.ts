@@ -297,9 +297,6 @@ export const importCourses = async (coursesData: any[]) => {
           description: courseData.description || "",
           prerequisites: courseData.prerequisites || [],
           status: "active",
-          room: courseData.room || "",
-          schedule: courseData.schedule || [],
-          maxStudents: courseData.maxStudents || 60,
           sections: {
             create: [
               {

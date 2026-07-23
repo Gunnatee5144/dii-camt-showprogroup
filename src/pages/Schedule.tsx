@@ -62,14 +62,14 @@ export default function Schedule() {
     };
 
     return courses.flatMap(course =>
-      (course.schedule || []).map((slot, idx) => ({
+      (course.sections?.[0]?.schedule || []).map((slot, idx) => ({
         id: `${course.id}-${idx}`,
         courseCode: course.code,
         courseName: course.name,
         day: dayIndexByName[slot.day.toLowerCase()] ?? 0,
         startTime: slot.startTime,
         endTime: slot.endTime,
-        room: slot.room || course.room || (language === 'en' ? 'TBA' : 'ไม่ระบุ')
+        room: slot.room || course.sections?.[0]?.room || (language === 'en' ? 'TBA' : 'ไม่ระบุ')
       }))
     ).filter(item => item.day > 0);
   }, [courses]);
@@ -332,7 +332,7 @@ export default function Schedule() {
                 </div>
               )}
               {studentCourses.slice(0, 3).map((course, index) => {
-                const slot = course.schedule?.[0];
+                const slot = course.sections?.[0]?.schedule?.[0];
                 const location = [slot?.room, slot?.building].filter(Boolean).join(' ');
 
                 return (

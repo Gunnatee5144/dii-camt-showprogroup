@@ -171,7 +171,7 @@ export default function TeacherDashboard() {
                       </div>
                       <div>
                         <p className="font-medium text-foreground">{course.name}</p>
-                        <p className="text-sm text-muted-foreground">{course.code} • {course.schedule?.[0] ? `${course.schedule[0].day} ${course.schedule[0].startTime}` : '-'}</p>
+                        <p className="text-sm text-muted-foreground">{course.code} • {course.sections?.[0]?.schedule?.[0] ? `${course.sections[0].schedule[0].day} ${course.sections[0].schedule[0].startTime}` : '-'}</p>
                       </div>
                     </div>
                     <div className="text-right">

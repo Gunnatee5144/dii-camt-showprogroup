@@ -241,14 +241,16 @@ export default function Courses() {
   const registrationMatches = React.useMemo(() => {
     const q = registrationQuery.trim().toLowerCase();
     if (!q) return [];
-    return visibleCourses.filter((course) => (
-      course.enrolledStudents.length < course.maxStudents &&
+    return visibleCourses.filter((course) => {
+      const section = course.sections?.[0];
+      const maxStudents = section?.maxStudents || 60;
+      return course.enrolledStudents.length < maxStudents &&
       (
         course.code?.toLowerCase().includes(q) ||
         course.name?.toLowerCase().includes(q) ||
         course.nameThai?.toLowerCase().includes(q)
       )
-    ));
+    });
   }, [visibleCourses, registrationQuery]);
   const totalCredits = user?.role === 'student' ? enrolledCourses.reduce((sum, course) => sum + course.credits, 0) : visibleCourses.reduce((sum, course) => sum + course.credits, 0);
   const creditProgress = Math.min((totalCredits / 22) * 100, 100);
@@ -273,16 +275,16 @@ export default function Courses() {
       academicYear: course.academicYear,
       year: String(course.year),
       lecturerId: course.lecturerId,
-      maxStudents: String(course.maxStudents),
-      minStudents: String(course.minStudents),
+      maxStudents: String(course.sections?.[0]?.maxStudents || 60),
+      minStudents: String(course.sections?.[0]?.minStudents || 0),
       description: course.description || '',
       syllabus: course.syllabus || '',
       status: course.status || 'active',
-      room: course.room || '',
-      sectionNumber: course.sections?.[0]?.sectionNumber || '001',
-      scheduleDays: course.schedule?.map(s => s.day) || [],
-      scheduleStartTime: course.schedule?.[0]?.startTime || '09:00',
-      scheduleEndTime: course.schedule?.[0]?.endTime || '12:00',
+      room: course.sections?.[0]?.room || '',
+      sectionNumber: course.sections?.[0]?.sectionNumber || course.sections?.[0]?.number || '001',
+      scheduleDays: course.sections?.[0]?.schedule?.map(s => s.day) || [],
+      scheduleStartTime: course.sections?.[0]?.schedule?.[0]?.startTime || '09:00',
+      scheduleEndTime: course.sections?.[0]?.schedule?.[0]?.endTime || '12:00',
     });
   };
 
@@ -922,7 +924,7 @@ export default function Courses() {
                       </div>
                       <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
                         <MapPin className="w-4 h-4 text-slate-400" />
-                        <span>{course.room || t.coursesPage.room}</span>
+                        <span>{course.sections?.[0]?.room || t.coursesPage.room}</span>
                       </div>
                     </div>
 
@@ -977,17 +979,17 @@ export default function Courses() {
                       <div>
                         <div className="flex justify-between items-center mb-4 text-sm text-indigo-100">
                           <span>{course.credits} {t.coursesPage.credits}</span>
-                          <span>{course.enrolledStudents.length}/{course.maxStudents} {language === 'th' ? 'คน' : 'students'}</span>
+                          <span>{course.enrolledStudents.length}/{course.sections?.[0]?.maxStudents || 60} {language === 'th' ? 'คน' : 'students'}</span>
                         </div>
                         <Button 
                           size="sm" 
                           className="w-full bg-white dark:bg-slate-900 text-indigo-600 hover:bg-indigo-50 border-0 font-bold dark:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed" 
                           onClick={(e) => { e.stopPropagation(); enrollCourse(course); }}
-                          disabled={enrolledCourses.some(c => c.id === course.id) || course.enrolledStudents.length >= course.maxStudents}
+                          disabled={enrolledCourses.some(c => c.id === course.id) || course.enrolledStudents.length >= (course.sections?.[0]?.maxStudents || 60)}
                         >
                           {enrolledCourses.some(c => c.id === course.id) 
                             ? (language === 'th' ? 'ลงทะเบียนแล้ว' : 'Registered') 
-                            : course.enrolledStudents.length >= course.maxStudents 
+                            : course.enrolledStudents.length >= (course.sections?.[0]?.maxStudents || 60) 
                               ? (language === 'th' ? 'เต็มแล้ว' : 'Full') 
                               : t.coursesPage.addCourse}
                         </Button>

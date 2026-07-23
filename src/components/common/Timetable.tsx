@@ -38,7 +38,7 @@ export function Timetable({ courses, semester, academicYear }: TimetableProps) {
     });
     
     courses.forEach(course => {
-      course.schedule.forEach(schedule => {
+      course.sections?.[0]?.schedule?.forEach(schedule => {
         byDay[schedule.day].push({ course, schedule });
       });
     });
@@ -115,7 +115,7 @@ export function Timetable({ courses, semester, academicYear }: TimetableProps) {
                               </div>
                               <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-slate-300">
                                 <MapPin className="w-3 h-3" />
-                                {schedule.room || course.room || (language === 'en' ? 'TBA' : 'ไม่ระบุ')}
+                                {schedule.room || course.sections?.[0]?.room || (language === 'en' ? 'TBA' : 'ไม่ระบุ')}
                               </div>
                               <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-slate-300">
                                 <User className="w-3 h-3" />
@@ -169,7 +169,7 @@ export function Timetable({ courses, semester, academicYear }: TimetableProps) {
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-300">
                         <MapPin className="w-4 h-4" />
-                        {schedule.room || course.room || (language === 'en' ? 'TBA' : 'ไม่ระบุ')} {schedule.building}
+                        {schedule.room || course.sections?.[0]?.room || (language === 'en' ? 'TBA' : 'ไม่ระบุ')} {schedule.building}
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-300">
                         <User className="w-4 h-4" />

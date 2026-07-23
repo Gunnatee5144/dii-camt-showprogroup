@@ -33,6 +33,7 @@ const Messages = lazy(() => import("./pages/Messages"));
 const Settings = lazy(() => import("./pages/Settings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Students = lazy(() => import("./pages/Students"));
+const Advisees = lazy(() => import("./pages/Advisees"));
 const Assignments = lazy(() => import("./pages/Assignments"));
 const Appointments = lazy(() => import("./pages/Appointments"));
 const Attendance = lazy(() => import("./pages/Attendance"));
@@ -51,6 +52,7 @@ const ActivitiesManagement = lazy(() => import("./pages/ActivitiesManagement"));
 const JobPostings = lazy(() => import("./pages/JobPostings"));
 const Applicants = lazy(() => import("./pages/Applicants"));
 const StudentProfiles = lazy(() => import("./pages/StudentProfiles"));
+const TalentSearch = lazy(() => import("./pages/TalentSearch"));
 const Cooperation = lazy(() => import("./pages/Cooperation"));
 const Subscription = lazy(() => import("./pages/Subscription"));
 const InternTracking = lazy(() => import("./pages/InternTracking"));
@@ -99,9 +101,9 @@ const App = () => (
 
                   {/* Academic (D-04: map ตาม Sidebar) */}
                   <Route path="/courses" element={<RoleGuard allowedRoles={['student', 'lecturer', 'staff', 'admin']}><Courses /></RoleGuard>} />
-                  <Route path="/courses/:courseId/grading" element={<RoleGuard allowedRoles={['lecturer', 'admin']}><CourseGradingSettings /></RoleGuard>} />
+                  <Route path="/courses/:courseId/grading" element={<RoleGuard allowedRoles={['lecturer', 'staff', 'admin']}><CourseGradingSettings /></RoleGuard>} />
                   <Route path="/schedule" element={<RoleGuard allowedRoles={['student', 'lecturer', 'admin']}><Schedule /></RoleGuard>} />
-                  <Route path="/grades" element={<RoleGuard allowedRoles={['student', 'lecturer', 'admin']}><Grades /></RoleGuard>} />
+                  <Route path="/grades" element={<RoleGuard allowedRoles={['student', 'lecturer', 'staff', 'admin']}><Grades /></RoleGuard>} />
 
                   {/* Student Routes */}
                   <Route path="/activities" element={<RoleGuard allowedRoles={['student', 'admin']}><Activities /></RoleGuard>} />
@@ -114,6 +116,7 @@ const App = () => (
 
                   {/* Lecturer Routes */}
                   <Route path="/students" element={<RoleGuard allowedRoles={['lecturer', 'staff', 'admin']}><Students /></RoleGuard>} />
+                  <Route path="/advisees" element={<RoleGuard allowedRoles={['lecturer']}><Advisees /></RoleGuard>} />
                   <Route path="/assignments" element={<RoleGuard allowedRoles={['lecturer', 'admin']}><Assignments /></RoleGuard>} />
                   <Route path="/appointments" element={<RoleGuard allowedRoles={['lecturer', 'admin']}><Appointments /></RoleGuard>} />
                   <Route path="/attendance" element={<RoleGuard allowedRoles={['lecturer', 'admin']}><Attendance /></RoleGuard>} />
@@ -141,7 +144,7 @@ const App = () => (
                   <Route path="/subscription" element={<RoleGuard allowedRoles={['company', 'admin']}><Subscription /></RoleGuard>} />
                   <Route path="/intern-tracking" element={<RoleGuard allowedRoles={['company', 'admin']}><InternTracking /></RoleGuard>} />
                   <Route path="/cooperation" element={<RoleGuard allowedRoles={['company', 'staff', 'admin']}><Cooperation /></RoleGuard>} />
-                  <Route path="/talent-search" element={<RoleGuard allowedRoles={['company', 'admin']}><StudentProfiles /></RoleGuard>} />
+                  <Route path="/talent-search" element={<RoleGuard allowedRoles={['company', 'admin']}><TalentSearch /></RoleGuard>} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>

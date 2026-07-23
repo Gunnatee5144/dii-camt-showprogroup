@@ -157,8 +157,15 @@ export default function Grades() {
         if (mounted) setIsLoading(false);
       });
     } else {
+      // Staff/admin aren't lecturers — lecturerSchedule() would 400 without an
+      // explicit lecturerId, so they get the full course list instead. The
+      // backend already scopes enrollments to "everything" for these roles.
+      const coursesRequest = user?.role === 'lecturer'
+        ? api.courses.lecturerSchedule().then((response) => response.schedule)
+        : api.courses.list().then((response) => response.courses);
+
       Promise.allSettled([
-        api.courses.lecturerSchedule().then((response) => response.schedule),
+        coursesRequest,
         api.enrollments.list(),
       ])
         .then(([coursesResult, enrollmentsResult]) => {
@@ -539,7 +546,9 @@ export default function Grades() {
                 const course = courses.find(c => c.id === grade.courseId);
                 if (!course) return null;
 
-                const getGradeColor = (g: string) => {
+                const getGradeColor = (g?: string) => {
+                  // No letter grade yet (course still in progress / not graded) — neutral color.
+                  if (!g) return 'bg-slate-300 text-slate-700 shadow-slate-200 dark:bg-slate-700 dark:text-slate-200';
                   if (g === 'A') return 'bg-emerald-500 text-white shadow-emerald-200';
                   if (g.startsWith('B')) return 'bg-blue-500 text-white shadow-blue-200';
                   if (g.startsWith('C')) return 'bg-orange-500 text-white shadow-orange-200';
@@ -563,7 +572,7 @@ export default function Grades() {
                         </div>
                       </div>
                       <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl font-bold shadow-lg ${getGradeColor(grade.letterGrade)}`}>
-                        {grade.letterGrade}
+                        {grade.letterGrade || '-'}
                       </div>
                     </div>
 

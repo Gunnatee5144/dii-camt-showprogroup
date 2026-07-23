@@ -19,6 +19,7 @@ import { StudentTimeline } from '@/components/common/StudentTimeline';
 import { DegreeProgressCard } from '@/components/dashboard/DegreeProgressCard';
 import { CreditMatrixCard, type CurriculumCourse } from '@/components/dashboard/CreditMatrixCard';
 import { GPAHistoryCard } from '@/components/dashboard/GPAHistoryCard';
+import { CareerGoalCard } from '@/components/dashboard/CareerGoalCard';
 import { TechnicalSkillsRubricCard } from '@/components/dashboard/TechnicalSkillsRubricCard';
 import { SoftSkillsRubricCard } from '@/components/dashboard/SoftSkillsRubricCard';
 import { SkillsRadarCard } from '@/components/dashboard/SkillsRadarCard';
@@ -537,6 +538,7 @@ export default function StudentDashboard() {
 
           {/* Quick Actions */}
           <div className="flex flex-col gap-3">
+            <CareerGoalCard />
             <Button
               onClick={() => navigate('/portfolio')}
               className="bg-white dark:bg-slate-900/10 hover:bg-white dark:bg-slate-900/20 text-white border border-white/20 rounded-xl"

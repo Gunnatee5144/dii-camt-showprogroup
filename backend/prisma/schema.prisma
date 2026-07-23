@@ -83,8 +83,33 @@ model StudentProfile {
   appointments        Appointment[]        @relation("StudentAppointments")
   skillRubrics        SkillRubric[]
   submissions         Submission[]
+  careerGoal          StudentCareerGoal?
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
+}
+
+// A shared, global catalog of career tracks (e.g. "Frontend Developer").
+// Students self-declare one as their target; companies watch tracks to see
+// how many students are aiming for that direction, even before they have
+// the matching skills yet.
+model CareerTrack {
+  id             String              @id @default(cuid())
+  key            String              @unique
+  name           String
+  nameThai       String
+  createdAt      DateTime            @default(now())
+  studentGoals   StudentCareerGoal[]
+  companyWatches CompanyTrackWatch[]
+}
+
+model StudentCareerGoal {
+  id            String         @id @default(cuid())
+  studentId     String         @unique
+  student       StudentProfile @relation(fields: [studentId], references: [id])
+  careerTrackId String
+  careerTrack   CareerTrack    @relation(fields: [careerTrackId], references: [id])
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 }
 
 model LecturerProfile {
@@ -151,8 +176,24 @@ model CompanyProfile {
   cooperation        CooperationRecord[]
   payments           PaymentHistory[]
   interns            InternshipRecord[]
+  trackWatches       CompanyTrackWatch[]
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
+}
+
+// A company "watching" a career track — the Dashboard hero shows how many
+// students have set this as their goal, and how many already have the
+// company's desired skills for it. No matching/scoring beyond an honest count.
+model CompanyTrackWatch {
+  id            String         @id @default(cuid())
+  companyId     String
+  company       CompanyProfile @relation(fields: [companyId], references: [id])
+  careerTrackId String
+  careerTrack   CareerTrack    @relation(fields: [careerTrackId], references: [id])
+  desiredSkills String[]       @default([])
+  createdAt     DateTime       @default(now())
+
+  @@unique([companyId, careerTrackId])
 }
 
 model AdminProfile {

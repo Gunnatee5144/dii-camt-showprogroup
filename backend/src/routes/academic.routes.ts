@@ -118,7 +118,7 @@ router.delete(
 router.patch(
   "/grades/bulk",
   requireAuth,
-  checkRole([Role.LECTURER, Role.ADMIN]),
+  checkRole([Role.LECTURER, Role.STAFF, Role.ADMIN]),
   validate(gradeBulkSchema),
   gradeBulkHandler
 );
@@ -148,7 +148,7 @@ router.get(
 router.get(
   "/courses/:courseId/grades/export",
   requireAuth,
-  checkRole([Role.LECTURER, Role.ADMIN]),
+  checkRole([Role.LECTURER, Role.STAFF, Role.ADMIN]),
   exportGradesCsvHandler
 );
 

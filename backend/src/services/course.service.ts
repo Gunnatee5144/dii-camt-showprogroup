@@ -29,6 +29,8 @@ export const getCourses = async (query: { q?: string; semester?: number; academi
       materials: true,
       assignments: true,
       enrollments: true,
+      gradingCriteria: { orderBy: { orderIndex: "asc" } },
+      gradeCutoffs: true,
     },
     orderBy: [{ academicYear: "desc" }, { semester: "desc" }, { code: "asc" }],
   });

@@ -54,16 +54,14 @@ export default function RegisterPage() {
     }
 
     if (role === 'staff') {
+      // Elevated canManage* permissions are not sent here — the backend always
+      // creates self-registered staff accounts with zero elevated permissions;
+      // an admin must grant them afterward via Users management.
       return {
         staffId: `STA${timestamp}`,
         department: 'DII Office',
         position: 'Staff',
         permissions: ['students', 'courses', 'reports'],
-        canManageUsers: true,
-        canManageCourses: true,
-        canManageSchedules: true,
-        canViewReports: true,
-        canManageInternships: true,
       };
     }
 

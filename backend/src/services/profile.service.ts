@@ -101,7 +101,12 @@ export const getLecturerProfileByUserId = async (userId: string) => {
       user: true,
       officeHours: true,
       courses: { include: { sections: { include: { facility: true } }, enrollments: true, lecturer: { include: { user: true } }, gradingCriteria: { orderBy: { orderIndex: 'asc' } }, gradeCutoffs: true } },
-      advisees: { include: { user: true } },
+      advisees: {
+        include: {
+          user: { select: { id: true, email: true, name: true, nameThai: true, avatar: true, phone: true, isActive: true } },
+          internship: { include: { company: true } },
+        },
+      },
       appointments: { include: { student: { include: { user: true } } } },
       workload: true,
     },

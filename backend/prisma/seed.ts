@@ -1432,6 +1432,23 @@ async function main() {
     },
   });
 
+  const careerTracks = [
+    { key: "frontend-developer", name: "Frontend Developer", nameThai: "ว่าที่ Frontend" },
+    { key: "backend-developer", name: "Backend Developer", nameThai: "ว่าที่ Backend" },
+    { key: "data-analyst", name: "Data Analyst", nameThai: "ว่าที่ Data" },
+    { key: "ux-ui-designer", name: "UX/UI Designer", nameThai: "ว่าที่ UX/UI" },
+    { key: "qa-engineer", name: "QA Engineer", nameThai: "ว่าที่ QA" },
+    { key: "devops-engineer", name: "DevOps Engineer", nameThai: "ว่าที่ DevOps" },
+    { key: "mobile-developer", name: "Mobile Developer", nameThai: "ว่าที่ Mobile" },
+  ];
+  for (const track of careerTracks) {
+    await prisma.careerTrack.upsert({
+      where: { key: track.key },
+      update: { name: track.name, nameThai: track.nameThai },
+      create: track,
+    });
+  }
+
   console.log("Seed completed.");
   console.log("Demo credentials:");
   console.log(`- admin@showpro.local / ${password}`);

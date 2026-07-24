@@ -1033,12 +1033,12 @@ export default function Courses() {
                 </div>
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">{language === 'th' ? 'สถานที่เรียน' : 'Room Location'}</p>
-                  <p className="font-medium text-slate-900 dark:text-slate-200">{viewingCourse?.room || (language === 'th' ? 'ไม่ระบุ' : 'TBA')}</p>
+                  <p className="font-medium text-slate-900 dark:text-slate-200">{viewingCourse?.sections?.[0]?.room || (language === 'th' ? 'ไม่ระบุ' : 'TBA')}</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">{language === 'th' ? 'ที่นั่งว่าง' : 'Available Seats'}</p>
                   <p className="font-medium text-slate-900 dark:text-slate-200">
-                    {viewingCourse && (viewingCourse.maxStudents - (viewingCourse.enrolledStudents?.length || 0))} / {viewingCourse?.maxStudents}
+                    {viewingCourse && ((viewingCourse.sections?.[0]?.maxStudents || 60) - (viewingCourse.enrolledStudents?.length || 0))} / {viewingCourse?.sections?.[0]?.maxStudents || 60}
                   </p>
                 </div>
               </div>
@@ -1050,11 +1050,11 @@ export default function Courses() {
                 </div>
               )}
 
-              {viewingCourse?.schedule && viewingCourse.schedule.length > 0 && (
+              {viewingCourse?.sections?.[0]?.schedule && viewingCourse.sections[0].schedule.length > 0 && (
                 <div className="space-y-2">
                   <p className="text-sm font-semibold text-slate-900 dark:text-slate-200">{language === 'th' ? 'เวลาเรียน' : 'Schedule'}</p>
                   <div className="space-y-1 text-sm text-slate-600 dark:text-slate-300">
-                    {viewingCourse.schedule.map((s, i) => (
+                    {viewingCourse.sections[0].schedule.map((s, i) => (
                       <div key={i} className="flex items-center gap-2">
                         <span className="capitalize">{s.day}</span>
                         <span>{s.startTime} - {s.endTime}</span>
@@ -1073,11 +1073,11 @@ export default function Courses() {
                     setViewingCourse(null);
                   }
                 }}
-                disabled={!viewingCourse || enrolledCourses.some(c => c.id === viewingCourse.id) || (viewingCourse.enrolledStudents?.length || 0) >= viewingCourse.maxStudents}
+                disabled={!viewingCourse || enrolledCourses.some(c => c.id === viewingCourse.id) || (viewingCourse.enrolledStudents?.length || 0) >= (viewingCourse.sections?.[0]?.maxStudents || 60)}
               >
                 {viewingCourse && enrolledCourses.some(c => c.id === viewingCourse.id)
                   ? (language === 'th' ? 'ลงทะเบียนแล้ว' : 'Registered')
-                  : viewingCourse && (viewingCourse.enrolledStudents?.length || 0) >= viewingCourse.maxStudents 
+                  : viewingCourse && (viewingCourse.enrolledStudents?.length || 0) >= (viewingCourse.sections?.[0]?.maxStudents || 60) 
                     ? (language === 'th' ? 'เต็มแล้ว' : 'Full') 
                     : t.coursesPage.addCourse}
               </Button>

@@ -99,37 +99,6 @@ export const attendanceCheckInSchema = z.object({
   status: z.string().default("present"),
 });
 
-export const assignmentsQuerySchema = z.object({
-  courseId: z.string().optional(),
-  includeSubmissions: z.coerce.boolean().optional(),
-});
-
-export const assignmentCreateSchema = z.object({
-  courseId: z.string().min(1),
-  title: z.string().min(1),
-  description: z.string().min(1),
-  type: z.string().min(1),
-  dueDate: z.coerce.date(),
-  maxScore: z.coerce.number().positive(),
-  isPublished: z.boolean().optional(),
-});
-
-export const assignmentUpdateSchema = assignmentCreateSchema.partial();
-
-export const assignmentParamsSchema = z.object({
-  id: z.string().min(1),
-});
-
-export const submissionCreateSchema = z.object({
-  files: z.array(z.string().min(1)).min(1),
-});
-
-export const submissionUpdateSchema = z.object({
-  score: z.coerce.number().min(0).optional(),
-  feedback: z.string().optional(),
-  status: z.string().optional(),
-});
-
 export const startAttendanceSessionSchema = z.object({
   courseId: z.string().min(1),
   durationMinutes: z.coerce.number().int().positive().default(15),

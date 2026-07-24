@@ -13,12 +13,6 @@ import {
   transcriptQuerySchema,
   attendanceQuerySchema,
   attendanceCheckInSchema,
-  assignmentsQuerySchema,
-  assignmentCreateSchema,
-  assignmentUpdateSchema,
-  assignmentParamsSchema,
-  submissionCreateSchema,
-  submissionUpdateSchema,
   startAttendanceSessionSchema,
   qrCheckInSchema,
   attendanceSummaryParamsSchema,
@@ -39,14 +33,7 @@ import {
   getStudentTranscriptHandler,
   getAttendanceReportHandler,
   attendanceCheckInHandler,
-  getAssignmentsHandler,
-  getAssignmentByIdHandler,
-  createAssignmentHandler,
-  updateAssignmentHandler,
   deleteCourseHandler,
-  deleteAssignmentHandler,
-  submitAssignmentHandler,
-  updateSubmissionHandler,
   startAttendanceSessionHandler,
   qrCheckInHandler,
   getAttendanceSummaryHandler,
@@ -207,64 +194,4 @@ router.patch(
   validate(closeSessionParamsSchema, "params"),
   closeAttendanceSessionHandler
 );
-
-router.get(
-  "/assignments",
-  requireAuth,
-  checkRole([Role.STUDENT, Role.LECTURER, Role.STAFF, Role.ADMIN]),
-  validate(assignmentsQuerySchema, "query"),
-  getAssignmentsHandler
-);
-
-router.get(
-  "/assignments/:id",
-  requireAuth,
-  checkRole([Role.STUDENT, Role.LECTURER, Role.STAFF, Role.ADMIN]),
-  validate(assignmentParamsSchema, "params"),
-  getAssignmentByIdHandler
-);
-
-router.post(
-  "/assignments",
-  requireAuth,
-  checkRole([Role.LECTURER, Role.ADMIN]),
-  validate(assignmentCreateSchema),
-  createAssignmentHandler
-);
-
-router.patch(
-  "/assignments/:id",
-  requireAuth,
-  checkRole([Role.LECTURER, Role.ADMIN]),
-  validate(assignmentParamsSchema, "params"),
-  validate(assignmentUpdateSchema),
-  updateAssignmentHandler
-);
-
-router.delete(
-  "/assignments/:id",
-  requireAuth,
-  checkRole([Role.LECTURER, Role.ADMIN]),
-  validate(assignmentParamsSchema, "params"),
-  deleteAssignmentHandler
-);
-
-router.post(
-  "/assignments/:id/submissions",
-  requireAuth,
-  checkRole([Role.STUDENT]),
-  validate(assignmentParamsSchema, "params"),
-  validate(submissionCreateSchema),
-  submitAssignmentHandler
-);
-
-router.patch(
-  "/submissions/:id",
-  requireAuth,
-  checkRole([Role.LECTURER, Role.ADMIN]),
-  validate(assignmentParamsSchema, "params"),
-  validate(submissionUpdateSchema),
-  updateSubmissionHandler
-);
-
 export const academicRoutes = router;

@@ -310,9 +310,9 @@ export default function TeacherDashboard() {
                 </Link>
               </Button>
               <Button variant="outline" className="w-full justify-start" asChild>
-                <Link to="/assignments">
+                <Link to="/courses">
                   <BookOpen className="mr-2 h-4 w-4" />
-                  {t.teacherDashboard.createAssignment}
+                  {t.nav.courseManagement}
                 </Link>
               </Button>
               <Button variant="outline" className="w-full justify-start" asChild>

@@ -82,7 +82,6 @@ model StudentProfile {
   applications        Application[]
   appointments        Appointment[]        @relation("StudentAppointments")
   skillRubrics        SkillRubric[]
-  submissions         Submission[]
   careerGoal          StudentCareerGoal?
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
@@ -226,7 +225,6 @@ model Course {
   status           String           @default("active")
   sections         Section[]
   materials        CourseMaterial[]
-  assignments      Assignment[]
   enrollments      Enrollment[]
   attendanceSessions AttendanceSession[]
   gradingCriteria  CourseGradingCriteria[]
@@ -338,36 +336,6 @@ model AttendanceSession {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   records     AttendanceRecord[]
-}
-
-model Assignment {
-  id          String       @id @default(cuid())
-  courseId    String
-  course      Course       @relation(fields: [courseId], references: [id])
-  title       String
-  description String
-  type        String
-  dueDate     DateTime
-  maxScore    Int
-  isPublished Boolean      @default(false)
-  submissions Submission[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-}
-
-model Submission {
-  id           String         @id @default(cuid())
-  assignmentId String
-  assignment   Assignment     @relation(fields: [assignmentId], references: [id])
-  studentId    String
-  student      StudentProfile @relation(fields: [studentId], references: [id])
-  files        String[]       @default([])
-  submittedAt  DateTime       @default(now())
-  score        Float?
-  feedback     String?
-  status       String         @default("submitted")
-
-  @@unique([assignmentId, studentId])
 }
 
 model CourseMaterial {

@@ -56,8 +56,6 @@ async function resetDatabase() {
   await prisma.auditLog.deleteMany();
   await prisma.attendanceRecord.deleteMany();
   await prisma.gradeHistory.deleteMany();
-  await prisma.submission.deleteMany();
-  await prisma.assignment.deleteMany();
   await prisma.courseMaterial.deleteMany();
   await prisma.enrollmentScore.deleteMany();
   await prisma.enrollment.deleteMany();
@@ -771,39 +769,6 @@ async function main() {
         enrollmentId: enrollmentC2.id,
         date: new Date("2026-01-14"),
         status: "present",
-      },
-    ],
-  });
-
-  const assignmentA = await prisma.assignment.create({
-    data: {
-      courseId: courseA.id,
-      title: "Sprint 2 Demo",
-      description: "Ship the dashboard prototype with authenticated API integration.",
-      type: "group",
-      dueDate: new Date("2026-02-20"),
-      maxScore: 100,
-      isPublished: true,
-    },
-  });
-
-  await prisma.submission.createMany({
-    data: [
-      {
-        assignmentId: assignmentA.id,
-        studentId: studentA.id,
-        files: ["https://files.example.com/sprint2-alice.zip"],
-        score: 95,
-        feedback: "Excellent structure and polished UX.",
-        status: "graded",
-      },
-      {
-        assignmentId: assignmentA.id,
-        studentId: studentB.id,
-        files: ["https://files.example.com/sprint2-bob.zip"],
-        score: 88,
-        feedback: "Strong work, can improve API error handling.",
-        status: "graded",
       },
     ],
   });

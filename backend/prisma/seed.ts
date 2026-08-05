@@ -73,9 +73,6 @@ async function resetDatabase() {
   await prisma.badge.deleteMany();
   await prisma.officeHour.deleteMany();
   await prisma.appointment.deleteMany();
-  await prisma.questEnrollment.deleteMany();
-  await prisma.questTask.deleteMany();
-  await prisma.quest.deleteMany();
   await prisma.internshipEvaluation.deleteMany();
   await prisma.internshipDocument.deleteMany();
   await prisma.internshipLog.deleteMany();
@@ -773,64 +770,6 @@ async function main() {
     ],
   });
 
-  const quest = await prisma.quest.create({
-    data: {
-      title: "React Dashboard Challenge",
-      titleEn: "React Dashboard Challenge",
-      description: "Build a role-based dashboard backed by a real API.",
-      descriptionEn: "Build a role-based dashboard backed by a real API.",
-      type: "challenge",
-      difficulty: "hard",
-      category: "frontend",
-      xp: 120,
-      coins: 60,
-      deadline: new Date("2026-05-30"),
-      assignerId: lecturerA.id,
-      assignerType: "lecturer",
-      tasks: {
-        create: [
-          {
-            title: "Implement API auth flow",
-            titleEn: "Implement API auth flow",
-            sortOrder: 1,
-          },
-          {
-            title: "Build analytics widgets",
-            titleEn: "Build analytics widgets",
-            sortOrder: 2,
-          },
-          {
-            title: "Ship mobile responsive layout",
-            titleEn: "Ship mobile responsive layout",
-            sortOrder: 3,
-          },
-        ],
-      },
-    },
-    include: { tasks: true },
-  });
-
-  await prisma.questEnrollment.createMany({
-    data: [
-      {
-        questId: quest.id,
-        studentId: studentA.id,
-        status: "completed",
-        progress: 100,
-        completedTasks: quest.tasks.map((task) => task.id),
-        rewardGranted: true,
-        completedAt: new Date("2026-04-05"),
-      },
-      {
-        questId: quest.id,
-        studentId: studentB.id,
-        status: "in-progress",
-        progress: 67,
-        completedTasks: quest.tasks.slice(0, 2).map((task) => task.id),
-        rewardGranted: false,
-      },
-    ],
-  });
 
   const activityCompleted = await prisma.activity.create({
     data: {
@@ -1191,20 +1130,6 @@ async function main() {
 
   await prisma.timelineEvent.createMany({
     data: [
-      {
-        studentId: studentA.id,
-        type: "achievement",
-        title: "Completed React Dashboard Challenge",
-        titleThai: "ทำภารกิจ React Dashboard สำเร็จ",
-        description: "ได้รับ 120 XP และ 60 coins",
-        semester: 1,
-        academicYear: "2569",
-        relatedId: quest.id,
-        relatedType: "quest",
-        isImportant: true,
-        tags: ["quest", "achievement"],
-        metadata: { xp: 120, coins: 60 } as Prisma.InputJsonValue,
-      },
       {
         studentId: studentA.id,
         type: "activity",

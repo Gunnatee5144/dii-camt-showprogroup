@@ -680,12 +680,6 @@ export const getStudentStatsHandler = asyncHandler(async (req, res) => {
     _count: { id: true },
   });
 
-  const completedQuests = await prisma.questEnrollment.count({
-    where: {
-      studentId: student.id,
-      status: "completed",
-    },
-  });
 
   res.json({
     success: true,
@@ -704,7 +698,6 @@ export const getStudentStatsHandler = asyncHandler(async (req, res) => {
       gamificationPoints: student.gamificationPoints,
       totalActivityHours: student.totalActivityHours,
       completedActivities: activitySummary._count.id,
-      completedQuests,
       badges: student.badges,
       gradeHistory,
       skillRubrics,

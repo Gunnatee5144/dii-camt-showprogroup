@@ -581,24 +581,6 @@ export const api = {
   talent: {
     search: (query = "") => request<ApiEnvelope<{ talents: unknown[] }>>(`/talent/search${query}`),
   },
-  quests: {
-    list: (query = "") => request<ApiEnvelope<{ quests: unknown[] }>>(`/quests${query}`),
-    create: (payload: Record<string, unknown>) =>
-      request<ApiEnvelope<{ quest: unknown }>>("/quests", {
-        method: "POST",
-        body: payload,
-      }),
-    accept: (questId: string) =>
-      request<ApiEnvelope<{ enrollment: unknown }>>("/quests/accept", {
-        method: "POST",
-        body: { questId },
-      }),
-    completeTask: (payload: Record<string, unknown>) =>
-      request<ApiEnvelope<{ enrollment: unknown }>>("/quests/task/complete", {
-        method: "PATCH",
-        body: payload,
-      }),
-  },
   facilities: {
     list: () => request<ApiEnvelope<{ facilities: unknown[] }>>("/facilities"),
     create: (payload: Record<string, unknown>) =>

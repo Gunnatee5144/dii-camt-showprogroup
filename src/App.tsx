@@ -58,7 +58,6 @@ const InternTracking = lazy(() => import("./pages/InternTracking"));
 const PersonalDashboard = lazy(() => import("./pages/PersonalDashboard"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
-const Training = lazy(() => import("./pages/Training"));
 const SkillsRequirement = lazy(() => import("./pages/SkillsRequirement"));
 const Automation = lazy(() => import("./pages/Automation"));
 const StudentQRCheckIn = lazy(() => import("./pages/StudentQRCheckIn"));
@@ -110,7 +109,6 @@ const App = () => (
                   <Route path="/internships" element={<RoleGuard allowedRoles={['student']}><Internships /></RoleGuard>} />
                   <Route path="/application-history" element={<RoleGuard allowedRoles={['student']}><ApplicationHistory /></RoleGuard>} />
                   <Route path="/requests" element={<RoleGuard allowedRoles={['student', 'staff', 'admin']}><Requests /></RoleGuard>} />
-                  <Route path="/training" element={<RoleGuard allowedRoles={['student']}><Training /></RoleGuard>} />
                   <Route path="/student/checkin" element={<RoleGuard allowedRoles={['student']}><StudentQRCheckIn /></RoleGuard>} />
 
                   {/* Lecturer Routes */}

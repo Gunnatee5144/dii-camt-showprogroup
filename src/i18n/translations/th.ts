@@ -91,8 +91,6 @@ export const th = {
     internTracking: 'ติดตามนักศึกษาฝึกงาน',
     cooperationMOU: 'ความร่วมมือ (MOU)',
     subscriptionPackage: 'แพ็คเกจสมาชิก',
-    // Student - extra
-    training: 'ฝึกฝน & เควสท์',
     // Company - extra
     skillsRequirement: 'ทักษะที่ต้องการ',
     // Admin
@@ -622,43 +620,6 @@ export const th = {
     languageSettings: 'การตั้งค่าภาษา',
   },
 
-  // Training / Quest System
-  training: {
-    title: 'ศูนย์ฝึก',
-    titleHighlight: 'เควสท์',
-    subtitle: 'ระบบภารกิจและฝึกฝน',
-    level: 'เลเวล',
-    questsDone: 'เควสท์สำเร็จ',
-    streak: 'ต่อเนื่อง',
-    days: 'วัน',
-    badges: 'เหรียญตรา',
-    badgesEarned: 'ที่ได้รับ',
-    allQuests: 'ทั้งหมด',
-    activeQuests: 'กำลังทำ',
-    availableQuests: 'พร้อมรับ',
-    completedQuests: 'สำเร็จแล้ว',
-    solo: 'งานเดี่ยว',
-    group: 'งานกลุ่ม',
-    event: 'อีเวนต์',
-    meeting: 'ประชุม',
-    challenge: 'โจทย์ท้าทาย',
-    easy: 'ง่าย',
-    normal: 'ปกติ',
-    hard: 'ยาก',
-    legendary: 'ตำนาน',
-    inProgress: 'กำลังทำ',
-    completed: 'สำเร็จ',
-    available: 'พร้อมรับ',
-    upcoming: 'เร็วๆ นี้',
-    progress: 'ความคืบหน้า',
-    rewards: 'รางวัล',
-    assignedByLabel: 'มอบหมายโดย',
-    deadlineLabel: 'กำหนดส่ง',
-    taskList: 'รายการงาน',
-    acceptQuest: 'รับภารกิจ',
-    submitQuest: 'ส่งงาน',
-    noQuests: 'ไม่มีภารกิจในหมวดนี้',
-  },
 
   // Intern Tracking
   internTracking: {

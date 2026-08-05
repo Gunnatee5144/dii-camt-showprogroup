@@ -65,7 +65,6 @@ const getNavItems = (role: UserRole, nav: Record<string, string>): NavItem[] => 
         { icon: Briefcase, label: nav.internships, href: '/internships' },
         { icon: Clock, label: nav.applicationHistory || 'ประวัติการสมัคร', href: '/application-history' },
         { icon: ClipboardList, label: nav.requests, href: '/requests' },
-        // { icon: Swords, label: nav.training, href: '/training' }, // ปิดชั่วคราว
         { icon: MessageSquare, label: nav.messages, href: '/messages' },
         { icon: Settings, label: nav.settings, href: '/settings' },
       ];

@@ -68,7 +68,6 @@ model StudentProfile {
   skills              StudentSkill[]
   enrollments         Enrollment[]
   activityEnrollments ActivityEnrollment[]
-  questEnrollments    QuestEnrollment[]
   portfolio           Portfolio?
   internship          InternshipRecord?
   requests            Request[]
@@ -425,50 +424,6 @@ model SkillRubric {
   updatedAt      DateTime       @updatedAt
 }
 
-model Quest {
-  id            String            @id @default(cuid())
-  title         String
-  titleEn       String
-  description   String
-  descriptionEn String
-  type          String
-  difficulty    String
-  category      String
-  xp            Int
-  coins         Int
-  deadline      DateTime
-  assignerId    String
-  assignerType  String
-  tasks         QuestTask[]
-  enrollments   QuestEnrollment[]
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-}
-
-model QuestTask {
-  id         String @id @default(cuid())
-  questId    String
-  quest      Quest  @relation(fields: [questId], references: [id])
-  title      String
-  titleEn    String
-  sortOrder  Int    @default(0)
-}
-
-model QuestEnrollment {
-  id             String         @id @default(cuid())
-  questId        String
-  quest          Quest          @relation(fields: [questId], references: [id])
-  studentId      String
-  student        StudentProfile @relation(fields: [studentId], references: [id])
-  status         String         @default("in-progress")
-  progress       Int            @default(0)
-  completedTasks String[]       @default([])
-  rewardGranted  Boolean        @default(false)
-  startedAt      DateTime       @default(now())
-  completedAt    DateTime?
-
-  @@unique([questId, studentId])
-}
 
 model InternshipRecord {
   id                String               @id @default(cuid())

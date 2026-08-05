@@ -61,7 +61,6 @@ export const getStudentProfileByAnyId = async (identifier: string) => {
         },
       },
       activityEnrollments: { include: { activity: true } },
-      questEnrollments: { include: { quest: true } },
       applications: { include: { jobPosting: { include: { company: true } } } },
     },
   });

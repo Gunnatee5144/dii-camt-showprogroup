@@ -91,8 +91,6 @@ export const en = {
     internTracking: 'Intern Tracking',
     cooperationMOU: 'Cooperation (MOU)',
     subscriptionPackage: 'Subscription',
-    // Student - extra
-    training: 'Training & Quests',
     // Company - extra
     skillsRequirement: 'Skill Requirements',
     // Admin
@@ -622,43 +620,6 @@ export const en = {
     languageSettings: 'Language Settings',
   },
 
-  // Training / Quest System
-  training: {
-    title: 'Training',
-    titleHighlight: 'Quest',
-    subtitle: 'Quest & Training System',
-    level: 'Level',
-    questsDone: 'Quests Done',
-    streak: 'Streak',
-    days: 'days',
-    badges: 'Badges',
-    badgesEarned: 'Earned',
-    allQuests: 'All',
-    activeQuests: 'Active',
-    availableQuests: 'Available',
-    completedQuests: 'Completed',
-    solo: 'Solo',
-    group: 'Group',
-    event: 'Event',
-    meeting: 'Meeting',
-    challenge: 'Challenge',
-    easy: 'Easy',
-    normal: 'Normal',
-    hard: 'Hard',
-    legendary: 'Legendary',
-    inProgress: 'In Progress',
-    completed: 'Completed',
-    available: 'Available',
-    upcoming: 'Upcoming',
-    progress: 'Progress',
-    rewards: 'Rewards',
-    assignedByLabel: 'Assigned By',
-    deadlineLabel: 'Deadline',
-    taskList: 'Task List',
-    acceptQuest: 'Accept Quest',
-    submitQuest: 'Submit Quest',
-    noQuests: 'No quests in this category',
-  },
 
   // Intern Tracking
   internTracking: {

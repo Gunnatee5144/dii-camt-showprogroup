@@ -90,7 +90,6 @@ export const en = {
     applicants: 'Applicants',
     internTracking: 'Intern Tracking',
     cooperationMOU: 'Cooperation (MOU)',
-    subscriptionPackage: 'Subscription',
     // Company - extra
     skillsRequirement: 'Skill Requirements',
     // Admin
@@ -1265,26 +1264,6 @@ export const en = {
     activity3Desc: 'Donated 10 IoT Development Kit sets',
     coordinatorName: 'Asst. Prof. Dr. Somchai Jaidee',
     coordinatorPosition: 'Head of Industry Liaison Center',
-  },
-
-  // Subscription
-  subscriptionPage: {
-    subtitle: 'Subscription Plans',
-    title: 'Choose',
-    titleHighlight: 'Your Plan',
-    desc: 'Choose the right plan for your organization to access quality talent',
-    free: 'Free',
-    currentPlan: 'Current Plan',
-    inUse: '✓ In Use',
-    selectPlan: 'Select Plan',
-    paymentHistory: 'Payment History',
-    date: 'Date',
-    item: 'Item',
-    amount: 'Amount',
-    status: 'Status',
-    receipt: 'Receipt',
-    paid: 'Paid',
-    downloadReceipt: 'Download',
   },
 
   // Admin Dashboard

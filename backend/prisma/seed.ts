@@ -86,7 +86,6 @@ async function resetDatabase() {
   await prisma.budgetRecord.deleteMany();
   await prisma.cooperationRecord.deleteMany();
   await prisma.workloadRecord.deleteMany();
-  await prisma.paymentHistory.deleteMany();
   await prisma.automationRule.deleteMany();
   await prisma.adminProfile.deleteMany();
   await prisma.companyProfile.deleteMany();
@@ -1115,17 +1114,6 @@ async function main() {
         serviceHours: 3,
       },
     ],
-  });
-
-  await prisma.paymentHistory.create({
-    data: {
-      companyId: companyA.companyProfile!.id,
-      amount: 4900,
-      planName: "pro",
-      referenceNumber: "PAY-2026-0001",
-      status: "paid",
-      receiptUrl: "https://files.example.com/receipts/pay-2026-0001.pdf",
-    },
   });
 
   await prisma.timelineEvent.createMany({

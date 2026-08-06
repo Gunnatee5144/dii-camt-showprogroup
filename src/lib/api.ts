@@ -622,18 +622,6 @@ export const api = {
   audit: {
     list: () => request<ApiEnvelope<{ logs: unknown[] }>>("/audit"),
   },
-  subscription: {
-    plans: () => request<ApiEnvelope<{ plans: unknown[] }>>("/subscription/plans"),
-    payments: (companyId?: string) =>
-      request<ApiEnvelope<{ payments: unknown[] }>>(
-        `/subscription/payments${companyId ? `?companyId=${encodeURIComponent(companyId)}` : ""}`,
-      ),
-    createPayment: (payload: Record<string, unknown>) =>
-      request<ApiEnvelope<{ payment: unknown }>>("/subscription/payment", {
-        method: "POST",
-        body: payload,
-      }),
-  },
   documents: {
     transcript: (studentId?: string) =>
       requestBlob(

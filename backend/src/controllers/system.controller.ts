@@ -812,7 +812,6 @@ export const getCompaniesHandler = asyncHandler(async (req, res) => {
     include: {
       user: true,
       cooperation: true,
-      payments: true,
       jobPostings: true,
     },
     orderBy: { companyName: "asc" },

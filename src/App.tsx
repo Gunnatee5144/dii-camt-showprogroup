@@ -53,7 +53,6 @@ const Applicants = lazy(() => import("./pages/Applicants"));
 const StudentProfiles = lazy(() => import("./pages/StudentProfiles"));
 const TalentSearch = lazy(() => import("./pages/TalentSearch"));
 const Cooperation = lazy(() => import("./pages/Cooperation"));
-const Subscription = lazy(() => import("./pages/Subscription"));
 const InternTracking = lazy(() => import("./pages/InternTracking"));
 const PersonalDashboard = lazy(() => import("./pages/PersonalDashboard"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
@@ -137,7 +136,6 @@ const App = () => (
                   <Route path="/skills-requirement" element={<RoleGuard allowedRoles={['company', 'admin']}><SkillsRequirement /></RoleGuard>} />
                   <Route path="/applicants" element={<RoleGuard allowedRoles={['company', 'admin']}><Applicants /></RoleGuard>} />
                   <Route path="/student-profiles" element={<RoleGuard allowedRoles={['company', 'admin']}><StudentProfiles /></RoleGuard>} />
-                  <Route path="/subscription" element={<RoleGuard allowedRoles={['company', 'admin']}><Subscription /></RoleGuard>} />
                   <Route path="/intern-tracking" element={<RoleGuard allowedRoles={['company', 'admin']}><InternTracking /></RoleGuard>} />
                   <Route path="/cooperation" element={<RoleGuard allowedRoles={['company', 'staff', 'admin']}><Cooperation /></RoleGuard>} />
                   <Route path="/talent-search" element={<RoleGuard allowedRoles={['company', 'admin']}><TalentSearch /></RoleGuard>} />

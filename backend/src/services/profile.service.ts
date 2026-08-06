@@ -125,7 +125,6 @@ export const getCompanyProfileByUserId = async (userId: string) => {
       user: true,
       jobPostings: true,
       cooperation: true,
-      payments: true,
     },
   });
 

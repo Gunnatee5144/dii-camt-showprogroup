@@ -172,7 +172,6 @@ model CompanyProfile {
   canContactStudents Boolean             @default(true)
   jobPostings        JobPosting[]
   cooperation        CooperationRecord[]
-  payments           PaymentHistory[]
   interns            InternshipRecord[]
   trackWatches       CompanyTrackWatch[]
   createdAt          DateTime            @default(now())
@@ -559,18 +558,6 @@ model WorkloadRecord {
   advisingHours Int
   serviceHours  Int              @default(0)
   createdAt     DateTime         @default(now())
-}
-
-model PaymentHistory {
-  id              String         @id @default(cuid())
-  companyId       String
-  company         CompanyProfile @relation(fields: [companyId], references: [id])
-  amount          Float
-  planName        String
-  referenceNumber String?
-  date            DateTime       @default(now())
-  status          String         @default("paid")
-  receiptUrl      String?
 }
 
 model Request {

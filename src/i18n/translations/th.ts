@@ -90,7 +90,6 @@ export const th = {
     applicants: 'ผู้สมัครงาน',
     internTracking: 'ติดตามนักศึกษาฝึกงาน',
     cooperationMOU: 'ความร่วมมือ (MOU)',
-    subscriptionPackage: 'แพ็คเกจสมาชิก',
     // Company - extra
     skillsRequirement: 'ทักษะที่ต้องการ',
     // Admin
@@ -1265,26 +1264,6 @@ export const th = {
     activity3Desc: 'บริจาคชุดอุปกรณ์ IoT Development Kit จำนวน 10 ชุด',
     coordinatorName: 'อ.ดร. สมชาย ใจดี',
     coordinatorPosition: 'หัวหน้าศูนย์ประสานงานอุตสาหกรรม',
-  },
-
-  // Subscription
-  subscriptionPage: {
-    subtitle: 'แพ็คเกจสมาชิก',
-    title: 'เลือกแพ็คเกจ',
-    titleHighlight: 'ที่เหมาะกับคุณ',
-    desc: 'เลือกแพ็คเกจที่เหมาะสมกับองค์กรของคุณเพื่อเข้าถึงบุคลากรคุณภาพ',
-    free: 'ฟรี',
-    currentPlan: 'แพ็คเกจปัจจุบัน',
-    inUse: '✓ ใช้งานอยู่',
-    selectPlan: 'เลือกแพ็คเกจนี้',
-    paymentHistory: 'ประวัติการชำระเงิน',
-    date: 'วันที่',
-    item: 'รายการ',
-    amount: 'จำนวนเงิน',
-    status: 'สถานะ',
-    receipt: 'ใบเสร็จ',
-    paid: 'ชำระแล้ว',
-    downloadReceipt: 'ดาวน์โหลด',
   },
 
   // Admin Dashboard
